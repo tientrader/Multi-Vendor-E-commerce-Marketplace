@@ -1,0 +1,8 @@
+server:
+  port:
+  servlet:
+    context-path: /cart
+
+spring:
+  application:
+    name: cart-service

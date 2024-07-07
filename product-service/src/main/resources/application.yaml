@@ -1,0 +1,11 @@
+server:
+  port: 8083
+  servlet:
+    context-path: /product
+
+spring:
+  application:
+    name: product-service
+  data:
+    mongodb:
+      uri: mongodb://root:root@localhost:27017/product-service?authSource=admin
