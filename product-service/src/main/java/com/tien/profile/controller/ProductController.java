@@ -20,7 +20,7 @@ public class ProductController {
 
       ProductService productService;
 
-      @PostMapping()
+      @PostMapping
       ApiResponse<ProductResponse> createProduct(@RequestBody @Valid ProductCreationRequest request) {
             return ApiResponse.<ProductResponse>builder()
                     .result(productService.createProduct(request))

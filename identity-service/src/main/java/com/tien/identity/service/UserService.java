@@ -135,16 +135,17 @@ public class UserService {
     // Xem thông tin của tất cả User
     @PreAuthorize("hasRole('ADMIN')")
     public List<UserResponse> getAllUsers() {
-        return userRepository.findAll().stream().map(userMapper::toUserResponse).toList();
+        return userRepository.findAll()
+                .stream()
+                .map(userMapper::toUserResponse)
+                .toList();
     }
 
     // Xoá tài khoản của User dành cho Admin
     @PreAuthorize("hasRole('ADMIN')")
     public void deleteUser(String id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
-
-        userRepository.delete(user);
+        userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        userRepository.deleteById(id);
         profileClient.deleteProfile(id);
     }
 

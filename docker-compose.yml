@@ -52,3 +52,12 @@ services:
       - KEYCLOAK_ADMIN=
       - KEYCLOAK_ADMIN_PASSWORD=
     command: ["start-dev"]
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+    environment:
+      - REDIS_PASSWORD=
+    command: [ "redis-server", "--requirepass", "12345678" ]
