@@ -16,10 +16,10 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class Product {
 
       @Id
-      private String id = new ObjectId().toString();
-      private String name;
-      private String description;
-      private double price;
-      private int stock;
+      String id = new ObjectId().toString();
+      String name;
+      String description;
+      double price;
+      int stock;
 
 }
