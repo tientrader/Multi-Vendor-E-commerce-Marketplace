@@ -8,14 +8,16 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = CategoryMapper.class)
 public interface ProductMapper {
 
+      @Mapping(target = "category", ignore = true)
       @Mapping(target = "id", ignore = true)
       Product toProduct(ProductCreationRequest request);
 
       ProductResponse toProductResponse(Product product);
 
+      @Mapping(target = "category", ignore = true)
       @Mapping(target = "id", ignore = true)
       void updateProduct(@MappingTarget Product product, ProductUpdateRequest request);
 

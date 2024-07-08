@@ -2,9 +2,7 @@ package com.tien.profile.entity;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Getter
@@ -13,17 +11,12 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Document(collection = "products")
-public class Product {
+@Document(collection = "categories")
+public class Category {
 
       @Id
-      String id = new ObjectId().toString();
+      String id;
       String name;
       String description;
-      double price;
-      int stock;
-
-      @DBRef
-      Category category;
 
 }

@@ -1,4 +1,4 @@
-package com.tien.profile.dto.request;
+package com.tien.profile.dto.response;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -8,12 +8,10 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ProductCreationRequest {
+public class CategoryResponse {
 
+      String id;
       String name;
       String description;
-      double price;
-      int stock;
-      String categoryId;
 
 }

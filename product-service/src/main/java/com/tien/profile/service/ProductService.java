@@ -7,6 +7,7 @@ import com.tien.profile.entity.Product;
 import com.tien.profile.exception.AppException;
 import com.tien.profile.exception.ErrorCode;
 import com.tien.profile.mapper.ProductMapper;
+import com.tien.profile.repository.CategoryRepository;
 import com.tien.profile.repository.ProductRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +31,7 @@ public class ProductService {
 
       ProductRepository productRepository;
       ProductMapper productMapper;
+      CategoryRepository categoryRepository;
 
       @PreAuthorize("hasRole('ADMIN')")
       @CachePut(value = "products", key = "#result.id")
@@ -37,6 +39,9 @@ public class ProductService {
       @Transactional
       public ProductResponse createProduct(ProductCreationRequest request) {
             Product product = productMapper.toProduct(request);
+            product.setCategory(categoryRepository.findById(request.getCategoryId())
+                    .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND)));
+
             return productMapper.toProductResponse(productRepository.save(product));
       }
 
@@ -47,7 +52,10 @@ public class ProductService {
       public ProductResponse updateProduct(String productId, ProductUpdateRequest request) {
             Product product = productRepository.findById(productId)
                     .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+            product.setCategory(categoryRepository.findById(request.getCategoryId())
+                    .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND)));
             productMapper.updateProduct(product, request);
+
             return productMapper.toProductResponse(productRepository.save(product));
       }
 
