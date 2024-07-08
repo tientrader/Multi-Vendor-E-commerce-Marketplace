@@ -58,7 +58,7 @@ public class ProductService {
                     .collect(Collectors.toList());
       }
 
-      @Cacheable(value = "products", key = "#productId")
+//      @Cacheable(value = "products", key = "#productId")
       public ProductResponse getProductById(String productId) {
             return productMapper.toProductResponse(productRepository.findById(productId)
                     .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND)));
@@ -67,9 +67,10 @@ public class ProductService {
       @PreAuthorize("hasRole('ADMIN')")
       @CacheEvict(value = "allProducts", allEntries = true)
       @Transactional
-      public void deleteProduct(String id) {
-            productRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
-            productRepository.deleteById(id);
+      public void deleteProduct(String productId) {
+            productRepository.findById(productId)
+                    .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+            productRepository.deleteById(productId);
       }
 
 }

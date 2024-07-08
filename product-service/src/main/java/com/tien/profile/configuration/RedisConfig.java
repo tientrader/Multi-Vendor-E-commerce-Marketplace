@@ -40,7 +40,7 @@ public class RedisConfig {
             RedisCacheConfiguration config = RedisCacheConfiguration.defaultCacheConfig()
                     .entryTtl(Duration.ofHours(1))
                     .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
-                    .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new Jackson2JsonRedisSerializer<>(Object.class))); // Use Jackson to serialize values as JSON
+                    .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(new Jackson2JsonRedisSerializer<>(Object.class)));
             return RedisCacheManager.builder(lettuceConnectionFactory).cacheDefaults(config).build();
       }
 
