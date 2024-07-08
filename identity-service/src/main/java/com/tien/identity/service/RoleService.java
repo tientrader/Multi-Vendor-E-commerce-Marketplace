@@ -45,7 +45,6 @@ public class RoleService {
 
     // Xem tất cả các role hiện có
     @PreAuthorize("hasRole('ADMIN')")
-    @Transactional(readOnly = true)
     public List<RoleResponse> getAllRoles() {
         return roleRepository.findAll().stream().map(roleMapper::toRoleResponse).toList();
     }

@@ -28,6 +28,7 @@ import com.tien.identity.httpclient.ProfileClient;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 @Service
@@ -44,6 +45,7 @@ public class UserService {
     KafkaTemplate<String , String> kafkaTemplate;
 
     // Tạo tài khoản User
+    @Transactional
     public UserResponse createUser(UserCreationRequest request) {
         if (userRepository.existsByUsername(request.getUsername()))
             throw new AppException(ErrorCode.USER_EXISTED);
@@ -71,6 +73,7 @@ public class UserService {
     }
 
     // Tạo password cho User đăng nhập bằng Gmail
+    @Transactional
     public void createPassword(PasswordCreationRequest request) {
         String name = SecurityContextHolder.getContext().getAuthentication().getName();
 
@@ -96,6 +99,7 @@ public class UserService {
     }
 
     // Chỉnh sửa thông tin của chính User dựa trên token ngoại trừ role
+    @Transactional
     public UserResponse updateInfo(UserInfoUpdateRequest request) {
         String name = SecurityContextHolder.getContext().getAuthentication().getName();
 
@@ -112,6 +116,7 @@ public class UserService {
 
     // Chỉnh sửa tất cả thông tin của chính User bằng ID dành cho Admin
     @PreAuthorize("hasRole('ADMIN')")
+    @Transactional
     public UserResponse updateUser(String id, UserUpdateRequest request) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
@@ -143,6 +148,7 @@ public class UserService {
 
     // Xoá tài khoản của User dành cho Admin
     @PreAuthorize("hasRole('ADMIN')")
+    @Transactional
     public void deleteUser(String id) {
         userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         userRepository.deleteById(id);

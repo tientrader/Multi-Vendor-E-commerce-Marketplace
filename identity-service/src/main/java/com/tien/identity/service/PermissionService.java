@@ -40,7 +40,6 @@ public class PermissionService {
 
     // Xem tất cả các permission hiện có
     @PreAuthorize("hasRole('ADMIN')")
-    @Transactional(readOnly = true)
     public List<PermissionResponse> getAllPermissions() {
         return permissionRepository.findAll().stream().map(permissionMapper::toPermissionResponse).toList();
     }
