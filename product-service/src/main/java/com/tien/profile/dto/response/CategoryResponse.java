@@ -3,6 +3,8 @@ package com.tien.profile.dto.response;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.Set;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -13,5 +15,7 @@ public class CategoryResponse {
       String id;
       String name;
       String description;
+
+      Set<String> productIds;
 
 }

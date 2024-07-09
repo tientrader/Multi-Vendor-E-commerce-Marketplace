@@ -12,9 +12,6 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,8 +29,6 @@ public class CategoryService {
       CategoryMapper categoryMapper;
 
       @PreAuthorize("hasRole('ADMIN')")
-      @CachePut(value = "categories", key = "#result.id")
-      @CacheEvict(value = "allCategories", allEntries = true)
       @Transactional
       public CategoryResponse createCategory(CategoryCreationRequest request) {
             Category category = categoryMapper.toCategory(request);
@@ -41,8 +36,6 @@ public class CategoryService {
       }
 
       @PreAuthorize("hasRole('ADMIN')")
-      @CachePut(value = "categories", key = "#categoryId")
-      @CacheEvict(value = "allCategories", allEntries = true)
       @Transactional
       public CategoryResponse updateCategory(String categoryId, CategoryUpdateRequest request) {
             Category category = categoryRepository.findById(categoryId)
@@ -51,21 +44,18 @@ public class CategoryService {
             return categoryMapper.toCategoryResponse(categoryRepository.save(category));
       }
 
-      @Cacheable(value = "allCategories")
       public List<CategoryResponse> getAllCategories() {
             return categoryRepository.findAll().stream()
                     .map(categoryMapper::toCategoryResponse)
                     .collect(Collectors.toList());
       }
 
-//      @Cacheable(value = "categories", key = "#categoryId")
       public CategoryResponse getCategoryById(String categoryId) {
             return categoryMapper.toCategoryResponse(categoryRepository.findById(categoryId)
                     .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND)));
       }
 
       @PreAuthorize("hasRole('ADMIN')")
-      @CacheEvict(value = "allCategories", allEntries = true)
       @Transactional
       public void deleteCategory(String categoryId) {
             categoryRepository.findById(categoryId)

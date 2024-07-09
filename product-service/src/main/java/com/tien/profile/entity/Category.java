@@ -6,6 +6,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Getter
@@ -23,6 +24,6 @@ public class Category {
       String description;
 
       @DBRef
-      Set<Product> products;
+      Set<Product> products = new HashSet<>();
 
 }
