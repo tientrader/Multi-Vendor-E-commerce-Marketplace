@@ -15,6 +15,6 @@ public class ProductResponse {
       String description;
       double price;
       int stock;
-      CategoryResponse category;
+      String categoryName;
 
 }

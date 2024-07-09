@@ -40,7 +40,7 @@ public class ProductService {
       public ProductResponse createProduct(ProductCreationRequest request) {
             Product product = productMapper.toProduct(request);
             product.setCategory(categoryRepository.findById(request.getCategoryId())
-                    .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND)));
+                    .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND)));
 
             return productMapper.toProductResponse(productRepository.save(product));
       }
@@ -53,7 +53,7 @@ public class ProductService {
             Product product = productRepository.findById(productId)
                     .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
             product.setCategory(categoryRepository.findById(request.getCategoryId())
-                    .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND)));
+                    .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND)));
             productMapper.updateProduct(product, request);
 
             return productMapper.toProductResponse(productRepository.save(product));
