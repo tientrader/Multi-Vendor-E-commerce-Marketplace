@@ -35,6 +35,14 @@ public class CategoryController {
                     .build();
       }
 
+      @DeleteMapping("/{categoryId}")
+      ApiResponse<String> deleteCategory(@PathVariable String categoryId) {
+            categoryService.deleteCategory(categoryId);
+            return ApiResponse.<String>builder()
+                    .result("Category has been deleted")
+                    .build();
+      }
+
       @GetMapping("/{categoryId}")
       ApiResponse<CategoryResponse> getCategoryById(@PathVariable("categoryId") String categoryId) {
             return ApiResponse.<CategoryResponse>builder()
@@ -46,14 +54,6 @@ public class CategoryController {
       ApiResponse<List<CategoryResponse>> getAllCategories() {
             return ApiResponse.<List<CategoryResponse>>builder()
                     .result(categoryService.getAllCategories())
-                    .build();
-      }
-
-      @DeleteMapping("/{categoryId}")
-      ApiResponse<String> deleteCategory(@PathVariable String categoryId) {
-            categoryService.deleteCategory(categoryId);
-            return ApiResponse.<String>builder()
-                    .result("Category has been deleted")
                     .build();
       }
 

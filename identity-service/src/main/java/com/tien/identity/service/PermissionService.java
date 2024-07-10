@@ -38,18 +38,18 @@ public class PermissionService {
         return permissionMapper.toPermissionResponse(permission);
     }
 
-    // Xem tất cả các permission hiện có
-    @PreAuthorize("hasRole('ADMIN')")
-    public List<PermissionResponse> getAllPermissions() {
-        return permissionRepository.findAll().stream().map(permissionMapper::toPermissionResponse).toList();
-    }
-
     // Xoá permission dựa trên tên của permission
     @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public void deletePermission(String permission) {
         if (!permissionRepository.existsById(permission)) {throw new AppException(ErrorCode.PERMISSION_NOT_FOUND);}
         permissionRepository.deleteById(permission);
+    }
+
+    // Xem tất cả các permission hiện có
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<PermissionResponse> getAllPermissions() {
+        return permissionRepository.findAll().stream().map(permissionMapper::toPermissionResponse).toList();
     }
 
 }

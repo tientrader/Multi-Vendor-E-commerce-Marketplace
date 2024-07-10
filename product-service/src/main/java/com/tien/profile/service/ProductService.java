@@ -70,19 +70,6 @@ public class ProductService {
             return productMapper.toProductResponse(product);
       }
 
-      public List<ProductResponse> getAllProducts() {
-            System.out.println("dbms");
-            return productRepository.findAll().stream()
-                    .map(productMapper::toProductResponse)
-                    .collect(Collectors.toList());
-      }
-
-      public ProductResponse getProductById(String productId) {
-            System.out.println("db");
-            return productMapper.toProductResponse(productRepository.findById(productId)
-                    .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND)));
-      }
-
       @PreAuthorize("hasRole('ADMIN')")
       @Transactional
       public void deleteProduct(String productId) {
@@ -94,6 +81,17 @@ public class ProductService {
             categoryRepository.save(category);
 
             productRepository.deleteById(productId);
+      }
+
+      public List<ProductResponse> getAllProducts() {
+            return productRepository.findAll().stream()
+                    .map(productMapper::toProductResponse)
+                    .collect(Collectors.toList());
+      }
+
+      public ProductResponse getProductById(String productId) {
+            return productMapper.toProductResponse(productRepository.findById(productId)
+                    .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND)));
       }
 
 }

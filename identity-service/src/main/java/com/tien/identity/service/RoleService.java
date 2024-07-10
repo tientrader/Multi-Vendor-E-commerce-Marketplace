@@ -43,18 +43,18 @@ public class RoleService {
         return roleMapper.toRoleResponse(role);
     }
 
-    // Xem tất cả các role hiện có
-    @PreAuthorize("hasRole('ADMIN')")
-    public List<RoleResponse> getAllRoles() {
-        return roleRepository.findAll().stream().map(roleMapper::toRoleResponse).toList();
-    }
-
     // Xoá role dựa trên tên của role
     @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public void deleteRole(String role) {
         if (!roleRepository.existsById(role)) {throw new AppException(ErrorCode.ROLE_NOT_FOUND);}
         roleRepository.deleteById(role);
+    }
+
+    // Xem tất cả các role hiện có
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<RoleResponse> getAllRoles() {
+        return roleRepository.findAll().stream().map(roleMapper::toRoleResponse).toList();
     }
 
 }

@@ -44,6 +44,14 @@ public class CategoryService {
             return categoryMapper.toCategoryResponse(categoryRepository.save(category));
       }
 
+      @PreAuthorize("hasRole('ADMIN')")
+      @Transactional
+      public void deleteCategory(String categoryId) {
+            categoryRepository.findById(categoryId)
+                    .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
+            categoryRepository.deleteById(categoryId);
+      }
+
       public List<CategoryResponse> getAllCategories() {
             return categoryRepository.findAll().stream()
                     .map(categoryMapper::toCategoryResponse)
@@ -53,14 +61,6 @@ public class CategoryService {
       public CategoryResponse getCategoryById(String categoryId) {
             return categoryMapper.toCategoryResponse(categoryRepository.findById(categoryId)
                     .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND)));
-      }
-
-      @PreAuthorize("hasRole('ADMIN')")
-      @Transactional
-      public void deleteCategory(String categoryId) {
-            categoryRepository.findById(categoryId)
-                    .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
-            categoryRepository.deleteById(categoryId);
       }
 
 }

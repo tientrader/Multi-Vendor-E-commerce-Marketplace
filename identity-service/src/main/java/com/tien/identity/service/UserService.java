@@ -130,6 +130,15 @@ public class UserService {
         return userMapper.toUserResponse(userRepository.save(user));
     }
 
+    // Xoá tài khoản của User dành cho Admin
+    @PreAuthorize("hasRole('ADMIN')")
+    @Transactional
+    public void deleteUser(String id) {
+        userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        userRepository.deleteById(id);
+        profileClient.deleteProfile(id);
+    }
+
     // Xem thông tin của User bằng ID
     @PreAuthorize("hasRole('ADMIN')")
     public UserResponse getUserById(String id) {
@@ -144,15 +153,6 @@ public class UserService {
                 .stream()
                 .map(userMapper::toUserResponse)
                 .toList();
-    }
-
-    // Xoá tài khoản của User dành cho Admin
-    @PreAuthorize("hasRole('ADMIN')")
-    @Transactional
-    public void deleteUser(String id) {
-        userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
-        userRepository.deleteById(id);
-        profileClient.deleteProfile(id);
     }
 
 }
