@@ -10,6 +10,7 @@ import com.tien.order.repository.OrderRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +24,7 @@ public class OrderService {
       OrderRepository orderRepository;
       ProductClient productClient;
       OrderMapper orderMapper;
+      KafkaTemplate<String, String> kafkaTemplate;
 
       @Transactional
       public OrderResponse createOrder(OrderCreationRequest request) {
@@ -41,6 +43,8 @@ public class OrderService {
 
             savedOrder.setStatus("COMPLETED");
             savedOrder = orderRepository.save(savedOrder);
+
+            kafkaTemplate.send("order-successful", "Create order successfully!");
 
             return orderMapper.toOrderResponse(savedOrder);
       }

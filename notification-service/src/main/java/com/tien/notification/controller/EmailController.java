@@ -32,7 +32,13 @@ public class EmailController {
 
     // Lắng nghe các message Kafka từ topic "onboard-successful"
     @KafkaListener(topics = "onboard-successful")
-    public void listen(String message) {
+    public void listenFromIdentityService(String message) {
+        log.info("Message received: {}", message);
+    }
+
+    // Lắng nghe các message Kafka từ topic "onboard-successful"
+    @KafkaListener(topics = "order-successful")
+    public void listenFromOrderService(String message) {
         log.info("Message received: {}", message);
     }
 

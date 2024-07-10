@@ -67,7 +67,6 @@ public class UserService {
 
         // Gửi message onboard User thành công cho Notification Service
         kafkaTemplate.send("onboard-successful", "Welcome " + user.getUsername() + " to TienApp!");
-        kafkaTemplate.send("onboard-successful", "Please fill in all your personal information for the best experience!");
 
         return userMapper.toUserResponse(user);
     }
