@@ -38,7 +38,11 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
     // Các endpoint không cần xác thực
     @NonFinal
     private String[] publicEndpoints = {
-            "/identity/auth/.*", "/identity/users/registration", "/notification/email/send", "/product/.*"
+            "/identity/auth/.*",
+            "/identity/users/registration",
+            "/notification/email/send",
+            "/product/.*",
+            "/order/.*"
     };
 
     @Value("${app.api-prefix}")

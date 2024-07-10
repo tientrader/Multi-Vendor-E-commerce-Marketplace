@@ -34,3 +34,9 @@ spring:
             - Path=${app.api-prefix}/product/**
           filters:
             - StripPrefix=2
+        - id: order_service
+          uri: http://localhost:8084
+          predicates:
+            - Path=${app.api-prefix}/order/**
+          filters:
+            - StripPrefix=2

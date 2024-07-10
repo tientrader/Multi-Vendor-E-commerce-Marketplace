@@ -1,8 +1,21 @@
 server:
-  port:
+  port: 8084
   servlet:
     context-path: /order
 
 spring:
   application:
     name: order-service
+  datasource:
+    url: ${DBMS_CONNECTION}
+    driverClassName: "com.mysql.cj.jdbc.Driver"
+    username: ${DBMS_USERNAME}
+    password: ${DBMS_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+app:
+  services:
+    product: http://localhost:8083/product
