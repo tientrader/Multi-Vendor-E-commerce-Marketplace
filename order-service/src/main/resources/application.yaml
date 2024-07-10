@@ -19,3 +19,4 @@ spring:
 app:
   services:
     product: http://localhost:8083/product
+    profile: http://localhost:8081/profile

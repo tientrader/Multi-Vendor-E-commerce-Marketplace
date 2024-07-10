@@ -40,6 +40,14 @@ public class UserProfileService {
         return userProfileMapper.toUserProfileReponse(userProfile);
     }
 
+    // Xem thông tin User bằng UserID
+    public UserProfileResponse getProfileByUserId(String userId) {
+        UserProfile userProfile = userProfileRepository.findByUserId(userId)
+                .orElseThrow(() -> new AppException(PROFILE_NOT_FOUND));
+
+        return userProfileMapper.toUserProfileReponse(userProfile);
+    }
+
     // Xem thông tin của tất cả User dành cho Admin
     @PreAuthorize("hasRole('ADMIN')")
     public List<UserProfileResponse> getAllProfiles() {

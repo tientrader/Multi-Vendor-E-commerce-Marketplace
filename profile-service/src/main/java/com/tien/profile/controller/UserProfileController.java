@@ -8,7 +8,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -24,6 +23,13 @@ public class UserProfileController {
     ApiResponse<UserProfileResponse> getProfileById(@PathVariable String profileId) {
         return ApiResponse.<UserProfileResponse>builder()
                 .result(userProfileService.getProfileById(profileId))
+                .build();
+    }
+
+    @GetMapping("/users/{userId}")
+    ApiResponse<UserProfileResponse> getProfileByUserId(@PathVariable String userId) {
+        return ApiResponse.<UserProfileResponse>builder()
+                .result(userProfileService.getProfileByUserId(userId))
                 .build();
     }
 
