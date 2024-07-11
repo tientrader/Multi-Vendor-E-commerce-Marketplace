@@ -18,8 +18,8 @@ public enum ErrorCode {
     UNAUTHENTICATED(1006, "Unauthenticated", HttpStatus.UNAUTHORIZED),
     UNAUTHORIZED(1007, "You do not have permission", HttpStatus.FORBIDDEN),
     PROFILE_NOT_FOUND(1009, "Profile not found", HttpStatus.NOT_FOUND),
-    STOCK_UPDATE_FAIL(1009, "STOCK_UPDATE_FAIL", HttpStatus.NOT_FOUND),
-    PRODUCT_FETCH_FAIL(1009, "PRODUCT_FETCH_FAIL", HttpStatus.NOT_FOUND),
+    STOCK_UPDATE_FAIL(1010, "STOCK_UPDATE_FAIL", HttpStatus.NOT_FOUND),
+    PRODUCT_FETCH_FAIL(1011, "PRODUCT_FETCH_FAIL", HttpStatus.NOT_FOUND),
     ;
 
     int code;

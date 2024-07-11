@@ -24,7 +24,4 @@ public class OrderItem {
       @Column(nullable = false)
       int quantity;
 
-      @Column(nullable = false)
-      double price;
-
 }

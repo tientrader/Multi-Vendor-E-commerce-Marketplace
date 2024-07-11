@@ -17,5 +17,6 @@ public class OrderResponse {
       List<OrderItemResponse> items;
       double total;
       String status;
+      UserProfileResponse userProfile;
 
 }
