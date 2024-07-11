@@ -8,10 +8,11 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class OrderItemResponse {
+public class ProductResponse {
 
-      String productId;
-      int quantity;
+      String description;
       double price;
+      int stock;
+      String categoryId;
 
 }
