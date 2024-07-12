@@ -1,4 +1,4 @@
-package com.tien.profile.configuration;
+package com.tien.payment.configuration;
 
 import com.nimbusds.jwt.SignedJWT;
 import org.springframework.security.oauth2.jwt.Jwt;

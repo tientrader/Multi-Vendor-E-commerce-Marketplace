@@ -16,7 +16,7 @@ public interface ProductClient {
     @GetMapping(value = "/{productId}", produces = MediaType.APPLICATION_JSON_VALUE)
     ProductResponse getProductById(@PathVariable("productId") String productId);
 
-    @PutMapping(value = "/{productId}/stock")
+    @PutMapping("/{productId}/stock")
     void updateStock(@PathVariable("productId") String productId, @RequestParam("quantity") int quantity);
 
 }

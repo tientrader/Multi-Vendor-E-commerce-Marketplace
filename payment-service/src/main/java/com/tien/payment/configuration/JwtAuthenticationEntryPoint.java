@@ -1,10 +1,10 @@
-package com.tien.profile.configuration;
+package com.tien.payment.configuration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.tien.profile.dto.ApiResponse;
+import com.tien.payment.dto.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import com.tien.profile.exception.ErrorCode;
+import com.tien.payment.exception.ErrorCode;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;

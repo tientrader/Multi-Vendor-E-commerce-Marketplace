@@ -31,7 +31,7 @@ public class ProductService {
 
       @PreAuthorize("hasRole('ADMIN')")
       @Transactional
-      public ProductResponse createProduct(ProductCreationRequest request) {
+      public ProductResponse addProduct(ProductCreationRequest request) {
             Product product = productMapper.toProduct(request);
             Category category = categoryRepository.findById(request.getCategoryId())
                     .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));

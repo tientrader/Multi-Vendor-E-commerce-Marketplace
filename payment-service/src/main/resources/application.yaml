@@ -1,8 +1,25 @@
 server:
-  port:
+  port: 8085
   servlet:
     context-path: /payment
 
 spring:
   application:
     name: payment-service
+  datasource:
+    url: ${DBMS_CONNECTION}
+    driverClassName: "com.mysql.cj.jdbc.Driver"
+    username: ${DBMS_USERNAME}
+    password: ${DBMS_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+stripe:
+  api-key: sk_test_51PbfkyC9fPubZMQMTyx5gwsbd5gAfdy7EUdyjetXBGr7Dd6jySqonHuQU1XEnbx4VoMkXIvtMym2DGLCxso2If9k00oshywfPd
+
+paypal:
+  client-id: AesP9_Zr4Zyf0eVqxduzn2WEVJrFO-86bL6uQVr3L4BAbemz-8xISk72Jo-Tray4JimZ5KMRKL0S8jQL
+  client-secret: EFd0p2HEut3mp27V8YYpNOah63y6mv8zd1vqGHSUetpUeSTNUcAtkYwOm_dq4RA_V6wB-HVoZgX9SG23
+  mode: sandbox #for testing, live for prod

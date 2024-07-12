@@ -1,6 +1,6 @@
-package com.tien.profile.exception;
+package com.tien.payment.exception;
 
-import com.tien.profile.dto.ApiResponse;
+import com.tien.payment.dto.ApiResponse;
 import jakarta.validation.ConstraintViolation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;

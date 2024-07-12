@@ -1,4 +1,4 @@
-package com.tien.profile.exception;
+package com.tien.payment.exception;
 
 import lombok.AccessLevel;
 import lombok.Getter;

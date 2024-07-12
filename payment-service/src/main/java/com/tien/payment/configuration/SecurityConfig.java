@@ -1,4 +1,4 @@
-package com.tien.profile.configuration;
+package com.tien.payment.configuration;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -24,7 +24,7 @@ public class SecurityConfig {
     CustomJwtDecoder customJwtDecoder;
 
     private static final String[] PUBLIC_ENDPOINTS = {
-        "/internal/.*"
+        "/**"
     };
 
     @Bean
