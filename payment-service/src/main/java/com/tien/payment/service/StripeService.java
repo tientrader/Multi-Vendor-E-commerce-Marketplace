@@ -84,9 +84,7 @@ public class StripeService {
                     .setSource(source)
                     .build();
 
-            Customer customer = Customer.create(createParams);
-
-            return customer;
+            return Customer.create(createParams);
       }
 
 }
