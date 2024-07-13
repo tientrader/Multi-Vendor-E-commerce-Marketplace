@@ -1,10 +1,17 @@
 package com.tien.payment.service;
 
-import com.paypal.api.payments.*;
+import com.paypal.api.payments.Amount;
+import com.paypal.api.payments.Payment;
+import com.paypal.api.payments.Payer;
+import com.paypal.api.payments.RedirectUrls;
+import com.paypal.api.payments.Transaction;
 import com.paypal.base.rest.APIContext;
 import com.paypal.base.rest.PayPalRESTException;
-import com.tien.payment.repository.PaypalRepository;
+import com.tien.payment.dto.PaypalRequest;
+import com.tien.payment.dto.PaypalResponse;
 import com.tien.payment.entity.Paypal;
+import com.tien.payment.mapper.PaypalMapper;
+import com.tien.payment.repository.PaypalRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -13,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 @Service
 @RequiredArgsConstructor
@@ -22,70 +28,51 @@ public class PaypalService {
 
       APIContext apiContext;
       PaypalRepository paypalRepository;
+      PaypalMapper paypalMapper;
 
       @Transactional(rollbackFor = Exception.class)
-      public Payment createPayment(
-              double total,
-              String currency,
-              String method,
-              String intent,
-              String description,
-              String cancelUrl,
-              String successUrl
-      ) throws PayPalRESTException {
+      public Payment createPayment(PaypalRequest request) throws PayPalRESTException {
             Amount amount = new Amount();
-            amount.setCurrency(currency);
-            amount.setTotal(String.format(Locale.US, "%.2f", total));
+            amount.setCurrency(request.getCurrency());
+            amount.setTotal(request.getAmount().toString());
 
             Transaction transaction = new Transaction();
-            transaction.setDescription(description);
+            transaction.setDescription(request.getDescription());
             transaction.setAmount(amount);
 
             List<Transaction> transactions = new ArrayList<>();
             transactions.add(transaction);
 
             Payer payer = new Payer();
-            payer.setPaymentMethod(method);
+            payer.setPaymentMethod(request.getPaymentMethod());
 
             Payment payment = new Payment();
-            payment.setIntent(intent);
+            payment.setIntent("sale");
             payment.setPayer(payer);
             payment.setTransactions(transactions);
 
             RedirectUrls redirectUrls = new RedirectUrls();
-            redirectUrls.setCancelUrl(cancelUrl);
-            redirectUrls.setReturnUrl(successUrl);
+            redirectUrls.setCancelUrl("http://localhost:8085/payment/paypal/cancel");
+            redirectUrls.setReturnUrl("http://localhost:8085/payment/paypal/success");
             payment.setRedirectUrls(redirectUrls);
 
-            Payment createdPayment = payment.create(apiContext);
-
-            Paypal paypalTransaction = new Paypal();
-            paypalTransaction.setPaymentId(Long.valueOf(createdPayment.getId()));
-            paypalTransaction.setAmount(total);
-            paypalTransaction.setCurrency(currency);
-            paypalTransaction.setPaymentMethod(method);
-            paypalTransaction.setDescription(description);
-            paypalTransaction.setPaymentState(createdPayment.getState());
-            paypalRepository.save(paypalTransaction);
-
-            return createdPayment;
+            return payment.create(apiContext);
       }
 
       @Transactional(rollbackFor = Exception.class)
       public Payment executePayment(Long paymentId, String payerId) throws PayPalRESTException {
             Payment payment = new Payment();
             payment.setId(String.valueOf(paymentId));
-            PaymentExecution paymentExecution = new PaymentExecution();
+            com.paypal.api.payments.PaymentExecution paymentExecution = new com.paypal.api.payments.PaymentExecution();
             paymentExecution.setPayerId(payerId);
-            Payment executedPayment = payment.execute(apiContext, paymentExecution);
+            return payment.execute(apiContext, paymentExecution);
+      }
 
-            Paypal paypalTransaction = paypalRepository.findById(paymentId)
-                    .orElseThrow(() -> new RuntimeException("Transaction not found"));
-            paypalTransaction.setPayerId(payerId);
-            paypalTransaction.setPaymentState(executedPayment.getState());
-            paypalRepository.save(paypalTransaction);
-
-            return executedPayment;
+      @Transactional(rollbackFor = Exception.class)
+      public PaypalResponse saveAndReturnResponse(PaypalRequest request) {
+            Paypal paypal = paypalMapper.toPaypal(request);
+            Paypal savedPaypal = paypalRepository.save(paypal);
+            return paypalMapper.toPaypalResponse(savedPaypal);
       }
 
 }

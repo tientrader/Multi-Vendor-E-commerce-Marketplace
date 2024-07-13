@@ -22,4 +22,4 @@ stripe:
 paypal:
   client-id: ${PAYPAL_CLIENT_ID}
   client-secret: ${PAYPAL_CLIENT_SECRET}
-  mode: sandbox #for testing, live for prod
+  mode: sandbox

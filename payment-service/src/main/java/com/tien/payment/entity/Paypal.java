@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.math.BigDecimal;
+
 @Getter
 @Setter
 @Builder
@@ -18,7 +20,7 @@ public class Paypal {
       Long paymentId;
 
       String payerId;
-      double amount;
+      BigDecimal amount;
       String currency;
       String paymentMethod;
       String paymentState;

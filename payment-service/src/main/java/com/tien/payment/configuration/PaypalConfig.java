@@ -5,6 +5,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Configuration
 public class PaypalConfig {
 
@@ -19,7 +22,17 @@ public class PaypalConfig {
 
       @Bean
       public APIContext apiContext() {
-            return new APIContext(clientId, clientSecret, mode);
+            APIContext apiContext = new APIContext(clientId, clientSecret, mode);
+            apiContext.setConfigurationMap(getConfiguration());
+            return apiContext;
+      }
+
+      private Map<String, String> getConfiguration() {
+            Map<String, String> configMap = new HashMap<>();
+            configMap.put("paypal.clientID", clientId);
+            configMap.put("paypal.clientSecret", clientSecret);
+            configMap.put("paypal.mode", mode);
+            return configMap;
       }
 
 }
