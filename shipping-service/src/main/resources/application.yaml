@@ -5,9 +5,13 @@ server:
 
 spring:
   application:
-    name: profile-service
-  neo4j:
-    uri: ${DBMS.CONNECTION}
-    authentication:
-      username: ${DBMS_USERNAME}
-      password: ${DBMS_PASSWORD}
+    name: shipping-service
+  datasource:
+    url: ${DBMS_CONNECTION}
+    driverClassName: "com.mysql.cj.jdbc.Driver"
+    username: ${DBMS_USERNAME}
+    password: ${DBMS_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
