@@ -1,4 +1,4 @@
-package com.tien.payment.exception;
+package com.tien.shipping.exception;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;

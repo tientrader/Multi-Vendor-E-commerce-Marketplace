@@ -1,0 +1,13 @@
+server:
+  port: 8087
+  servlet:
+    context-path: /shipping
+
+spring:
+  application:
+    name: profile-service
+  neo4j:
+    uri: ${DBMS.CONNECTION}
+    authentication:
+      username: ${DBMS_USERNAME}
+      password: ${DBMS_PASSWORD}
