@@ -12,10 +12,6 @@ import java.time.LocalDate;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ShippingRequest {
 
-    String userId;
-    String firstName;
-    String lastName;
-    LocalDate dob;
-    String city;
+
 
 }
