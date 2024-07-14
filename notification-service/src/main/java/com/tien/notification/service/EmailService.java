@@ -24,12 +24,12 @@ public class EmailService {
 
     EmailClient emailClient;
 
-    // API key để xác thực với dịch vụ email Brevo
+    // API key to authenticate with Brevo email service
     @NonFinal
     @Value("${email.api-key}")
     protected String apiKey;
 
-    // Gửi email dựa trên thông tin từ request
+    // Send email based on information from the request
     public EmailResponse sendEmail(SendEmailRequest request) {
         EmailRequest emailRequest = EmailRequest.builder()
                         .sender(Sender.builder()

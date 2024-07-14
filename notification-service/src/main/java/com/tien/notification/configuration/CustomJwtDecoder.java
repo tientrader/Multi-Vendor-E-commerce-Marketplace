@@ -11,6 +11,7 @@ import java.text.ParseException;
 @Component
 public class CustomJwtDecoder implements JwtDecoder {
 
+    // Retrieve token information for user authentication, role management, and session handling
     @Override
     public Jwt decode(String token) throws JwtException {
         try {

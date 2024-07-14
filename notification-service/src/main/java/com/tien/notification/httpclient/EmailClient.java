@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 @FeignClient(name = "email-client", url = "https://api.brevo.com")
 public interface EmailClient {
 
-    // Gửi email bằng cách gọi API của Brevo
+    // Send email by calling Brevo API
     @PostMapping(value = "/v3/smtp/email", produces = MediaType.APPLICATION_JSON_VALUE)
     EmailResponse sendEmail(@RequestHeader("api-key") String apiKey, @RequestBody EmailRequest body);
 
