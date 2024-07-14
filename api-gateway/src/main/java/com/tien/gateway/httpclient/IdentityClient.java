@@ -10,7 +10,7 @@ import reactor.core.publisher.Mono;
 
 public interface IdentityClient {
 
-    // Gọi method introspect của Identity Service để kiểm tra token có hợp lệ không
+    // Call introspect method of Identity Service to check if the token is valid
     @PostExchange(url = "/auth/introspect", contentType = MediaType.APPLICATION_JSON_VALUE)
     Mono<ApiResponse<IntrospectResponse>> introspect(@RequestBody IntrospectRequest request);
 

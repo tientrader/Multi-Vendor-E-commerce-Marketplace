@@ -44,34 +44,34 @@ public class UserService {
     ProfileClient profileClient;
     KafkaTemplate<String , String> kafkaTemplate;
 
-    // Tạo tài khoản User
+    // Create User account
     @Transactional
     public UserResponse createUser(UserCreationRequest request) {
         if (userRepository.existsByUsername(request.getUsername()))
             throw new AppException(ErrorCode.USER_EXISTED);
 
-        // Mã hoá password
+        // Encode password
         User user = userMapper.toUser(request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 
-        // Gán role cho User
+        // Assign role to User
         HashSet<Role> roles = new HashSet<>();
         roleRepository.findById(PredefinedRole.USER_ROLE).ifPresent(roles::add);
         user.setRoles(roles);
         user = userRepository.save(user);
 
-        // Tạo profile ở Profile Service
+        // Create profile in Profile Service
         var profileRequest = profileMapper.toProfileCreationRequest(request);
         profileRequest.setUserId(user.getId());
         profileClient.createProfile(profileRequest);
 
-        // Gửi message onboard User thành công cho Notification Service
+        // Send onboard successful message to Notification Service
         kafkaTemplate.send("onboard-successful", "Welcome " + user.getUsername() + " to TienApp!");
 
         return userMapper.toUserResponse(user);
     }
 
-    // Tạo password cho User đăng nhập bằng Gmail
+    // Create password for User logging in with Gmail
     @Transactional
     public void createPassword(PasswordCreationRequest request) {
         String name = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -84,7 +84,7 @@ public class UserService {
         userRepository.save(user);
     }
 
-    // Chỉnh sửa thông tin của chính User dựa trên token ngoại trừ role
+    // Update User's own information based on token, excluding role
     @Transactional
     public UserResponse updateInfo(UserInfoUpdateRequest request) {
         String name = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -100,7 +100,7 @@ public class UserService {
         return userMapper.toUserResponse(userRepository.save(user));
     }
 
-    // Chỉnh sửa tất cả thông tin của chính User bằng ID dành cho Admin
+    // Update all User information by ID for Admin
     @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public UserResponse updateUser(String id, UserUpdateRequest request) {
@@ -116,7 +116,7 @@ public class UserService {
         return userMapper.toUserResponse(userRepository.save(user));
     }
 
-    // Xoá tài khoản của User dành cho Admin
+    // Delete User account for Admin
     @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public void deleteUser(String id) {
@@ -125,7 +125,7 @@ public class UserService {
         profileClient.deleteProfile(id);
     }
 
-    // Xem thông tin của chính User dựa trên token
+    // View own User information based on token
     public UserResponse getMyInfo() {
         String name = SecurityContextHolder.getContext().getAuthentication().getName();
 
@@ -138,14 +138,14 @@ public class UserService {
         return userResponse;
     }
 
-    // Xem thông tin của User bằng ID
+    // View User information by ID
     @PreAuthorize("hasRole('ADMIN')")
     public UserResponse getUserById(String id) {
         return userMapper.toUserResponse(userRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED)));
     }
 
-    // Xem thông tin của tất cả User
+    // View all Users information
     @PreAuthorize("hasRole('ADMIN')")
     public List<UserResponse> getAllUsers() {
         return userRepository.findAll()

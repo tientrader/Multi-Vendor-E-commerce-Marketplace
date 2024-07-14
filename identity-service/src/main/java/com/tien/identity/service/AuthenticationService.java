@@ -74,7 +74,7 @@ public class AuthenticationService {
     @NonFinal
     protected final String GRANT_TYPE = "authorization_code";
 
-    // Tạo token cho User khi đăng nhập thành công
+    // Generate token for User
     private String generateToken(User user) {
         JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
@@ -88,7 +88,7 @@ public class AuthenticationService {
         Payload payload = new Payload(jwtClaimsSet.toJSONObject());
         JWSObject jwsObject = new JWSObject(header, payload);
 
-        // Ký và mã hoá token
+        // Sign and encrypt the token
         try {
             jwsObject.sign(new MACSigner(SIGNER_KEY.getBytes()));
             return jwsObject.serialize();
@@ -98,7 +98,7 @@ public class AuthenticationService {
         }
     }
 
-    // Xác thực token
+    // Verify token
     private SignedJWT verifyToken(String token, boolean isRefresh) throws JOSEException, ParseException {
         JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
 
@@ -115,7 +115,7 @@ public class AuthenticationService {
 
         var verified = signedJWT.verify(verifier);
 
-        // Check token đã hết hạn hay chưa
+        // Check if the token has expired
         if (!(verified && expiryTime.after(new Date()))) throw new AppException(ErrorCode.UNAUTHENTICATED);
 
         if (invalidatedTokenRepository.existsById(signedJWT.getJWTClaimsSet().getJWTID()))
@@ -124,7 +124,7 @@ public class AuthenticationService {
         return signedJWT;
     }
 
-    // Xác thực thông tin User từ bên ngoài hệ thống (Google OAuth2)
+    // Authenticate user information from an external system (Google OAuth2)
     public AuthenticationResponse outboundAuthenticate(String code) {
         var response =  outboundIdentityClient.exchangeToken(ExchangeTokenRequest.builder()
                 .code(code)
@@ -158,7 +158,7 @@ public class AuthenticationService {
                 .build();
     }
 
-    // Xác thực thông tin User khi đăng nhập bằng username & password và trả về token
+    // Authenticate user information when logging in with username & password and return the token
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
         log.info("SignerKey: {}", SIGNER_KEY);
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
@@ -175,7 +175,7 @@ public class AuthenticationService {
     }
 
 
-    // Đăng xuất token User và thêm token đã hết hạn vào danh sách token hết hạn
+    // Logout user token and add the expired token to the list of invalidated tokens
     public void logout(LogoutRequest request) throws ParseException, JOSEException {
         try {
             var signToken = verifyToken(request.getToken(), true);
@@ -192,13 +192,13 @@ public class AuthenticationService {
         }
     }
 
-    // Refresh token của User khi hết hạn
+    // Refresh user's token
     public AuthenticationResponse refresh(RefreshRequest request) throws ParseException, JOSEException {
         var signedJWT = verifyToken(request.getToken(), true);
         var jit = signedJWT.getJWTClaimsSet().getJWTID();
         var expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
 
-        // Thêm vào danh sách token hết hạn
+        // Add to the list of invalidated tokens
         InvalidatedToken invalidatedToken = InvalidatedToken.builder().id(jit).expiryTime(expiryTime).build();
         invalidatedTokenRepository.save(invalidatedToken);
 
@@ -207,11 +207,11 @@ public class AuthenticationService {
                 .orElseThrow(() -> new AppException(ErrorCode.UNAUTHENTICATED));
         var token = generateToken(user);
 
-        // Trả về token mới
+        // Return new token
         return AuthenticationResponse.builder().token(token).build();
     }
 
-    // Kiểm tra tính hợp lệ của token
+    // Check token validity
     public IntrospectResponse introspect(IntrospectRequest request) {
         var token = request.getToken();
         boolean isValid = true;
@@ -225,7 +225,7 @@ public class AuthenticationService {
         return IntrospectResponse.builder().valid(isValid).build();
     }
 
-    // Thêm ROLE_ trước USER hoặc ADMIN để dễ đọc hơn
+    // Add ROLE_ prefix to USER or ADMIN for better readability
     private String buildScope(User user) {
         StringJoiner stringJoiner = new StringJoiner(" ");
 

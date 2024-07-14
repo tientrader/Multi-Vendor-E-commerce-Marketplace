@@ -9,8 +9,8 @@ import feign.RequestTemplate;
 
 public class AuthenticationRequestInterceptor implements RequestInterceptor {
 
-    // Sử dụng thông tin xác thực từ header "Authorization" của request gốc và thêm vào template của Feign client
-    // Để tự động xác thực khi gửi request đến các service khác
+    /* Use authentication information from the "Authorization" header of the original request and
+    add it to Feign client's template to automatically authenticate when sending requests to other services */
     @Override
     public void apply(RequestTemplate template) {
         ServletRequestAttributes servletRequestAttributes =

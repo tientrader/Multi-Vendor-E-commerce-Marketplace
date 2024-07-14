@@ -12,7 +12,7 @@ import com.nimbusds.jwt.SignedJWT;
 @Component
 public class CustomJwtDecoder implements JwtDecoder {
 
-    // Lấy thông tin của token để xác thực User, quản lý quyền hạn, phiên làm việc
+    // Retrieve token information for user authentication, role management, and session handling
     @Override
     public Jwt decode(String token) throws JwtException {
         try {

@@ -15,7 +15,7 @@ import java.util.List;
 @Configuration
 public class WebClientConfiguration {
 
-    // Cấu hình CORS để cho phép các nguồn khác nhau truy cập tài nguyên
+    // Configure CORS to allow access from different origins
     @Bean
     CorsWebFilter corsWebFilter(){
         CorsConfiguration corsConfiguration = new CorsConfiguration();
@@ -29,7 +29,7 @@ public class WebClientConfiguration {
         return new CorsWebFilter(urlBasedCorsConfigurationSource);
     }
 
-    // Cấu hình WebClient với base URL
+    // Configure WebClient with base URL
     @Bean
     WebClient webClient(){
         return WebClient.builder()
@@ -37,7 +37,7 @@ public class WebClientConfiguration {
                 .build();
     }
 
-    // Tạo và cấu hình IdentityClient sử dụng WebClient
+    // Create and configure IdentityClient using WebClient
     @Bean
     IdentityClient identityClient(WebClient webClient){
         HttpServiceProxyFactory httpServiceProxyFactory = HttpServiceProxyFactory

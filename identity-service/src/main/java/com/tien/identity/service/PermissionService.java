@@ -26,7 +26,7 @@ public class PermissionService {
     PermissionRepository permissionRepository;
     PermissionMapper permissionMapper;
 
-    // Tạo permission cho User
+    // Create permission for User
     @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public PermissionResponse createPermission(PermissionRequest request) {
@@ -36,7 +36,7 @@ public class PermissionService {
         return permissionMapper.toPermissionResponse(permission);
     }
 
-    // Xoá permission dựa trên tên của permission
+    // Delete permission based on the name of the permission
     @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public void deletePermission(String permission) {
@@ -44,7 +44,7 @@ public class PermissionService {
         permissionRepository.deleteById(permission);
     }
 
-    // Xem tất cả các permission hiện có
+    // View all existing permissions
     @PreAuthorize("hasRole('ADMIN')")
     public List<PermissionResponse> getAllPermissions() {
         return permissionRepository.findAll().stream().map(permissionMapper::toPermissionResponse).toList();

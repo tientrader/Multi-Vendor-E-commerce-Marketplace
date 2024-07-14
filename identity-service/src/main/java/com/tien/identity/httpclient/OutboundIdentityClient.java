@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
         configuration = {AuthenticationRequestInterceptor.class})
 public interface OutboundIdentityClient {
 
-      // Trao đổi authorization code lấy access token
+      // Exchange authorization code for access token
       @PostMapping(value = "/token", produces = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
       ExchangeTokenResponse exchangeToken(@QueryMap ExchangeTokenRequest request);
 

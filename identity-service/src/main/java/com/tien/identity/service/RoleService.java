@@ -28,7 +28,7 @@ public class RoleService {
     PermissionRepository permissionRepository;
     RoleMapper roleMapper;
 
-    // Tạo role cho User
+    // Create role for User
     @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public RoleResponse createRole(RoleRequest request) {
@@ -41,7 +41,7 @@ public class RoleService {
         return roleMapper.toRoleResponse(role);
     }
 
-    // Xoá role dựa trên tên của role
+    // Delete role based on the name of the role
     @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public void deleteRole(String role) {
@@ -49,7 +49,7 @@ public class RoleService {
         roleRepository.deleteById(role);
     }
 
-    // Xem tất cả các role hiện có
+    // View all existing roles
     @PreAuthorize("hasRole('ADMIN')")
     public List<RoleResponse> getAllRoles() {
         return roleRepository.findAll().stream().map(roleMapper::toRoleResponse).toList();

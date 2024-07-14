@@ -15,7 +15,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
-    // Thông báo khi có lỗi xảy ra trong quá trình xác thực
+    // Notify when an error occurs during authentication
     @Override
     public void commence(HttpServletRequest request,
                          HttpServletResponse response,

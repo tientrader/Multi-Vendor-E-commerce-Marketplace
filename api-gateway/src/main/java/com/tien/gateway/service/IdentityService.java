@@ -17,7 +17,7 @@ public class IdentityService {
 
     IdentityClient identityClient;
 
-    // Tạo một yêu cầu introspect token rồi gửi đến IdentityClient
+    // Create an introspect token request and send it to IdentityClient
     public Mono<ApiResponse<IntrospectResponse>> introspect(String token){
         return identityClient.introspect(IntrospectRequest.builder()
                 .token(token)

@@ -25,20 +25,20 @@ public class SecurityConfig {
 
     CustomJwtDecoder customJwtDecoder;
 
-    // Các endpoint không cần xác thực
+    // Public endpoints that do not require authentication
     static final String[] PUBLIC_ENDPOINTS = {
         "/users/registration", "/auth/**"
     };
 
-    // Cấu hình bộ lọc bảo mật
+    // Configure security filter chain
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
-        // Cấu hình phân quyền truy cập, cho phép truy cập 1 số endpoint công khai mà không yêu cầu xác thực
+        // Configure access permissions, allowing access to some public endpoints without authentication
         httpSecurity.authorizeHttpRequests(request -> request
                         .requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS).permitAll()
                         .anyRequest().authenticated());
 
-        // Cấu hình bảo mật JWT
+        // Configure JWT security
         httpSecurity.oauth2ResourceServer(oauth2 -> oauth2.jwt(jwtConfigurer -> jwtConfigurer
                         .decoder(customJwtDecoder)
                         .jwtAuthenticationConverter(jwtAuthenticationConverter()))
@@ -49,7 +49,7 @@ public class SecurityConfig {
         return httpSecurity.build();
     }
 
-    // Cấu hình để sử dụng các role từ JWT mà không có tiền tố "ROLE_"
+    // Configure to use roles from JWT without the "ROLE_" prefix
     @Bean
     JwtAuthenticationConverter jwtAuthenticationConverter() {
         JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
@@ -61,7 +61,7 @@ public class SecurityConfig {
         return jwtAuthenticationConverter;
     }
 
-    // Cấu hình mã hóa password, sử dụng BCrypt để mã hóa password với công cụ cấp độ 10
+    // Configure password encoder, use BCrypt to encode passwords with strength level 10
     @Bean
     PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(10);

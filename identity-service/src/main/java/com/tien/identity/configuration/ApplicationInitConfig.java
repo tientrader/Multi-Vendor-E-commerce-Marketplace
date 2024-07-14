@@ -30,7 +30,7 @@ public class ApplicationInitConfig {
     static String ADMIN_USER_NAME = "admin";
     static String ADMIN_PASSWORD = "admin";
 
-    // Tự động tạo tài khoản ADMIN sau khi run application
+    // Automatically create the ADMIN account after running the application
     @Bean
     @ConditionalOnProperty(prefix = "spring",
                            value = "datasource.driverClassName",

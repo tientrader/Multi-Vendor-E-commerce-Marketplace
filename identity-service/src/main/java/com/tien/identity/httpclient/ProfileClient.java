@@ -11,11 +11,11 @@ import com.tien.identity.dto.request.ProfileCreationRequest;
         configuration = {AuthenticationRequestInterceptor.class})
 public interface ProfileClient {
 
-    // Tự động gọi đến method tạo profile ở Profile Service sau khi User tạo tài khoản
+    // Call the profile creation method in the Profile Service after the user account is created.
     @PostMapping(value = "/internal/users", produces = MediaType.APPLICATION_JSON_VALUE)
     void createProfile(@RequestBody ProfileCreationRequest request);
 
-    // Tự động gọi đến method xoá profile ở Profile Service sau khi User xoá tài khoản
+    // Call the profile deletion method in the Profile Service after the user account is deleted.
     @DeleteMapping("/internal/users/{userId}")
     void deleteProfile(@PathVariable("userId") String userId);
 

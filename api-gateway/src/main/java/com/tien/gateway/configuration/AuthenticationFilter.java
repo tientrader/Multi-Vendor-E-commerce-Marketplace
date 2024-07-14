@@ -35,7 +35,7 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
     IdentityService identityService;
     ObjectMapper objectMapper;
 
-    // Các endpoint không cần xác thực
+    // Endpoints that do not require authentication
     @NonFinal
     private String[] publicEndpoints = {
             "/identity/auth/.*",
@@ -46,19 +46,19 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
     @NonFinal
     private String apiPrefix;
 
-    // Kiểm tra endpoint có public hay không
+    // Check if the endpoint is public
     private boolean isPublicEndpoint(ServerHttpRequest request){
         return Arrays.stream(publicEndpoints).anyMatch
                 (s -> request.getURI().getPath().matches(apiPrefix + s));
     }
 
-    // Đặt thứ tự ưu tiên của bộ lọc lên đầu
+    // Set the filter order to the highest priority
     @Override
     public int getOrder() {
         return -1;
     }
 
-    // Cấu hình bộ lọc xác thực
+    // Configure the authentication filter
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         log.info("Enter authentication filter....");
@@ -82,7 +82,7 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
         }).onErrorResume(throwable -> unauthenticated(exchange.getResponse()));
     }
 
-    // Trả về response nếu chưa xác thực
+    // Return response if unauthenticated
     Mono<Void> unauthenticated(ServerHttpResponse response) {
         ApiResponse<?> apiResponse = ApiResponse.builder()
                 .code(1401)
