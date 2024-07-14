@@ -20,6 +20,7 @@ public class StripeService {
 
       StripeRepository stripeRepository;
 
+      // Create a PaymentIntent with specified amount, currency, and description
       public PaymentIntent createPaymentIntent(int amount, String currency, String description) throws StripeException {
             PaymentIntentCreateParams createParams = new PaymentIntentCreateParams.Builder()
                     .setCurrency(currency)
@@ -41,6 +42,7 @@ public class StripeService {
             return paymentIntent;
       }
 
+      // Charge a customer with the specified customerId and amount
       public Charge charge(String customerId, int amount) throws StripeException {
             Map<String, Object> chargeParams = new HashMap<>();
             chargeParams.put("amount", amount);
@@ -62,6 +64,7 @@ public class StripeService {
             return charge;
       }
 
+      // Refund a charge with the specified chargeId
       public Refund refund(String chargeId) throws StripeException {
             RefundCreateParams createParams = new RefundCreateParams.Builder()
                     .setCharge(chargeId)
@@ -78,6 +81,7 @@ public class StripeService {
             return refund;
       }
 
+      // Create a new customer with the specified email and source
       public Customer createCustomer(String email, String source) throws StripeException {
             CustomerCreateParams createParams = new CustomerCreateParams.Builder()
                     .setEmail(email)

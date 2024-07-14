@@ -7,11 +7,11 @@ import com.paypal.api.payments.RedirectUrls;
 import com.paypal.api.payments.Transaction;
 import com.paypal.base.rest.APIContext;
 import com.paypal.base.rest.PayPalRESTException;
-import com.tien.payment.dto.PaypalRequest;
-import com.tien.payment.dto.PaypalResponse;
-import com.tien.payment.entity.Paypal;
-import com.tien.payment.mapper.PaypalMapper;
-import com.tien.payment.repository.PaypalRepository;
+import com.tien.payment.dto.request.PayPalRequest;
+import com.tien.payment.dto.response.PayPalResponse;
+import com.tien.payment.entity.PayPal;
+import com.tien.payment.mapper.PayPalMapper;
+import com.tien.payment.repository.PayPalRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -24,14 +24,15 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class PaypalService {
+public class PayPalService {
 
       APIContext apiContext;
-      PaypalRepository paypalRepository;
-      PaypalMapper paypalMapper;
+      PayPalRepository paypalRepository;
+      PayPalMapper paypalMapper;
 
+      // Create a PayPal payment with specified details
       @Transactional(rollbackFor = Exception.class)
-      public Payment createPayment(PaypalRequest request) throws PayPalRESTException {
+      public Payment createPayment(PayPalRequest request) throws PayPalRESTException {
             Amount amount = new Amount();
             amount.setCurrency(request.getCurrency());
             amount.setTotal(request.getAmount().toString());
@@ -59,6 +60,7 @@ public class PaypalService {
             return payment.create(apiContext);
       }
 
+      // Execute a PayPal payment using the paymentId and payerId
       @Transactional(rollbackFor = Exception.class)
       public Payment executePayment(Long paymentId, String payerId) throws PayPalRESTException {
             Payment payment = new Payment();
@@ -68,10 +70,11 @@ public class PaypalService {
             return payment.execute(apiContext, paymentExecution);
       }
 
+      // Save a PayPal request and return the response
       @Transactional(rollbackFor = Exception.class)
-      public PaypalResponse saveAndReturnResponse(PaypalRequest request) {
-            Paypal paypal = paypalMapper.toPaypal(request);
-            Paypal savedPaypal = paypalRepository.save(paypal);
+      public PayPalResponse saveAndReturnResponse(PayPalRequest request) {
+            PayPal paypal = paypalMapper.toPaypal(request);
+            PayPal savedPaypal = paypalRepository.save(paypal);
             return paypalMapper.toPaypalResponse(savedPaypal);
       }
 

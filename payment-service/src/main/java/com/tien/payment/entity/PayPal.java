@@ -13,7 +13,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
-public class Paypal {
+public class PayPal {
 
       @Id
       @GeneratedValue(strategy = GenerationType.IDENTITY)

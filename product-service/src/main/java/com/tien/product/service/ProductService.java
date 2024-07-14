@@ -29,6 +29,7 @@ public class ProductService {
       ProductMapper productMapper;
       CategoryRepository categoryRepository;
 
+      // Add product
       @PreAuthorize("hasRole('ADMIN')")
       @Transactional
       public ProductResponse addProduct(ProductCreationRequest request) {
@@ -36,6 +37,7 @@ public class ProductService {
             Category category = categoryRepository.findById(request.getCategoryId())
                     .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
 
+            // Set category for product
             product.setCategory(category);
             product = productRepository.save(product);
 
@@ -45,6 +47,7 @@ public class ProductService {
             return productMapper.toProductResponse(product);
       }
 
+      // Update product by productId
       @PreAuthorize("hasRole('ADMIN')")
       @Transactional
       public ProductResponse updateProduct(String productId, ProductUpdateRequest request) {
@@ -68,6 +71,7 @@ public class ProductService {
             return productMapper.toProductResponse(product);
       }
 
+      // Update stock when order created
       @Transactional
       public void updateStock(String productId, int quantity) {
             Product product = productRepository.findById(productId)
@@ -82,6 +86,7 @@ public class ProductService {
             productRepository.save(product);
       }
 
+      // Delete product by productId
       @PreAuthorize("hasRole('ADMIN')")
       @Transactional
       public void deleteProduct(String productId) {
@@ -95,12 +100,14 @@ public class ProductService {
             productRepository.deleteById(productId);
       }
 
+      // Display all products
       public List<ProductResponse> getAllProducts() {
             return productRepository.findAll().stream()
                     .map(productMapper::toProductResponse)
                     .collect(Collectors.toList());
       }
 
+      // Display product by productId
       public ProductResponse getProductById(String productId) {
             return productMapper.toProductResponse(productRepository.findById(productId)
                     .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND)));

@@ -1,4 +1,4 @@
-package com.tien.payment.dto;
+package com.tien.payment.dto.request;
 
 import jakarta.validation.constraints.*;
 import lombok.*;
@@ -12,7 +12,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class PaypalRequest {
+public class PayPalRequest {
 
       @NotNull
       BigDecimal amount;

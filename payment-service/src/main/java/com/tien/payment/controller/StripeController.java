@@ -2,6 +2,7 @@ package com.tien.payment.controller;
 
 import com.stripe.exception.StripeException;
 import com.stripe.model.PaymentIntent;
+import com.tien.payment.dto.ApiResponse;
 import com.tien.payment.service.StripeService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -19,35 +20,55 @@ public class StripeController {
       StripeService stripeService;
 
       @PostMapping("/payment-intent")
-      public PaymentIntent createPaymentIntent(
+      public ApiResponse<PaymentIntent> createPaymentIntent(
               @RequestParam("amount") int amount,
               @RequestParam("currency") String currency,
               @RequestParam("description") String description
       ) throws StripeException {
-            return stripeService.createPaymentIntent(amount, currency, description);
+            PaymentIntent paymentIntent = stripeService.createPaymentIntent(amount, currency, description);
+            return ApiResponse.<PaymentIntent>builder()
+                    .code(1000)
+                    .message("Payment Intent created successfully")
+                    .result(paymentIntent)
+                    .build();
       }
 
       @PostMapping("/charge")
-      public String chargeCustomer(
+      public ApiResponse<String> chargeCustomer(
               @RequestParam("customerId") String customerId,
               @RequestParam("amount") int amount
       ) throws StripeException {
-            return stripeService.charge(customerId, amount).toJson();
+            String charge = stripeService.charge(customerId, amount).toJson();
+            return ApiResponse.<String>builder()
+                    .code(1000)
+                    .message("Customer charged successfully")
+                    .result(charge)
+                    .build();
       }
 
       @PostMapping("/refund")
-      public String refundCharge(
+      public ApiResponse<String> refundCharge(
               @RequestParam("chargeId") String chargeId
       ) throws StripeException {
-            return stripeService.refund(chargeId).toJson();
+            String refund = stripeService.refund(chargeId).toJson();
+            return ApiResponse.<String>builder()
+                    .code(1000)
+                    .message("Charge refunded successfully")
+                    .result(refund)
+                    .build();
       }
 
       @PostMapping("/customer")
-      public String createCustomer(
+      public ApiResponse<String> createCustomer(
               @RequestParam("email") String email,
               @RequestParam("source") String source
       ) throws StripeException {
-            return stripeService.createCustomer(email, source).toJson();
+            String customer = stripeService.createCustomer(email, source).toJson();
+            return ApiResponse.<String>builder()
+                    .code(1000)
+                    .message("Customer created successfully")
+                    .result(customer)
+                    .build();
       }
 
 }

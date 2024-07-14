@@ -1,19 +1,19 @@
 package com.tien.payment.mapper;
 
-import com.tien.payment.dto.PaypalRequest;
-import com.tien.payment.dto.PaypalResponse;
-import com.tien.payment.entity.Paypal;
+import com.tien.payment.dto.request.PayPalRequest;
+import com.tien.payment.dto.response.PayPalResponse;
+import com.tien.payment.entity.PayPal;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
-public interface PaypalMapper {
+public interface PayPalMapper {
 
       @Mapping(target = "paymentState", ignore = true)
       @Mapping(target = "payerId", ignore = true)
       @Mapping(target = "paymentId", ignore = true)
-      Paypal toPaypal(PaypalRequest request);
+      PayPal toPaypal(PayPalRequest request);
 
-      PaypalResponse toPaypalResponse(Paypal entity);
+      PayPalResponse toPaypalResponse(PayPal entity);
 
 }

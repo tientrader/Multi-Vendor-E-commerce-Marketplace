@@ -1,4 +1,4 @@
-package com.tien.payment.dto;
+package com.tien.payment.dto.response;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -8,7 +8,7 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class PaypalResponse {
+public class PayPalResponse {
 
       Long paymentId;
       String paymentState;

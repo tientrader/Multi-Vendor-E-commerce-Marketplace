@@ -4,8 +4,8 @@ import com.paypal.api.payments.Links;
 import com.paypal.api.payments.Payment;
 import com.paypal.base.rest.PayPalRESTException;
 import com.tien.payment.dto.ApiResponse;
-import com.tien.payment.dto.PaypalRequest;
-import com.tien.payment.service.PaypalService;
+import com.tien.payment.dto.request.PayPalRequest;
+import com.tien.payment.service.PayPalService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -18,12 +18,13 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
-public class PaypalController {
+public class PayPalController {
 
-      final PaypalService paypalService;
+      final PayPalService paypalService;
 
       @PostMapping
-      public ApiResponse<String> createPayment(@Validated @RequestBody PaypalRequest request) {
+      public ApiResponse<String> createPayment(
+              @Validated @RequestBody PayPalRequest request) {
             try {
                   Payment payment = paypalService.createPayment(request);
 
@@ -46,7 +47,9 @@ public class PaypalController {
       }
 
       @GetMapping("/success")
-      public ApiResponse<String> success(@RequestParam("paymentId") Long paymentId, @RequestParam("PayerID") String payerId) {
+      public ApiResponse<String> success(
+              @RequestParam("paymentId") Long paymentId,
+              @RequestParam("PayerID") String payerId) {
             try {
                   Payment payment = paypalService.executePayment(paymentId, payerId);
                   if (payment.getState().equals("approved")) {

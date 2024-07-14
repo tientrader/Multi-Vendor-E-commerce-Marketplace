@@ -24,7 +24,7 @@ public class UserProfileService {
     UserProfileRepository userProfileRepository;
     UserProfileMapper userProfileMapper;
 
-    // Tạo thông tin User
+    // Create a new user profile
     public UserProfileResponse createProfile(ProfileCreationRequest request) {
         UserProfile userProfile = userProfileMapper.toUserProfile(request);
         userProfile = userProfileRepository.save(userProfile);
@@ -32,7 +32,7 @@ public class UserProfileService {
         return userProfileMapper.toUserProfileReponse(userProfile);
     }
 
-    // Xem thông tin User bằng ID
+    // Get user profile by profileId
     public UserProfileResponse getProfileById(String id) {
         UserProfile userProfile = userProfileRepository.findById(id)
                 .orElseThrow(() -> new AppException(PROFILE_NOT_FOUND));
@@ -40,7 +40,7 @@ public class UserProfileService {
         return userProfileMapper.toUserProfileReponse(userProfile);
     }
 
-    // Xem thông tin User bằng UserID
+    // Get user profile by userId
     public UserProfileResponse getProfileByUserId(String userId) {
         UserProfile userProfile = userProfileRepository.findByUserId(userId)
                 .orElseThrow(() -> new AppException(PROFILE_NOT_FOUND));
@@ -48,13 +48,13 @@ public class UserProfileService {
         return userProfileMapper.toUserProfileReponse(userProfile);
     }
 
-    // Xem thông tin của tất cả User dành cho Admin
+    // Get all user profiles
     @PreAuthorize("hasRole('ADMIN')")
     public List<UserProfileResponse> getAllProfiles() {
         return userProfileRepository.findAll().stream().map(userProfileMapper::toUserProfileReponse).toList();
     }
 
-    // Xoá thông tin User
+    // Delete a user profile
     @PreAuthorize("hasRole('ADMIN')")
     public void deleteProfile(String userId) {
         UserProfile userProfile = userProfileRepository.findByUserId(userId)
