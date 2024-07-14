@@ -7,10 +7,10 @@ spring:
   application:
     name: order-service
   datasource:
-    url: ${DBMS_CONNECTION}
+    url: ${MYSQL_CONNECTION}
     driverClassName: "com.mysql.cj.jdbc.Driver"
-    username: ${DBMS_USERNAME}
-    password: ${DBMS_PASSWORD}
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: update

@@ -8,10 +8,10 @@ spring:
     name: product-service
   data:
     mongodb:
-      uri: mongodb://root:root@localhost:27017/product-service?authSource=admin
+      uri: mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@localhost:27017/product-service?authSource=admin
   cache:
     type: redis
   redis:
     host: localhost
     port: 6379
-    password: 12345678
+    password: ${REDIS_PASSWORD}

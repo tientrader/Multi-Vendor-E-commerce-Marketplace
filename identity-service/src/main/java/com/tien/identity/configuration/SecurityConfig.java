@@ -26,9 +26,8 @@ public class SecurityConfig {
     CustomJwtDecoder customJwtDecoder;
 
     // Các endpoint không cần xác thực
-    private static final String[] PUBLIC_ENDPOINTS = {
-        "/users/registration",
-            "/auth/token", "/auth/introspect", "/auth/logout", "/auth/refresh", "/auth/outbound/authentication"
+    static final String[] PUBLIC_ENDPOINTS = {
+        "/users/registration", "/auth/**"
     };
 
     // Cấu hình bộ lọc bảo mật
@@ -62,7 +61,7 @@ public class SecurityConfig {
         return jwtAuthenticationConverter;
     }
 
-    // Cấu hình mã hóa password, sử dụng BCrypt để mã hóa password với công cụ mức độ an toàn 10
+    // Cấu hình mã hóa password, sử dụng BCrypt để mã hóa password với công cụ cấp độ 10
     @Bean
     PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(10);

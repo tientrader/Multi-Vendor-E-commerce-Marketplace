@@ -17,9 +17,9 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
     // Thông báo khi có lỗi xảy ra trong quá trình xác thực
     @Override
-    public void commence(
-            HttpServletRequest request, HttpServletResponse response, AuthenticationException authException)
-            throws IOException {
+    public void commence(HttpServletRequest request,
+                         HttpServletResponse response,
+                         AuthenticationException authException) throws IOException {
         ErrorCode errorCode = ErrorCode.UNAUTHENTICATED;
 
         response.setStatus(errorCode.getStatusCode().value());

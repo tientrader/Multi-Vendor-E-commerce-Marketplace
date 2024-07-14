@@ -7,7 +7,7 @@ spring:
   application:
     name: profile-service
   neo4j:
-    uri: ${DBMS.CONNECTION}
+    uri: ${NEO4J_CONNECTION}
     authentication:
-      username: ${DBMS_USERNAME}
-      password: ${DBMS_PASSWORD}
+      username: ${NEO4J_USERNAME}
+      password: ${NEO4J_PASSWORD}

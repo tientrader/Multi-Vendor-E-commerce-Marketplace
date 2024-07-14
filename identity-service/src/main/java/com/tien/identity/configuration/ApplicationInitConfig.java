@@ -17,7 +17,6 @@ import com.tien.identity.repository.UserRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 
 @Configuration
@@ -28,18 +27,14 @@ public class ApplicationInitConfig {
 
     PasswordEncoder passwordEncoder;
 
-    @NonFinal
-    static final String ADMIN_USER_NAME = "admin";
-
-    @NonFinal
-    static final String ADMIN_PASSWORD = "admin";
+    static String ADMIN_USER_NAME = "admin";
+    static String ADMIN_PASSWORD = "admin";
 
     // Tự động tạo tài khoản ADMIN sau khi run application
     @Bean
-    @ConditionalOnProperty(
-            prefix = "spring",
-            value = "datasource.driverClassName",
-            havingValue = "com.mysql.cj.jdbc.Driver")
+    @ConditionalOnProperty(prefix = "spring",
+                           value = "datasource.driverClassName",
+                           havingValue = "com.mysql.cj.jdbc.Driver")
     ApplicationRunner applicationRunner(UserRepository userRepository, RoleRepository roleRepository) {
         log.info("Initializing application.....");
         return args -> {

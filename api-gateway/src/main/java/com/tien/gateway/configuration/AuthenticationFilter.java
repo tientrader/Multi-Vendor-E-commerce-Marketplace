@@ -51,6 +51,12 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
         return Arrays.stream(publicEndpoints).anyMatch(s -> request.getURI().getPath().matches(apiPrefix + s));
     }
 
+    // Đặt thứ tự ưu tiên của bộ lọc lên đầu
+    @Override
+    public int getOrder() {
+        return -1;
+    }
+
     // Cấu hình bộ lọc xác thực
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
@@ -76,7 +82,7 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
     }
 
     // Trả về response nếu chưa xác thực
-    Mono<Void> unauthenticated(ServerHttpResponse response){
+    Mono<Void> unauthenticated(ServerHttpResponse response) {
         ApiResponse<?> apiResponse = ApiResponse.builder()
                 .code(1401)
                 .message("Unauthenticated")
@@ -93,12 +99,7 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
         response.getHeaders().add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
 
         return response.writeWith(Mono.just(response.bufferFactory().wrap(body.getBytes())));
-    }
 
-    // Đặt thứ tự ưu tiên của bộ lọc lên đầu
-    @Override
-    public int getOrder() {
-        return -1;
     }
 
 }

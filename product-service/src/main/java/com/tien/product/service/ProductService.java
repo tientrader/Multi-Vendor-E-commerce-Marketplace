@@ -68,6 +68,20 @@ public class ProductService {
             return productMapper.toProductResponse(product);
       }
 
+      @Transactional
+      public void updateStock(String productId, int quantity) {
+            Product product = productRepository.findById(productId)
+                    .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+
+            int updatedStock = product.getStock() - quantity;
+            if (updatedStock < 0) {
+                  throw new AppException(ErrorCode.OUT_OF_STOCK);
+            }
+
+            product.setStock(updatedStock);
+            productRepository.save(product);
+      }
+
       @PreAuthorize("hasRole('ADMIN')")
       @Transactional
       public void deleteProduct(String productId) {
@@ -90,20 +104,6 @@ public class ProductService {
       public ProductResponse getProductById(String productId) {
             return productMapper.toProductResponse(productRepository.findById(productId)
                     .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND)));
-      }
-
-      @Transactional
-      public void updateStock(String productId, int quantity) {
-            Product product = productRepository.findById(productId)
-                    .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
-
-            int updatedStock = product.getStock() - quantity;
-            if (updatedStock < 0) {
-                  throw new AppException(ErrorCode.OUT_OF_STOCK);
-            }
-
-            product.setStock(updatedStock);
-            productRepository.save(product);
       }
 
 }

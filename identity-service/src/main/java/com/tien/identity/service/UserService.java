@@ -84,19 +84,6 @@ public class UserService {
         userRepository.save(user);
     }
 
-    // Xem thông tin của chính User dựa trên token
-    public UserResponse getMyInfo() {
-        String name = SecurityContextHolder.getContext().getAuthentication().getName();
-
-        User user = userRepository.findByUsername(name)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
-
-        var userResponse = userMapper.toUserResponse(user);
-        userResponse.setNoPassword(!StringUtils.hasText(user.getPassword()));
-
-        return userResponse;
-    }
-
     // Chỉnh sửa thông tin của chính User dựa trên token ngoại trừ role
     @Transactional
     public UserResponse updateInfo(UserInfoUpdateRequest request) {
@@ -136,6 +123,19 @@ public class UserService {
         userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         userRepository.deleteById(id);
         profileClient.deleteProfile(id);
+    }
+
+    // Xem thông tin của chính User dựa trên token
+    public UserResponse getMyInfo() {
+        String name = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        User user = userRepository.findByUsername(name)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        var userResponse = userMapper.toUserResponse(user);
+        userResponse.setNoPassword(!StringUtils.hasText(user.getPassword()));
+
+        return userResponse;
     }
 
     // Xem thông tin của User bằng ID
