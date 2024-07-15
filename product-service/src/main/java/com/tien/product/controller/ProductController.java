@@ -3,6 +3,7 @@ package com.tien.product.controller;
 import com.tien.product.dto.request.ProductUpdateRequest;
 import com.tien.product.dto.ApiResponse;
 import com.tien.product.dto.request.ProductCreationRequest;
+import com.tien.product.dto.response.ExistsResponse;
 import com.tien.product.dto.response.ProductResponse;
 import com.tien.product.service.ProductService;
 import jakarta.validation.Valid;
@@ -56,12 +57,9 @@ public class ProductController {
                     .build();
       }
 
-      @PutMapping("/{productId}/stock")
-      ApiResponse<String> updateStock(@PathVariable String productId, @RequestParam int quantity) {
-            productService.updateStock(productId, quantity);
-            return ApiResponse.<String>builder()
-                    .result("Stock updated successfully")
-                    .build();
+      @GetMapping("/{productId}/exists")
+      public ExistsResponse existsProduct(@PathVariable String productId) {
+            return productService.existsProduct(productId);
       }
 
 }

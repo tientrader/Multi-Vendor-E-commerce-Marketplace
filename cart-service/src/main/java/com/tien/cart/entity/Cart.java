@@ -5,6 +5,9 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Getter
 @Setter
 @Builder
@@ -16,7 +19,6 @@ public class Cart {
 
       @Id
       String id;
-      Long productId;
-      Integer quantity;
+      List<ProductInCart> products = new ArrayList<>();
 
 }

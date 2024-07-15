@@ -1,19 +1,15 @@
 package com.tien.cart.dto.response;
 
-import com.tien.cart.entity.ProductInCart;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-
-import java.util.List;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CartResponse {
+public class ExistsResponse {
 
-      String cartId;
-      List<ProductInCart> products;
+      boolean exists;
 
 }

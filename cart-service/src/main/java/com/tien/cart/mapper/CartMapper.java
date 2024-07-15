@@ -10,10 +10,10 @@ import org.mapstruct.Mapping;
 public interface CartMapper {
 
       @Mapping(target = "id", ignore = true)
-      Cart toCart(CartCreationRequest cartRequest);
+      @Mapping(target = "products", source = "cartCreationRequest.products")
+      Cart toCart(CartCreationRequest cartCreationRequest);
 
-      @Mapping(target = "status", ignore = true)
-      @Mapping(target = "cartId", ignore = true)
+      @Mapping(source = "id", target = "cartId")
       CartResponse toCartResponse(Cart cart);
 
 }

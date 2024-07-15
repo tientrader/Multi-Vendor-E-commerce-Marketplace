@@ -1,7 +1,10 @@
 package com.tien.cart.dto.request;
 
+import com.tien.cart.entity.ProductInCart;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+
+import java.util.List;
 
 @Data
 @Builder
@@ -10,7 +13,6 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CartCreationRequest {
 
-      Long productId;
-      Integer quantity;
+      List<ProductInCart> products;
 
 }

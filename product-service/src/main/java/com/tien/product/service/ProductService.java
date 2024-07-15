@@ -1,6 +1,7 @@
 package com.tien.product.service;
 
 import com.tien.product.dto.request.ProductUpdateRequest;
+import com.tien.product.dto.response.ExistsResponse;
 import com.tien.product.entity.Category;
 import com.tien.product.mapper.ProductMapper;
 import com.tien.product.repository.CategoryRepository;
@@ -111,6 +112,12 @@ public class ProductService {
       public ProductResponse getProductById(String productId) {
             return productMapper.toProductResponse(productRepository.findById(productId)
                     .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND)));
+      }
+
+      // Check if product exists by productId
+      public ExistsResponse existsProduct(String productId) {
+            boolean exists = productRepository.existsById(productId);
+            return new ExistsResponse(exists);
       }
 
 }
