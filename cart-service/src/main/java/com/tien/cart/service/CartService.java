@@ -16,6 +16,8 @@ import lombok.experimental.FieldDefaults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,6 +37,9 @@ public class CartService {
 
       @Transactional
       public CartResponse createCartAndAddItem(CartCreationRequest cartRequest) {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String userId = authentication.getName();
+
             logger.info("Checking if product exists: {}", cartRequest.getProducts());
             ExistsResponse existsResponse = productClient.existsProduct(cartRequest.getProducts().getFirst().getProductId());
 
@@ -44,6 +49,7 @@ public class CartService {
 
             Cart cart = cartMapper.toCart(cartRequest);
             cart.setId(UUID.randomUUID().toString());
+            cart.setUserId(userId);
             logger.info("Cart created with ID: {}", cart.getId());
 
             redisTemplate.opsForValue().set("cart:" + cart.getId(), cart);
@@ -51,15 +57,23 @@ public class CartService {
 
             CartResponse cartResponse = cartMapper.toCartResponse(cart);
             cartResponse.setCartId(cart.getId());
+            cartResponse.setUserId(cart.getUserId());
 
             return cartResponse;
       }
 
       @Transactional
       public CartResponse createOrderForCart(String cartId) {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String userId = authentication.getName();
+
             Optional<Cart> optionalCart = Optional.ofNullable((Cart) redisTemplate.opsForValue().get("cart:" + cartId));
             if (optionalCart.isPresent()) {
                   Cart cart = optionalCart.get();
+                  if (!cart.getUserId().equals(userId)) {
+                        throw new AppException(ErrorCode.UNAUTHORIZED);
+                  }
+
                   OrderCreationRequest orderRequest = new OrderCreationRequest(cart.getId(), cart.getProducts().getFirst().getProductId(), cart.getProducts().getFirst().getQuantity());
                   orderClient.createOrder(orderRequest);
                   return cartMapper.toCartResponse(cart);
@@ -70,13 +84,20 @@ public class CartService {
 
       @Transactional
       public CartResponse addOrUpdateItemInCart(String cartId, CartCreationRequest cartRequest) {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String userId = authentication.getName();
+
             ExistsResponse existsResponse = productClient.existsProduct(cartRequest.getProducts().getFirst().getProductId());
             if (!existsResponse.isExists()) {
                   throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
             }
 
             Cart cart = Optional.ofNullable((Cart) redisTemplate.opsForValue().get("cart:" + cartId))
-                    .orElse(Cart.builder().id(cartId).build());
+                    .orElse(Cart.builder().id(cartId).userId(userId).build());
+
+            if (!cart.getUserId().equals(userId)) {
+                  throw new AppException(ErrorCode.UNAUTHORIZED);
+            }
 
             cart.setProducts(cartRequest.getProducts());
 
@@ -87,15 +108,35 @@ public class CartService {
       }
 
       public void removeItemFromCart(String cartId) {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String userId = authentication.getName();
+
+            Cart cart = (Cart) redisTemplate.opsForValue().get("cart:" + cartId);
+            if (cart == null) {
+                  throw new AppException(ErrorCode.CART_NOT_FOUND);
+            }
+
+            if (!cart.getUserId().equals(userId)) {
+                  throw new AppException(ErrorCode.UNAUTHORIZED);
+            }
+
             redisTemplate.delete("cart:" + cartId);
             logger.info("Cart removed from Redis with ID: {}", cartId);
       }
 
       public CartResponse getCartById(String cartId) {
+            System.out.println("db");
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String userId = authentication.getName();
+
             Cart cart = (Cart) redisTemplate.opsForValue().get("cart:" + cartId);
             if (cart == null) {
                   logger.error("Cart with ID {} not found in Redis", cartId);
-                  throw new IllegalArgumentException("Cart not found");
+                  throw new AppException(ErrorCode.CART_NOT_FOUND);
+            }
+
+            if (!cart.getUserId().equals(userId)) {
+                  throw new AppException(ErrorCode.UNAUTHORIZED);
             }
 
             logger.info("Cart fetched from Redis with ID: {}", cartId);

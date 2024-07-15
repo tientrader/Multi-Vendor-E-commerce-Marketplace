@@ -14,6 +14,7 @@ import java.util.List;
 public class CartResponse {
 
       String cartId;
+      String userId;
       List<ProductInCart> products;
 
 }

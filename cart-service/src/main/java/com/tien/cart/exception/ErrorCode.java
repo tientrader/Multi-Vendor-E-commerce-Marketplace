@@ -23,6 +23,7 @@ public enum ErrorCode {
     INVALID_DOB(1008, "Your age must be at least {min}", HttpStatus.BAD_REQUEST),
     PROFILE_NOT_FOUND(1009, "Profile not found", HttpStatus.NOT_FOUND),
     PRODUCT_NOT_FOUND(1009, "Product not found", HttpStatus.NOT_FOUND),
+    CART_NOT_FOUND(1009, "Cart not found", HttpStatus.NOT_FOUND),
     ;
 
     int code;

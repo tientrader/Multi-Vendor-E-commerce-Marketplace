@@ -13,6 +13,7 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CartCreationRequest {
 
+      String userId;
       List<ProductInCart> products;
 
 }
