@@ -1,4 +1,4 @@
-package com.tien.profile.exception;
+package com.tien.cart.exception;
 
 import lombok.AccessLevel;
 import lombok.Getter;

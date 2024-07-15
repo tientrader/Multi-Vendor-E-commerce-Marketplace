@@ -1,16 +1,16 @@
-package com.tien.profile.entity;
+package com.tien.cart.dto.request;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-@Getter
-@Setter
+@Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Cart {
+public class CartCreationRequest {
 
-
+      Long productId;
+      Integer quantity;
 
 }

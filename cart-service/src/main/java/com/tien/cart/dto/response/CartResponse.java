@@ -1,4 +1,4 @@
-package com.tien.profile.dto.request;
+package com.tien.cart.dto.response;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -8,8 +8,11 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CartCreationRequest {
+public class CartResponse {
 
-
+      String cartId;
+      Long productId;
+      Integer quantity;
+      String status;
 
 }

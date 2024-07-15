@@ -1,8 +1,11 @@
 server:
-  port:
+  port: 8086
   servlet:
     context-path: /cart
 
 spring:
   application:
     name: cart-service
+  redis:
+    host: localhost
+    port: 6379
