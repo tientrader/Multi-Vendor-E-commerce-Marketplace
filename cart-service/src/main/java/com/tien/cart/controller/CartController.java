@@ -43,10 +43,10 @@ public class CartController {
       }
 
       @DeleteMapping("/{cartId}")
-      ApiResponse<Void> removeItemFromCart(@PathVariable String cartId) {
-            cartService.removeItemFromCart(cartId);
+      ApiResponse<Void> deleteCart(@PathVariable String cartId) {
+            cartService.deleteCart(cartId);
             return ApiResponse.<Void>builder()
-                    .message("Item removed from cart")
+                    .message("Cart have been deleted")
                     .build();
       }
 

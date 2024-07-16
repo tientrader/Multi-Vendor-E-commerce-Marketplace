@@ -39,10 +39,8 @@ public class CartService {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String userId = authentication.getName();
 
-            log.info("Checking if product exists: {}", cartRequest.getProducts());
             ExistsResponse existsResponse = productClient.existsProduct
                     (cartRequest.getProducts().getFirst().getProductId());
-
             if (!existsResponse.isExists()) throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
 
             Cart cart = cartMapper.toCart(cartRequest);
@@ -50,7 +48,6 @@ public class CartService {
             cart.setUserId(userId);
 
             redisTemplate.opsForValue().set("cart:" + cart.getId(), cart);
-            log.info("Cart saved to Redis with ID (create): {}", cart.getId());
 
             CartResponse cartResponse = cartMapper.toCartResponse(cart);
             cartResponse.setCartId(cart.getId());
@@ -82,7 +79,8 @@ public class CartService {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String userId = authentication.getName();
 
-            ExistsResponse existsResponse = productClient.existsProduct(cartRequest.getProducts().getFirst().getProductId());
+            ExistsResponse existsResponse = productClient.existsProduct
+                    (cartRequest.getProducts().getFirst().getProductId());
             if (!existsResponse.isExists()) throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
 
             Cart cart = Optional.ofNullable((Cart) redisTemplate.opsForValue().get("cart:" + cartId))
@@ -91,16 +89,14 @@ public class CartService {
                             .userId(userId)
                             .build());
             if (!cart.getUserId().equals(userId)) throw new AppException(ErrorCode.UNAUTHORIZED);
-
             cart.setProducts(cartRequest.getProducts());
 
             redisTemplate.opsForValue().set("cart:" + cartId, cart);
-            log.info("Cart saved to Redis with ID (update): {}", cartId);
 
             return cartMapper.toCartResponse(cart);
       }
 
-      public void removeItemFromCart(String cartId) {
+      public void deleteCart(String cartId) {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String userId = authentication.getName();
 
@@ -109,11 +105,9 @@ public class CartService {
             if (!cart.getUserId().equals(userId)) throw new AppException(ErrorCode.UNAUTHORIZED);
 
             redisTemplate.delete("cart:" + cartId);
-            log.info("Cart removed from Redis with ID: {}", cartId);
       }
 
       public CartResponse getCartById(String cartId) {
-            System.out.println("db");
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String userId = authentication.getName();
 
@@ -121,7 +115,6 @@ public class CartService {
             if (cart == null) throw new AppException(ErrorCode.CART_NOT_FOUND);
             if (!cart.getUserId().equals(userId)) throw new AppException(ErrorCode.UNAUTHORIZED);
 
-            log.info("Cart fetched from Redis with ID: {}", cartId);
             return cartMapper.toCartResponse(cart);
       }
 
