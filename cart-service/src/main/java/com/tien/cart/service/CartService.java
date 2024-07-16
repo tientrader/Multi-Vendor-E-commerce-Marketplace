@@ -13,8 +13,7 @@ import com.tien.cart.httpclient.OrderClient;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -27,33 +26,31 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@Slf4j
 public class CartService {
 
       CartMapper cartMapper;
       ProductClient productClient;
       OrderClient orderClient;
       RedisTemplate<String, Object> redisTemplate;
-      Logger logger = LoggerFactory.getLogger(CartService.class);
 
       @Transactional
       public CartResponse createCartAndAddItem(CartCreationRequest cartRequest) {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String userId = authentication.getName();
 
-            logger.info("Checking if product exists: {}", cartRequest.getProducts());
-            ExistsResponse existsResponse = productClient.existsProduct(cartRequest.getProducts().getFirst().getProductId());
+            log.info("Checking if product exists: {}", cartRequest.getProducts());
+            ExistsResponse existsResponse = productClient.existsProduct
+                    (cartRequest.getProducts().getFirst().getProductId());
 
-            if (!existsResponse.isExists()) {
-                  throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
-            }
+            if (!existsResponse.isExists()) throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
 
             Cart cart = cartMapper.toCart(cartRequest);
             cart.setId(UUID.randomUUID().toString());
             cart.setUserId(userId);
-            logger.info("Cart created with ID: {}", cart.getId());
 
             redisTemplate.opsForValue().set("cart:" + cart.getId(), cart);
-            logger.info("Cart saved to Redis with ID (create): {}", cart.getId());
+            log.info("Cart saved to Redis with ID (create): {}", cart.getId());
 
             CartResponse cartResponse = cartMapper.toCartResponse(cart);
             cartResponse.setCartId(cart.getId());
@@ -70,15 +67,13 @@ public class CartService {
             Optional<Cart> optionalCart = Optional.ofNullable((Cart) redisTemplate.opsForValue().get("cart:" + cartId));
             if (optionalCart.isPresent()) {
                   Cart cart = optionalCart.get();
-                  if (!cart.getUserId().equals(userId)) {
-                        throw new AppException(ErrorCode.UNAUTHORIZED);
-                  }
+                  if (!cart.getUserId().equals(userId)) throw new AppException(ErrorCode.UNAUTHORIZED);
 
                   OrderCreationRequest orderRequest = new OrderCreationRequest(cart.getId(), cart.getProducts().getFirst().getProductId(), cart.getProducts().getFirst().getQuantity());
                   orderClient.createOrder(orderRequest);
                   return cartMapper.toCartResponse(cart);
             } else {
-                  throw new IllegalArgumentException("Cart does not exist");
+                  throw new AppException(ErrorCode.CART_NOT_FOUND);
             }
       }
 
@@ -88,21 +83,19 @@ public class CartService {
             String userId = authentication.getName();
 
             ExistsResponse existsResponse = productClient.existsProduct(cartRequest.getProducts().getFirst().getProductId());
-            if (!existsResponse.isExists()) {
-                  throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
-            }
+            if (!existsResponse.isExists()) throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
 
             Cart cart = Optional.ofNullable((Cart) redisTemplate.opsForValue().get("cart:" + cartId))
-                    .orElse(Cart.builder().id(cartId).userId(userId).build());
-
-            if (!cart.getUserId().equals(userId)) {
-                  throw new AppException(ErrorCode.UNAUTHORIZED);
-            }
+                    .orElse(Cart.builder()
+                            .id(cartId)
+                            .userId(userId)
+                            .build());
+            if (!cart.getUserId().equals(userId)) throw new AppException(ErrorCode.UNAUTHORIZED);
 
             cart.setProducts(cartRequest.getProducts());
 
             redisTemplate.opsForValue().set("cart:" + cartId, cart);
-            logger.info("Cart saved to Redis with ID (update): {}", cartId);
+            log.info("Cart saved to Redis with ID (update): {}", cartId);
 
             return cartMapper.toCartResponse(cart);
       }
@@ -112,16 +105,11 @@ public class CartService {
             String userId = authentication.getName();
 
             Cart cart = (Cart) redisTemplate.opsForValue().get("cart:" + cartId);
-            if (cart == null) {
-                  throw new AppException(ErrorCode.CART_NOT_FOUND);
-            }
-
-            if (!cart.getUserId().equals(userId)) {
-                  throw new AppException(ErrorCode.UNAUTHORIZED);
-            }
+            if (cart == null) throw new AppException(ErrorCode.CART_NOT_FOUND);
+            if (!cart.getUserId().equals(userId)) throw new AppException(ErrorCode.UNAUTHORIZED);
 
             redisTemplate.delete("cart:" + cartId);
-            logger.info("Cart removed from Redis with ID: {}", cartId);
+            log.info("Cart removed from Redis with ID: {}", cartId);
       }
 
       public CartResponse getCartById(String cartId) {
@@ -130,16 +118,10 @@ public class CartService {
             String userId = authentication.getName();
 
             Cart cart = (Cart) redisTemplate.opsForValue().get("cart:" + cartId);
-            if (cart == null) {
-                  logger.error("Cart with ID {} not found in Redis", cartId);
-                  throw new AppException(ErrorCode.CART_NOT_FOUND);
-            }
+            if (cart == null) throw new AppException(ErrorCode.CART_NOT_FOUND);
+            if (!cart.getUserId().equals(userId)) throw new AppException(ErrorCode.UNAUTHORIZED);
 
-            if (!cart.getUserId().equals(userId)) {
-                  throw new AppException(ErrorCode.UNAUTHORIZED);
-            }
-
-            logger.info("Cart fetched from Redis with ID: {}", cartId);
+            log.info("Cart fetched from Redis with ID: {}", cartId);
             return cartMapper.toCartResponse(cart);
       }
 
