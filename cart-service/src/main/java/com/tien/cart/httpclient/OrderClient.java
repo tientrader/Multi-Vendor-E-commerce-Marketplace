@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
         configuration = {AuthenticationRequestInterceptor.class})
 public interface OrderClient {
 
-      @PostMapping(value = "/order/create", produces = MediaType.APPLICATION_JSON_VALUE)
+      @PostMapping(value = "/create", produces = MediaType.APPLICATION_JSON_VALUE)
       void createOrder(@RequestBody OrderCreationRequest request);
 
 }

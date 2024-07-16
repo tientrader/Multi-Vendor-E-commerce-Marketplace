@@ -13,7 +13,6 @@ public class OrderItemResponse {
       Long id;
       String productId;
       int quantity;
-      double price;
       ProductResponse productDetails;
 
 }

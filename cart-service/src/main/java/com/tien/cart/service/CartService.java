@@ -2,6 +2,7 @@ package com.tien.cart.service;
 
 import com.tien.cart.dto.request.CartCreationRequest;
 import com.tien.cart.dto.request.OrderCreationRequest;
+import com.tien.cart.dto.request.OrderItemCreationRequest;
 import com.tien.cart.dto.response.CartResponse;
 import com.tien.cart.dto.response.ExistsResponse;
 import com.tien.cart.entity.Cart;
@@ -20,8 +21,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -61,17 +64,25 @@ public class CartService {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String userId = authentication.getName();
 
-            Optional<Cart> optionalCart = Optional.ofNullable((Cart) redisTemplate.opsForValue().get("cart:" + cartId));
-            if (optionalCart.isPresent()) {
-                  Cart cart = optionalCart.get();
-                  if (!cart.getUserId().equals(userId)) throw new AppException(ErrorCode.UNAUTHORIZED);
+            Cart cart = (Cart) redisTemplate.opsForValue().get("cart:" + cartId);
+            if (cart == null) throw new AppException(ErrorCode.CART_NOT_FOUND);
+            if (!cart.getUserId().equals(userId)) throw new AppException(ErrorCode.UNAUTHORIZED);
 
-                  OrderCreationRequest orderRequest = new OrderCreationRequest(cart.getId(), cart.getProducts().getFirst().getProductId(), cart.getProducts().getFirst().getQuantity());
-                  orderClient.createOrder(orderRequest);
-                  return cartMapper.toCartResponse(cart);
-            } else {
-                  throw new AppException(ErrorCode.CART_NOT_FOUND);
-            }
+            List<OrderItemCreationRequest> orderItems = cart.getProducts().stream()
+                    .map(product -> OrderItemCreationRequest.builder()
+                            .productId(product.getProductId())
+                            .quantity(product.getQuantity())
+                            .build())
+                    .collect(Collectors.toList());
+
+            OrderCreationRequest orderRequest = OrderCreationRequest.builder()
+                    .userId(userId)
+                    .items(orderItems)
+                    .status("CREATED")
+                    .build();
+
+            orderClient.createOrder(orderRequest);
+            return cartMapper.toCartResponse(cart);
       }
 
       @Transactional
@@ -96,6 +107,7 @@ public class CartService {
             return cartMapper.toCartResponse(cart);
       }
 
+      @Transactional
       public void deleteCart(String cartId) {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String userId = authentication.getName();
