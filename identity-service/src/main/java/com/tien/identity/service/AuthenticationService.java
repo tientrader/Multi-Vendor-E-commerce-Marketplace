@@ -5,17 +5,17 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
-import com.tien.identity.constant.PredefinedRole;
-import com.tien.identity.dto.request.*;
-import com.tien.identity.entity.Role;
-import com.tien.identity.httpclient.OutboundIdentityClient;
-import com.tien.identity.httpclient.OutboundUserClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import com.tien.identity.constant.PredefinedRole;
+import com.tien.identity.dto.request.*;
+import com.tien.identity.entity.Role;
+import com.tien.identity.httpclient.OutboundIdentityClient;
+import com.tien.identity.httpclient.OutboundUserClient;
 import com.tien.identity.dto.response.AuthenticationResponse;
 import com.tien.identity.dto.response.IntrospectResponse;
 import com.tien.identity.entity.InvalidatedToken;

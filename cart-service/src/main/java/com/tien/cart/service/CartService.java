@@ -11,10 +11,11 @@ import com.tien.cart.exception.ErrorCode;
 import com.tien.cart.mapper.CartMapper;
 import com.tien.cart.httpclient.ProductClient;
 import com.tien.cart.httpclient.OrderClient;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -29,7 +30,6 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-@Slf4j
 public class CartService {
 
       CartMapper cartMapper;

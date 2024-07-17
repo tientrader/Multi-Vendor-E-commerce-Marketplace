@@ -51,7 +51,7 @@ public class CartController {
       }
 
       @GetMapping("/{cartId}")
-      public ApiResponse<CartResponse> getCartById(@PathVariable String cartId) {
+      ApiResponse<CartResponse> getCartById(@PathVariable String cartId) {
             CartResponse cartResponse = cartService.getCartById(cartId);
             return ApiResponse.<CartResponse>builder()
                     .result(cartResponse)

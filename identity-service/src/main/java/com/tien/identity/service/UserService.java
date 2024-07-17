@@ -3,14 +3,14 @@ package com.tien.identity.service;
 import java.util.HashSet;
 import java.util.List;
 
-import com.tien.identity.dto.request.UserInfoUpdateRequest;
-import com.tien.identity.dto.request.PasswordCreationRequest;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.tien.identity.dto.request.UserInfoUpdateRequest;
+import com.tien.identity.dto.request.PasswordCreationRequest;
 import com.tien.identity.constant.PredefinedRole;
 import com.tien.identity.dto.request.UserCreationRequest;
 import com.tien.identity.dto.request.UserUpdateRequest;
@@ -28,6 +28,7 @@ import com.tien.identity.httpclient.ProfileClient;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
