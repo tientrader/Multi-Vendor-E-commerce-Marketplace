@@ -58,7 +58,7 @@ public class ProductController {
       }
 
       @GetMapping("/{productId}/exists")
-      public ExistsResponse existsProduct(@PathVariable String productId) {
+      ExistsResponse existsProduct(@PathVariable String productId) {
             return productService.existsProduct(productId);
       }
 

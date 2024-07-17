@@ -40,22 +40,17 @@ public class CartService {
       // Creates a new cart and adds an item to it.
       @Transactional
       public CartResponse createCartAndAddItem(CartCreationRequest cartRequest) {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String userId = authentication.getName();
-
             ExistsResponse existsResponse = productClient.existsProduct
                     (cartRequest.getProducts().getFirst().getProductId());
             if (!existsResponse.isExists()) throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
 
             Cart cart = cartMapper.toCart(cartRequest);
             cart.setId(UUID.randomUUID().toString());
-            cart.setUserId(userId);
 
             redisTemplate.opsForValue().set("cart:" + cart.getId(), cart);
 
             CartResponse cartResponse = cartMapper.toCartResponse(cart);
             cartResponse.setCartId(cart.getId());
-            cartResponse.setUserId(cart.getUserId());
 
             return cartResponse;
       }
@@ -63,12 +58,8 @@ public class CartService {
       // Creates an order for the given cart.
       @Transactional
       public CartResponse createOrderForCart(String cartId) {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String userId = authentication.getName();
-
             Cart cart = (Cart) redisTemplate.opsForValue().get("cart:" + cartId);
             if (cart == null) throw new AppException(ErrorCode.CART_NOT_FOUND);
-            if (!cart.getUserId().equals(userId)) throw new AppException(ErrorCode.UNAUTHORIZED);
 
             List<OrderItemCreationRequest> orderItems = cart.getProducts().stream()
                     .map(product -> OrderItemCreationRequest.builder()
@@ -78,7 +69,7 @@ public class CartService {
                     .collect(Collectors.toList());
 
             OrderCreationRequest orderRequest = OrderCreationRequest.builder()
-                    .userId(userId)
+                    .userId(cart.getUserId())
                     .items(orderItems)
                     .status("CREATED")
                     .build();

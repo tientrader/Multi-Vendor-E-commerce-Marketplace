@@ -17,13 +17,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
-import org.springframework.stereotype.Service;
-
-import jakarta.transaction.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -40,26 +39,30 @@ public class OrderService {
       public OrderResponse createOrder(OrderCreationRequest orderRequest) {
             log.info("Creating order for user: {}", orderRequest.getUserId());
 
-            List<OrderItem> orderItems = orderMapper.toOrderItems(orderRequest.getItems());
+            List<OrderItem> orderItems = orderRequest.getItems().stream()
+                    .map(orderMapper::toOrderItem)
+                    .collect(Collectors.toList());
+
             log.info("Mapped {} order items", orderItems.size());
 
             double total = calculateTotal(orderItems);
             log.info("Total calculated: {}", total);
 
-            Order order = orderMapper.toOrder(orderRequest, orderItems);
-            order.setTotal(total);
+            Order order = orderMapper.toOrder(orderRequest, orderItems, total);
             log.info("Order object created: {}", order);
 
             orderRepository.save(order);
             log.info("Order saved in database");
 
-            UserProfileResponse userProfile = fetchUserProfile(order.getUserId());
+            UserProfileResponse userProfile = profileClient.getProfileByUserId(orderRequest.getUserId());
             log.info("Fetched user profile: {}", userProfile);
 
             List<OrderItemResponse> orderItemResponses = mapOrderItemsToOrderItemResponses(orderItems);
             log.info("Mapped order item responses: {}", orderItemResponses);
 
-            OrderResponse orderResponse = orderMapper.toOrderResponse(order, orderItemResponses, userProfile);
+            OrderResponse orderResponse = orderMapper.toOrderResponse(order);
+            orderResponse.setItems(orderItemResponses);
+            orderResponse.setUserProfile(userProfile);
             log.info("Created order response: {}", orderResponse);
 
             return orderResponse;
@@ -84,13 +87,10 @@ public class OrderService {
                     .map(orderItem -> {
                           String productId = orderItem.getProductId();
                           ProductResponse productResponse = productClient.getProductById(productId);
+                          log.debug("Fetched product details for order item: {}", productResponse);
                           return orderMapper.toOrderItemResponse(orderItem, productResponse);
                     })
                     .collect(Collectors.toList());
-      }
-
-      private UserProfileResponse fetchUserProfile(String userId) {
-            return profileClient.getProfileByUserId(userId);
       }
 
 }

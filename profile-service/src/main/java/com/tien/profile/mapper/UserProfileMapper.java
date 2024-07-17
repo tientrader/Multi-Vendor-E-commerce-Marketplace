@@ -12,6 +12,6 @@ public interface UserProfileMapper {
     @Mapping(target = "id", ignore = true)
     UserProfile toUserProfile(ProfileCreationRequest request);
 
-    UserProfileResponse toUserProfileReponse(UserProfile entity);
+    UserProfileResponse toUserProfileResponse(UserProfile entity);
 
 }

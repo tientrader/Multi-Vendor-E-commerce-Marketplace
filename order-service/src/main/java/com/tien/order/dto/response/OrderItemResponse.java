@@ -10,7 +10,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class OrderItemResponse {
 
-      Long id;
+      Long orderItemId;
       String productId;
       int quantity;
       ProductResponse productDetails;

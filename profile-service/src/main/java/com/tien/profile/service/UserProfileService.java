@@ -30,7 +30,7 @@ public class UserProfileService {
         UserProfile userProfile = userProfileMapper.toUserProfile(request);
         userProfile = userProfileRepository.save(userProfile);
 
-        return userProfileMapper.toUserProfileReponse(userProfile);
+        return userProfileMapper.toUserProfileResponse(userProfile);
     }
 
     // Delete a user profile
@@ -47,7 +47,7 @@ public class UserProfileService {
         UserProfile userProfile = userProfileRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.PROFILE_NOT_FOUND));
 
-        return userProfileMapper.toUserProfileReponse(userProfile);
+        return userProfileMapper.toUserProfileResponse(userProfile);
     }
 
     // Get user profile by userId
@@ -55,13 +55,13 @@ public class UserProfileService {
         UserProfile userProfile = userProfileRepository.findByUserId(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.PROFILE_NOT_FOUND));
 
-        return userProfileMapper.toUserProfileReponse(userProfile);
+        return userProfileMapper.toUserProfileResponse(userProfile);
     }
 
     // Get all user profiles
     @PreAuthorize("hasRole('ADMIN')")
     public List<UserProfileResponse> getAllProfiles() {
-        return userProfileRepository.findAll().stream().map(userProfileMapper::toUserProfileReponse).toList();
+        return userProfileRepository.findAll().stream().map(userProfileMapper::toUserProfileResponse).toList();
     }
 
 }

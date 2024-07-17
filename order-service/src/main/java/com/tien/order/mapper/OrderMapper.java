@@ -8,6 +8,7 @@ import com.tien.order.dto.response.ProductResponse;
 import com.tien.order.dto.response.UserProfileResponse;
 import com.tien.order.entity.Order;
 import com.tien.order.entity.OrderItem;
+
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
@@ -18,28 +19,35 @@ import java.util.List;
 public interface OrderMapper {
 
       @Mappings({
-              @Mapping(target = "id", ignore = true),
-              @Mapping(target = "userId", source = "orderCreationRequest.userId"),
-              @Mapping(target = "items", source = "items"),
-              @Mapping(target = "total", ignore = true),
-              @Mapping(target = "status", constant = "CREATED")
+              @Mapping(target = "orderId", ignore = true),
+              @Mapping(source = "request.userId", target = "userId"),
+              @Mapping(source = "items", target = "items"),
+              @Mapping(source = "total", target = "total"),
+              @Mapping(source = "request.status", target = "status")
       })
-      Order toOrder(OrderCreationRequest orderCreationRequest, List<OrderItem> items);
+      Order toOrder(OrderCreationRequest request, List<OrderItem> items, double total);
 
-      List<OrderItem> toOrderItems(List<OrderItemCreationRequest> orderItemCreationRequests);
+      @Mappings({
+              @Mapping(source = "order.orderId", target = "orderId"),
+              @Mapping(source = "order.userId", target = "userId"),
+              @Mapping(source = "order.status", target = "status"),
+              @Mapping(target = "items", ignore = true),
+              @Mapping(target = "userProfile", ignore = true)
+      })
+      OrderResponse toOrderResponse(Order order);
 
-      List<OrderItemResponse> toOrderItemResponses(List<OrderItem> orderItems);
+      @Mapping(target = "orderItemId", ignore = true)
+      OrderItem toOrderItem(OrderItemCreationRequest request);
 
-      @Mapping(target = "userProfile", ignore = true)
-      @Mapping(target = "total", ignore = true)
-      @Mapping(target = "id", source = "order.id")
-      @Mapping(target = "userId", source = "order.userId")
-      OrderResponse toOrderResponse(Order order, List<OrderItemResponse> orderItemResponses, UserProfileResponse userProfileResponse);
-
-      @Mapping(target = "id", source = "orderItem.id")
-      @Mapping(target = "productDetails", ignore = true)
-      @Mapping(target = "productId", source = "orderItem.productId")
-      @Mapping(target = "quantity", source = "orderItem.quantity")
+      @Mapping(source = "productResponse", target = "productDetails")
       OrderItemResponse toOrderItemResponse(OrderItem orderItem, ProductResponse productResponse);
+
+      // Product mappings
+      @Mapping(source = "id", target = "productId")
+      OrderItemCreationRequest toOrderItemCreationRequest(ProductResponse productResponse);
+
+      // UserProfile mappings
+      @Mapping(source = "userId", target = "userId")
+      OrderCreationRequest toOrderCreationRequest(UserProfileResponse userProfileResponse);
 
 }
