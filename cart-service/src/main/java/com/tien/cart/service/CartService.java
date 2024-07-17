@@ -37,6 +37,7 @@ public class CartService {
       OrderClient orderClient;
       RedisTemplate<String, Object> redisTemplate;
 
+      // Creates a new cart and adds an item to it.
       @Transactional
       public CartResponse createCartAndAddItem(CartCreationRequest cartRequest) {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -59,6 +60,7 @@ public class CartService {
             return cartResponse;
       }
 
+      // Creates an order for the given cart.
       @Transactional
       public CartResponse createOrderForCart(String cartId) {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -85,6 +87,7 @@ public class CartService {
             return cartMapper.toCartResponse(cart);
       }
 
+      // Adds or updates an item in the cart.
       @Transactional
       public CartResponse addOrUpdateItemInCart(String cartId, CartCreationRequest cartRequest) {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -107,6 +110,7 @@ public class CartService {
             return cartMapper.toCartResponse(cart);
       }
 
+      // Deletes the cart.
       @Transactional
       public void deleteCart(String cartId) {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -119,6 +123,7 @@ public class CartService {
             redisTemplate.delete("cart:" + cartId);
       }
 
+      // Retrieves the cart by its ID.
       public CartResponse getCartById(String cartId) {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String userId = authentication.getName();

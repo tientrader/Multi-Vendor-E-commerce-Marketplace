@@ -16,7 +16,6 @@ public class InternalUserProfileController {
 
     UserProfileService userProfileService;
 
-    // Method chạy ngầm khi User tạo tài khoản sẽ gọi đến method tạo profile
     @PostMapping("/internal/users")
     ApiResponse<UserProfileResponse> createProfile(@RequestBody ProfileCreationRequest request) {
         return ApiResponse.<UserProfileResponse>builder()
@@ -24,7 +23,6 @@ public class InternalUserProfileController {
                 .build();
     }
 
-    // Method chạy ngầm khi xoá tài khoản sẽ gọi đến method xoá profile
     @DeleteMapping("/internal/users/{userId}")
     ApiResponse<String> deleteProfile(@PathVariable String userId) {
         userProfileService.deleteProfile(userId);

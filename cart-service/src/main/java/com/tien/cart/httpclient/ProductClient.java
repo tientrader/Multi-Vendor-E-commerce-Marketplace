@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
         configuration = {AuthenticationRequestInterceptor.class})
 public interface ProductClient {
 
+      // Call the Product Service to check if a product exists
       @GetMapping("/{productId}/exists")
       ExistsResponse existsProduct(@PathVariable String productId);
 

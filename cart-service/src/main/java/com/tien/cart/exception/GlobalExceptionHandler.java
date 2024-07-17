@@ -28,14 +28,6 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(apiResponse);
     }
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ApiResponse<String> handleIllegalArgumentException(IllegalArgumentException ex) {
-        return ApiResponse.<String>builder()
-                .code(400)
-                .message(ex.getMessage())
-                .build();
-    }
-
     // Application-specific exception handler
     @ExceptionHandler(value = AppException.class)
     ResponseEntity<ApiResponse<Object>> handlingAppException(AppException exception) {

@@ -1,10 +1,6 @@
 package com.tien.payment.service;
 
-import com.paypal.api.payments.Amount;
-import com.paypal.api.payments.Payment;
-import com.paypal.api.payments.Payer;
-import com.paypal.api.payments.RedirectUrls;
-import com.paypal.api.payments.Transaction;
+import com.paypal.api.payments.*;
 import com.paypal.base.rest.APIContext;
 import com.paypal.base.rest.PayPalRESTException;
 import com.tien.payment.dto.request.PayPalRequest;
@@ -65,7 +61,7 @@ public class PayPalService {
       public Payment executePayment(Long paymentId, String payerId) throws PayPalRESTException {
             Payment payment = new Payment();
             payment.setId(String.valueOf(paymentId));
-            com.paypal.api.payments.PaymentExecution paymentExecution = new com.paypal.api.payments.PaymentExecution();
+            PaymentExecution paymentExecution = new com.paypal.api.payments.PaymentExecution();
             paymentExecution.setPayerId(payerId);
             return payment.execute(apiContext, paymentExecution);
       }
