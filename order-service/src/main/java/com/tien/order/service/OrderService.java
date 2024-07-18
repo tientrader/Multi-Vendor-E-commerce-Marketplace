@@ -35,6 +35,7 @@ public class OrderService {
       OrderRepository orderRepository;
       OrderMapper orderMapper;
 
+      // Creates a new order
       @Transactional
       public OrderResponse createOrder(OrderCreationRequest orderRequest) {
             log.info("Creating order for user: {}", orderRequest.getUserId());
@@ -42,11 +43,9 @@ public class OrderService {
             List<OrderItem> orderItems = orderRequest.getItems().stream()
                     .map(orderMapper::toOrderItem)
                     .collect(Collectors.toList());
-
             log.info("Mapped {} order items", orderItems.size());
 
             double total = calculateTotal(orderItems);
-            log.info("Total calculated: {}", total);
 
             Order order = orderMapper.toOrder(orderRequest, orderItems, total);
             log.info("Order object created: {}", order);
@@ -54,6 +53,14 @@ public class OrderService {
             orderRepository.save(order);
             log.info("Order saved in database");
 
+            // Update stock for each product in the order
+            for (OrderItem orderItem : orderItems) {
+                  productClient.updateStock(orderItem.getProductId(), -orderItem.getQuantity());
+                  log.info("Updated stock for product: {}, quantity: {}",
+                          orderItem.getProductId(), orderItem.getQuantity());
+            }
+
+            // Fetch user profile based on user ID
             UserProfileResponse userProfile = profileClient.getProfileByUserId(orderRequest.getUserId());
             log.info("Fetched user profile: {}", userProfile);
 
@@ -68,20 +75,23 @@ public class OrderService {
             return orderResponse;
       }
 
+      // Calculates the total cost of the given list of order items.
       private double calculateTotal(List<OrderItem> orderItems) {
             double total = orderItems.stream()
                     .mapToDouble(item -> {
+                          // Fetch product details to get the price
                           ProductResponse product = productClient.getProductById(item.getProductId());
                           Double price = Optional.ofNullable(product).map(ProductResponse::getPrice)
-                                  .orElseThrow(() -> new RuntimeException("Price is null for item with productId: " + item.getProductId()));
+                                  .orElseThrow(() -> new RuntimeException
+                                          ("Price is null for item with productId: " + item.getProductId()));
 
-                          return price * item.getQuantity();
-                    }).sum();
+                          return price * item.getQuantity();}).sum();
 
-            log.info("Total calculated:(calculateTotal) {}", total);
+            log.info("Total calculated: {}", total);
             return total;
       }
 
+      // Maps the list of order items to their response DTOs.
       public List<OrderItemResponse> mapOrderItemsToOrderItemResponses(List<OrderItem> orderItems) {
             return orderItems.stream()
                     .map(orderItem -> {
@@ -89,8 +99,7 @@ public class OrderService {
                           ProductResponse productResponse = productClient.getProductById(productId);
                           log.debug("Fetched product details for order item: {}", productResponse);
                           return orderMapper.toOrderItemResponse(orderItem, productResponse);
-                    })
-                    .collect(Collectors.toList());
+                    }).collect(Collectors.toList());
       }
 
 }
