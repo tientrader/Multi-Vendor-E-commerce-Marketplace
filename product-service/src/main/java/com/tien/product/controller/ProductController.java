@@ -22,9 +22,9 @@ public class ProductController {
       ProductService productService;
 
       @PostMapping
-      ApiResponse<ProductResponse> addProduct(@RequestBody @Valid ProductCreationRequest request) {
+      ApiResponse<ProductResponse> createProduct(@RequestBody @Valid ProductCreationRequest request) {
             return ApiResponse.<ProductResponse>builder()
-                    .result(productService.addProduct(request))
+                    .result(productService.createProduct(request))
                     .build();
       }
 

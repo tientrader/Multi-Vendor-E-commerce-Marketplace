@@ -37,7 +37,7 @@ public class CartService {
       OrderClient orderClient;
       RedisTemplate<String, Object> redisTemplate;
 
-      // Creates a new cart and adds an item to it.
+      // Create a new cart and adds an item to it.
       @Transactional
       public CartResponse createCartAndAddItem(CartCreationRequest cartRequest) {
             ExistsResponse existsResponse = productClient.existsProduct
@@ -55,7 +55,7 @@ public class CartService {
             return cartResponse;
       }
 
-      // Creates an order for the given cart.
+      // Create an order for the given cart.
       @Transactional
       public CartResponse createOrderForCart(String cartId) {
             Cart cart = (Cart) redisTemplate.opsForValue().get("cart:" + cartId);
@@ -78,7 +78,7 @@ public class CartService {
             return cartMapper.toCartResponse(cart);
       }
 
-      // Adds or updates an item in the cart.
+      // Add or update an item in the cart.
       @Transactional
       public CartResponse addOrUpdateItemInCart(String cartId, CartCreationRequest cartRequest) {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -94,6 +94,7 @@ public class CartService {
                             .userId(userId)
                             .build());
             if (!cart.getUserId().equals(userId)) throw new AppException(ErrorCode.UNAUTHORIZED);
+
             cart.setProducts(cartRequest.getProducts());
 
             redisTemplate.opsForValue().set("cart:" + cartId, cart);
@@ -101,7 +102,7 @@ public class CartService {
             return cartMapper.toCartResponse(cart);
       }
 
-      // Deletes the cart.
+      // Delete the cart.
       @Transactional
       public void deleteCart(String cartId) {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -114,7 +115,7 @@ public class CartService {
             redisTemplate.delete("cart:" + cartId);
       }
 
-      // Retrieves the cart by its ID.
+      // Retrieve the cart by its ID.
       public CartResponse getCartById(String cartId) {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String userId = authentication.getName();

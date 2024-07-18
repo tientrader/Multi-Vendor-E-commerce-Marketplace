@@ -33,14 +33,14 @@ public class ProductService {
       CategoryRepository categoryRepository;
 
       // Add product
-      @PreAuthorize("hasRole('ADMIN')")
+      @PreAuthorize("hasRole('SELLER')")
       @Transactional
-      public ProductResponse addProduct(ProductCreationRequest request) {
+      public ProductResponse createProduct(ProductCreationRequest request) {
             Product product = productMapper.toProduct(request);
+
             Category category = categoryRepository.findById(request.getCategoryId())
                     .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
 
-            // Set category for product
             product.setCategory(category);
             product = productRepository.save(product);
 
@@ -51,7 +51,7 @@ public class ProductService {
       }
 
       // Update product by productId
-      @PreAuthorize("hasRole('ADMIN')")
+      @PreAuthorize("hasRole('SELLER')")
       @Transactional
       public ProductResponse updateProduct(String productId, ProductUpdateRequest request) {
             Product product = productRepository.findById(productId)
@@ -81,16 +81,14 @@ public class ProductService {
                     .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
 
             int updatedStock = product.getStock() - quantity;
-            if (updatedStock < 0) {
-                  throw new AppException(ErrorCode.OUT_OF_STOCK);
-            }
+            if (updatedStock < 0) throw new AppException(ErrorCode.OUT_OF_STOCK);
 
             product.setStock(updatedStock);
             productRepository.save(product);
       }
 
       // Delete product by productId
-      @PreAuthorize("hasRole('ADMIN')")
+      @PreAuthorize("hasRole('SELLER')")
       @Transactional
       public void deleteProduct(String productId) {
             Product product = productRepository.findById(productId)
