@@ -60,3 +60,9 @@ services:
     environment:
       - REDIS_PASSWORD=
     command: [ "redis-server", "--requirepass", "password" ]
+
+  zipkin:
+    image: openzipkin/zipkin
+    container_name: zipkin
+    ports:
+      - "9411:9411"
