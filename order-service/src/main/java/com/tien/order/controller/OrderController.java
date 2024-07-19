@@ -19,11 +19,11 @@ public class OrderController {
 
       OrderService orderService;
 
-      @PostMapping("/create")
-      ApiResponse<OrderResponse> createOder(@RequestBody @Valid OrderCreationRequest request) {
-            return ApiResponse.<OrderResponse>builder()
-                    .result(orderService.createOrder(request))
-                    .build();
-      }
+//      @PostMapping("/create")
+//      ApiResponse<OrderResponse> createOder(@RequestBody @Valid OrderCreationRequest request) {
+//            return ApiResponse.<OrderResponse>builder()
+//                    .result(orderService.createOrder(request))
+//                    .build();
+//      }
 
 }

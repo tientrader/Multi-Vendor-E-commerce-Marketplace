@@ -20,5 +20,6 @@ public class Cart {
       String id;
       String userId;
       List<ProductInCart> products = new ArrayList<>();
+      double total;
 
 }

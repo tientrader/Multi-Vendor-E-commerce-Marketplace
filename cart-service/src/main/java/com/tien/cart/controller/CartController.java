@@ -25,14 +25,14 @@ public class CartController {
                     .build();
       }
 
-      @PostMapping("/{cartId}/add-or-update")
-      ApiResponse<CartResponse> addOrUpdateItemInCart(@PathVariable String cartId,
-                                                      @Valid @RequestBody CartCreationRequest cartRequest) {
-            CartResponse cartResponse = cartService.addOrUpdateItemInCart(cartId, cartRequest);
-            return ApiResponse.<CartResponse>builder()
-                    .result(cartResponse)
-                    .build();
-      }
+//      @PostMapping("/{cartId}/add-or-update")
+//      ApiResponse<CartResponse> addOrUpdateItemInCart(@PathVariable String cartId,
+//                                                      @Valid @RequestBody CartCreationRequest cartRequest) {
+//            CartResponse cartResponse = cartService.addOrUpdateItemInCart(cartId, cartRequest);
+//            return ApiResponse.<CartResponse>builder()
+//                    .result(cartResponse)
+//                    .build();
+//      }
 
       @PostMapping("/{cartId}/create-order")
       ApiResponse<CartResponse> createOrderForCart(@PathVariable String cartId) {

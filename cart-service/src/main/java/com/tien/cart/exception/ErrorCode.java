@@ -18,6 +18,9 @@ public enum ErrorCode {
     UNAUTHORIZED(1007, "You do not have permission", HttpStatus.FORBIDDEN),
     PRODUCT_NOT_FOUND(1009, "Product not found", HttpStatus.NOT_FOUND),
     CART_NOT_FOUND(1009, "Cart not found", HttpStatus.NOT_FOUND),
+    REDIS_SAVE_FAILED(1009, "REDIS_SAVE_FAILED", HttpStatus.NOT_FOUND),
+    TOTAL_CALCULATION_FAILED(1009, "TOTAL_CALCULATION_FAILED", HttpStatus.NOT_FOUND),
+    PRODUCT_FETCH_FAILED(1009, "PRODUCT_FETCH_FAILED", HttpStatus.NOT_FOUND),
     ;
 
     int code;
