@@ -50,7 +50,6 @@ public class ProductController {
                     .build();
       }
 
-      // Get product price by productId
       @GetMapping("/{productId}/price")
       ApiResponse<Double> getProductPriceById(@PathVariable String productId) {
             double price = productService.getProductPriceById(productId);
