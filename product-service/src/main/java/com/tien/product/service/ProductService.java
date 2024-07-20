@@ -108,6 +108,13 @@ public class ProductService {
                     .collect(Collectors.toList());
       }
 
+      // Display product price by productId
+      public double getProductPriceById(String productId) {
+            Product product = productRepository.findById(productId)
+                    .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+            return product.getPrice();
+      }
+
       // Display product by productId
       public ProductResponse getProductById(String productId) {
             return productMapper.toProductResponse(productRepository.findById(productId)
