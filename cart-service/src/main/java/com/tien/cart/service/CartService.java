@@ -41,23 +41,13 @@ public class CartService {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String userId = authentication.getName();
 
-            log.info("Validating if products exist in the ProductService");
             for (ProductInCartCreationRequest item : cartCreationRequest.getProductInCarts()) {
                   String productId = item.getProductId();
-                  log.debug("Checking if product with ID {} exists.", productId);
                   ExistsResponse existsResponse = productClient.existsProduct(productId);
-                  log.debug("Received ExistsResponse for product ID {}: {}", productId, existsResponse);
-                  if (!existsResponse.isExists()) {
-                        log.error("Product with ID {} does not exist", productId);
-                        throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
-                  }
-                  log.info("Product with ID {} exists.", productId);
+                  if (!existsResponse.isExists()) throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
             }
-            log.info("All products exist");
 
             // Fetch product price map
-            log.info("Fetching product price map from ProductService");
-
             List<String> productIds = cartCreationRequest.getProductInCarts().stream()
                     .map(ProductInCartCreationRequest::getProductId)
                     .distinct()
@@ -68,41 +58,26 @@ public class CartService {
                     .collect(Collectors.toMap(
                             productId -> productId,
                             productId -> {
-                                  log.debug("Fetching price for product with ID: {}", productId);
                                   ApiResponse<Double> response = productClient.getProductPriceById(productId);
-                                  double price = response.getResult();
-                                  log.info("Product ID {} has price: {}", productId, price);
-                                  return price;
+                                  return response.getResult();
                             }
                     ));
-
-            log.info("Product price map fetched successfully: {}", productPriceMap);
 
             // Calculate total price of the cart
             double total = cartCreationRequest.getProductInCarts().stream()
                     .mapToDouble(productInCart -> {
                           Double price = productPriceMap.get(productInCart.getProductId());
-                          if (price == null) {
-                                log.warn("Price not found for product ID: {}", productInCart.getProductId());
-                                price = 0.0;
-                          }
+                          if (price == null) price = 0.0;
                           return price * productInCart.getQuantity();
-                    })
-                    .sum();
-            log.info("Total price calculated: {}", total);
+                    }).sum();
 
             Cart cart = cartMapper.toCart(cartCreationRequest);
             cart.setId(UUID.randomUUID().toString());
             cart.setTotal(total);
             cart.setUserId(userId);
-
             redisTemplate.opsForValue().set(CART_KEY_PREFIX + cart.getId(), cart);
-            log.info("Saving cart to Redis with ID: {}", cart.getId());
 
-            CartResponse cartResponse = cartMapper.toCartResponse(cart);
-            log.info("Cart created successfully: {}", cartResponse);
-
-            return cartResponse;
+            return cartMapper.toCartResponse(cart);
       }
 
 }
