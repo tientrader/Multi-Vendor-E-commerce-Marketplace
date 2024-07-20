@@ -1,31 +1,25 @@
 package com.tien.cart.service;
 
-import com.tien.cart.dto.request.CartCreationRequest;
-import com.tien.cart.dto.request.OrderCreationRequest;
-import com.tien.cart.dto.request.OrderItemCreationRequest;
-import com.tien.cart.dto.response.CartResponse;
-import com.tien.cart.dto.response.ExistsResponse;
-import com.tien.cart.dto.response.ProductResponse;
-import com.tien.cart.entity.Cart;
-import com.tien.cart.entity.ProductInCart;
+import com.tien.cart.dto.request.ProductInCartCreationRequest;
 import com.tien.cart.exception.AppException;
 import com.tien.cart.exception.ErrorCode;
 import com.tien.cart.mapper.CartMapper;
+import com.tien.cart.dto.request.CartCreationRequest;
+import com.tien.cart.dto.response.ProductResponse;
+import com.tien.cart.dto.response.ExistsResponse;
+import com.tien.cart.dto.response.CartResponse;
+import com.tien.cart.entity.Cart;
 import com.tien.cart.httpclient.ProductClient;
-import com.tien.cart.httpclient.OrderClient;
-
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -34,155 +28,61 @@ import java.util.stream.Collectors;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class CartService {
 
-      CartMapper cartMapper;
-      ProductClient productClient;
-      OrderClient orderClient;
-      RedisTemplate<String, Object> redisTemplate;
       Logger logger = LoggerFactory.getLogger(CartService.class);
 
-      @Transactional
-      public CartResponse createCartAndAddItem(CartCreationRequest cartRequest) {
-            String userId = cartRequest.getUserId();
-            logger.info("Creating a new cart for user ID: {}", userId);
+      RedisTemplate<String, Object> redisTemplate;
+      CartMapper cartMapper;
+      ProductClient productClient;
 
-            for (ProductInCart product : cartRequest.getProducts()) {
-                  String productId = product.getProductId();
+      private static final String CART_KEY_PREFIX = "cart:";
+
+      // Create a cart
+      public CartResponse createCart(CartCreationRequest cartCreationRequest) {
+            // Validate if products exist
+            for (ProductInCartCreationRequest item : cartCreationRequest.getProductInCarts()) {
+                  String productId = item.getProductId();
                   logger.debug("Checking if product with ID {} exists.", productId);
                   ExistsResponse existsResponse = productClient.existsProduct(productId);
-                  if (!existsResponse.isExists()) throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
+                  logger.debug("Received ExistsResponse for product ID {}: {}", productId, existsResponse);
+                  if (!existsResponse.isExists()) {
+                        logger.error("Product with ID {} does not exist", productId);
+                        throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
+                  }
                   logger.info("Product with ID {} exists.", productId);
             }
 
-            logger.info("Fetching product details for products in the cart.");
-            List<ProductResponse> productResponses = cartRequest.getProducts().stream()
-                    .map(product -> {
-                          String productId = product.getProductId();
-                          logger.debug("Fetching details for product ID {}.", productId);
-                          ProductResponse productResponse = productClient.getProductById(productId);
-                          if (productResponse == null) {
-                                logger.error("Product details for ID {} could not be fetched.", productId);
-                                throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
-                          }
-                          logger.info("Product details for ID {} fetched successfully.", productId);
-                          return productResponse;
-                    }).toList();
+            // Fetch product price map
+            logger.info("Fetching product price map from ProductService");
 
-            Cart cart = cartMapper.toCart(cartRequest);
-            cart.setId(UUID.randomUUID().toString());
-            logger.info("Cart ID set to {}", cart.getId());
+            List<String> productIds = cartCreationRequest.getProductInCarts().stream()
+                    .map(ProductInCartCreationRequest::getProductId).distinct().toList();
 
-            logger.info("Calculating total value of the cart.");
-            double total = calculateTotal(cartRequest.getProducts(), productResponses);
-            logger.info("Total value calculated: {}", total);
-            cart.setTotal(total);
+            Map<String, ProductResponse> productResponseMap = productIds.stream()
+                    .collect(Collectors.toMap(productId -> productId, productClient::getProductById));
 
-            logger.info("Saving cart with ID {} to Redis.", cart.getId());
-            redisTemplate.opsForValue().set("cart:" + cart.getId(), cart);
+            Map<String, Double> productPriceMap = productResponseMap.entrySet().stream()
+                    .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().getPrice()));
 
-            CartResponse cartResponse = cartMapper.toCartResponse(cart);
-            cartResponse.setCartId(cart.getId());
-            cartResponse.setTotal(total);
+            logger.info("Product price map fetched successfully: {}", productPriceMap);
 
-            logger.info("Cart created successfully with ID: {}", cart.getId());
-            logger.debug("Cart details: {}", cartResponse);
-            return cartResponse;
-      }
-
-      private double calculateTotal(List<ProductInCart> products, List<ProductResponse> productResponses) {
-            return products.stream()
+            // Calculate total price of the cart
+            double total = cartCreationRequest.getProductInCarts().stream()
                     .mapToDouble(productInCart -> {
-                          ProductResponse productResponse = productResponses.stream()
-                                  .filter(response -> response.getId().equals(productInCart.getProductId()))
-                                  .findFirst()
-                                  .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
-                          return productResponse.getPrice() * productInCart.getQuantity();
+                          Double price = productPriceMap.get(productInCart.getProductId());
+                          if (price == null) price = 0.0;
+                          return price * productInCart.getQuantity();
                     }).sum();
-      }
+            logger.info("Total price calculated: {}", total);
 
-      @Transactional
-      public CartResponse createOrderForCart(String cartId) {
-            Cart cart = (Cart) redisTemplate.opsForValue().get("cart:" + cartId);
-            if (cart == null) throw new AppException(ErrorCode.CART_NOT_FOUND);
-
-            List<OrderItemCreationRequest> orderItems = cart.getProducts().stream()
-                    .map(product -> OrderItemCreationRequest.builder()
-                            .productId(product.getProductId())
-                            .quantity(product.getQuantity())
-                            .build())
-                    .collect(Collectors.toList());
-
-            OrderCreationRequest orderRequest = OrderCreationRequest.builder()
-                    .userId(cart.getUserId())
-                    .items(orderItems)
-                    .total(cart.getTotal())
-                    .status("CREATED")
-                    .build();
-
-            orderClient.createOrder(orderRequest);
-            return cartMapper.toCartResponse(cart);
-      }
-
-      @Transactional
-      public CartResponse addOrUpdateItemInCart(String cartId, CartCreationRequest cartRequest) {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String userId = authentication.getName();
-
-            for (ProductInCart product : cartRequest.getProducts()) {
-                  ExistsResponse existsResponse = productClient.existsProduct(product.getProductId());
-                  if (!existsResponse.isExists()) throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
-            }
-
-            Cart cart = (Cart) redisTemplate.opsForValue().get("cart:" + cartId);
-            if (cart == null) {
-                  cart = Cart.builder()
-                          .id(cartId)
-                          .userId(userId)
-                          .build();
-            } else if (!cart.getUserId().equals(userId)) throw new AppException(ErrorCode.UNAUTHORIZED);
-
-
-            cart.setProducts(cartRequest.getProducts());
-
-            List<ProductResponse> productResponses = cartRequest.getProducts().stream()
-                    .map(product -> {
-                          ProductResponse productResponse = productClient.getProductById(product.getProductId());
-                          if (productResponse == null) throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
-                          return productResponse;
-                    }).collect(Collectors.toList());
-
-            double total = calculateTotal(cart.getProducts(), productResponses);
+            Cart cart = cartMapper.toCart(cartCreationRequest);
+            cart.setId(UUID.randomUUID().toString());
             cart.setTotal(total);
 
-            redisTemplate.opsForValue().set("cart:" + cartId, cart);
+            redisTemplate.opsForValue().set(CART_KEY_PREFIX + cart.getId(), cart);
+            logger.info("Saving cart to Redis with ID: {}", cart.getId());
 
             CartResponse cartResponse = cartMapper.toCartResponse(cart);
-            cartResponse.setTotal(total);
-
-            return cartResponse;
-      }
-
-      @Transactional
-      public void deleteCart(String cartId) {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String userId = authentication.getName();
-
-            Cart cart = (Cart) redisTemplate.opsForValue().get("cart:" + cartId);
-            if (cart == null) throw new AppException(ErrorCode.CART_NOT_FOUND);
-            if (!cart.getUserId().equals(userId)) throw new AppException(ErrorCode.UNAUTHORIZED);
-
-            redisTemplate.delete("cart:" + cartId);
-      }
-
-      public CartResponse getCartById(String cartId) {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String userId = authentication.getName();
-
-            Cart cart = (Cart) redisTemplate.opsForValue().get("cart:" + cartId);
-            if (cart == null) throw new AppException(ErrorCode.CART_NOT_FOUND);
-            if (!cart.getUserId().equals(userId)) throw new AppException(ErrorCode.UNAUTHORIZED);
-
-            CartResponse cartResponse = cartMapper.toCartResponse(cart);
-            cartResponse.setTotal(cart.getTotal());
+            logger.info("Cart created successfully: {}", cartResponse);
 
             return cartResponse;
       }

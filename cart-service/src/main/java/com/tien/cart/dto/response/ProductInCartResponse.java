@@ -3,18 +3,14 @@ package com.tien.cart.dto.response;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.util.List;
-
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CartResponse {
+public class ProductInCartResponse {
 
-      String cartId;
-      String userId;
-      List<ProductInCartResponse> productInCarts;
-      double total;
+      String productId;
+      Integer quantity;
 
 }

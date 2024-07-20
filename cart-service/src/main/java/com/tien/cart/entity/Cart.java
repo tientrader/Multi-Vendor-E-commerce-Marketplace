@@ -19,7 +19,7 @@ public class Cart {
       @Id
       String id;
       String userId;
-      List<ProductInCart> products = new ArrayList<>();
+      List<ProductInCart> productInCarts = new ArrayList<>();
       double total;
 
 }

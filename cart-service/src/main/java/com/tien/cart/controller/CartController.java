@@ -18,41 +18,8 @@ public class CartController {
       CartService cartService;
 
       @PostMapping("/create")
-      ApiResponse<CartResponse> createCartAndAddItem(@Valid @RequestBody CartCreationRequest cartRequest) {
-            CartResponse cartResponse = cartService.createCartAndAddItem(cartRequest);
-            return ApiResponse.<CartResponse>builder()
-                    .result(cartResponse)
-                    .build();
-      }
-
-//      @PostMapping("/{cartId}/add-or-update")
-//      ApiResponse<CartResponse> addOrUpdateItemInCart(@PathVariable String cartId,
-//                                                      @Valid @RequestBody CartCreationRequest cartRequest) {
-//            CartResponse cartResponse = cartService.addOrUpdateItemInCart(cartId, cartRequest);
-//            return ApiResponse.<CartResponse>builder()
-//                    .result(cartResponse)
-//                    .build();
-//      }
-
-      @PostMapping("/{cartId}/create-order")
-      ApiResponse<CartResponse> createOrderForCart(@PathVariable String cartId) {
-            CartResponse cartResponse = cartService.createOrderForCart(cartId);
-            return ApiResponse.<CartResponse>builder()
-                    .result(cartResponse)
-                    .build();
-      }
-
-      @DeleteMapping("/{cartId}")
-      ApiResponse<Void> deleteCart(@PathVariable String cartId) {
-            cartService.deleteCart(cartId);
-            return ApiResponse.<Void>builder()
-                    .message("Cart have been deleted")
-                    .build();
-      }
-
-      @GetMapping("/{cartId}")
-      ApiResponse<CartResponse> getCartById(@PathVariable String cartId) {
-            CartResponse cartResponse = cartService.getCartById(cartId);
+      ApiResponse<CartResponse> createCart(@Valid @RequestBody CartCreationRequest cartRequest) {
+            CartResponse cartResponse = cartService.createCart(cartRequest);
             return ApiResponse.<CartResponse>builder()
                     .result(cartResponse)
                     .build();
