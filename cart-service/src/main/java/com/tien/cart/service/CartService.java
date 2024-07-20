@@ -13,8 +13,7 @@ import com.tien.cart.httpclient.ProductClient;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -23,13 +22,12 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class CartService {
-
-      Logger logger = LoggerFactory.getLogger(CartService.class);
-
+      
       RedisTemplate<String, Object> redisTemplate;
       CartMapper cartMapper;
       ProductClient productClient;
@@ -41,18 +39,18 @@ public class CartService {
             // Validate if products exist
             for (ProductInCartCreationRequest item : cartCreationRequest.getProductInCarts()) {
                   String productId = item.getProductId();
-                  logger.debug("Checking if product with ID {} exists.", productId);
+                  log.debug("Checking if product with ID {} exists.", productId);
                   ExistsResponse existsResponse = productClient.existsProduct(productId);
-                  logger.debug("Received ExistsResponse for product ID {}: {}", productId, existsResponse);
+                  log.debug("Received ExistsResponse for product ID {}: {}", productId, existsResponse);
                   if (!existsResponse.isExists()) {
-                        logger.error("Product with ID {} does not exist", productId);
+                        log.error("Product with ID {} does not exist", productId);
                         throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
                   }
-                  logger.info("Product with ID {} exists.", productId);
+                  log.info("Product with ID {} exists.", productId);
             }
 
             // Fetch product price map
-            logger.info("Fetching product price map from ProductService");
+            log.info("Fetching product price map from ProductService");
 
             List<String> productIds = cartCreationRequest.getProductInCarts().stream()
                     .map(ProductInCartCreationRequest::getProductId).distinct().toList();
@@ -63,7 +61,7 @@ public class CartService {
             Map<String, Double> productPriceMap = productResponseMap.entrySet().stream()
                     .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().getPrice()));
 
-            logger.info("Product price map fetched successfully: {}", productPriceMap);
+            log.info("Product price map fetched successfully: {}", productPriceMap);
 
             // Calculate total price of the cart
             double total = cartCreationRequest.getProductInCarts().stream()
@@ -72,17 +70,17 @@ public class CartService {
                           if (price == null) price = 0.0;
                           return price * productInCart.getQuantity();
                     }).sum();
-            logger.info("Total price calculated: {}", total);
+            log.info("Total price calculated: {}", total);
 
             Cart cart = cartMapper.toCart(cartCreationRequest);
             cart.setId(UUID.randomUUID().toString());
             cart.setTotal(total);
 
             redisTemplate.opsForValue().set(CART_KEY_PREFIX + cart.getId(), cart);
-            logger.info("Saving cart to Redis with ID: {}", cart.getId());
+            log.info("Saving cart to Redis with ID: {}", cart.getId());
 
             CartResponse cartResponse = cartMapper.toCartResponse(cart);
-            logger.info("Cart created successfully: {}", cartResponse);
+            log.info("Cart created successfully: {}", cartResponse);
 
             return cartResponse;
       }
