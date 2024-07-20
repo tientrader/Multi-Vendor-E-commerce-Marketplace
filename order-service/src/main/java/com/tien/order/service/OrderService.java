@@ -1,12 +1,5 @@
 package com.tien.order.service;
 
-import com.tien.order.dto.request.OrderCreationRequest;
-import com.tien.order.dto.response.OrderItemResponse;
-import com.tien.order.dto.response.OrderResponse;
-import com.tien.order.dto.response.ProductResponse;
-import com.tien.order.dto.response.UserProfileResponse;
-import com.tien.order.entity.Order;
-import com.tien.order.entity.OrderItem;
 import com.tien.order.httpclient.ProductClient;
 import com.tien.order.httpclient.ProfileClient;
 import com.tien.order.mapper.OrderMapper;
@@ -18,11 +11,6 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
