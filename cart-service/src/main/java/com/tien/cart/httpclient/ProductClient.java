@@ -1,6 +1,7 @@
 package com.tien.cart.httpclient;
 
 import com.tien.cart.configuration.AuthenticationRequestInterceptor;
+import com.tien.cart.dto.ApiResponse;
 import com.tien.cart.dto.response.ExistsResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
@@ -13,7 +14,7 @@ public interface ProductClient {
 
       // Call the Product Service to get Product Price
       @GetMapping(value = "/{productId}/price", produces = MediaType.APPLICATION_JSON_VALUE)
-      double getProductPriceById(@PathVariable("productId") String productId);
+      ApiResponse<Double> getProductPriceById(@PathVariable("productId") String productId);
 
       // Call the Product Service to check if a product exists
       @GetMapping("/{productId}/exists")

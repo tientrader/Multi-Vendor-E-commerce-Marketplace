@@ -9,11 +9,14 @@ import com.tien.cart.dto.request.CartCreationRequest;
 import com.tien.cart.dto.response.ExistsResponse;
 import com.tien.cart.dto.response.CartResponse;
 import com.tien.cart.httpclient.ProductClient;
+import com.tien.cart.dto.ApiResponse;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -35,9 +38,9 @@ public class CartService {
 
       // Create a cart
       public CartResponse createCart(CartCreationRequest cartCreationRequest) {
-            log.info("Creating or updating cart for user: {}", cartCreationRequest.getUserId());
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String userId = authentication.getName();
 
-            // Validate if products exist
             log.info("Validating if products exist in the ProductService");
             for (ProductInCartCreationRequest item : cartCreationRequest.getProductInCarts()) {
                   String productId = item.getProductId();
@@ -60,15 +63,18 @@ public class CartService {
                     .distinct()
                     .toList();
 
+            // Initialize productPriceMap
             Map<String, Double> productPriceMap = productIds.stream()
                     .collect(Collectors.toMap(
+                            productId -> productId,
                             productId -> {
-                                  log.debug("Requesting price for product with ID: {}", productId);
-                                  double price = productClient.getProductPriceById(productId);
+                                  log.debug("Fetching price for product with ID: {}", productId);
+                                  ApiResponse<Double> response = productClient.getProductPriceById(productId);
+                                  double price = response.getResult();
                                   log.info("Product ID {} has price: {}", productId, price);
-                                  return productId;
-                            },
-                            productClient::getProductPriceById));
+                                  return price;
+                            }
+                    ));
 
             log.info("Product price map fetched successfully: {}", productPriceMap);
 
@@ -88,6 +94,7 @@ public class CartService {
             Cart cart = cartMapper.toCart(cartCreationRequest);
             cart.setId(UUID.randomUUID().toString());
             cart.setTotal(total);
+            cart.setUserId(userId);
 
             redisTemplate.opsForValue().set(CART_KEY_PREFIX + cart.getId(), cart);
             log.info("Saving cart to Redis with ID: {}", cart.getId());

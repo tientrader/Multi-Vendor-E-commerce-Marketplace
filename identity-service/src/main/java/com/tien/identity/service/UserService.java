@@ -88,9 +88,9 @@ public class UserService {
     // Update User's own information based on token, excluding role
     @Transactional
     public UserResponse updateInfo(UserInfoUpdateRequest request) {
-        String name = SecurityContextHolder.getContext().getAuthentication().getName();
+        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        User user = userRepository.findByUsername(name)
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         userMapper.updateUser(user, request);
@@ -128,9 +128,9 @@ public class UserService {
 
     // View own User information based on token
     public UserResponse getMyInfo() {
-        String name = SecurityContextHolder.getContext().getAuthentication().getName();
+        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        User user = userRepository.findByUsername(name)
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         var userResponse = userMapper.toUserResponse(user);
