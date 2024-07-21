@@ -17,6 +17,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
 import org.springframework.data.domain.*;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +35,7 @@ public class ProductService {
       ProductRepository productRepository;
       ProductMapper productMapper;
       CategoryRepository categoryRepository;
+      MongoTemplate mongoTemplate;
 
       // Add product
       @PreAuthorize("hasRole('ADMIN')")
@@ -101,13 +105,31 @@ public class ProductService {
             productRepository.deleteById(productId);
       }
 
-      // Retrieves paginated and sorted product list based on input parameters.
-      public Page<ProductResponse> getProductsWithPaginationAndSorting
-                    (int page, int size, String sortBy, String sortDirection) {
-            Pageable pageable = PageRequest.of(
-                    page, size, Sort.by(Sort.Direction.fromString(sortDirection), sortBy));
-            Page<Product> productsPage = productRepository.findAll(pageable);
-            return productsPage.map(productMapper::toProductResponse);
+      // Method for paginated, sorted, and filtered product retrieval
+      public Page<ProductResponse> getFilteredSortedPaginatedProducts(
+              int page, int size, String sortBy, String sortDirection,
+              String categoryId, Double minPrice, Double maxPrice) {
+
+            Criteria criteria = new Criteria();
+
+            if (categoryId != null) criteria.and("categoryId").is(categoryId);
+
+            if (minPrice != null && maxPrice != null) {
+                  criteria.and("price").gte(minPrice).lte(maxPrice);
+            } else if (minPrice != null) {
+                  criteria.and("price").gte(minPrice);
+            } else if (maxPrice != null) {
+                  criteria.and("price").lte(maxPrice);
+            }
+
+            Query query = Query.query(criteria);
+            Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(sortDirection), sortBy));
+            query.with(pageable);
+
+            List<Product> products = mongoTemplate.find(query, Product.class);
+            long total = mongoTemplate.count(query, Product.class);
+            List<ProductResponse> productResponses = productMapper.toProductResponses(products);
+            return new PageImpl<>(productResponses, pageable, total);
       }
 
       // Display all products

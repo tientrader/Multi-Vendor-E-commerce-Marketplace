@@ -8,6 +8,8 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
+import java.util.List;
+
 @Mapper(componentModel = "spring")
 public interface ProductMapper {
 
@@ -21,5 +23,7 @@ public interface ProductMapper {
       @Mapping(target = "id", ignore = true)
       @Mapping(target = "category", ignore = true)
       void updateProduct(@MappingTarget Product product, ProductUpdateRequest request);
+
+      List<ProductResponse> toProductResponses(List<Product> products);
 
 }

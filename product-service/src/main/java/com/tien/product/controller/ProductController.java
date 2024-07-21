@@ -53,14 +53,18 @@ public class ProductController {
                     .build();
       }
 
-      @GetMapping
-      ApiResponse<Page<ProductResponse>> getProductsWithPaginationAndSorting(
+      @GetMapping()
+      public ApiResponse<Page<ProductResponse>> getFilteredSortedPaginatedProducts(
               @RequestParam(defaultValue = "0") int page,
               @RequestParam(defaultValue = "10") int size,
               @RequestParam(defaultValue = "name") String sortBy,
-              @RequestParam(defaultValue = "asc") String sortDirection) {
-            Page<ProductResponse> productsPage = productService.getProductsWithPaginationAndSorting
-                    (page, size, sortBy, sortDirection);
+              @RequestParam(defaultValue = "asc") String sortDirection,
+              @RequestParam(required = false) String categoryId,
+              @RequestParam(required = false) Double minPrice,
+              @RequestParam(required = false) Double maxPrice) {
+            Page<ProductResponse> productsPage = productService.getFilteredSortedPaginatedProducts(
+                    page, size, sortBy, sortDirection, categoryId, minPrice, maxPrice);
+
             return ApiResponse.<Page<ProductResponse>>builder()
                     .result(productsPage)
                     .build();
