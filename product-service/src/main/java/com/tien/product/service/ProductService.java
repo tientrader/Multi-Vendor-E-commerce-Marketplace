@@ -16,10 +16,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,7 +34,7 @@ public class ProductService {
       CategoryRepository categoryRepository;
 
       // Add product
-      @PreAuthorize("hasRole('SELLER')")
+      @PreAuthorize("hasRole('ADMIN')")
       @Transactional
       public ProductResponse createProduct(ProductCreationRequest request) {
             Product product = productMapper.toProduct(request);
@@ -55,7 +52,7 @@ public class ProductService {
       }
 
       // Update product by productId
-      @PreAuthorize("hasRole('SELLER')")
+      @PreAuthorize("hasRole('ADMIN')")
       @Transactional
       public ProductResponse updateProduct(String productId, ProductUpdateRequest request) {
             Product product = productRepository.findById(productId)
@@ -91,7 +88,7 @@ public class ProductService {
       }
 
       // Delete product by productId
-      @PreAuthorize("hasRole('SELLER')")
+      @PreAuthorize("hasRole('ADMIN')")
       @Transactional
       public void deleteProduct(String productId) {
             Product product = productRepository.findById(productId)

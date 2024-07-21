@@ -29,7 +29,7 @@ public class CategoryService {
       CategoryMapper categoryMapper;
 
       // Create a new category
-      @PreAuthorize("hasRole('SELLER')")
+      @PreAuthorize("hasRole('ADMIN')")
       @Transactional
       public CategoryResponse createCategory(CategoryCreationRequest request) {
             Category category = categoryMapper.toCategory(request);
@@ -37,7 +37,7 @@ public class CategoryService {
       }
 
       // Update a category based on categoryId
-      @PreAuthorize("hasRole('SELLER')")
+      @PreAuthorize("hasRole('ADMIN')")
       @Transactional
       public CategoryResponse updateCategory(String categoryId, CategoryUpdateRequest request) {
             Category category = categoryRepository.findById(categoryId)
@@ -47,7 +47,7 @@ public class CategoryService {
       }
 
       // Delete a category based on categoryId
-      @PreAuthorize("hasRole('SELLER')")
+      @PreAuthorize("hasRole('ADMIN')")
       @Transactional
       public void deleteCategory(String categoryId) {
             categoryRepository.findById(categoryId)
