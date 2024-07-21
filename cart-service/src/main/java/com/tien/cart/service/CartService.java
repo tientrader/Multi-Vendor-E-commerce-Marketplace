@@ -2,6 +2,7 @@ package com.tien.cart.service;
 
 import com.tien.cart.dto.request.ProductInCartCreationRequest;
 import com.tien.cart.entity.Cart;
+import com.tien.cart.entity.ProductInCart;
 import com.tien.cart.exception.AppException;
 import com.tien.cart.exception.ErrorCode;
 import com.tien.cart.mapper.CartMapper;
@@ -36,10 +37,20 @@ public class CartService {
 
       private static final String CART_KEY_PREFIX = "cart:";
 
-      // Create a cart
+      // Create or update a cart
       public CartResponse createCart(CartCreationRequest cartCreationRequest) {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String userId = authentication.getName();
+
+            String existingCartKey = CART_KEY_PREFIX + userId;
+            Cart existingCart = (Cart) redisTemplate.opsForValue().get(existingCartKey);
+
+            if (existingCart != null) {
+                  log.info("User {} already has a cart. Updating existing cart.", userId);
+                  updateCart(existingCart, cartCreationRequest);
+                  redisTemplate.opsForValue().set(existingCartKey, existingCart);
+                  return cartMapper.toCartResponse(existingCart);
+            }
 
             for (ProductInCartCreationRequest item : cartCreationRequest.getProductInCarts()) {
                   String productId = item.getProductId();
@@ -47,13 +58,11 @@ public class CartService {
                   if (!existsResponse.isExists()) throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
             }
 
-            // Fetch product price map
             List<String> productIds = cartCreationRequest.getProductInCarts().stream()
                     .map(ProductInCartCreationRequest::getProductId)
                     .distinct()
                     .toList();
 
-            // Initialize productPriceMap
             Map<String, Double> productPriceMap = productIds.stream()
                     .collect(Collectors.toMap(
                             productId -> productId,
@@ -63,7 +72,6 @@ public class CartService {
                             }
                     ));
 
-            // Calculate total price of the cart
             double total = cartCreationRequest.getProductInCarts().stream()
                     .mapToDouble(productInCart -> {
                           Double price = productPriceMap.get(productInCart.getProductId());
@@ -75,7 +83,45 @@ public class CartService {
             cart.setId(UUID.randomUUID().toString());
             cart.setTotal(total);
             cart.setUserId(userId);
-            redisTemplate.opsForValue().set(CART_KEY_PREFIX + cart.getId(), cart);
+
+            redisTemplate.opsForValue().set(CART_KEY_PREFIX + userId, cart);
+
+            return cartMapper.toCartResponse(cart);
+      }
+
+      private void updateCart(Cart existingCart, CartCreationRequest cartCreationRequest) {
+            List<ProductInCart> productInCarts = cartCreationRequest.getProductInCarts().stream()
+                    .map(request -> ProductInCart.builder()
+                            .productId(request.getProductId())
+                            .quantity(request.getQuantity())
+                            .build())
+                    .collect(Collectors.toList());
+
+            existingCart.setProductInCarts(productInCarts);
+
+            double total = productInCarts.stream()
+                    .mapToDouble(productInCart -> {
+                          Double price = productClient.getProductPriceById
+                                  (productInCart.getProductId()).getResult();
+                          if (price == null) price = 0.0;
+                          return price * productInCart.getQuantity();
+                    }).sum();
+
+            existingCart.setTotal(total);
+      }
+
+      // Get the user's cart
+      public CartResponse getCart() {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String userId = authentication.getName();
+            if (userId == null) throw new AppException(ErrorCode.UNAUTHORIZED);
+
+            String cartKey = CART_KEY_PREFIX + userId;
+            
+            Cart cart = (Cart) redisTemplate.opsForValue().get(cartKey);
+            if (cart == null) {
+                  throw new AppException(ErrorCode.CART_NOT_FOUND);
+            }
 
             return cartMapper.toCartResponse(cart);
       }

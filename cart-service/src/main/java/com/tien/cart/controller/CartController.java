@@ -25,4 +25,12 @@ public class CartController {
                     .build();
       }
 
+      @GetMapping("/my-cart")
+      public ApiResponse<CartResponse> getMyCart() {
+            CartResponse cartResponse = cartService.getCart();
+            return ApiResponse.<CartResponse>builder()
+                    .result(cartResponse)
+                    .build();
+      }
+
 }
