@@ -1,5 +1,8 @@
 package com.tien.order.service;
 
+import com.tien.order.dto.request.OrderCreationRequest;
+import com.tien.order.dto.request.OrderItemCreationRequest;
+import com.tien.order.entity.Order;
 import com.tien.order.httpclient.ProductClient;
 import com.tien.order.httpclient.ProfileClient;
 import com.tien.order.mapper.OrderMapper;
@@ -19,8 +22,18 @@ import org.springframework.stereotype.Service;
 public class OrderService {
 
       ProductClient productClient;
-      ProfileClient profileClient;
       OrderRepository orderRepository;
       OrderMapper orderMapper;
+
+      public void createOrder(OrderCreationRequest orderCreationRequest) {
+            Order order = orderMapper.toOrder(orderCreationRequest);
+
+            for (OrderItemCreationRequest item : orderCreationRequest.getItems()) {
+                  int quantityToUpdate = -item.getQuantity();
+                  productClient.updateStock(item.getProductId(), quantityToUpdate);
+            }
+
+            orderRepository.save(order);
+      }
 
 }

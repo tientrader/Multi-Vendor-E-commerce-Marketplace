@@ -29,9 +29,18 @@ public class ProductController {
       }
 
       @PutMapping("/{productId}")
-      ApiResponse<ProductResponse> updateProduct(@PathVariable String productId, @RequestBody @Valid ProductUpdateRequest request) {
+      ApiResponse<ProductResponse> updateProduct(@PathVariable String productId,
+                                                 @RequestBody @Valid ProductUpdateRequest request) {
             return ApiResponse.<ProductResponse>builder()
                     .result(productService.updateProduct(productId, request))
+                    .build();
+      }
+
+      @PutMapping("/{productId}/stock")
+      ApiResponse<Void> updateStock(@PathVariable String productId, @RequestParam int quantity) {
+            productService.updateStock(productId, quantity);
+            return ApiResponse.<Void>builder()
+                    .message("Stock updated successfully")
                     .build();
       }
 

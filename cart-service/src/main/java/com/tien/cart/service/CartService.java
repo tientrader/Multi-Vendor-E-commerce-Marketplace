@@ -1,10 +1,12 @@
 package com.tien.cart.service;
 
+import com.tien.cart.dto.request.OrderCreationRequest;
 import com.tien.cart.dto.request.ProductInCartCreationRequest;
 import com.tien.cart.entity.Cart;
 import com.tien.cart.entity.ProductInCart;
 import com.tien.cart.exception.AppException;
 import com.tien.cart.exception.ErrorCode;
+import com.tien.cart.httpclient.OrderClient;
 import com.tien.cart.mapper.CartMapper;
 import com.tien.cart.dto.request.CartCreationRequest;
 import com.tien.cart.dto.response.ExistsResponse;
@@ -34,6 +36,7 @@ public class CartService {
       RedisTemplate<String, Object> redisTemplate;
       CartMapper cartMapper;
       ProductClient productClient;
+      OrderClient orderClient;
 
       private static final String CART_KEY_PREFIX = "cart:";
 
@@ -107,6 +110,24 @@ public class CartService {
                     }).sum();
 
             existingCart.setTotal(total);
+      }
+
+      // Create order from cart
+      public void createOrderFromCart() {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String userId = authentication.getName();
+            if (userId == null) throw new AppException(ErrorCode.UNAUTHORIZED);
+
+            String cartKey = CART_KEY_PREFIX + userId;
+            Cart cart = (Cart) redisTemplate.opsForValue().get(cartKey);
+            if (cart == null) throw new AppException(ErrorCode.CART_NOT_FOUND);
+
+            OrderCreationRequest orderRequest = cartMapper.toOrderCreationRequest(cart);
+            orderRequest.setStatus("PENDING");
+
+            orderClient.createOrder(orderRequest);
+
+            redisTemplate.delete(cartKey);
       }
 
       // Delete the user's cart

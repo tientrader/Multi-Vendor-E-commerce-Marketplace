@@ -1,11 +1,8 @@
 package com.tien.order.mapper;
 
 import com.tien.order.dto.request.OrderCreationRequest;
-import com.tien.order.dto.request.OrderItemCreationRequest;
 import com.tien.order.dto.response.OrderItemResponse;
 import com.tien.order.dto.response.OrderResponse;
-import com.tien.order.dto.response.ProductResponse;
-import com.tien.order.dto.response.UserProfileResponse;
 import com.tien.order.entity.Order;
 import com.tien.order.entity.OrderItem;
 
@@ -19,35 +16,29 @@ import java.util.List;
 public interface OrderMapper {
 
       @Mappings({
-              @Mapping(target = "orderId", ignore = true),
-              @Mapping(source = "request.userId", target = "userId"),
               @Mapping(source = "items", target = "items"),
+              @Mapping(source = "userId", target = "userId"),
               @Mapping(source = "total", target = "total"),
-              @Mapping(source = "request.status", target = "status")
+              @Mapping(source = "status", target = "status"),
       })
-      Order toOrder(OrderCreationRequest request, List<OrderItem> items, double total);
+      Order toOrder(OrderCreationRequest request);
 
       @Mappings({
-              @Mapping(source = "order.orderId", target = "orderId"),
-              @Mapping(source = "order.userId", target = "userId"),
-              @Mapping(source = "order.status", target = "status"),
-              @Mapping(target = "items", ignore = true),
-              @Mapping(target = "userProfile", ignore = true)
+              @Mapping(source = "orderItemId", target = "orderItemId"),
+              @Mapping(source = "productId", target = "productId"),
+              @Mapping(source = "quantity", target = "quantity")
+      })
+      OrderItemResponse toOrderItemResponse(OrderItem orderItem);
+
+      List<OrderItemResponse> toOrderItemResponses(List<OrderItem> orderItems);
+
+      @Mappings({
+              @Mapping(source = "orderId", target = "orderId"),
+              @Mapping(source = "userId", target = "userId"),
+              @Mapping(source = "total", target = "total"),
+              @Mapping(source = "status", target = "status"),
+              @Mapping(source = "items", target = "items")
       })
       OrderResponse toOrderResponse(Order order);
-
-      @Mapping(target = "orderItemId", ignore = true)
-      OrderItem toOrderItem(OrderItemCreationRequest request);
-
-      @Mapping(source = "productResponse", target = "productDetails")
-      OrderItemResponse toOrderItemResponse(OrderItem orderItem, ProductResponse productResponse);
-
-      // Product mappings
-      @Mapping(source = "id", target = "productId")
-      OrderItemCreationRequest toOrderItemCreationRequest(ProductResponse productResponse);
-
-      // UserProfile mappings
-      @Mapping(source = "userId", target = "userId")
-      OrderCreationRequest toOrderCreationRequest(UserProfileResponse userProfileResponse);
 
 }

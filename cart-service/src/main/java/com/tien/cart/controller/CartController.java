@@ -25,6 +25,14 @@ public class CartController {
                     .build();
       }
 
+      @PostMapping("/create-order")
+      public ApiResponse<Void> createOrderFromCart() {
+            cartService.createOrderFromCart();
+            return ApiResponse.<Void>builder()
+                    .message("Order created successfully")
+                    .build();
+      }
+
       @GetMapping("/my-cart")
       public ApiResponse<CartResponse> getMyCart() {
             CartResponse cartResponse = cartService.getCart();

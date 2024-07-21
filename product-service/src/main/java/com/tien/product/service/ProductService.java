@@ -74,16 +74,15 @@ public class ProductService {
             return productMapper.toProductResponse(product);
       }
 
-      // Update stock when order created
       @Transactional
       public void updateStock(String productId, int quantity) {
             Product product = productRepository.findById(productId)
                     .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
 
-            int updatedStock = product.getStock() - quantity;
-            if (updatedStock < 0) throw new AppException(ErrorCode.OUT_OF_STOCK);
+            int newStock = product.getStock() + quantity;
+            if (newStock < 0) throw new AppException(ErrorCode.OUT_OF_STOCK);
 
-            product.setStock(updatedStock);
+            product.setStock(newStock);
             productRepository.save(product);
       }
 

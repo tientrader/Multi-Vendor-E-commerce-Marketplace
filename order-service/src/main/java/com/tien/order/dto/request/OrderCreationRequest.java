@@ -14,6 +14,7 @@ public class OrderCreationRequest {
 
       String userId;
       List<OrderItemCreationRequest> items;
+      double total;
       String status;
 
 }
