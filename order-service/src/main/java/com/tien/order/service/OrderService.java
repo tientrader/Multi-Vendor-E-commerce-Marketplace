@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -23,9 +24,11 @@ public class OrderService {
       ProductClient productClient;
       OrderRepository orderRepository;
       OrderMapper orderMapper;
+      KafkaTemplate<String, String> kafkaTemplate;
 
       public void createOrder(OrderCreationRequest orderCreationRequest) {
             Order order = orderMapper.toOrder(orderCreationRequest);
+
 
             for (OrderItemCreationRequest item : orderCreationRequest.getItems()) {
                   int quantityToUpdate = -item.getQuantity();
@@ -33,6 +36,8 @@ public class OrderService {
             }
 
             orderRepository.save(order);
+            kafkaTemplate.send("order-successful",
+                               "Order ID: " + order.getOrderId() + " created successfully!");
       }
 
 }
