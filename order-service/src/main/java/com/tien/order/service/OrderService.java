@@ -4,7 +4,6 @@ import com.tien.order.dto.request.OrderCreationRequest;
 import com.tien.order.dto.request.OrderItemCreationRequest;
 import com.tien.order.entity.Order;
 import com.tien.order.httpclient.ProductClient;
-import com.tien.order.httpclient.ProfileClient;
 import com.tien.order.mapper.OrderMapper;
 import com.tien.order.repository.OrderRepository;
 
