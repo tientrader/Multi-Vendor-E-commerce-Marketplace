@@ -10,6 +10,7 @@ import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -52,10 +53,30 @@ public class ProductController {
                     .build();
       }
 
+      @GetMapping
+      ApiResponse<Page<ProductResponse>> getProductsWithPaginationAndSorting(
+              @RequestParam(defaultValue = "0") int page,
+              @RequestParam(defaultValue = "10") int size,
+              @RequestParam(defaultValue = "name") String sortBy,
+              @RequestParam(defaultValue = "asc") String sortDirection) {
+            Page<ProductResponse> productsPage = productService.getProductsWithPaginationAndSorting
+                    (page, size, sortBy, sortDirection);
+            return ApiResponse.<Page<ProductResponse>>builder()
+                    .result(productsPage)
+                    .build();
+      }
+
       @GetMapping("/{productId}")
       ApiResponse<ProductResponse> getProductById(@PathVariable("productId") String productId) {
             return ApiResponse.<ProductResponse>builder()
                     .result(productService.getProductById(productId))
+                    .build();
+      }
+
+      @GetMapping("/all")
+      ApiResponse<List<ProductResponse>> getAllProducts() {
+            return ApiResponse.<List<ProductResponse>>builder()
+                    .result(productService.getAllProducts())
                     .build();
       }
 
@@ -64,13 +85,6 @@ public class ProductController {
             double price = productService.getProductPriceById(productId);
             return ApiResponse.<Double>builder()
                     .result(price)
-                    .build();
-      }
-
-      @GetMapping
-      ApiResponse<List<ProductResponse>> getAllProducts() {
-            return ApiResponse.<List<ProductResponse>>builder()
-                    .result(productService.getAllProducts())
                     .build();
       }
 

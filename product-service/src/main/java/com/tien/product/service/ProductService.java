@@ -16,6 +16,10 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -100,6 +104,15 @@ public class ProductService {
             productRepository.deleteById(productId);
       }
 
+      // Retrieves paginated and sorted product list based on input parameters.
+      public Page<ProductResponse> getProductsWithPaginationAndSorting
+                    (int page, int size, String sortBy, String sortDirection) {
+            Pageable pageable = PageRequest.of(
+                    page, size, Sort.by(Sort.Direction.fromString(sortDirection), sortBy));
+            Page<Product> productsPage = productRepository.findAll(pageable);
+            return productsPage.map(productMapper::toProductResponse);
+      }
+
       // Display all products
       public List<ProductResponse> getAllProducts() {
             return productRepository.findAll().stream()
@@ -107,17 +120,17 @@ public class ProductService {
                     .collect(Collectors.toList());
       }
 
+      // Display product by productId
+      public ProductResponse getProductById(String productId) {
+            return productMapper.toProductResponse(productRepository.findById(productId)
+                    .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND)));
+      }
+
       // Display product price by productId
       public double getProductPriceById(String productId) {
             Product product = productRepository.findById(productId)
                     .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
             return product.getPrice();
-      }
-
-      // Display product by productId
-      public ProductResponse getProductById(String productId) {
-            return productMapper.toProductResponse(productRepository.findById(productId)
-                    .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND)));
       }
 
       // Check if product exists by productId
