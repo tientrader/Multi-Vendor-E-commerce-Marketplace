@@ -2,6 +2,8 @@ package com.tien.identity.dto.request;
 
 import java.time.LocalDate;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
@@ -24,6 +26,10 @@ public class UserCreationRequest {
     @Size(min = 8, message = "INVALID_PASSWORD")
     @NotNull(message = "PASSWORD_NULL")
     String password;
+
+    @Email(message = "INVALID_EMAIL")
+    @NotBlank(message = "EMAIL_IS_REQUIRED")
+    String email;
 
     @NotNull(message = "FIRSTNAME_NULL")
     String firstName;

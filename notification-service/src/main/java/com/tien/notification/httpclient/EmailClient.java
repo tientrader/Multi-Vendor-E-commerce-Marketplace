@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 
-@FeignClient(name = "email-client", url = "https://api.brevo.com")
+@FeignClient(name = "email-client", url = "${notification.email.brevo-url}")
 public interface EmailClient {
 
     // Send email by calling Brevo API

@@ -3,6 +3,7 @@ package com.tien.identity.service;
 import java.util.HashSet;
 import java.util.List;
 
+import com.tien.event.dto.NotificationEvent;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -43,7 +44,7 @@ public class UserService {
     ProfileMapper profileMapper;
     PasswordEncoder passwordEncoder;
     ProfileClient profileClient;
-    KafkaTemplate<String , String> kafkaTemplate;
+    KafkaTemplate<String , Object> kafkaTemplate;
 
     // Create User account
     @Transactional
@@ -51,23 +52,26 @@ public class UserService {
         if (userRepository.existsByUsername(request.getUsername()))
             throw new AppException(ErrorCode.USER_EXISTED);
 
-        // Encode password
         User user = userMapper.toUser(request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 
-        // Assign role to User
         HashSet<Role> roles = new HashSet<>();
         roleRepository.findById(PredefinedRole.USER_ROLE).ifPresent(roles::add);
         user.setRoles(roles);
         user = userRepository.save(user);
 
-        // Create profile in Profile Service
         var profileRequest = profileMapper.toProfileCreationRequest(request);
         profileRequest.setUserId(user.getId());
         profileClient.createProfile(profileRequest);
 
-        // Send onboard successful message to Notification Service
-        kafkaTemplate.send("onboard-successful", "Welcome " + user.getUsername() + " to TienApp!");
+        NotificationEvent notificationEvent = NotificationEvent.builder()
+                .channel("EMAIL")
+                .recipient(request.getEmail())
+                .subject("Welcome to TienProApp")
+                .body("Hello, " + request.getUsername())
+                .build();
+
+        kafkaTemplate.send("notification-delivery", notificationEvent);
 
         return userMapper.toUserResponse(user);
     }
@@ -133,10 +137,7 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
-        var userResponse = userMapper.toUserResponse(user);
-        userResponse.setNoPassword(!StringUtils.hasText(user.getPassword()));
-
-        return userResponse;
+          return userMapper.toUserResponse(user);
     }
 
     // View User information by ID

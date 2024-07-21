@@ -17,7 +17,6 @@ public interface UserMapper {
     @Mapping(target = "id", ignore = true)
     User toUser(UserCreationRequest request);
 
-    @Mapping(target = "noPassword", ignore = true)
     UserResponse toUserResponse(User user);
 
     @Mapping(target = "username", ignore = true)

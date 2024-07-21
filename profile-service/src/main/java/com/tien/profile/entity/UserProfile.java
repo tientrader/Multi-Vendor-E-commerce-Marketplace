@@ -23,6 +23,7 @@ public class UserProfile {
     String id;
 
     String userId;
+    String email;
     String firstName;
     String lastName;
     LocalDate dob;
