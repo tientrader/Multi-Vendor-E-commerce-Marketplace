@@ -37,7 +37,7 @@ public class CartService {
 
       private static final String CART_KEY_PREFIX = "cart:";
 
-      // Create or update a cart
+      // Create new cart or update (if cart already exists)
       public CartResponse createCart(CartCreationRequest cartCreationRequest) {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String userId = authentication.getName();
@@ -46,7 +46,6 @@ public class CartService {
             Cart existingCart = (Cart) redisTemplate.opsForValue().get(existingCartKey);
 
             if (existingCart != null) {
-                  log.info("User {} already has a cart. Updating existing cart.", userId);
                   updateCart(existingCart, cartCreationRequest);
                   redisTemplate.opsForValue().set(existingCartKey, existingCart);
                   return cartMapper.toCartResponse(existingCart);
@@ -110,6 +109,20 @@ public class CartService {
             existingCart.setTotal(total);
       }
 
+      // Delete the user's cart
+      public void deleteCart() {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String userId = authentication.getName();
+            if (userId == null) throw new AppException(ErrorCode.UNAUTHORIZED);
+
+            String cartKey = CART_KEY_PREFIX + userId;
+
+            Cart cart = (Cart) redisTemplate.opsForValue().get(cartKey);
+            if (cart == null) throw new AppException(ErrorCode.CART_NOT_FOUND);
+
+            redisTemplate.delete(cartKey);
+      }
+
       // Get the user's cart
       public CartResponse getCart() {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -119,9 +132,7 @@ public class CartService {
             String cartKey = CART_KEY_PREFIX + userId;
             
             Cart cart = (Cart) redisTemplate.opsForValue().get(cartKey);
-            if (cart == null) {
-                  throw new AppException(ErrorCode.CART_NOT_FOUND);
-            }
+            if (cart == null) throw new AppException(ErrorCode.CART_NOT_FOUND);
 
             return cartMapper.toCartResponse(cart);
       }

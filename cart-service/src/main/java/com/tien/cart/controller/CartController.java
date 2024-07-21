@@ -33,4 +33,12 @@ public class CartController {
                     .build();
       }
 
+      @DeleteMapping("/my-cart")
+      public ApiResponse<String> deleteCart() {
+            cartService.deleteCart();
+            return ApiResponse.<String>builder()
+                    .message("Cart deleted successfully")
+                    .build();
+      }
+
 }
