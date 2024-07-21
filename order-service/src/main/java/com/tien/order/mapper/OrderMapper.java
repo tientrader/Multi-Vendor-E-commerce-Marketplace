@@ -20,11 +20,11 @@ public interface OrderMapper {
               @Mapping(source = "userId", target = "userId"),
               @Mapping(source = "total", target = "total"),
               @Mapping(source = "status", target = "status"),
+              @Mapping(target = "orderId", ignore = true)
       })
       Order toOrder(OrderCreationRequest request);
 
       @Mappings({
-              @Mapping(source = "orderItemId", target = "orderItemId"),
               @Mapping(source = "productId", target = "productId"),
               @Mapping(source = "quantity", target = "quantity")
       })

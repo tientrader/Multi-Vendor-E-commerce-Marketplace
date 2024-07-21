@@ -14,11 +14,11 @@ public enum ErrorCode {
 
     UNCATEGORIZED_EXCEPTION(9999, "Uncategorized error", HttpStatus.INTERNAL_SERVER_ERROR),
     INVALID_KEY(1001, "Uncategorized error", HttpStatus.BAD_REQUEST),
-    UNAUTHENTICATED(1006, "Unauthenticated", HttpStatus.UNAUTHORIZED),
-    UNAUTHORIZED(1007, "You do not have permission", HttpStatus.FORBIDDEN),
-    PRODUCT_NOT_FOUND(1008, "Product not found", HttpStatus.NOT_FOUND),
-    CATEGORY_NOT_FOUND(1009, "Category not found", HttpStatus.NOT_FOUND),
-    OUT_OF_STOCK(1010, "Out of stock", HttpStatus.BAD_REQUEST),
+    UNAUTHENTICATED(1002, "Unauthenticated", HttpStatus.UNAUTHORIZED),
+    UNAUTHORIZED(1003, "You do not have permission", HttpStatus.FORBIDDEN),
+    PRODUCT_NOT_FOUND(1004, "Product not found", HttpStatus.NOT_FOUND),
+    CATEGORY_NOT_FOUND(1005, "Category not found", HttpStatus.NOT_FOUND),
+    OUT_OF_STOCK(1006, "Out of stock", HttpStatus.BAD_REQUEST),
     ;
 
     int code;
