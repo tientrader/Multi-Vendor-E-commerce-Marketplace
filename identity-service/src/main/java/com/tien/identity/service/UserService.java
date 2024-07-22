@@ -4,17 +4,14 @@ import java.util.HashSet;
 import java.util.List;
 
 import com.tien.event.dto.NotificationEvent;
+import com.tien.identity.dto.request.*;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.tien.identity.dto.request.UserInfoUpdateRequest;
-import com.tien.identity.dto.request.PasswordCreationRequest;
 import com.tien.identity.constant.PredefinedRole;
-import com.tien.identity.dto.request.UserCreationRequest;
-import com.tien.identity.dto.request.UserUpdateRequest;
 import com.tien.identity.dto.response.UserResponse;
 import com.tien.identity.entity.Role;
 import com.tien.identity.entity.User;
@@ -92,9 +89,9 @@ public class UserService {
     // Update User's own information based on token, excluding role
     @Transactional
     public UserResponse updateInfo(UserInfoUpdateRequest request) {
-        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         userMapper.updateUser(user, request);
@@ -132,9 +129,9 @@ public class UserService {
 
     // View own User information based on token
     public UserResponse getMyInfo() {
-        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
           return userMapper.toUserResponse(user);

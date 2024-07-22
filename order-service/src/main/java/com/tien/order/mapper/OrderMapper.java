@@ -17,7 +17,7 @@ public interface OrderMapper {
 
       @Mappings({
               @Mapping(source = "items", target = "items"),
-              @Mapping(source = "userId", target = "userId"),
+              @Mapping(source = "username", target = "username"),
               @Mapping(source = "total", target = "total"),
               @Mapping(source = "status", target = "status"),
               @Mapping(target = "orderId", ignore = true)
@@ -34,7 +34,7 @@ public interface OrderMapper {
 
       @Mappings({
               @Mapping(source = "orderId", target = "orderId"),
-              @Mapping(source = "userId", target = "userId"),
+              @Mapping(source = "username", target = "username"),
               @Mapping(source = "total", target = "total"),
               @Mapping(source = "status", target = "status"),
               @Mapping(source = "items", target = "items")

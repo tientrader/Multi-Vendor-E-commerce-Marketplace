@@ -12,7 +12,7 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class OrderCreationRequest {
 
-      String userId;
+      String username;
       String email;
       List<OrderItemCreationRequest> items;
       double total;

@@ -22,7 +22,7 @@ public interface CartMapper {
       CartResponse toCartResponse(Cart cart);
 
       @Mapping(target = "status", ignore = true)
-      @Mapping(source = "userId", target = "userId")
+      @Mapping(source = "username", target = "username")
       @Mapping(source = "total", target = "total")
       @Mapping(source = "productInCarts", target = "items")
       OrderCreationRequest toOrderCreationRequest(Cart cart);

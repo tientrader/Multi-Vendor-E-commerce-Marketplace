@@ -14,7 +14,7 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class OrderCreationRequest {
 
-      String userId;
+      String username;
 
       @Email(message = "INVALID_EMAIL")
       @NotBlank(message = "EMAIL_IS_REQUIRED")

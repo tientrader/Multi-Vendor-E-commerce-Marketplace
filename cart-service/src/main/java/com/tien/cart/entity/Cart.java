@@ -18,7 +18,7 @@ public class Cart {
 
       @Id
       String id;
-      String userId;
+      String username;
       String email;
       List<ProductInCart> productInCarts = new ArrayList<>();
       double total;

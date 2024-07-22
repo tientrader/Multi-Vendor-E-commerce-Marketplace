@@ -22,7 +22,7 @@ public class Order {
       Long orderId;
 
       @Column(nullable = false)
-      String userId;
+      String username;
 
       String email;
 

@@ -13,7 +13,7 @@ import java.util.List;
 public class OrderResponse {
 
       Long orderId;
-      String userId;
+      String username;
       String email;
       List<OrderItemResponse> items;
       double total;

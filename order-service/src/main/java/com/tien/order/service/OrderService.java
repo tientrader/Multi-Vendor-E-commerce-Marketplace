@@ -18,7 +18,6 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -37,13 +36,12 @@ public class OrderService {
       KafkaTemplate<String, Object> kafkaTemplate;
 
       public void createOrder(OrderCreationRequest request) {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String userId = authentication.getName();
+            String username = SecurityContextHolder.getContext().getAuthentication().getName();
 
             double total = calculateOrderTotal(request.getItems());
 
             Order order = orderMapper.toOrder(request);
-            order.setUserId(userId);
+            order.setUsername(username);
             order.setTotal(total);
 
             for (OrderItemCreationRequest item : request.getItems()) {
@@ -78,10 +76,9 @@ public class OrderService {
       }
 
       public List<OrderResponse> getAllMyOrder() {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String userId = authentication.getName();
+            String username = SecurityContextHolder.getContext().getAuthentication().getName();
 
-            List<Order> orders = orderRepository.findByUserId(userId);
+            List<Order> orders = orderRepository.findByUsername(username);
             if (orders.isEmpty()) {
                   throw new AppException(ErrorCode.ORDER_NOT_FOUND);
             }
@@ -92,14 +89,13 @@ public class OrderService {
       }
 
       public OrderResponse getMyOrderById(Long orderId) {
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            String userId = authentication.getName();
+            String username = SecurityContextHolder.getContext().getAuthentication().getName();
 
             Order order = orderRepository.findById(orderId)
                     .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
 
-            if (!order.getUserId().equals(userId)) {
-                  throw new AppException(ErrorCode.UNAUTHORIZED);
+            if (!order.getUsername().equals(username)) {
+                  throw new AppException(ErrorCode.ORDER_IS_NOT_YOURS);
             }
 
             return orderMapper.toOrderResponse(order);
