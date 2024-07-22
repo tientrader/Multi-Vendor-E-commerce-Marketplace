@@ -19,20 +19,21 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
 @RestController
+@RequestMapping("/users")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserController {
 
     UserService userService;
 
-    @PostMapping("/users/registration")
+    @PostMapping("/registration")
     ApiResponse<UserResponse> createUser(@RequestBody @Valid UserCreationRequest request) {
         return ApiResponse.<UserResponse>builder()
                 .result(userService.createUser(request))
                 .build();
     }
 
-    @PostMapping("/users/create-password")
+    @PostMapping("/create-password")
     ApiResponse<Void> createPassword(@RequestBody @Valid PasswordCreationRequest request) {
         userService.createPassword(request);
         return ApiResponse.<Void>builder()
@@ -40,21 +41,21 @@ public class UserController {
                 .build();
     }
 
-    @PutMapping("/users/my-info")
+    @PutMapping("/my-info")
     ApiResponse<UserResponse> updateInfo(@RequestBody @Valid UserInfoUpdateRequest request) {
         return ApiResponse.<UserResponse>builder()
                 .result(userService.updateInfo(request))
                 .build();
     }
 
-    @PutMapping("/users/{userId}")
+    @PutMapping("/{userId}")
     ApiResponse<UserResponse> updateUser(@PathVariable String userId, @RequestBody @Valid UserUpdateRequest request) {
         return ApiResponse.<UserResponse>builder()
                 .result(userService.updateUser(userId, request))
                 .build();
     }
 
-    @DeleteMapping("/users/{userId}")
+    @DeleteMapping("/{userId}")
     ApiResponse<String> deleteUser(@PathVariable String userId) {
         userService.deleteUser(userId);
         return ApiResponse.<String>builder()
@@ -62,21 +63,21 @@ public class UserController {
                 .build();
     }
 
-    @GetMapping("/users/my-info")
+    @GetMapping("/my-info")
     ApiResponse<UserResponse> getMyInfo() {
         return ApiResponse.<UserResponse>builder()
                 .result(userService.getMyInfo())
                 .build();
     }
 
-    @GetMapping("/users")
+    @GetMapping
     ApiResponse<List<UserResponse>> getAllUsers() {
         return ApiResponse.<List<UserResponse>>builder()
                 .result(userService.getAllUsers())
                 .build();
     }
 
-    @GetMapping("/users/{userId}")
+    @GetMapping("/{userId}")
     ApiResponse<UserResponse> getUserById(@PathVariable("userId") String userId) {
         return ApiResponse.<UserResponse>builder()
                 .result(userService.getUserById(userId))

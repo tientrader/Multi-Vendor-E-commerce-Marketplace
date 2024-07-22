@@ -14,27 +14,28 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
 @RestController
+@RequestMapping("/permissions")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class PermissionController {
 
     PermissionService permissionService;
 
-    @PostMapping("/permissions")
+    @PostMapping
     ApiResponse<PermissionResponse> createPermission(@RequestBody PermissionRequest request) {
         return ApiResponse.<PermissionResponse>builder()
                 .result(permissionService.createPermission(request))
                 .build();
     }
 
-    @GetMapping("/permissions")
+    @GetMapping
     ApiResponse<List<PermissionResponse>> getAllPermissions() {
         return ApiResponse.<List<PermissionResponse>>builder()
                 .result(permissionService.getAllPermissions())
                 .build();
     }
 
-    @DeleteMapping("/permissions/{permission}")
+    @DeleteMapping("/{permission}")
     ApiResponse<String> deletePermission(@PathVariable String permission) {
         permissionService.deletePermission(permission);
         return ApiResponse.<String>builder()
