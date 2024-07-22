@@ -1,5 +1,6 @@
 package com.tien.order.service;
 
+import com.tien.event.dto.NotificationEvent;
 import com.tien.order.dto.ApiResponse;
 import com.tien.order.dto.request.OrderCreationRequest;
 import com.tien.order.dto.request.OrderItemCreationRequest;
@@ -32,26 +33,33 @@ public class OrderService {
       ProductClient productClient;
       OrderRepository orderRepository;
       OrderMapper orderMapper;
-      KafkaTemplate<String, String> kafkaTemplate;
+      KafkaTemplate<String, Object> kafkaTemplate;
 
-      public void createOrder(OrderCreationRequest orderCreationRequest) {
+      public void createOrder(OrderCreationRequest request) {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String userId = authentication.getName();
 
-            double total = calculateOrderTotal(orderCreationRequest.getItems());
+            double total = calculateOrderTotal(request.getItems());
 
-            Order order = orderMapper.toOrder(orderCreationRequest);
+            Order order = orderMapper.toOrder(request);
             order.setUserId(userId);
             order.setTotal(total);
 
-            for (OrderItemCreationRequest item : orderCreationRequest.getItems()) {
+            for (OrderItemCreationRequest item : request.getItems()) {
                   int quantityToUpdate = -item.getQuantity();
                   productClient.updateStock(item.getProductId(), quantityToUpdate);
             }
 
-            orderRepository.save(order);
+            NotificationEvent notificationEvent = NotificationEvent.builder()
+                    .channel("EMAIL")
+                    .recipient(request.getEmail())
+                    .subject("Order created successfully")
+                    .body("Thanks for buying our products!")
+                    .build();
 
-            kafkaTemplate.send("order-successful", "Order ID: " + order.getOrderId() + " created successfully!");
+            kafkaTemplate.send("order-successful", notificationEvent);
+
+            orderRepository.save(order);
       }
 
       private double calculateOrderTotal(List<OrderItemCreationRequest> items) {

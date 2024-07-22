@@ -23,7 +23,7 @@ public class NotificationController {
 
       // Listen to Kafka messages from topic "notification-delivery"
       @KafkaListener(topics = "notification-delivery")
-      public void listenNotificationDelivery(NotificationEvent message) {
+      public void listenIdentityService(NotificationEvent message) {
             log.info("Message received: {}", message);
             emailService.sendEmail(SendEmailRequest.builder()
                             .to(Recipient.builder()
@@ -36,8 +36,15 @@ public class NotificationController {
 
       // Listen to Kafka messages from topic "order-successful"
       @KafkaListener(topics = "order-successful")
-      public void listenFromOrderService(String message) {
+      public void listenOrderService(NotificationEvent message) {
             log.info("Message received: {}", message);
+            emailService.sendEmail(SendEmailRequest.builder()
+                    .to(Recipient.builder()
+                            .email(message.getRecipient())
+                            .build())
+                    .subject(message.getSubject())
+                    .htmlContent(message.getBody())
+                    .build());
       }
 
 }

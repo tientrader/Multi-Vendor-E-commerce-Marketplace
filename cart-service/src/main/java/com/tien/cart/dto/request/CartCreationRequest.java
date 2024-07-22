@@ -13,6 +13,7 @@ import java.util.List;
 public class CartCreationRequest {
 
       String userId;
+      String email;
       List<ProductInCartCreationRequest> productInCarts;
 
 }

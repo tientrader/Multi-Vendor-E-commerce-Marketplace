@@ -14,6 +14,7 @@ public class OrderResponse {
 
       Long orderId;
       String userId;
+      String email;
       List<OrderItemResponse> items;
       double total;
       String status;

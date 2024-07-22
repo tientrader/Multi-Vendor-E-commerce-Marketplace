@@ -24,6 +24,8 @@ public class Order {
       @Column(nullable = false)
       String userId;
 
+      String email;
+
       @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
       @JoinColumn(name = "order_id")
       List<OrderItem> items;

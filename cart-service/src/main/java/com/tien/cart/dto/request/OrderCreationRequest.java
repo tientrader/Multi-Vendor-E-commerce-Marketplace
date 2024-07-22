@@ -13,6 +13,7 @@ import java.util.List;
 public class OrderCreationRequest {
 
       String userId;
+      String email;
       List<OrderItemCreationRequest> items;
       double total;
       String status;

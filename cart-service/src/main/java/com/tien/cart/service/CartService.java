@@ -41,7 +41,7 @@ public class CartService {
       private static final String CART_KEY_PREFIX = "cart:";
 
       // Create new cart or update (if cart already exists)
-      public CartResponse createCart(CartCreationRequest cartCreationRequest) {
+      public CartResponse createCart(CartCreationRequest request) {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String userId = authentication.getName();
 
@@ -49,18 +49,18 @@ public class CartService {
             Cart existingCart = (Cart) redisTemplate.opsForValue().get(existingCartKey);
 
             if (existingCart != null) {
-                  updateCart(existingCart, cartCreationRequest);
+                  updateCart(existingCart, request);
                   redisTemplate.opsForValue().set(existingCartKey, existingCart);
                   return cartMapper.toCartResponse(existingCart);
             }
 
-            for (ProductInCartCreationRequest item : cartCreationRequest.getProductInCarts()) {
+            for (ProductInCartCreationRequest item : request.getProductInCarts()) {
                   String productId = item.getProductId();
                   ExistsResponse existsResponse = productClient.existsProduct(productId);
                   if (!existsResponse.isExists()) throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
             }
 
-            List<String> productIds = cartCreationRequest.getProductInCarts().stream()
+            List<String> productIds = request.getProductInCarts().stream()
                     .map(ProductInCartCreationRequest::getProductId)
                     .distinct()
                     .toList();
@@ -74,17 +74,19 @@ public class CartService {
                             }
                     ));
 
-            double total = cartCreationRequest.getProductInCarts().stream()
+            // Update cart (when it already exists)
+            double total = request.getProductInCarts().stream()
                     .mapToDouble(productInCart -> {
                           Double price = productPriceMap.get(productInCart.getProductId());
                           if (price == null) price = 0.0;
                           return price * productInCart.getQuantity();
                     }).sum();
 
-            Cart cart = cartMapper.toCart(cartCreationRequest);
+            Cart cart = cartMapper.toCart(request);
             cart.setId(UUID.randomUUID().toString());
             cart.setTotal(total);
             cart.setUserId(userId);
+            cart.setEmail(request.getEmail());
 
             redisTemplate.opsForValue().set(CART_KEY_PREFIX + userId, cart);
 
@@ -124,6 +126,7 @@ public class CartService {
 
             OrderCreationRequest orderRequest = cartMapper.toOrderCreationRequest(cart);
             orderRequest.setStatus("PENDING");
+            orderRequest.setEmail(cart.getEmail());
 
             orderClient.createOrder(orderRequest);
 

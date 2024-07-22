@@ -13,17 +13,22 @@ import com.tien.identity.entity.User;
 @Mapper(componentModel = "spring")
 public interface UserMapper {
 
+    @Mapping(target = "emailVerified", ignore = true)
     @Mapping(target = "roles", ignore = true)
     @Mapping(target = "id", ignore = true)
     User toUser(UserCreationRequest request);
 
     UserResponse toUserResponse(User user);
 
+    @Mapping(target = "emailVerified", ignore = true)
+    @Mapping(target = "email", ignore = true)
     @Mapping(target = "username", ignore = true)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "roles", ignore = true)
     void updateUser(@MappingTarget User user, UserUpdateRequest request);
 
+    @Mapping(target = "emailVerified", ignore = true)
+    @Mapping(target = "email", ignore = true)
     @Mapping(target = "username", ignore = true)
     @Mapping(target = "roles", ignore = true)
     @Mapping(target = "id", ignore = true)

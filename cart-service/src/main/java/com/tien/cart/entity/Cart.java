@@ -19,6 +19,7 @@ public class Cart {
       @Id
       String id;
       String userId;
+      String email;
       List<ProductInCart> productInCarts = new ArrayList<>();
       double total;
 
