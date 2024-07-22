@@ -23,6 +23,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -76,7 +77,21 @@ public class OrderService {
             return total;
       }
 
-      public OrderResponse getMyOrder(Long orderId) {
+      public List<OrderResponse> getAllMyOrder() {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String userId = authentication.getName();
+
+            List<Order> orders = orderRepository.findByUserId(userId);
+            if (orders.isEmpty()) {
+                  throw new AppException(ErrorCode.ORDER_NOT_FOUND);
+            }
+
+            return orders.stream()
+                    .map(orderMapper::toOrderResponse)
+                    .collect(Collectors.toList());
+      }
+
+      public OrderResponse getMyOrderById(Long orderId) {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             String userId = authentication.getName();
 
