@@ -74,7 +74,6 @@ public class CartService {
                             }
                     ));
 
-            // Update cart (when it already exists)
             double total = request.getProductInCarts().stream()
                     .mapToDouble(productInCart -> {
                           Double price = productPriceMap.get(productInCart.getProductId());
@@ -93,6 +92,7 @@ public class CartService {
             return cartMapper.toCartResponse(cart);
       }
 
+      // Update cart (when it already exists)
       private void updateCart(Cart existingCart, CartCreationRequest cartCreationRequest) {
             List<ProductInCart> productInCarts = cartCreationRequest.getProductInCarts().stream()
                     .map(request -> ProductInCart.builder()
