@@ -19,6 +19,7 @@ public class Shop {
       Long id;
 
       String name;
+      String email;
       String ownerUsername;
 
 }

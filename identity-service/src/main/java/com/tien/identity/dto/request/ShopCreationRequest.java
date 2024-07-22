@@ -11,5 +11,6 @@ import lombok.experimental.FieldDefaults;
 public class ShopCreationRequest {
 
       String name;
+      String email;
 
 }
