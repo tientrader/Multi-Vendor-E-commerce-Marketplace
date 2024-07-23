@@ -1,8 +1,10 @@
 package com.tien.product.service;
 
 import com.tien.product.dto.response.CategoryResponse;
+import com.tien.product.dto.response.ShopResponse;
 import com.tien.product.entity.Category;
 import com.tien.product.exception.ErrorCode;
+import com.tien.product.httpclient.ShopClient;
 import com.tien.product.mapper.CategoryMapper;
 import com.tien.product.repository.CategoryRepository;
 import com.tien.product.dto.request.CategoryCreationRequest;
@@ -14,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,31 +30,72 @@ public class CategoryService {
 
       CategoryRepository categoryRepository;
       CategoryMapper categoryMapper;
+      ShopClient shopClient;
 
       // Create a new category
-      @PreAuthorize("hasRole('ADMIN')")
+      @PreAuthorize("hasRole('SELLER')")
       @Transactional
       public CategoryResponse createCategory(CategoryCreationRequest request) {
+            String username = SecurityContextHolder.getContext().getAuthentication().getName();
+
+            ShopResponse shopResponse = shopClient.getShopByOwnerUsername(username).getResult();
+
+            if (shopResponse == null) {
+                  throw new AppException(ErrorCode.SHOP_NOT_FOUND);
+            }
+
             Category category = categoryMapper.toCategory(request);
-            return categoryMapper.toCategoryResponse(categoryRepository.save(category));
+            category.setShopId(shopResponse.getId());
+
+            Category savedCategory = categoryRepository.save(category);
+
+            return categoryMapper.toCategoryResponse(savedCategory);
       }
 
       // Update a category based on categoryId
-      @PreAuthorize("hasRole('ADMIN')")
+      @PreAuthorize("hasRole('SELLER')")
       @Transactional
       public CategoryResponse updateCategory(String categoryId, CategoryUpdateRequest request) {
+            String username = SecurityContextHolder.getContext().getAuthentication().getName();
+
+            ShopResponse shopResponse = shopClient.getShopByOwnerUsername(username).getResult();
+
+            if (shopResponse == null) {
+                  throw new AppException(ErrorCode.SHOP_NOT_FOUND);
+            }
+
             Category category = categoryRepository.findById(categoryId)
                     .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
+
+            if (!category.getShopId().equals(shopResponse.getId())) {
+                  throw new AppException(ErrorCode.UNAUTHORIZED);
+            }
+
             categoryMapper.updateCategory(category, request);
-            return categoryMapper.toCategoryResponse(categoryRepository.save(category));
+            Category updatedCategory = categoryRepository.save(category);
+
+            return categoryMapper.toCategoryResponse(updatedCategory);
       }
 
       // Delete a category based on categoryId
-      @PreAuthorize("hasRole('ADMIN')")
+      @PreAuthorize("hasRole('SELLER')")
       @Transactional
       public void deleteCategory(String categoryId) {
-            categoryRepository.findById(categoryId)
+            String username = SecurityContextHolder.getContext().getAuthentication().getName();
+
+            ShopResponse shopResponse = shopClient.getShopByOwnerUsername(username).getResult();
+
+            if (shopResponse == null) {
+                  throw new AppException(ErrorCode.SHOP_NOT_FOUND);
+            }
+
+            Category category = categoryRepository.findById(categoryId)
                     .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
+
+            if (!category.getShopId().equals(shopResponse.getId())) {
+                  throw new AppException(ErrorCode.UNAUTHORIZED);
+            }
+
             categoryRepository.deleteById(categoryId);
       }
 

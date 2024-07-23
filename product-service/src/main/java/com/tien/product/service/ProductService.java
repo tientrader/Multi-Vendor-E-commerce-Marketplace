@@ -2,7 +2,9 @@ package com.tien.product.service;
 
 import com.tien.product.dto.request.ProductUpdateRequest;
 import com.tien.product.dto.response.ExistsResponse;
+import com.tien.product.dto.response.ShopResponse;
 import com.tien.product.entity.Category;
+import com.tien.product.httpclient.ShopClient;
 import com.tien.product.mapper.ProductMapper;
 import com.tien.product.repository.CategoryRepository;
 import com.tien.product.repository.ProductRepository;
@@ -21,6 +23,7 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,16 +39,27 @@ public class ProductService {
       ProductMapper productMapper;
       CategoryRepository categoryRepository;
       MongoTemplate mongoTemplate;
+      ShopClient shopClient;
 
       // Add product
-      @PreAuthorize("hasRole('ADMIN')")
+      @PreAuthorize("hasRole('SELLER')")
       @Transactional
       public ProductResponse createProduct(ProductCreationRequest request) {
-            Product product = productMapper.toProduct(request);
+            String username = SecurityContextHolder.getContext().getAuthentication().getName();
+
+            ShopResponse shopResponse = shopClient.getShopByOwnerUsername(username).getResult();
+            if (shopResponse == null) {
+                  throw new AppException(ErrorCode.SHOP_NOT_FOUND);
+            }
 
             Category category = categoryRepository.findById(request.getCategoryId())
                     .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
 
+            if (!category.getShopId().equals(shopResponse.getId())) {
+                  throw new AppException(ErrorCode.UNAUTHORIZED);
+            }
+
+            Product product = productMapper.toProduct(request);
             product.setCategory(category);
             product = productRepository.save(product);
 
@@ -56,14 +70,25 @@ public class ProductService {
       }
 
       // Update product by productId
-      @PreAuthorize("hasRole('ADMIN')")
+      @PreAuthorize("hasRole('SELLER')")
       @Transactional
       public ProductResponse updateProduct(String productId, ProductUpdateRequest request) {
+            String username = SecurityContextHolder.getContext().getAuthentication().getName();
+
+            ShopResponse shopResponse = shopClient.getShopByOwnerUsername(username).getResult();
+            if (shopResponse == null) {
+                  throw new AppException(ErrorCode.SHOP_NOT_FOUND);
+            }
+
             Product product = productRepository.findById(productId)
                     .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
 
             Category newCategory = categoryRepository.findById(request.getCategoryId())
                     .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
+
+            if (!newCategory.getShopId().equals(shopResponse.getId())) {
+                  throw new AppException(ErrorCode.UNAUTHORIZED);
+            }
 
             Category oldCategory = product.getCategory();
             oldCategory.getProducts().remove(product);
@@ -92,11 +117,22 @@ public class ProductService {
       }
 
       // Delete product by productId
-      @PreAuthorize("hasRole('ADMIN')")
+      @PreAuthorize("hasRole('SELLER')")
       @Transactional
       public void deleteProduct(String productId) {
+            String username = SecurityContextHolder.getContext().getAuthentication().getName();
+
+            ShopResponse shopResponse = shopClient.getShopByOwnerUsername(username).getResult();
+            if (shopResponse == null) {
+                  throw new AppException(ErrorCode.SHOP_NOT_FOUND);
+            }
+
             Product product = productRepository.findById(productId)
                     .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+
+            if (!product.getCategory().getShopId().equals(shopResponse.getId())) {
+                  throw new AppException(ErrorCode.UNAUTHORIZED);
+            }
 
             Category category = product.getCategory();
             category.getProducts().remove(product);

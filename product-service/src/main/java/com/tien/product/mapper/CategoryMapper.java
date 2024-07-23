@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 @Mapper(componentModel = "spring")
 public interface CategoryMapper {
 
+      @Mapping(target = "shopId", ignore = true)
       @Mapping(target = "products", ignore = true)
       @Mapping(target = "id", ignore = true)
       Category toCategory(CategoryCreationRequest request);
@@ -24,6 +25,7 @@ public interface CategoryMapper {
       @Mapping(target = "productIds", source = "products", qualifiedByName = "mapProductIds")
       CategoryResponse toCategoryResponse(Category category);
 
+      @Mapping(target = "shopId", ignore = true)
       @Mapping(target = "products", ignore = true)
       @Mapping(target = "id", ignore = true)
       void updateCategory(@MappingTarget Category category, CategoryUpdateRequest request);

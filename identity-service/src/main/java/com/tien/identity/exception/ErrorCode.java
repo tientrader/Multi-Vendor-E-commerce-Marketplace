@@ -31,7 +31,10 @@ public enum ErrorCode {
     CITY_NULL(1015, "City must not be null!", HttpStatus.BAD_REQUEST),
     ROLE_NOT_FOUND(1016, "Role not found!", HttpStatus.NOT_FOUND),
     PERMISSION_NOT_FOUND(1017, "Permissions not found!", HttpStatus.NOT_FOUND),
-    PASSWORD_EXISTED(1018, "Password existed", HttpStatus.BAD_REQUEST);
+    PASSWORD_EXISTED(1018, "Password existed", HttpStatus.BAD_REQUEST),
+    ALREADY_HAVE_A_SHOP(1019, "ALREADY_HAVE_A_SHOP", HttpStatus.BAD_REQUEST),
+    SHOP_NOT_FOUND(1020, "SHOP_NOT_FOUND", HttpStatus.BAD_REQUEST),
+    ;
 
     int code;
     String message;

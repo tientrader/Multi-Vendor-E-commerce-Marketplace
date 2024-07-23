@@ -3,19 +3,16 @@ package com.tien.product.dto.response;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.util.Set;
-
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CategoryResponse {
+public class ShopResponse {
 
-      String id;
-      Long shopId;
+      Long id;
       String name;
-      String description;
-      Set<String> productIds;
+      String email;
+      String ownerUsername;
 
 }

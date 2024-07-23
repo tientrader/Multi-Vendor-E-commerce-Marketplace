@@ -9,3 +9,7 @@ spring:
   data:
     mongodb:
       uri: mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@localhost:27017/product-service?authSource=admin
+
+app:
+  services:
+    identity: http://localhost:8080/identity

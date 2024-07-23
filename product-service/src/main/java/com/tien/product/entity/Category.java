@@ -20,6 +20,7 @@ public class Category {
 
       @Id
       String id;
+      Long shopId;
       String name;
       String description;
 

@@ -2,16 +2,14 @@ package com.tien.identity.controller;
 
 import com.tien.identity.dto.ApiResponse;
 import com.tien.identity.dto.request.ShopCreationRequest;
+import com.tien.identity.dto.request.ShopUpdateRequest;
 import com.tien.identity.dto.response.ShopResponse;
 import com.tien.identity.service.ShopService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/shop")
@@ -27,6 +25,32 @@ public class ShopController {
             return ApiResponse.<ShopResponse>builder()
                     .result(shopResponse)
                     .message("Shop created successfully")
+                    .build();
+      }
+
+      @PutMapping
+      public ApiResponse<ShopResponse> updateShop(@RequestBody @Valid ShopUpdateRequest request) {
+            ShopResponse shopResponse = shopService.updateShop(request);
+            return ApiResponse.<ShopResponse>builder()
+                    .result(shopResponse)
+                    .message("Shop updated successfully")
+                    .build();
+      }
+
+      @DeleteMapping
+      public ApiResponse<Void> deleteShop() {
+            shopService.deleteShop();
+            return ApiResponse.<Void>builder()
+                    .message("Shop deleted successfully")
+                    .build();
+      }
+
+      @GetMapping("/owner/{username}")
+      public ApiResponse<ShopResponse> getShopByOwnerUsername(@PathVariable("username") String username) {
+            ShopResponse shopResponse = shopService.getShopByOwnerUsername(username);
+            return ApiResponse.<ShopResponse>builder()
+                    .result(shopResponse)
+                    .message("Shop retrieved successfully")
                     .build();
       }
 
