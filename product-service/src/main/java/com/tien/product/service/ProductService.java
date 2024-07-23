@@ -46,11 +46,8 @@ public class ProductService {
       @Transactional
       public ProductResponse createProduct(ProductCreationRequest request) {
             String username = SecurityContextHolder.getContext().getAuthentication().getName();
-
             ShopResponse shopResponse = shopClient.getShopByOwnerUsername(username).getResult();
-            if (shopResponse == null) {
-                  throw new AppException(ErrorCode.SHOP_NOT_FOUND);
-            }
+            if (shopResponse == null) throw new AppException(ErrorCode.SHOP_NOT_FOUND);
 
             Category category = categoryRepository.findById(request.getCategoryId())
                     .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
@@ -76,9 +73,7 @@ public class ProductService {
             String username = SecurityContextHolder.getContext().getAuthentication().getName();
 
             ShopResponse shopResponse = shopClient.getShopByOwnerUsername(username).getResult();
-            if (shopResponse == null) {
-                  throw new AppException(ErrorCode.SHOP_NOT_FOUND);
-            }
+            if (shopResponse == null) throw new AppException(ErrorCode.SHOP_NOT_FOUND);
 
             Product product = productRepository.findById(productId)
                     .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
@@ -104,6 +99,7 @@ public class ProductService {
             return productMapper.toProductResponse(product);
       }
 
+      // Update stock after order created
       @Transactional
       public void updateStock(String productId, int quantity) {
             Product product = productRepository.findById(productId)
@@ -123,9 +119,7 @@ public class ProductService {
             String username = SecurityContextHolder.getContext().getAuthentication().getName();
 
             ShopResponse shopResponse = shopClient.getShopByOwnerUsername(username).getResult();
-            if (shopResponse == null) {
-                  throw new AppException(ErrorCode.SHOP_NOT_FOUND);
-            }
+            if (shopResponse == null) throw new AppException(ErrorCode.SHOP_NOT_FOUND);
 
             Product product = productRepository.findById(productId)
                     .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
@@ -159,12 +153,14 @@ public class ProductService {
             }
 
             Query query = Query.query(criteria);
-            Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(sortDirection), sortBy));
+            Pageable pageable = PageRequest.of
+                    (page, size, Sort.by(Sort.Direction.fromString(sortDirection), sortBy));
             query.with(pageable);
 
             List<Product> products = mongoTemplate.find(query, Product.class);
             long total = mongoTemplate.count(query, Product.class);
             List<ProductResponse> productResponses = productMapper.toProductResponses(products);
+
             return new PageImpl<>(productResponses, pageable, total);
       }
 

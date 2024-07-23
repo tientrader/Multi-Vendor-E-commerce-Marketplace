@@ -46,8 +46,9 @@ public class UserService {
     // Create User account
     @Transactional
     public UserResponse createUser(UserCreationRequest request) {
-        if (userRepository.existsByUsername(request.getUsername()))
+        if (userRepository.existsByUsername(request.getUsername())) {
             throw new AppException(ErrorCode.USER_EXISTED);
+        }
 
         User user = userMapper.toUser(request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
@@ -80,7 +81,10 @@ public class UserService {
 
         User user = userRepository.findByUsername(name)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
-        if (StringUtils.hasText(user.getPassword())) throw new AppException(ErrorCode.PASSWORD_EXISTED);
+
+        if (StringUtils.hasText(user.getPassword())) {
+            throw new AppException(ErrorCode.PASSWORD_EXISTED);
+        }
 
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         userRepository.save(user);
@@ -95,6 +99,7 @@ public class UserService {
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         userMapper.updateUser(user, request);
+
         if (StringUtils.hasText(request.getPassword())) {
             user.setPassword(passwordEncoder.encode(request.getPassword()));
         }

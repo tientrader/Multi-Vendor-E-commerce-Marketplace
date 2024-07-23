@@ -41,14 +41,18 @@ public class PermissionService {
     @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public void deletePermission(String permission) {
-        if (!permissionRepository.existsById(permission)) {throw new AppException(ErrorCode.PERMISSION_NOT_FOUND);}
+        if (!permissionRepository.existsById(permission)) {
+            throw new AppException(ErrorCode.PERMISSION_NOT_FOUND);
+        }
         permissionRepository.deleteById(permission);
     }
 
     // View all existing permissions
     @PreAuthorize("hasRole('ADMIN')")
     public List<PermissionResponse> getAllPermissions() {
-        return permissionRepository.findAll().stream().map(permissionMapper::toPermissionResponse).toList();
+        return permissionRepository.findAll().stream()
+                .map(permissionMapper::toPermissionResponse)
+                .toList();
     }
 
 }

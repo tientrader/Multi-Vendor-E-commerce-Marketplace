@@ -34,7 +34,6 @@ public class UserProfileService {
     }
 
     // Delete a user profile
-    @PreAuthorize("hasRole('ADMIN')")
     public void deleteProfile(String userId) {
         UserProfile userProfile = userProfileRepository.findByUserId(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.PROFILE_NOT_FOUND));
@@ -61,7 +60,9 @@ public class UserProfileService {
     // Get all user profiles
     @PreAuthorize("hasRole('ADMIN')")
     public List<UserProfileResponse> getAllProfiles() {
-        return userProfileRepository.findAll().stream().map(userProfileMapper::toUserProfileResponse).toList();
+        return userProfileRepository.findAll().stream()
+                .map(userProfileMapper::toUserProfileResponse)
+                .toList();
     }
 
 }

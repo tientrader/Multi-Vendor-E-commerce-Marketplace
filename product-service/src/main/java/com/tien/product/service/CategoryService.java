@@ -37,16 +37,11 @@ public class CategoryService {
       @Transactional
       public CategoryResponse createCategory(CategoryCreationRequest request) {
             String username = SecurityContextHolder.getContext().getAuthentication().getName();
-
             ShopResponse shopResponse = shopClient.getShopByOwnerUsername(username).getResult();
-
-            if (shopResponse == null) {
-                  throw new AppException(ErrorCode.SHOP_NOT_FOUND);
-            }
+            if (shopResponse == null) throw new AppException(ErrorCode.SHOP_NOT_FOUND);
 
             Category category = categoryMapper.toCategory(request);
             category.setShopId(shopResponse.getId());
-
             Category savedCategory = categoryRepository.save(category);
 
             return categoryMapper.toCategoryResponse(savedCategory);
@@ -57,12 +52,8 @@ public class CategoryService {
       @Transactional
       public CategoryResponse updateCategory(String categoryId, CategoryUpdateRequest request) {
             String username = SecurityContextHolder.getContext().getAuthentication().getName();
-
             ShopResponse shopResponse = shopClient.getShopByOwnerUsername(username).getResult();
-
-            if (shopResponse == null) {
-                  throw new AppException(ErrorCode.SHOP_NOT_FOUND);
-            }
+            if (shopResponse == null) throw new AppException(ErrorCode.SHOP_NOT_FOUND);
 
             Category category = categoryRepository.findById(categoryId)
                     .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
@@ -82,12 +73,8 @@ public class CategoryService {
       @Transactional
       public void deleteCategory(String categoryId) {
             String username = SecurityContextHolder.getContext().getAuthentication().getName();
-
             ShopResponse shopResponse = shopClient.getShopByOwnerUsername(username).getResult();
-
-            if (shopResponse == null) {
-                  throw new AppException(ErrorCode.SHOP_NOT_FOUND);
-            }
+            if (shopResponse == null) throw new AppException(ErrorCode.SHOP_NOT_FOUND);
 
             Category category = categoryRepository.findById(categoryId)
                     .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
