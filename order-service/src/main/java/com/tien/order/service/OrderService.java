@@ -54,7 +54,7 @@ public class OrderService {
                     .channel("EMAIL")
                     .recipient(request.getEmail())
                     .subject("Order created successfully")
-                    .body("Thanks for buying our products!")
+                    .body("Thank " + request.getUsername() + " for buying our products! \n The total amount is " + request.getTotal())
                     .build();
 
             kafkaTemplate.send("order-successful", notificationEvent);
