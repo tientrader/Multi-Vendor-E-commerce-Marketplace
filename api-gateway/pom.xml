@@ -51,6 +51,7 @@
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>
+
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
