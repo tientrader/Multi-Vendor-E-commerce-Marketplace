@@ -22,4 +22,4 @@ spring:
 notification:
   email:
     brevo-url: https://api.brevo.com
-    brevo-apikey: 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
+    brevo-apikey: ${BREVO_API_KEY}
