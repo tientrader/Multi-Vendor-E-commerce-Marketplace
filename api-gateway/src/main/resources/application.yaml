@@ -13,51 +13,114 @@ spring:
         - id: identity_service
           uri: http://localhost:8080
           predicates:
-          - Path=${app.api-prefix}/identity/**
+            - Path=${app.api-prefix}/identity/**
           filters:
-          - StripPrefix=2
+            - StripPrefix=2
+            - name: Resilience4JCircuitBreaker
+              args:
+                ref: 'defaultCircuitBreaker'
+            - name: Resilience4JRetry
+              args:
+                ref: 'defaultRetry'
         - id: profile_service
           uri: http://localhost:8081
           predicates:
-          - Path=${app.api-prefix}/profile/users/**
+            - Path=${app.api-prefix}/profile/users/**
           filters:
-          - StripPrefix=2
+            - StripPrefix=2
+            - name: Resilience4JCircuitBreaker
+              args:
+                ref: 'defaultCircuitBreaker'
+            - name: Resilience4JRetry
+              args:
+                ref: 'defaultRetry'
         - id: notification_service
           uri: http://localhost:8082
           predicates:
             - Path=${app.api-prefix}/notification/**
           filters:
             - StripPrefix=2
+            - name: Resilience4JCircuitBreaker
+              args:
+                ref: 'defaultCircuitBreaker'
+            - name: Resilience4JRetry
+              args:
+                ref: 'defaultRetry'
         - id: product_service
           uri: http://localhost:8083
           predicates:
             - Path=${app.api-prefix}/product/**
           filters:
             - StripPrefix=2
+            - name: Resilience4JCircuitBreaker
+              args:
+                ref: 'defaultCircuitBreaker'
+            - name: Resilience4JRetry
+              args:
+                ref: 'defaultRetry'
         - id: order_service
           uri: http://localhost:8084
           predicates:
             - Path=${app.api-prefix}/order/**
           filters:
             - StripPrefix=2
+            - name: Resilience4JCircuitBreaker
+              args:
+                ref: 'defaultCircuitBreaker'
+            - name: Resilience4JRetry
+              args:
+                ref: 'defaultRetry'
         - id: payment_service
           uri: http://localhost:8085
           predicates:
             - Path=${app.api-prefix}/payment/**
           filters:
             - StripPrefix=2
+            - name: Resilience4JCircuitBreaker
+              args:
+                ref: 'defaultCircuitBreaker'
+            - name: Resilience4JRetry
+              args:
+                ref: 'defaultRetry'
         - id: cart_service
           uri: http://localhost:8086
           predicates:
             - Path=${app.api-prefix}/cart/**
           filters:
             - StripPrefix=2
+            - name: Resilience4JCircuitBreaker
+              args:
+                ref: 'defaultCircuitBreaker'
+            - name: Resilience4JRetry
+              args:
+                ref: 'defaultRetry'
         - id: shipping_service
           uri: http://localhost:8087
           predicates:
             - Path=${app.api-prefix}/shipping/**
           filters:
             - StripPrefix=2
+            - name: Resilience4JCircuitBreaker
+              args:
+                ref: 'defaultCircuitBreaker'
+            - name: Resilience4JRetry
+              args:
+                ref: 'defaultRetry'
+
+  resilience4j:
+    circuitbreaker:
+      instances:
+        defaultCircuitBreaker:
+          registerHealthIndicator: true
+          failureRateThreshold: 50
+          waitDurationInOpenState: 5s
+          slidingWindowSize: 10
+          slidingWindowType: COUNT_BASED
+    retry:
+      instances:
+        defaultRetry:
+          maxAttempts: 3
+          waitDuration: 500ms
 
 management:
   endpoints:
