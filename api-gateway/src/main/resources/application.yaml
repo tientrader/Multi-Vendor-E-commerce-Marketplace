@@ -16,117 +16,255 @@ spring:
             - Path=${app.api-prefix}/identity/**
           filters:
             - StripPrefix=2
-            - name: Resilience4JCircuitBreaker
+            - name: CircuitBreaker
               args:
-                ref: 'defaultCircuitBreaker'
-            - name: Resilience4JRetry
+                name: identityService
+            - name: Retry
               args:
-                ref: 'defaultRetry'
+                name: identityService
+                retries: 3
+                backoff:
+                  firstBackoff: 500ms
+                  maxBackoff: 2000ms
         - id: profile_service
           uri: http://localhost:8081
           predicates:
             - Path=${app.api-prefix}/profile/users/**
           filters:
             - StripPrefix=2
-            - name: Resilience4JCircuitBreaker
+            - name: CircuitBreaker
               args:
-                ref: 'defaultCircuitBreaker'
-            - name: Resilience4JRetry
+                name: profileService
+            - name: Retry
               args:
-                ref: 'defaultRetry'
+                name: profileService
+                retries: 3
+                backoff:
+                  firstBackoff: 500ms
+                  maxBackoff: 2000ms
         - id: notification_service
           uri: http://localhost:8082
           predicates:
             - Path=${app.api-prefix}/notification/**
           filters:
             - StripPrefix=2
-            - name: Resilience4JCircuitBreaker
+            - name: CircuitBreaker
               args:
-                ref: 'defaultCircuitBreaker'
-            - name: Resilience4JRetry
+                name: notificationService
+            - name: Retry
               args:
-                ref: 'defaultRetry'
+                name: notificationService
+                retries: 3
+                backoff:
+                  firstBackoff: 500ms
+                  maxBackoff: 2000ms
         - id: product_service
           uri: http://localhost:8083
           predicates:
             - Path=${app.api-prefix}/product/**
           filters:
             - StripPrefix=2
-            - name: Resilience4JCircuitBreaker
+            - name: CircuitBreaker
               args:
-                ref: 'defaultCircuitBreaker'
-            - name: Resilience4JRetry
+                name: productService
+            - name: Retry
               args:
-                ref: 'defaultRetry'
+                name: productService
+                retries: 3
+                backoff:
+                  firstBackoff: 500ms
+                  maxBackoff: 2000ms
         - id: order_service
           uri: http://localhost:8084
           predicates:
             - Path=${app.api-prefix}/order/**
           filters:
             - StripPrefix=2
-            - name: Resilience4JCircuitBreaker
+            - name: CircuitBreaker
               args:
-                ref: 'defaultCircuitBreaker'
-            - name: Resilience4JRetry
+                name: orderService
+            - name: Retry
               args:
-                ref: 'defaultRetry'
+                name: orderService
+                retries: 3
+                backoff:
+                  firstBackoff: 500ms
+                  maxBackoff: 2000ms
         - id: payment_service
           uri: http://localhost:8085
           predicates:
             - Path=${app.api-prefix}/payment/**
           filters:
             - StripPrefix=2
-            - name: Resilience4JCircuitBreaker
+            - name: CircuitBreaker
               args:
-                ref: 'defaultCircuitBreaker'
-            - name: Resilience4JRetry
+                name: paymentService
+            - name: Retry
               args:
-                ref: 'defaultRetry'
+                name: paymentService
+                retries: 3
+                backoff:
+                  firstBackoff: 500ms
+                  maxBackoff: 2000ms
         - id: cart_service
           uri: http://localhost:8086
           predicates:
             - Path=${app.api-prefix}/cart/**
           filters:
             - StripPrefix=2
-            - name: Resilience4JCircuitBreaker
+            - name: CircuitBreaker
               args:
-                ref: 'defaultCircuitBreaker'
-            - name: Resilience4JRetry
+                name: cartService
+            - name: Retry
               args:
-                ref: 'defaultRetry'
+                name: cartService
+                retries: 3
+                backoff:
+                  firstBackoff: 500ms
+                  maxBackoff: 2000ms
         - id: shipping_service
           uri: http://localhost:8087
           predicates:
             - Path=${app.api-prefix}/shipping/**
           filters:
             - StripPrefix=2
-            - name: Resilience4JCircuitBreaker
+            - name: CircuitBreaker
               args:
-                ref: 'defaultCircuitBreaker'
-            - name: Resilience4JRetry
+                name: shippingService
+            - name: Retry
               args:
-                ref: 'defaultRetry'
+                name: shippingService
+                retries: 3
+                backoff:
+                  firstBackoff: 500ms
+                  maxBackoff: 2000ms
+        - id: actuator
+          uri: http://localhost:8888
+          predicates:
+            - Path=/actuator/**
 
-  resilience4j:
-    circuitbreaker:
-      instances:
-        defaultCircuitBreaker:
-          registerHealthIndicator: true
-          failureRateThreshold: 50
-          waitDurationInOpenState: 5s
-          slidingWindowSize: 10
-          slidingWindowType: COUNT_BASED
-    retry:
-      instances:
-        defaultRetry:
-          maxAttempts: 3
-          waitDuration: 500ms
+resilience4j:
+  circuitbreaker:
+    instances:
+      identityService:
+        registerHealthIndicator: true
+        eventConsumerBufferSize: 10
+        failureRateThreshold: 50
+        minimumNumberOfCalls: 5
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        waitDurationInOpenState: 5s
+        permittedNumberOfCallsInHalfOpenState: 3
+        slidingWindowSize: 10
+        slidingWindowType: COUNT_BASED
+      profileService:
+        registerHealthIndicator: true
+        eventConsumerBufferSize: 10
+        failureRateThreshold: 50
+        minimumNumberOfCalls: 5
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        waitDurationInOpenState: 5s
+        permittedNumberOfCallsInHalfOpenState: 3
+        slidingWindowSize: 10
+        slidingWindowType: COUNT_BASED
+      notificationService:
+        registerHealthIndicator: true
+        eventConsumerBufferSize: 10
+        failureRateThreshold: 50
+        minimumNumberOfCalls: 5
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        waitDurationInOpenState: 5s
+        permittedNumberOfCallsInHalfOpenState: 3
+        slidingWindowSize: 10
+        slidingWindowType: COUNT_BASED
+      productService:
+        registerHealthIndicator: true
+        eventConsumerBufferSize: 10
+        failureRateThreshold: 50
+        minimumNumberOfCalls: 5
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        waitDurationInOpenState: 5s
+        permittedNumberOfCallsInHalfOpenState: 3
+        slidingWindowSize: 10
+        slidingWindowType: COUNT_BASED
+      orderService:
+        registerHealthIndicator: true
+        eventConsumerBufferSize: 10
+        failureRateThreshold: 50
+        minimumNumberOfCalls: 5
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        waitDurationInOpenState: 5s
+        permittedNumberOfCallsInHalfOpenState: 3
+        slidingWindowSize: 10
+        slidingWindowType: COUNT_BASED
+      paymentService:
+        registerHealthIndicator: true
+        eventConsumerBufferSize: 10
+        failureRateThreshold: 50
+        minimumNumberOfCalls: 5
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        waitDurationInOpenState: 5s
+        permittedNumberOfCallsInHalfOpenState: 3
+        slidingWindowSize: 10
+        slidingWindowType: COUNT_BASED
+      cartService:
+        registerHealthIndicator: true
+        eventConsumerBufferSize: 10
+        failureRateThreshold: 50
+        minimumNumberOfCalls: 5
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        waitDurationInOpenState: 5s
+        permittedNumberOfCallsInHalfOpenState: 3
+        slidingWindowSize: 10
+        slidingWindowType: COUNT_BASED
+      shippingService:
+        registerHealthIndicator: true
+        eventConsumerBufferSize: 10
+        failureRateThreshold: 50
+        minimumNumberOfCalls: 5
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        waitDurationInOpenState: 5s
+        permittedNumberOfCallsInHalfOpenState: 3
+        slidingWindowSize: 10
+        slidingWindowType: COUNT_BASED
+
+  retry:
+    instances:
+      identityService:
+        maxRetryAttempts: 5
+        waitDuration: 10s
+      profileService:
+        maxRetryAttempts: 5
+        waitDuration: 10s
+      notificationService:
+        maxRetryAttempts: 5
+        waitDuration: 10s
+      productService:
+        maxRetryAttempts: 5
+        waitDuration: 10s
+      orderService:
+        maxRetryAttempts: 5
+        waitDuration: 10s
+      paymentService:
+        maxRetryAttempts: 5
+        waitDuration: 10s
+      cartService:
+        maxRetryAttempts: 5
+        waitDuration: 10s
+      shippingService:
+        maxRetryAttempts: 5
+        waitDuration: 10s
 
 management:
   endpoints:
     web:
       exposure:
-        include: health, info, prometheus, trace
+        include: health, info, prometheus, trace, metrics, circuitbreakers
+  endpoint:
+    health:
+      show-details: always
+  health:
+    circuitbreakers:
+      enabled: true
   tracing:
     sampler:
       probability: 1.0
