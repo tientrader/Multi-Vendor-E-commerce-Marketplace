@@ -21,11 +21,7 @@ spring:
                 name: identityService
             - name: Retry
               args:
-                name: identityService
-                retries: 3
-                backoff:
-                  firstBackoff: 500ms
-                  maxBackoff: 2000ms
+                name: default
         - id: profile_service
           uri: http://localhost:8081
           predicates:
@@ -37,11 +33,7 @@ spring:
                 name: profileService
             - name: Retry
               args:
-                name: profileService
-                retries: 3
-                backoff:
-                  firstBackoff: 500ms
-                  maxBackoff: 2000ms
+                name: default
         - id: notification_service
           uri: http://localhost:8082
           predicates:
@@ -53,11 +45,7 @@ spring:
                 name: notificationService
             - name: Retry
               args:
-                name: notificationService
-                retries: 3
-                backoff:
-                  firstBackoff: 500ms
-                  maxBackoff: 2000ms
+                name: default
         - id: product_service
           uri: http://localhost:8083
           predicates:
@@ -69,11 +57,7 @@ spring:
                 name: productService
             - name: Retry
               args:
-                name: productService
-                retries: 3
-                backoff:
-                  firstBackoff: 500ms
-                  maxBackoff: 2000ms
+                name: default
         - id: order_service
           uri: http://localhost:8084
           predicates:
@@ -85,11 +69,7 @@ spring:
                 name: orderService
             - name: Retry
               args:
-                name: orderService
-                retries: 3
-                backoff:
-                  firstBackoff: 500ms
-                  maxBackoff: 2000ms
+                name: default
         - id: payment_service
           uri: http://localhost:8085
           predicates:
@@ -101,11 +81,7 @@ spring:
                 name: paymentService
             - name: Retry
               args:
-                name: paymentService
-                retries: 3
-                backoff:
-                  firstBackoff: 500ms
-                  maxBackoff: 2000ms
+                name: default
         - id: cart_service
           uri: http://localhost:8086
           predicates:
@@ -117,11 +93,7 @@ spring:
                 name: cartService
             - name: Retry
               args:
-                name: cartService
-                retries: 3
-                backoff:
-                  firstBackoff: 500ms
-                  maxBackoff: 2000ms
+                name: default
         - id: shipping_service
           uri: http://localhost:8087
           predicates:
@@ -133,11 +105,7 @@ spring:
                 name: shippingService
             - name: Retry
               args:
-                name: shippingService
-                retries: 3
-                backoff:
-                  firstBackoff: 500ms
-                  maxBackoff: 2000ms
+                name: default
         - id: actuator
           uri: http://localhost:8888
           predicates:
@@ -145,106 +113,56 @@ spring:
 
 resilience4j:
   circuitbreaker:
+    configs:
+      default:
+        registerHealthIndicator: true
+        failureRateThreshold: 50
+        minimumNumberOfCalls: 5
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        waitDurationInOpenState: 5s
+        permittedNumberOfCallsInHalfOpenState: 3
+        slidingWindowSize: 10
+        slidingWindowType: COUNT_BASED
     instances:
       identityService:
-        registerHealthIndicator: true
-        failureRateThreshold: 50
-        minimumNumberOfCalls: 5
-        automaticTransitionFromOpenToHalfOpenEnabled: true
-        waitDurationInOpenState: 5s
-        permittedNumberOfCallsInHalfOpenState: 3
-        slidingWindowSize: 10
-        slidingWindowType: COUNT_BASED
+        baseConfig: default
       profileService:
-        registerHealthIndicator: true
-        failureRateThreshold: 50
-        minimumNumberOfCalls: 5
-        automaticTransitionFromOpenToHalfOpenEnabled: true
-        waitDurationInOpenState: 5s
-        permittedNumberOfCallsInHalfOpenState: 3
-        slidingWindowSize: 10
-        slidingWindowType: COUNT_BASED
+        baseConfig: default
       notificationService:
-        registerHealthIndicator: true
-        failureRateThreshold: 50
-        minimumNumberOfCalls: 5
-        automaticTransitionFromOpenToHalfOpenEnabled: true
-        waitDurationInOpenState: 5s
-        permittedNumberOfCallsInHalfOpenState: 3
-        slidingWindowSize: 10
-        slidingWindowType: COUNT_BASED
+        baseConfig: default
       productService:
-        registerHealthIndicator: true
-        failureRateThreshold: 50
-        minimumNumberOfCalls: 5
-        automaticTransitionFromOpenToHalfOpenEnabled: true
-        waitDurationInOpenState: 5s
-        permittedNumberOfCallsInHalfOpenState: 3
-        slidingWindowSize: 10
-        slidingWindowType: COUNT_BASED
+        baseConfig: default
       orderService:
-        registerHealthIndicator: true
-        failureRateThreshold: 50
-        minimumNumberOfCalls: 5
-        automaticTransitionFromOpenToHalfOpenEnabled: true
-        waitDurationInOpenState: 5s
-        permittedNumberOfCallsInHalfOpenState: 3
-        slidingWindowSize: 10
-        slidingWindowType: COUNT_BASED
+        baseConfig: default
       paymentService:
-        registerHealthIndicator: true
-        failureRateThreshold: 50
-        minimumNumberOfCalls: 5
-        automaticTransitionFromOpenToHalfOpenEnabled: true
-        waitDurationInOpenState: 5s
-        permittedNumberOfCallsInHalfOpenState: 3
-        slidingWindowSize: 10
-        slidingWindowType: COUNT_BASED
+        baseConfig: default
       cartService:
-        registerHealthIndicator: true
-        failureRateThreshold: 50
-        minimumNumberOfCalls: 5
-        automaticTransitionFromOpenToHalfOpenEnabled: true
-        waitDurationInOpenState: 5s
-        permittedNumberOfCallsInHalfOpenState: 3
-        slidingWindowSize: 10
-        slidingWindowType: COUNT_BASED
+        baseConfig: default
       shippingService:
-        registerHealthIndicator: true
-        failureRateThreshold: 50
-        minimumNumberOfCalls: 5
-        automaticTransitionFromOpenToHalfOpenEnabled: true
-        waitDurationInOpenState: 5s
-        permittedNumberOfCallsInHalfOpenState: 3
-        slidingWindowSize: 10
-        slidingWindowType: COUNT_BASED
+        baseConfig: default
 
   retry:
+    configs:
+      default:
+        maxRetryAttempts: 3
+        waitDuration: 2s
     instances:
       identityService:
-        maxRetryAttempts: 3
-        waitDuration: 2s
+        baseConfig: default
       profileService:
-        maxRetryAttempts: 3
-        waitDuration: 2s
+        baseConfig: default
       notificationService:
-        maxRetryAttempts: 3
-        waitDuration: 2s
+        baseConfig: default
       productService:
-        maxRetryAttempts: 3
-        waitDuration: 2s
+        baseConfig: default
       orderService:
-        maxRetryAttempts: 3
-        waitDuration: 2s
+        baseConfig: default
       paymentService:
-        maxRetryAttempts: 3
-        waitDuration: 2s
+        baseConfig: default
       cartService:
-        maxRetryAttempts: 3
-        waitDuration: 2s
+        baseConfig: default
       shippingService:
-        maxRetryAttempts: 3
-        waitDuration: 2s
+        baseConfig: default
 
 management:
   endpoints:
