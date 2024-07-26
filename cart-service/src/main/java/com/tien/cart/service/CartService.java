@@ -55,6 +55,7 @@ public class CartService {
             for (ProductInCartCreationRequest item : request.getProductInCarts()) {
                   String productId = item.getProductId();
                   ExistsResponse existsResponse = productClient.existsProduct(productId);
+                  if (existsResponse.isError()) throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
                   if (!existsResponse.isExists()) throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
             }
 
@@ -67,8 +68,13 @@ public class CartService {
                     .collect(Collectors.toMap(
                             productId -> productId,
                             productId -> {
-                                  ApiResponse<Double> response = productClient.getProductPriceById(productId);
-                                  return response.getResult();
+                                  try {
+                                        ApiResponse<Double> response = productClient.getProductPriceById(productId);
+                                        return response.getResult();
+                                  } catch (AppException e) {
+                                        log.error("Error fetching price for productId {}: {}", productId, e.getMessage());
+                                        return 0.0;
+                                  }
                             }
                     ));
 

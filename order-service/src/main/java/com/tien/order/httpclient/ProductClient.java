@@ -2,6 +2,10 @@ package com.tien.order.httpclient;
 
 import com.tien.order.configuration.AuthenticationRequestInterceptor;
 import com.tien.order.dto.ApiResponse;
+import com.tien.order.exception.AppException;
+import com.tien.order.exception.ErrorCode;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,11 +18,23 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface ProductClient {
 
     // Call the Product Service to get Product Price
+    @CircuitBreaker(name = "getProductPriceById", fallbackMethod = "getProductPriceByIdFallback")
+    @Retry(name = "getProductPriceById")
     @GetMapping(value = "/{productId}/price", produces = MediaType.APPLICATION_JSON_VALUE)
     ApiResponse<Double> getProductPriceById(@PathVariable("productId") String productId);
 
     // Call the Product Service to update stock
+    @CircuitBreaker(name = "updateStock", fallbackMethod = "updateStockFallback")
+    @Retry(name = "updateStock")
     @PutMapping("/{productId}/stock")
     ApiResponse<Void> updateStock(@PathVariable String productId, @RequestParam int quantity);
+
+    default ApiResponse<Double> getProductPriceByIdFallback() {
+        throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
+    }
+
+    default ApiResponse<Void> updateStockFallback() {
+        throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
+    }
 
 }

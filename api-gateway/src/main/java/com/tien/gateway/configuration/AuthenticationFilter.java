@@ -78,14 +78,17 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
             } else {
                 return unauthenticated(exchange.getResponse());
             }
-        }).onErrorResume(throwable -> unauthenticated(exchange.getResponse()));
+        }).onErrorResume(throwable -> {
+            log.error("Error during authentication: ", throwable);
+            return serviceDown(exchange.getResponse());
+        });
     }
 
     // Return response if unauthenticated
     Mono<Void> unauthenticated(ServerHttpResponse response) {
         ApiResponse<?> apiResponse = ApiResponse.builder()
                 .code(1401)
-                .message("Unauthenticated or Service is down! Please try again later.")
+                .message("Unauthenticated!")
                 .build();
 
         String body;
@@ -99,7 +102,26 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
         response.getHeaders().add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
 
         return response.writeWith(Mono.just(response.bufferFactory().wrap(body.getBytes())));
+    }
 
+    // Return response if service is down
+    Mono<Void> serviceDown(ServerHttpResponse response) {
+        ApiResponse<?> apiResponse = ApiResponse.builder()
+                .code(HttpStatus.SERVICE_UNAVAILABLE.value())
+                .message("The service is currently unavailable. Please try again later. Thanks for your understanding.")
+                .build();
+
+        String body;
+        try {
+            body = objectMapper.writeValueAsString(apiResponse);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+
+        response.setStatusCode(HttpStatus.SERVICE_UNAVAILABLE);
+        response.getHeaders().add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
+
+        return response.writeWith(Mono.just(response.bufferFactory().wrap(body.getBytes())));
     }
 
 }

@@ -20,6 +20,7 @@ public enum ErrorCode {
     CATEGORY_NOT_FOUND(1005, "Category not found", HttpStatus.NOT_FOUND),
     OUT_OF_STOCK(1006, "Out of stock", HttpStatus.BAD_REQUEST),
     SHOP_NOT_FOUND(1006, "SHOP_NOT_FOUND", HttpStatus.BAD_REQUEST),
+    SERVICE_UNAVAILABLE(1007, "SERVICE_UNAVAILABLE", HttpStatus.SERVICE_UNAVAILABLE),
     ;
 
     int code;

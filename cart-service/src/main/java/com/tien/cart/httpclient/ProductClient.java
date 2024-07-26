@@ -3,14 +3,14 @@ package com.tien.cart.httpclient;
 import com.tien.cart.configuration.AuthenticationRequestInterceptor;
 import com.tien.cart.dto.ApiResponse;
 import com.tien.cart.dto.response.ExistsResponse;
+import com.tien.cart.exception.AppException;
+import com.tien.cart.exception.ErrorCode;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.server.ResponseStatusException;
-import org.springframework.http.HttpStatus;
 
 @FeignClient(name = "product-service", url = "${app.services.product}",
         configuration = {AuthenticationRequestInterceptor.class})
@@ -28,12 +28,12 @@ public interface ProductClient {
       @GetMapping("/{productId}/exists")
       ExistsResponse existsProduct(@PathVariable String productId);
 
-      default ApiResponse<Double> getProductPriceByIdFallback(String productId, Throwable t) {
-            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Product Service is unavailable", t);
+      default ApiResponse<Double> getProductPriceByIdFallback() {
+            throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
       }
 
-      default ExistsResponse existsProductFallback(String productId, Throwable t) {
-            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Product Service is unavailable", t);
+      default ExistsResponse existsProductFallback() {
+            throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
       }
 
 }

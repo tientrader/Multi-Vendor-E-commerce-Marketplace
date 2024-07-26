@@ -16,32 +16,35 @@ app:
     product: http://localhost:8083/product
     order: http://localhost:8084/order
 
-resilience4j.circuitbreaker:
-  instances:
-    getProductPriceById:
-      registerHealthIndicator: true
-      failureRateThreshold: 50
-      minimumNumberOfCalls: 5
-      automaticTransitionFromOpenToHalfOpenEnabled: true
-      waitDurationInOpenState: 5s
-      permittedNumberOfCallsInHalfOpenState: 3
-      slidingWindowSize: 10
-      slidingWindowType: COUNT_BASED
-    existsProduct:
-      registerHealthIndicator: true
-      failureRateThreshold: 50
-      minimumNumberOfCalls: 5
-      automaticTransitionFromOpenToHalfOpenEnabled: true
-      waitDurationInOpenState: 5s
-      permittedNumberOfCallsInHalfOpenState: 3
-      slidingWindowSize: 10
-      slidingWindowType: COUNT_BASED
-
-  retry:
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        registerHealthIndicator: true
+        failureRateThreshold: 50
+        minimumNumberOfCalls: 5
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        waitDurationInOpenState: 5s
+        permittedNumberOfCallsInHalfOpenState: 3
+        slidingWindowSize: 10
+        slidingWindowType: COUNT_BASED
     instances:
       getProductPriceById:
-        maxRetryAttempts: 3
-        waitDuration: 2s
+        baseConfig: default
       existsProduct:
+        baseConfig: default
+      createOrder:
+        baseConfig: default
+
+  retry:
+    configs:
+      default:
         maxRetryAttempts: 3
         waitDuration: 2s
+    instances:
+      getProductPriceById:
+        baseConfig: default
+      existsProduct:
+        baseConfig: default
+      createOrder:
+        baseConfig: default

@@ -11,5 +11,6 @@ import lombok.experimental.FieldDefaults;
 public class ExistsResponse {
 
       boolean exists;
+      boolean error;
 
 }

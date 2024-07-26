@@ -25,3 +25,32 @@ app:
   services:
     product: http://localhost:8083/product
     profile: http://localhost:8081/profile
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        registerHealthIndicator: true
+        failureRateThreshold: 50
+        minimumNumberOfCalls: 5
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        waitDurationInOpenState: 5s
+        permittedNumberOfCallsInHalfOpenState: 3
+        slidingWindowSize: 10
+        slidingWindowType: COUNT_BASED
+    instances:
+      getProductPriceById:
+        baseConfig: default
+      updateStock:
+        baseConfig: default
+
+  retry:
+    configs:
+      default:
+        maxRetryAttempts: 3
+        waitDuration: 2s
+    instances:
+      getProductPriceById:
+        baseConfig: default
+      updateStock:
+        baseConfig: default
