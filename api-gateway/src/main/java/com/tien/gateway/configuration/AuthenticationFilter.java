@@ -26,8 +26,8 @@ import reactor.core.publisher.Mono;
 import java.util.Arrays;
 import java.util.List;
 
-@Component
 @Slf4j
+@Component
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AuthenticationFilter implements GlobalFilter, Ordered {
@@ -67,8 +67,7 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
             return chain.filter(exchange);
 
         List<String> authHeader = exchange.getRequest().getHeaders().get(HttpHeaders.AUTHORIZATION);
-        if (CollectionUtils.isEmpty(authHeader))
-            return unauthenticated(exchange.getResponse());
+        if (CollectionUtils.isEmpty(authHeader)) return unauthenticated(exchange.getResponse());
 
         String token = authHeader.getFirst().replace("Bearer ", "");
         log.info("Token: {}", token);
@@ -86,7 +85,7 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
     Mono<Void> unauthenticated(ServerHttpResponse response) {
         ApiResponse<?> apiResponse = ApiResponse.builder()
                 .code(1401)
-                .message("Unauthenticated")
+                .message("Unauthenticated or Service is down. Please try again later.")
                 .build();
 
         String body;
