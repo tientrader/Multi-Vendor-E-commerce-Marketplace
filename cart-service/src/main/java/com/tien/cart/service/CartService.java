@@ -69,11 +69,11 @@ public class CartService {
                             productId -> productId,
                             productId -> {
                                   try {
-                                        ApiResponse<Double> response = productClient.getProductPriceById(productId);
+                                        ApiResponse<Double> response =
+                                                productClient.getProductPriceById(productId);
                                         return response.getResult();
                                   } catch (AppException e) {
-                                        log.error("Error fetching price for productId {}: {}", productId, e.getMessage());
-                                        return 0.0;
+                                        throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
                                   }
                             }
                     ));
