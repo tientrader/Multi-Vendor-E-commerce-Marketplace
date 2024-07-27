@@ -108,7 +108,9 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
     Mono<Void> serviceDown(ServerHttpResponse response) {
         ApiResponse<?> apiResponse = ApiResponse.builder()
                 .code(HttpStatus.SERVICE_UNAVAILABLE.value())
-                .message("The service is currently unavailable. Please try again later. Thanks for your understanding.")
+                .message("The service is currently unavailable. " +
+                         "Please try again later. " +
+                         "Thanks for your understanding.")
                 .build();
 
         String body;

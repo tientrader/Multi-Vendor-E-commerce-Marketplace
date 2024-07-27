@@ -27,7 +27,8 @@ public interface CartMapper {
       @Mapping(source = "productInCarts", target = "items")
       OrderCreationRequest toOrderCreationRequest(Cart cart);
 
-      default List<OrderItemCreationRequest> mapProductInCartsToOrderItemRequests(List<ProductInCart> productInCarts) {
+      default List<OrderItemCreationRequest> mapProductInCartsToOrderItemRequests
+              (List<ProductInCart> productInCarts) {
             return productInCarts.stream()
                     .map(productInCart -> OrderItemCreationRequest.builder()
                             .productId(productInCart.getProductId())

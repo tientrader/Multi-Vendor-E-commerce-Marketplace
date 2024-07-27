@@ -24,10 +24,10 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-@Slf4j
 public class OrderService {
 
       ProductClient productClient;
@@ -54,7 +54,8 @@ public class OrderService {
                     .channel("EMAIL")
                     .recipient(request.getEmail())
                     .subject("Order created successfully")
-                    .body("Thank " + request.getUsername() + " for buying our products! \n The total amount is " + request.getTotal())
+                    .body("Thank " + request.getUsername() + " for buying our products! \n" +
+                            "The total amount is " + request.getTotal())
                     .build();
 
             kafkaTemplate.send("order-successful", notificationEvent);
