@@ -68,13 +68,8 @@ public class CartService {
                     .collect(Collectors.toMap(
                             productId -> productId,
                             productId -> {
-                                  try {
-                                        ApiResponse<Double> response =
-                                                productClient.getProductPriceById(productId);
-                                        return response.getResult();
-                                  } catch (AppException e) {
-                                        throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
-                                  }
+                                  ApiResponse<Double> response = productClient.getProductPriceById(productId);
+                                  return response.getResult();
                             }
                     ));
 
