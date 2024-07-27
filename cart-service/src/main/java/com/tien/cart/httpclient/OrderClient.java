@@ -21,7 +21,6 @@ public interface OrderClient {
       @PostMapping(value = "/create", produces = MediaType.APPLICATION_JSON_VALUE)
       void createOrder(@RequestBody OrderCreationRequest request);
 
-      // Fallback method
       default void createOrderFallback() {
             throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
       }
