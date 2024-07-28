@@ -53,7 +53,6 @@ public class CartService {
             for (ProductInCartCreationRequest item : request.getProductInCarts()) {
                   String productId = item.getProductId();
                   ExistsResponse existsResponse = productClient.existsProduct(productId);
-                  if (existsResponse.isError()) throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
                   if (!existsResponse.isExists()) throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
             }
 

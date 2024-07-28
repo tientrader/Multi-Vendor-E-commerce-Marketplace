@@ -57,7 +57,6 @@ public class OrderService {
                     .body("Thank " + request.getUsername() + " for buying our products! \n" +
                             "The total amount is " + request.getTotal())
                     .build();
-
             kafkaTemplate.send("order-successful", notificationEvent);
 
             orderRepository.save(order);
