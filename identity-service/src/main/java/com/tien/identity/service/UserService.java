@@ -127,7 +127,8 @@ public class UserService {
     @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public void deleteUser(String id) {
-        userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        userRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         userRepository.deleteById(id);
         profileClient.deleteProfile(id);
     }
