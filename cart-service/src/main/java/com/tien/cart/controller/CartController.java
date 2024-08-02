@@ -17,7 +17,7 @@ public class CartController {
 
       CartService cartService;
 
-      @PostMapping("/create")
+      @PostMapping
       ApiResponse<CartResponse> createCart(@Valid @RequestBody CartCreationRequest cartRequest) {
             CartResponse cartResponse = cartService.createCart(cartRequest);
             return ApiResponse.<CartResponse>builder()
@@ -33,7 +33,7 @@ public class CartController {
                     .build();
       }
 
-      @GetMapping("/my-cart")
+      @GetMapping
       public ApiResponse<CartResponse> getMyCart() {
             CartResponse cartResponse = cartService.getCart();
             return ApiResponse.<CartResponse>builder()
@@ -41,7 +41,7 @@ public class CartController {
                     .build();
       }
 
-      @DeleteMapping("/my-cart")
+      @DeleteMapping
       public ApiResponse<String> deleteCart() {
             cartService.deleteCart();
             return ApiResponse.<String>builder()

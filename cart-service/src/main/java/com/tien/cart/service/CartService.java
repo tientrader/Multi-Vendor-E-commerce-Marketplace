@@ -128,19 +128,6 @@ public class CartService {
             redisTemplate.delete(cartKey);
       }
 
-      // Delete the user's cart
-      public void deleteCart() {
-            String username = SecurityContextHolder.getContext().getAuthentication().getName();
-            if (username == null) throw new AppException(ErrorCode.UNAUTHORIZED);
-
-            String cartKey = CART_KEY_PREFIX + username;
-
-            Cart cart = (Cart) redisTemplate.opsForValue().get(cartKey);
-            if (cart == null) throw new AppException(ErrorCode.CART_NOT_FOUND);
-
-            redisTemplate.delete(cartKey);
-      }
-
       // Get the user's cart
       public CartResponse getCart() {
             String username = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -152,6 +139,19 @@ public class CartService {
             if (cart == null) throw new AppException(ErrorCode.CART_NOT_FOUND);
 
             return cartMapper.toCartResponse(cart);
+      }
+
+      // Delete the user's cart
+      public void deleteCart() {
+            String username = SecurityContextHolder.getContext().getAuthentication().getName();
+            if (username == null) throw new AppException(ErrorCode.UNAUTHORIZED);
+
+            String cartKey = CART_KEY_PREFIX + username;
+
+            Cart cart = (Cart) redisTemplate.opsForValue().get(cartKey);
+            if (cart == null) throw new AppException(ErrorCode.CART_NOT_FOUND);
+
+            redisTemplate.delete(cartKey);
       }
 
 }
