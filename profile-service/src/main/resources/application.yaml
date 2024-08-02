@@ -11,3 +11,13 @@ spring:
     authentication:
       username: ${NEO4J_USERNAME}
       password: ${NEO4J_PASSWORD}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: prometheus
+  metrics:
+    export:
+      prometheus:
+        enabled: true

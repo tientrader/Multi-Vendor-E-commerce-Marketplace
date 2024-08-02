@@ -48,3 +48,13 @@ resilience4j:
         baseConfig: default
       createOrder:
         baseConfig: default
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: prometheus
+  metrics:
+    export:
+      prometheus:
+        enabled: true

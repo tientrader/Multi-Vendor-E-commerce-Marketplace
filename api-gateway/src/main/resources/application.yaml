@@ -168,7 +168,11 @@ management:
   endpoints:
     web:
       exposure:
-        include: health, info, prometheus, trace, metrics, circuitbreakers
+        include: prometheus
+  metrics:
+    export:
+      prometheus:
+        enabled: true
   endpoint:
     health:
       show-details: always

@@ -23,3 +23,13 @@ paypal:
   client-id: ${PAYPAL_CLIENT_ID}
   client-secret: ${PAYPAL_CLIENT_SECRET}
   mode: sandbox
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: prometheus
+  metrics:
+    export:
+      prometheus:
+        enabled: true

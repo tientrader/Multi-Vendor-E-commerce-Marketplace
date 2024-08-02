@@ -23,3 +23,13 @@ notification:
   email:
     brevo-url: https://api.brevo.com
     brevo-apikey: ${BREVO_API_KEY}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: prometheus
+  metrics:
+    export:
+      prometheus:
+        enabled: true

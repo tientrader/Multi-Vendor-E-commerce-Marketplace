@@ -38,3 +38,13 @@ resilience4j:
     instances:
       getShopByOwnerUsername:
         baseConfig: default
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: prometheus
+  metrics:
+    export:
+      prometheus:
+        enabled: true
