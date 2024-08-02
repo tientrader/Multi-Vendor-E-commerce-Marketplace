@@ -17,7 +17,7 @@ public class CartController {
 
       CartService cartService;
 
-      @PostMapping
+      @PostMapping("/create")
       ApiResponse<CartResponse> createCart(@Valid @RequestBody CartCreationRequest cartRequest) {
             CartResponse cartResponse = cartService.createCart(cartRequest);
             return ApiResponse.<CartResponse>builder()
