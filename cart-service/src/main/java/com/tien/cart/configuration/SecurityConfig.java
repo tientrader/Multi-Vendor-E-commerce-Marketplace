@@ -25,6 +25,7 @@ public class SecurityConfig {
 
     // Public endpoints that do not require authentication
     static final String[] PUBLIC_ENDPOINTS = {
+            "/actuator/**",
             "/**"
     };
 
@@ -34,6 +35,7 @@ public class SecurityConfig {
         // Configure access permissions, allowing access to some public endpoints without authentication
         httpSecurity.authorizeHttpRequests(request -> request
                 .requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS).permitAll()
+                .requestMatchers(HttpMethod.GET, PUBLIC_ENDPOINTS).permitAll()
                 .anyRequest().authenticated());
 
         // Configure JWT security
