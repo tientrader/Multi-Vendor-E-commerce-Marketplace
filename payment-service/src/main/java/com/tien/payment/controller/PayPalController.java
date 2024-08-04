@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 public class PayPalController {
 
-      final PayPalService paypalService;
+      PayPalService paypalService;
 
       @PostMapping("/create")
       public ApiResponse<String> createPayment(
