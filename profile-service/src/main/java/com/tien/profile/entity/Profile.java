@@ -16,13 +16,14 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Node("user_profile")
-public class UserProfile {
+public class Profile {
 
     @Id
     @GeneratedValue(generatorClass = UUIDStringGenerator.class)
     String id;
 
     String userId;
+    String username;
     String email;
     String firstName;
     String lastName;
