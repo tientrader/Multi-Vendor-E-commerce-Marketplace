@@ -25,6 +25,7 @@ app:
   services:
     product: http://localhost:8083/product
     profile: http://localhost:8081/profile
+    payment: http://localhost:8085/payment
 
 resilience4j:
   circuitbreaker:

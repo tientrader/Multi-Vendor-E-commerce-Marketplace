@@ -22,7 +22,7 @@ public class PayPalController {
 
       final PayPalService paypalService;
 
-      @PostMapping
+      @PostMapping("/create")
       public ApiResponse<String> createPayment(
               @Validated @RequestBody PayPalRequest request) {
             try {

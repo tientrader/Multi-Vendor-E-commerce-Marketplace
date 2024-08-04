@@ -50,6 +50,8 @@ public class OrderService {
                   productClient.updateStock(item.getProductId(), quantityToUpdate);
             }
 
+            orderRepository.save(order);
+
             NotificationEvent notificationEvent = NotificationEvent.builder()
                     .channel("EMAIL")
                     .recipient(request.getEmail())
@@ -58,8 +60,6 @@ public class OrderService {
                             "The total amount is " + request.getTotal())
                     .build();
             kafkaTemplate.send("order-successful", notificationEvent);
-
-            orderRepository.save(order);
       }
 
       // Calculate the total price of the products in the cart

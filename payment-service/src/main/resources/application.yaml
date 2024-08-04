@@ -16,9 +16,6 @@ spring:
       ddl-auto: update
     show-sql: true
 
-stripe:
-  api-key: ${STRIPE_API_KEY}
-
 paypal:
   client-id: ${PAYPAL_CLIENT_ID}
   client-secret: ${PAYPAL_CLIENT_SECRET}
