@@ -15,24 +15,24 @@ import java.math.BigDecimal;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class PayPalRequest {
 
-      @NotNull
+      @NotNull(message = "PAYPAL_AMOUNT_NULL")
       BigDecimal amount;
 
-      @NotBlank
+      @NotBlank(message = "PAYPAL_CURRENCY_BLANK")
       String currency;
 
-      @NotBlank
+      @NotBlank(message = "PAYPAL_PAYMENT_METHOD_BLANK")
       String paymentMethod;
 
-      @NotBlank
+      @NotBlank(message = "PAYPAL_DESCRIPTION_BLANK")
       String description;
 
-      @NotBlank
-      @URL
+      @NotBlank(message = "PAYPAL_CANCEL_URL_BLANK")
+      @URL(message = "PAYPAL_CANCEL_URL_INVALID")
       String cancelUrl;
 
-      @NotBlank
-      @URL
+      @NotBlank(message = "PAYPAL_SUCCESS_URL_BLANK")
+      @URL(message = "PAYPAL_SUCCESS_URL_INVALID")
       String successUrl;
 
 }

@@ -1,5 +1,6 @@
 package com.tien.product.dto.request;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -10,7 +11,9 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CategoryCreationRequest {
 
+      @NotBlank(message = "CATEGORY_NAME_IS_REQUIRED")
       String name;
+
       String description;
 
 }
