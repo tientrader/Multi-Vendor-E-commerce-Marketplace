@@ -65,6 +65,14 @@ management:
     export:
       prometheus:
         enabled: true
+    distribution:
+      percentiles-histogram:
+        http:
+          server:
+            requests: true
+  observations:
+    key-values:
+      application: order-service
   endpoint:
     prometheus:
       enabled: true
@@ -74,5 +82,8 @@ management:
     circuitbreakers:
       enabled: true
   tracing:
+    exporter:
+      tempo:
+        url: http://localhost:3200
     sampler:
       probability: 1.0

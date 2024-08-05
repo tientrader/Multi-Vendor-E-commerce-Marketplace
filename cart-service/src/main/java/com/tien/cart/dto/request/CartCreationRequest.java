@@ -13,8 +13,6 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CartCreationRequest {
 
-      @Size(min = 4, message = "USERNAME_INVALID")
-      @NotBlank(message = "USERNAME_IS_REQUIRED")
       String username;
 
       @Email(message = "INVALID_EMAIL")
