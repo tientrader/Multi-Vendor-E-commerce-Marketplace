@@ -1,1 +1,1 @@
-![identity-service](https://github.com/user-attachments/assets/859f045b-65d9-4ffd-9894-a8eae686ea00)
+![identity-service (2)](https://github.com/user-attachments/assets/848db303-e9d3-4ffa-9a60-4627d8b726c1)
