@@ -26,7 +26,9 @@ Technologies
 	•	MySQL
 	•	MongoDB
 
- ![identity-service (3)](https://github.com/user-attachments/assets/8cd67bb8-ba35-40b5-a700-e926f02e0b66)
+
+![e-com](https://github.com/user-attachments/assets/18911ba3-c8d0-472b-a483-6a62ad97eac2)
+
 
 Key Contributions
 
