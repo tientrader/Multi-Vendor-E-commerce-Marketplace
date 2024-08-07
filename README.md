@@ -14,7 +14,6 @@ Technologies
 	•	Reactive Programming (Reactor)
 	•	OAuth2
 	•	Kafka
-	•	Firebase
 	•	KeyCloak
 	•	Docker
 	•	Prometheus
@@ -26,9 +25,7 @@ Technologies
 	•	MySQL
 	•	MongoDB
 
-
 ![e-com](https://github.com/user-attachments/assets/18911ba3-c8d0-472b-a483-6a62ad97eac2)
-
 
 Key Contributions
 
