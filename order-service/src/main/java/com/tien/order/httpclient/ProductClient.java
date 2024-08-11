@@ -29,11 +29,11 @@ public interface ProductClient {
     @PutMapping("/{productId}/stock")
     ApiResponse<Void> updateStock(@PathVariable String productId, @RequestParam int quantity);
 
-    default ApiResponse<Double> getProductPriceByIdFallback() {
+    default ApiResponse<Double> getProductPriceByIdFallback(String productId, Throwable throwable) {
         throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
     }
 
-    default ApiResponse<Void> updateStockFallback() {
+    default ApiResponse<Void> updateStockFallback(String productId, int quantity, Throwable throwable) {
         throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
     }
 

@@ -28,11 +28,11 @@ public interface ProductClient {
       @GetMapping("/{productId}/exists")
       ExistsResponse existsProduct(@PathVariable String productId);
 
-      default ApiResponse<Double> getProductPriceByIdFallback() {
+      default ApiResponse<Double> getProductPriceByIdFallback(String productId, Throwable throwable) {
             throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
       }
 
-      default ExistsResponse existsProductFallback() {
+      default ExistsResponse existsProductFallback(String productId, Throwable throwable) {
             throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
       }
 
