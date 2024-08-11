@@ -8,7 +8,7 @@ spring:
     name: user-service
   data:
     mongodb:
-      uri: mongodb://root:root@localhost:27017/user-service?authSource=admin
+      uri: mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@localhost:27017/user-service?authSource=admin
   security:
     oauth2:
       resourceserver:
