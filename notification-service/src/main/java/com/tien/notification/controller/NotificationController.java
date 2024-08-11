@@ -21,8 +21,8 @@ public class NotificationController {
 
       EmailService emailService;
 
-      // Listen to Kafka messages from topic "notification-delivery"
-      @KafkaListener(topics = "notification-delivery")
+      // Listen to Kafka messages from topic "register-successfully"
+      @KafkaListener(topics = "register-successfully")
       public void listenIdentityService(NotificationEvent message) {
             emailService.sendEmail(SendEmailRequest.builder()
                             .to(Recipient.builder()

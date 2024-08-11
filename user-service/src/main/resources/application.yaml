@@ -1,0 +1,62 @@
+server:
+  port: 8088
+  servlet:
+    context-path: /user
+
+spring:
+  application:
+    name: user-service
+  data:
+    mongodb:
+      uri: mongodb://root:root@localhost:27017/user-service?authSource=admin
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8180/realms/tienproapp
+  kafka:
+    bootstrap-servers: localhost:9094
+    consumer:
+      group-id: notification-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+
+idp:
+  url: http://localhost:8180
+  client-id: tienpro
+  client-secret: tKESjcwvEjf7Wp79pfhO1NBnIZc1Kdcj
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, metrics, info, prometheus
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    distribution:
+      percentiles-histogram:
+        http:
+          server:
+            requests: true
+  observations:
+    key-values:
+      application: user-service
+  endpoint:
+    prometheus:
+      enabled: true
+    health:
+      show-details: always
+  health:
+    circuitbreakers:
+      enabled: true
+  tracing:
+    exporter:
+      tempo:
+        url: http://localhost:3200
+    sampler:
+      probability: 1.0
