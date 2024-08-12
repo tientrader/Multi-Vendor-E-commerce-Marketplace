@@ -24,6 +24,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,7 +46,8 @@ public class ProductService {
       @PreAuthorize("hasRole('SELLER')")
       @Transactional
       public ProductResponse createProduct(ProductCreationRequest request) {
-            String username = SecurityContextHolder.getContext().getAuthentication().getName();
+            String username = ((Jwt) SecurityContextHolder.getContext().getAuthentication()
+                    .getPrincipal()).getClaim("preferred_username");
             ShopResponse shopResponse = shopClient.getShopByOwnerUsername(username).getResult();
             if (shopResponse == null) throw new AppException(ErrorCode.SHOP_NOT_FOUND);
 
@@ -70,7 +72,8 @@ public class ProductService {
       @PreAuthorize("hasRole('SELLER')")
       @Transactional
       public ProductResponse updateProduct(String productId, ProductUpdateRequest request) {
-            String username = SecurityContextHolder.getContext().getAuthentication().getName();
+            String username = ((Jwt) SecurityContextHolder.getContext().getAuthentication()
+                    .getPrincipal()).getClaim("preferred_username");
 
             ShopResponse shopResponse = shopClient.getShopByOwnerUsername(username).getResult();
             if (shopResponse == null) throw new AppException(ErrorCode.SHOP_NOT_FOUND);
@@ -116,7 +119,8 @@ public class ProductService {
       @PreAuthorize("hasRole('SELLER')")
       @Transactional
       public void deleteProduct(String productId) {
-            String username = SecurityContextHolder.getContext().getAuthentication().getName();
+            String username = ((Jwt) SecurityContextHolder.getContext().getAuthentication()
+                    .getPrincipal()).getClaim("preferred_username");
 
             ShopResponse shopResponse = shopClient.getShopByOwnerUsername(username).getResult();
             if (shopResponse == null) throw new AppException(ErrorCode.SHOP_NOT_FOUND);

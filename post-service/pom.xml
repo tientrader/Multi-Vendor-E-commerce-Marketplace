@@ -11,10 +11,10 @@
     </parent>
 
     <groupId>com.truongnhattien</groupId>
-    <artifactId>user-service</artifactId>
+    <artifactId>post-service</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>user-service</name>
-    <description>User service</description>
+    <name>post-service</name>
+    <description>Post service</description>
 
     <properties>
         <java.version>21</java.version>
@@ -33,17 +33,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.keycloak</groupId>
-            <artifactId>keycloak-spring-security-adapter</artifactId>
-            <version>24.0.5</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>commons-logging</groupId>
-                    <artifactId>commons-logging</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.springframework.cloud</groupId>
