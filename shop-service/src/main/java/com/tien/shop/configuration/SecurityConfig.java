@@ -25,7 +25,7 @@ public class SecurityConfig {
 
       // Public endpoints that do not require authentication
       private static final String[] PUBLIC_ENDPOINTS = {
-              "/register", "/actuator/**"
+              "/actuator/**"
       };
 
       // Configure security filter chain
