@@ -21,6 +21,8 @@ import org.springframework.security.web.SecurityFilterChain;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class SecurityConfig {
 
+    CustomJwtDecoder customJwtDecoder;
+
     // Public endpoints that do not require authentication
     private static final String[] PUBLIC_ENDPOINTS = {
             "/**", "/actuator/**"
@@ -37,6 +39,7 @@ public class SecurityConfig {
 
         // Configure JWT security
         httpSecurity.oauth2ResourceServer(oauth2 -> oauth2.jwt(jwtConfigurer -> jwtConfigurer
+                        .decoder(customJwtDecoder)
                         .jwtAuthenticationConverter(jwtAuthenticationConverter()))
                 .authenticationEntryPoint(new JwtAuthenticationEntryPoint()));
 

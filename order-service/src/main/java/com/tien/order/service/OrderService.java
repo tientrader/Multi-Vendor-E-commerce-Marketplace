@@ -61,7 +61,7 @@ public class OrderService {
                     .body("Thank " + request.getUsername() + " for buying our products! \n" +
                             "The total amount is " + request.getTotal())
                     .build();
-            kafkaTemplate.send("order-successful", notificationEvent);
+            kafkaTemplate.send("order-created-successful", notificationEvent);
       }
 
       // Calculate the total price of the products in the cart

@@ -1,4 +1,4 @@
-package com.tien.product.configuration;
+package com.tien.notification.configuration;
 
 import com.nimbusds.jwt.SignedJWT;
 import org.springframework.security.oauth2.jwt.Jwt;

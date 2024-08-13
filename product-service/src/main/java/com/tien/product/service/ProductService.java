@@ -18,11 +18,11 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
@@ -31,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -43,33 +44,45 @@ public class ProductService {
       ShopClient shopClient;
 
       // Add product
-      @PreAuthorize("hasRole('SELLER')")
       @Transactional
       public ProductResponse createProduct(ProductCreationRequest request) {
             String username = ((Jwt) SecurityContextHolder.getContext().getAuthentication()
                     .getPrincipal()).getClaim("preferred_username");
+            log.info("Creating product for user: {}", username);
+
             ShopResponse shopResponse = shopClient.getShopByOwnerUsername(username).getResult();
-            if (shopResponse == null) throw new AppException(ErrorCode.SHOP_NOT_FOUND);
+            if (shopResponse == null) {
+                  log.error("Shop not found for user: {}", username);
+                  throw new AppException(ErrorCode.SHOP_NOT_FOUND);
+            }
+            log.info("Shop found: {}", shopResponse);
 
             Category category = categoryRepository.findById(request.getCategoryId())
-                    .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
+                    .orElseThrow(() -> {
+                          log.error("Category not found with ID: {}", request.getCategoryId());
+                          return new AppException(ErrorCode.CATEGORY_NOT_FOUND);
+                    });
+            log.info("Category found: {}", category);
 
             if (!category.getShopId().equals(shopResponse.getId())) {
+                  log.error("Unauthorized access. Category shop ID: {} does not match shop ID: {}",
+                          category.getShopId(), shopResponse.getId());
                   throw new AppException(ErrorCode.UNAUTHORIZED);
             }
 
             Product product = productMapper.toProduct(request);
             product.setCategory(category);
             product = productRepository.save(product);
+            log.info("Product saved: {}", product);
 
             category.getProducts().add(product);
             categoryRepository.save(category);
+            log.info("Category updated with new product: {}", category);
 
             return productMapper.toProductResponse(product);
       }
 
       // Update product by productId
-      @PreAuthorize("hasRole('SELLER')")
       @Transactional
       public ProductResponse updateProduct(String productId, ProductUpdateRequest request) {
             String username = ((Jwt) SecurityContextHolder.getContext().getAuthentication()
@@ -116,7 +129,6 @@ public class ProductService {
       }
 
       // Delete product by productId
-      @PreAuthorize("hasRole('SELLER')")
       @Transactional
       public void deleteProduct(String productId) {
             String username = ((Jwt) SecurityContextHolder.getContext().getAuthentication()

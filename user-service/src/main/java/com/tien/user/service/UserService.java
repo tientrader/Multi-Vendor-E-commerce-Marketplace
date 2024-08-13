@@ -84,8 +84,7 @@ public class UserService {
                     .body("Hello, " + request.getUsername())
                     .build();
 
-            kafkaTemplate.send("register-successfully", notificationEvent);
-
+            kafkaTemplate.send("register-successful", notificationEvent);
             return userMapper.toUserResponse(user);
         } catch (FeignException e) {
             handleFeignException(e);

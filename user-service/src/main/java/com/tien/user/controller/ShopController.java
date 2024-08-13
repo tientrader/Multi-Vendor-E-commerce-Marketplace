@@ -21,10 +21,8 @@ public class ShopController {
 
       @PostMapping("/create")
       public ApiResponse<ShopResponse> createShop(@Valid @RequestBody ShopCreationRequest request) {
-            ShopResponse shopResponse = shopService.createShop(request);
             return ApiResponse.<ShopResponse>builder()
-                    .result(shopResponse)
-                    .message("Shop created successfully")
+                    .result(shopService.createShop(request))
                     .build();
       }
 
@@ -47,10 +45,8 @@ public class ShopController {
 
       @GetMapping("/owner/{username}")
       public ApiResponse<ShopResponse> getShopByOwnerUsername(@PathVariable("username") String username) {
-            ShopResponse shopResponse = shopService.getShopByOwnerUsername(username);
             return ApiResponse.<ShopResponse>builder()
-                    .result(shopResponse)
-                    .message("Shop retrieved successfully")
+                    .result(shopService.getShopByOwnerUsername(username))
                     .build();
       }
 

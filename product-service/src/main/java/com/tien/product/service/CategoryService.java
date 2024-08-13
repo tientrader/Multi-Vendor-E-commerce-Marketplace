@@ -15,7 +15,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
-import org.springframework.security.access.prepost.PreAuthorize;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -34,11 +35,11 @@ public class CategoryService {
       ShopClient shopClient;
 
       // Create a new category
-      @PreAuthorize("hasRole('SELLER')")
       @Transactional
       public CategoryResponse createCategory(CategoryCreationRequest request) {
             String username = ((Jwt) SecurityContextHolder.getContext().getAuthentication()
                     .getPrincipal()).getClaim("preferred_username");
+
             ShopResponse shopResponse = shopClient.getShopByOwnerUsername(username).getResult();
             if (shopResponse == null) throw new AppException(ErrorCode.SHOP_NOT_FOUND);
 
@@ -50,7 +51,6 @@ public class CategoryService {
       }
 
       // Update a category based on categoryId
-      @PreAuthorize("hasRole('SELLER')")
       @Transactional
       public CategoryResponse updateCategory(String categoryId, CategoryUpdateRequest request) {
             String username = ((Jwt) SecurityContextHolder.getContext().getAuthentication()
@@ -72,7 +72,6 @@ public class CategoryService {
       }
 
       // Delete a category based on categoryId
-      @PreAuthorize("hasRole('SELLER')")
       @Transactional
       public void deleteCategory(String categoryId) {
             String username = ((Jwt) SecurityContextHolder.getContext().getAuthentication()

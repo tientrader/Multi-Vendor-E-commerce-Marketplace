@@ -13,7 +13,7 @@ import java.util.Set;
 public class CategoryResponse {
 
       String id;
-      Long shopId;
+      String shopId;
       String name;
       String description;
       Set<String> productIds;

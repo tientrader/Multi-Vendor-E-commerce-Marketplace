@@ -22,8 +22,8 @@ public class NotificationController {
       EmailService emailService;
 
       // Listen to Kafka messages from topic "register-successfully"
-      @KafkaListener(topics = "register-successfully")
-      public void listenIdentityService(NotificationEvent message) {
+      @KafkaListener(topics = "register-successful")
+      public void listenUserService(NotificationEvent message) {
             emailService.sendEmail(SendEmailRequest.builder()
                             .to(Recipient.builder()
                                     .email(message.getRecipient())
@@ -34,7 +34,7 @@ public class NotificationController {
       }
 
       // Listen to Kafka messages from topic "order-successful"
-      @KafkaListener(topics = "order-successful")
+      @KafkaListener(topics = "order-created-successful")
       public void listenOrderService(NotificationEvent message) {
             emailService.sendEmail(SendEmailRequest.builder()
                     .to(Recipient.builder()
@@ -46,7 +46,7 @@ public class NotificationController {
       }
 
       // Listen to Kafka messages from topic "shop-created-successfully"
-      @KafkaListener(topics = "shop-created-successfully")
+      @KafkaListener(topics = "shop-created-successful")
       public void listenShopService(NotificationEvent message) {
             emailService.sendEmail(SendEmailRequest.builder()
                     .to(Recipient.builder()

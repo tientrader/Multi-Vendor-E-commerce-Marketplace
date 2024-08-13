@@ -22,7 +22,7 @@ public class ProductController {
 
       ProductService productService;
 
-      @PostMapping
+      @PostMapping("/create")
       ApiResponse<ProductResponse> createProduct(@RequestBody @Valid ProductCreationRequest request) {
             return ApiResponse.<ProductResponse>builder()
                     .result(productService.createProduct(request))
@@ -53,7 +53,7 @@ public class ProductController {
                     .build();
       }
 
-      @GetMapping()
+      @GetMapping
       public ApiResponse<Page<ProductResponse>> getFilteredSortedPaginatedProducts(
               @RequestParam(defaultValue = "0") int page,
               @RequestParam(defaultValue = "10") int size,

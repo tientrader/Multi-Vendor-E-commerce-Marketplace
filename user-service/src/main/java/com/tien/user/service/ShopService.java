@@ -14,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
@@ -30,6 +29,7 @@ public class ShopService {
       KafkaTemplate<String , Object> kafkaTemplate;
       ShopMapper shopMapper;
 
+      @Transactional
       public ShopResponse createShop(ShopCreationRequest request) {
             String username = ((Jwt) SecurityContextHolder.getContext().getAuthentication()
                     .getPrincipal()).getClaim("preferred_username");
@@ -49,12 +49,11 @@ public class ShopService {
                     .body("Thanks for choosing us. Wish you all the best!")
                     .build();
 
-            kafkaTemplate.send("shop-created-successfully", notificationEvent);
+            kafkaTemplate.send("shop-created-successful", notificationEvent);
 
             return shopMapper.toShopResponse(shop);
       }
 
-      @PreAuthorize("hasRole('SELLER')")
       @Transactional
       public ShopResponse updateShop(ShopUpdateRequest request) {
             String username = ((Jwt) SecurityContextHolder.getContext().getAuthentication()
@@ -68,7 +67,6 @@ public class ShopService {
             return shopMapper.toShopResponse(shop);
       }
 
-      @PreAuthorize("hasRole('SELLER')")
       @Transactional
       public void deleteShop() {
             String username = ((Jwt) SecurityContextHolder.getContext().getAuthentication()
