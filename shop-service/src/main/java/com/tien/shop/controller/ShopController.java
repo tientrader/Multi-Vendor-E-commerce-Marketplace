@@ -25,12 +25,11 @@ public class ShopController {
                     .build();
       }
 
-      @PutMapping
+      @PutMapping("/update")
       public ApiResponse<ShopResponse> updateShop(@RequestBody @Valid ShopUpdateRequest request) {
             ShopResponse shopResponse = shopService.updateShop(request);
             return ApiResponse.<ShopResponse>builder()
                     .result(shopResponse)
-                    .message("Shop updated successfully")
                     .build();
       }
 
