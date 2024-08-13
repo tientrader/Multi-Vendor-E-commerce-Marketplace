@@ -2,7 +2,7 @@
 
 ## Overview
 
-This project is an E-commerce and Social Platform built with a microservices architecture. It supports a wide range of functionalities, including user authentication, product management, order processing, social interactions (posts, likes, comments), notifications, and search capabilities. The system is designed to be scalable, fault-tolerant, and secure, making it suitable for modern web applications.
+This project is an E-commerce and Social Platform built with a microservices architecture. It supports a wide range of functionalities, including user authentication/authorization, shop & product management, order processing, social interactions (posts, likes, comments), notifications, and search capabilities. The system is designed to be scalable, fault-tolerant, and secure, making it suitable for modern web applications.
 
 ## Table of Contents
 
@@ -18,6 +18,7 @@ This project is an E-commerce and Social Platform built with a microservices arc
   - [Post Service](#post-service)
   - [Notification Service](#notification-service)
   - [File Service](#file-service)
+  - [Shop Service](#shop-service)
 
 ## Technologies
 
@@ -108,3 +109,11 @@ The system is composed of multiple microservices, each responsible for a specifi
   - Secure file upload and download
   - Metadata management for files
   - Integration with User and Product services
+
+### Shop Service
+
+- **Description**: Manages the creation and management of shops by users.
+- **Key Features**:
+  - CRUD operations for shops
+  - Integration with Product Service for categorizing products under specific shops
+  - Permission management for shop owners, ensuring only authorized users can manage shops
