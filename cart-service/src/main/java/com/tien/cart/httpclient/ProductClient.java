@@ -16,13 +16,11 @@ import org.springframework.web.bind.annotation.PathVariable;
         configuration = {AuthenticationRequestInterceptor.class})
 public interface ProductClient {
 
-      // Call the Product Service to get Product Price
       @CircuitBreaker(name = "getProductPriceById", fallbackMethod = "getProductPriceByIdFallback")
       @Retry(name = "getProductPriceById")
       @GetMapping(value = "/{productId}/price", produces = MediaType.APPLICATION_JSON_VALUE)
       ApiResponse<Double> getProductPriceById(@PathVariable("productId") String productId);
 
-      // Call the Product Service to check if a product exists
       @CircuitBreaker(name = "existsProduct", fallbackMethod = "existsProductFallback")
       @Retry(name = "existsProduct")
       @GetMapping("/{productId}/exists")

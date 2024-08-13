@@ -8,8 +8,6 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 public class AuthenticationRequestInterceptor implements RequestInterceptor {
 
-    /* Use authentication information from the "Authorization" header of the original request and
-    add it to Feign client's template to automatically authenticate when sending requests to other services */
     @Override
     public void apply(RequestTemplate template) {
         ServletRequestAttributes servletRequestAttributes =

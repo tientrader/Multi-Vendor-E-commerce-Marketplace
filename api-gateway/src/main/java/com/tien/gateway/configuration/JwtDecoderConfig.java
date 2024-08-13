@@ -10,7 +10,8 @@ public class JwtDecoderConfig {
 
       @Bean
       public ReactiveJwtDecoder jwtDecoder() {
-            return NimbusReactiveJwtDecoder.withJwkSetUri("http://localhost:8180/realms/tienproapp/protocol/openid-connect/certs").build();
+            return NimbusReactiveJwtDecoder.withJwkSetUri
+                    ("http://localhost:8180/realms/tienproapp/protocol/openid-connect/certs").build();
       }
 
 }

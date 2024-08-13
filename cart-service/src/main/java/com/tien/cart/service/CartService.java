@@ -38,7 +38,6 @@ public class CartService {
 
       private static final String CART_KEY_PREFIX = "cart:";
 
-      // Create new cart or update (if cart already exists)
       public CartResponse createCart(CartCreationRequest request) {
             String username = ((Jwt) SecurityContextHolder.getContext().getAuthentication()
                     .getPrincipal()).getClaim("preferred_username");
@@ -90,7 +89,6 @@ public class CartService {
             return cartMapper.toCartResponse(cart);
       }
 
-      // Update cart (when it already exists)
       private void updateCart(Cart existingCart, CartCreationRequest cartCreationRequest) {
             List<ProductInCart> productInCarts = cartCreationRequest.getProductInCarts().stream()
                     .map(request -> ProductInCart.builder()
@@ -112,7 +110,6 @@ public class CartService {
             existingCart.setTotal(total);
       }
 
-      // Create order from cart
       public void createOrderFromCart() {
             String username = ((Jwt) SecurityContextHolder.getContext().getAuthentication()
                     .getPrincipal()).getClaim("preferred_username");
@@ -131,7 +128,6 @@ public class CartService {
             redisTemplate.delete(cartKey);
       }
 
-      // Get the user's cart
       public CartResponse getMyCart() {
             String username = ((Jwt) SecurityContextHolder.getContext().getAuthentication()
                     .getPrincipal()).getClaim("preferred_username");
@@ -145,7 +141,6 @@ public class CartService {
             return cartMapper.toCartResponse(cart);
       }
 
-      // Delete the user's cart
       public void deleteMyCart() {
             String username = ((Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getClaim("preferred_username");
             if (username == null) throw new AppException(ErrorCode.UNAUTHORIZED);

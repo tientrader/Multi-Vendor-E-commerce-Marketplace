@@ -34,7 +34,6 @@ public class CategoryService {
       CategoryMapper categoryMapper;
       ShopClient shopClient;
 
-      // Create a new category
       @Transactional
       public CategoryResponse createCategory(CategoryCreationRequest request) {
             String username = ((Jwt) SecurityContextHolder.getContext().getAuthentication()
@@ -50,7 +49,6 @@ public class CategoryService {
             return categoryMapper.toCategoryResponse(savedCategory);
       }
 
-      // Update a category based on categoryId
       @Transactional
       public CategoryResponse updateCategory(String categoryId, CategoryUpdateRequest request) {
             String username = ((Jwt) SecurityContextHolder.getContext().getAuthentication()
@@ -71,7 +69,6 @@ public class CategoryService {
             return categoryMapper.toCategoryResponse(updatedCategory);
       }
 
-      // Delete a category based on categoryId
       @Transactional
       public void deleteCategory(String categoryId) {
             String username = ((Jwt) SecurityContextHolder.getContext().getAuthentication()
@@ -89,14 +86,12 @@ public class CategoryService {
             categoryRepository.deleteById(categoryId);
       }
 
-      // Display all categories
       public List<CategoryResponse> getAllCategories() {
             return categoryRepository.findAll().stream()
                     .map(categoryMapper::toCategoryResponse)
                     .collect(Collectors.toList());
       }
 
-      // Display category by categoryId
       public CategoryResponse getCategoryById(String categoryId) {
             return categoryMapper.toCategoryResponse(categoryRepository.findById(categoryId)
                     .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND)));

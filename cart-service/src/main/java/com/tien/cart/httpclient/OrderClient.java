@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestBody;
         configuration = {AuthenticationRequestInterceptor.class})
 public interface OrderClient {
 
-      // Call the Order Service to create a new order
       @CircuitBreaker(name = "createOrder", fallbackMethod = "createOrderFallback")
       @Retry(name = "createOrder")
       @PostMapping(value = "/create", produces = MediaType.APPLICATION_JSON_VALUE)

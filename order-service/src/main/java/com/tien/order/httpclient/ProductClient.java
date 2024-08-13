@@ -17,13 +17,11 @@ import org.springframework.web.bind.annotation.RequestParam;
         configuration = {AuthenticationRequestInterceptor.class})
 public interface ProductClient {
 
-    // Call the Product Service to get Product Price
     @CircuitBreaker(name = "getProductPriceById", fallbackMethod = "getProductPriceByIdFallback")
     @Retry(name = "getProductPriceById")
     @GetMapping(value = "/{productId}/price", produces = MediaType.APPLICATION_JSON_VALUE)
     ApiResponse<Double> getProductPriceById(@PathVariable("productId") String productId);
 
-    // Call the Product Service to update stock
     @CircuitBreaker(name = "updateStock", fallbackMethod = "updateStockFallback")
     @Retry(name = "updateStock")
     @PutMapping("/{productId}/stock")

@@ -23,7 +23,6 @@ public class RedisConfig {
     @Value("${spring.redis.password}")
     private String redisPassword;
 
-    // Configures the RedisTemplate bean for interacting with Redis.
     @Bean
     public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
         RedisTemplate<String, Object> template = new RedisTemplate<>();
@@ -33,7 +32,6 @@ public class RedisConfig {
         return template;
     }
 
-    // Configures the RedisConnectionFactory bean for connecting to Redis.
     @Bean
     public RedisConnectionFactory redisConnectionFactory() {
         RedisStandaloneConfiguration configuration = new RedisStandaloneConfiguration(redisHost, redisPort);

@@ -27,12 +27,10 @@ public class EmailService {
 
     EmailClient emailClient;
 
-    // API key to authenticate with Brevo email service
     @Value("${notification.email.brevo-apikey}")
     @NonFinal
     String apiKey;
 
-    // Send email based on information from the request
     public EmailResponse sendEmail(SendEmailRequest request) {
         EmailRequest emailRequest = EmailRequest.builder()
                         .sender(Sender.builder()

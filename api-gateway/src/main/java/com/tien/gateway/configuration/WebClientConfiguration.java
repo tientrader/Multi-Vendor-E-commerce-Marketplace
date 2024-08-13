@@ -11,7 +11,6 @@ import java.util.List;
 @Configuration
 public class WebClientConfiguration {
 
-    // Configure CORS to allow access from different origins
     @Bean
     CorsWebFilter corsWebFilter(){
         CorsConfiguration corsConfiguration = new CorsConfiguration();

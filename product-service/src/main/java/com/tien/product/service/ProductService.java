@@ -43,7 +43,6 @@ public class ProductService {
       MongoTemplate mongoTemplate;
       ShopClient shopClient;
 
-      // Add product
       @Transactional
       public ProductResponse createProduct(ProductCreationRequest request) {
             String username = ((Jwt) SecurityContextHolder.getContext().getAuthentication()
@@ -68,7 +67,6 @@ public class ProductService {
             return productMapper.toProductResponse(product);
       }
 
-      // Update product by productId
       @Transactional
       public ProductResponse updateProduct(String productId, ProductUpdateRequest request) {
             String username = ((Jwt) SecurityContextHolder.getContext().getAuthentication()
@@ -101,7 +99,6 @@ public class ProductService {
             return productMapper.toProductResponse(product);
       }
 
-      // Update stock after order created
       @Transactional
       public void updateStock(String productId, int quantity) {
             Product product = productRepository.findById(productId)
@@ -114,7 +111,6 @@ public class ProductService {
             productRepository.save(product);
       }
 
-      // Delete product by productId
       @Transactional
       public void deleteProduct(String productId) {
             String username = ((Jwt) SecurityContextHolder.getContext().getAuthentication()
@@ -137,7 +133,6 @@ public class ProductService {
             productRepository.deleteById(productId);
       }
 
-      // Method for paginated, sorted, and filtered product retrieval
       public Page<ProductResponse> getFilteredSortedPaginatedProducts(
               int page, int size, String sortBy, String sortDirection,
               String categoryId, Double minPrice, Double maxPrice) {
@@ -166,27 +161,23 @@ public class ProductService {
             return new PageImpl<>(productResponses, pageable, total);
       }
 
-      // Display all products
       public List<ProductResponse> getAllProducts() {
             return productRepository.findAll().stream()
                     .map(productMapper::toProductResponse)
                     .collect(Collectors.toList());
       }
 
-      // Display product by productId
       public ProductResponse getProductById(String productId) {
             return productMapper.toProductResponse(productRepository.findById(productId)
                     .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND)));
       }
 
-      // Display product price by productId
       public double getProductPriceById(String productId) {
             Product product = productRepository.findById(productId)
                     .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
             return product.getPrice();
       }
 
-      // Check if product exists by productId
       public ExistsResponse existsProduct(String productId) {
             boolean exists = productRepository.existsById(productId);
             return new ExistsResponse(exists);

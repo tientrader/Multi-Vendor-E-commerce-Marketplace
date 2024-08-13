@@ -36,7 +36,6 @@ public class OrderService {
       OrderMapper orderMapper;
       KafkaTemplate<String, Object> kafkaTemplate;
 
-      // Create new order
       public void createOrder(OrderCreationRequest request) {
             String username = ((Jwt) SecurityContextHolder.getContext().getAuthentication()
                     .getPrincipal()).getClaim("preferred_username");
@@ -64,7 +63,6 @@ public class OrderService {
             kafkaTemplate.send("order-created-successful", notificationEvent);
       }
 
-      // Calculate the total price of the products in the cart
       private double calculateOrderTotal(List<OrderItemCreationRequest> items) {
             double total = 0.0;
             for (OrderItemCreationRequest item : items) {
@@ -79,7 +77,6 @@ public class OrderService {
             return total;
       }
 
-      // Display all user's orders
       public List<OrderResponse> getAllMyOrder() {
             String username = ((Jwt) SecurityContextHolder.getContext().getAuthentication()
                     .getPrincipal()).getClaim("preferred_username");
@@ -94,7 +91,6 @@ public class OrderService {
                     .collect(Collectors.toList());
       }
 
-      // // Display user's order by ID
       public OrderResponse getMyOrderById(Long orderId) {
             String username = ((Jwt) SecurityContextHolder.getContext().getAuthentication()
                     .getPrincipal()).getClaim("preferred_username");
