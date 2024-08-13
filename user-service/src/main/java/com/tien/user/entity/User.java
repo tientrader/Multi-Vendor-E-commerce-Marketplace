@@ -1,9 +1,8 @@
 package com.tien.user.entity;
 
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.MongoId;
 
 import java.time.LocalDate;
 
@@ -13,15 +12,20 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Document("user")
+@Entity
 public class User {
 
-    @MongoId
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     String profileId;
 
-    String userId;
+    @Column(name = "email", unique = true, columnDefinition = "VARCHAR(255) COLLATE utf8mb4_unicode_ci")
     String email;
+
+    @Column(name = "username", unique = true, columnDefinition = "VARCHAR(255) COLLATE utf8mb4_unicode_ci")
     String username;
+
+    String userId;
     String firstName;
     String lastName;
     LocalDate dob;

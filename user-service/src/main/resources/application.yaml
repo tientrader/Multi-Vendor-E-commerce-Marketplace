@@ -6,9 +6,15 @@ server:
 spring:
   application:
     name: user-service
-  data:
-    mongodb:
-      uri: mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@localhost:27017/user-service?authSource=admin
+  datasource:
+    url: ${MYSQL_CONNECTION}
+    driverClassName: "com.mysql.cj.jdbc.Driver"
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
   security:
     oauth2:
       resourceserver:
@@ -22,8 +28,8 @@ spring:
 
 idp:
   url: http://localhost:8180
-  client-id: tienpro
-  client-secret: tKESjcwvEjf7Wp79pfhO1NBnIZc1Kdcj
+  client-id: ${CLIENT_ID}
+  client-secret: ${CLIENT_SECRET}
 
 management:
   endpoints:
