@@ -1,9 +1,7 @@
 package com.tien.user.httpclient;
 
-import com.tien.user.dto.identity.Credential;
-import com.tien.user.dto.identity.TokenExchangeParam;
-import com.tien.user.dto.identity.TokenExchangeResponse;
-import com.tien.user.dto.identity.UserCreationParam;
+import com.tien.user.dto.identity.*;
+import com.tien.user.dto.request.UserUpdateRequest;
 import feign.QueryMap;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
@@ -21,6 +19,12 @@ public interface IdentityClient {
                 consumes = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<?> createUser(@RequestHeader("authorization") String token,
                                  @RequestBody UserCreationParam param);
+
+    @PutMapping(value = "/admin/realms/tienproapp/users/{id}",
+            consumes = MediaType.APPLICATION_JSON_VALUE)
+    ResponseEntity<?> updateUser(@RequestHeader("authorization") String token,
+                                 @PathVariable("id") String userId,
+                                 @RequestBody UserUpdateRequest param);
 
     @GetMapping(value = "/admin/realms/tienproapp/users",
                 consumes = MediaType.APPLICATION_JSON_VALUE)

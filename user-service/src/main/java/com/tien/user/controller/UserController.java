@@ -3,6 +3,7 @@ package com.tien.user.controller;
 import com.tien.user.dto.ApiResponse;
 import com.tien.user.dto.request.RegistrationRequest;
 import com.tien.user.dto.request.ResetPasswordRequest;
+import com.tien.user.dto.request.UserUpdateRequest;
 import com.tien.user.dto.response.UserResponse;
 import com.tien.user.service.UserService;
 import jakarta.validation.Valid;
@@ -48,11 +49,10 @@ public class UserController {
                 .build();
     }
 
-    @DeleteMapping("/{userId}")
-    public ApiResponse<Void> deleteUser(@PathVariable String userId) {
-        userService.deleteUser(userId);
-        return ApiResponse.<Void>builder()
-                .message("Deleted successfully")
+    @PutMapping("/{userId}")
+    public ApiResponse<UserResponse> updateUserProfile(@PathVariable String userId, @RequestBody @Valid UserUpdateRequest request) {
+        return ApiResponse.<UserResponse>builder()
+                .result(userService.updateUser(userId, request))
                 .build();
     }
 
@@ -61,6 +61,14 @@ public class UserController {
         userService.resetPassword(request.getNewPassword());
         return ApiResponse.<Void>builder()
                 .message("Password reset successfully")
+                .build();
+    }
+
+    @DeleteMapping("/{userId}")
+    public ApiResponse<Void> deleteUser(@PathVariable String userId) {
+        userService.deleteUser(userId);
+        return ApiResponse.<Void>builder()
+                .message("Deleted successfully")
                 .build();
     }
 
