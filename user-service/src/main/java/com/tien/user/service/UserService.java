@@ -46,19 +46,6 @@ public class UserService {
     @Value("${idp.client-secret}")
     String clientSecret;
 
-    private String getAccessToken() {
-        return identityClient.exchangeToken(TokenExchangeParam.builder()
-                .grant_type("client_credentials")
-                .client_id(clientId)
-                .client_secret(clientSecret)
-                .scope("openid")
-                .build()).getAccessToken();
-    }
-
-    private void handleFeignException(FeignException exception) {
-        throw errorNormalizer.handleKeyCloakException(exception);
-    }
-
     public UserResponse register(RegistrationRequest request) {
         try {
             String token = getAccessToken();
@@ -167,6 +154,19 @@ public class UserService {
                 .map(headers -> headers.getFirst().split("/"))
                 .map(splitStr -> splitStr[splitStr.length - 1])
                 .orElseThrow(() -> new AppException(ErrorCode.PROFILE_NOT_FOUND));
+    }
+
+    private String getAccessToken() {
+        return identityClient.exchangeToken(TokenExchangeParam.builder()
+                .grant_type("client_credentials")
+                .client_id(clientId)
+                .client_secret(clientSecret)
+                .scope("openid")
+                .build()).getAccessToken();
+    }
+
+    private void handleFeignException(FeignException exception) {
+        throw errorNormalizer.handleKeyCloakException(exception);
     }
 
 }
