@@ -130,6 +130,18 @@ spring:
             - name: Retry
               args:
                 name: default
+        - id: shop-service
+          uri: http://localhost:8090
+          predicates:
+            - Path=${app.api-prefix}/shop/**
+          filters:
+            - StripPrefix=2
+            - name: CircuitBreaker
+              args:
+                name: shopService
+            - name: Retry
+              args:
+                name: default
         - id: actuator
           uri: http://localhost:8888
           predicates:
@@ -170,6 +182,8 @@ resilience4j:
         baseConfig: default
       postService:
         baseConfig: default
+      shopService:
+        baseConfig: default
 
   retry:
     configs:
@@ -196,6 +210,8 @@ resilience4j:
       userService:
         baseConfig: default
       postService:
+        baseConfig: default
+      shopService:
         baseConfig: default
 
 management:

@@ -11,13 +11,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
 
-@FeignClient(name = "user-service", url = "${app.services.user}",
+@FeignClient(name = "shop-service", url = "${app.services.shop}",
         configuration = {AuthenticationRequestInterceptor.class})
 public interface ShopClient {
 
       @CircuitBreaker(name = "getShopByOwnerUsername", fallbackMethod = "getShopByOwnerUsernameFallback")
       @Retry(name = "getShopByOwnerUsername")
-      @GetMapping(value = "/shop/owner/{username}", produces = MediaType.APPLICATION_JSON_VALUE)
+      @GetMapping(value = "/owner/{username}", produces = MediaType.APPLICATION_JSON_VALUE)
       ApiResponse<ShopResponse> getShopByOwnerUsername(@PathVariable("username") String username);
 
       default ApiResponse<ShopResponse> getShopByOwnerUsernameFallback(String username, Throwable throwable) {

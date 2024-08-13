@@ -1,4 +1,4 @@
-package com.tien.user.exception;
+package com.tien.shop.exception;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -22,10 +22,12 @@ public enum ErrorCode {
     USER_EXISTED(1009, "Username existed, please choose another one", HttpStatus.BAD_REQUEST),
     USERNAME_IS_MISSING(1010, "Please enter username", HttpStatus.BAD_REQUEST),
     ROLE_NOT_FOUND(1011, "Role not found", HttpStatus.NOT_FOUND),
-    CLIENT_NOT_FOUND(1012, "Client not found", HttpStatus.NOT_FOUND),
-    REALM_NOT_FOUND(1013, "Realm not found", HttpStatus.NOT_FOUND),
-    PROFILE_NOT_FOUND(1014, "PROFILE_NOT_FOUND", HttpStatus.NOT_FOUND),
-    USER_NOT_EXISTED(1015, "USER_NOT_EXISTED", HttpStatus.NOT_FOUND),
+    CLIENT_NOT_FOUND(1011, "Client not found", HttpStatus.NOT_FOUND),
+    REALM_NOT_FOUND(1011, "Realm not found", HttpStatus.NOT_FOUND),
+    PROFILE_NOT_FOUND(1011, "PROFILE_NOT_FOUND", HttpStatus.NOT_FOUND),
+    SHOP_NOT_FOUND(1012, "SHOP_NOT_FOUND", HttpStatus.NOT_FOUND),
+    USER_NOT_EXISTED(1013, "USER_NOT_EXISTED", HttpStatus.NOT_FOUND),
+    ALREADY_HAVE_A_SHOP(1014, "ALREADY_HAVE_A_SHOP", HttpStatus.BAD_REQUEST),
     ;
 
     int code;
