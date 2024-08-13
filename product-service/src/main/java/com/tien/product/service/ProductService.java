@@ -48,36 +48,22 @@ public class ProductService {
       public ProductResponse createProduct(ProductCreationRequest request) {
             String username = ((Jwt) SecurityContextHolder.getContext().getAuthentication()
                     .getPrincipal()).getClaim("preferred_username");
-            log.info("Creating product for user: {}", username);
-
             ShopResponse shopResponse = shopClient.getShopByOwnerUsername(username).getResult();
-            if (shopResponse == null) {
-                  log.error("Shop not found for user: {}", username);
-                  throw new AppException(ErrorCode.SHOP_NOT_FOUND);
-            }
-            log.info("Shop found: {}", shopResponse);
+            if (shopResponse == null) throw new AppException(ErrorCode.SHOP_NOT_FOUND);
 
             Category category = categoryRepository.findById(request.getCategoryId())
-                    .orElseThrow(() -> {
-                          log.error("Category not found with ID: {}", request.getCategoryId());
-                          return new AppException(ErrorCode.CATEGORY_NOT_FOUND);
-                    });
-            log.info("Category found: {}", category);
+                    .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
 
             if (!category.getShopId().equals(shopResponse.getId())) {
-                  log.error("Unauthorized access. Category shop ID: {} does not match shop ID: {}",
-                          category.getShopId(), shopResponse.getId());
                   throw new AppException(ErrorCode.UNAUTHORIZED);
             }
 
             Product product = productMapper.toProduct(request);
             product.setCategory(category);
             product = productRepository.save(product);
-            log.info("Product saved: {}", product);
 
             category.getProducts().add(product);
             categoryRepository.save(category);
-            log.info("Category updated with new product: {}", category);
 
             return productMapper.toProductResponse(product);
       }
