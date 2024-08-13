@@ -17,6 +17,7 @@ import lombok.experimental.FieldDefaults;
 
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,7 +37,8 @@ public class CategoryService {
       @PreAuthorize("hasRole('SELLER')")
       @Transactional
       public CategoryResponse createCategory(CategoryCreationRequest request) {
-            String username = SecurityContextHolder.getContext().getAuthentication().getName();
+            String username = ((Jwt) SecurityContextHolder.getContext().getAuthentication()
+                    .getPrincipal()).getClaim("preferred_username");
             ShopResponse shopResponse = shopClient.getShopByOwnerUsername(username).getResult();
             if (shopResponse == null) throw new AppException(ErrorCode.SHOP_NOT_FOUND);
 
@@ -51,7 +53,8 @@ public class CategoryService {
       @PreAuthorize("hasRole('SELLER')")
       @Transactional
       public CategoryResponse updateCategory(String categoryId, CategoryUpdateRequest request) {
-            String username = SecurityContextHolder.getContext().getAuthentication().getName();
+            String username = ((Jwt) SecurityContextHolder.getContext().getAuthentication()
+                    .getPrincipal()).getClaim("preferred_username");
             ShopResponse shopResponse = shopClient.getShopByOwnerUsername(username).getResult();
             if (shopResponse == null) throw new AppException(ErrorCode.SHOP_NOT_FOUND);
 
@@ -72,7 +75,8 @@ public class CategoryService {
       @PreAuthorize("hasRole('SELLER')")
       @Transactional
       public void deleteCategory(String categoryId) {
-            String username = SecurityContextHolder.getContext().getAuthentication().getName();
+            String username = ((Jwt) SecurityContextHolder.getContext().getAuthentication()
+                    .getPrincipal()).getClaim("preferred_username");
             ShopResponse shopResponse = shopClient.getShopByOwnerUsername(username).getResult();
             if (shopResponse == null) throw new AppException(ErrorCode.SHOP_NOT_FOUND);
 

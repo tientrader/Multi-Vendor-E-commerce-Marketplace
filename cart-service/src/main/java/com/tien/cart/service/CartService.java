@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -39,7 +40,8 @@ public class CartService {
 
       // Create new cart or update (if cart already exists)
       public CartResponse createCart(CartCreationRequest request) {
-            String username = SecurityContextHolder.getContext().getAuthentication().getName();
+            String username = ((Jwt) SecurityContextHolder.getContext().getAuthentication()
+                    .getPrincipal()).getClaim("preferred_username");
 
             String existingCartKey = CART_KEY_PREFIX + username;
             Cart existingCart = (Cart) redisTemplate.opsForValue().get(existingCartKey);
@@ -112,7 +114,8 @@ public class CartService {
 
       // Create order from cart
       public void createOrderFromCart() {
-            String username = SecurityContextHolder.getContext().getAuthentication().getName();
+            String username = ((Jwt) SecurityContextHolder.getContext().getAuthentication()
+                    .getPrincipal()).getClaim("preferred_username");
             if (username == null) throw new AppException(ErrorCode.UNAUTHORIZED);
 
             String cartKey = CART_KEY_PREFIX + username;
@@ -129,8 +132,9 @@ public class CartService {
       }
 
       // Get the user's cart
-      public CartResponse getCart() {
-            String username = SecurityContextHolder.getContext().getAuthentication().getName();
+      public CartResponse getMyCart() {
+            String username = ((Jwt) SecurityContextHolder.getContext().getAuthentication()
+                    .getPrincipal()).getClaim("preferred_username");
             if (username == null) throw new AppException(ErrorCode.UNAUTHORIZED);
 
             String cartKey = CART_KEY_PREFIX + username;
@@ -142,8 +146,8 @@ public class CartService {
       }
 
       // Delete the user's cart
-      public void deleteCart() {
-            String username = SecurityContextHolder.getContext().getAuthentication().getName();
+      public void deleteMyCart() {
+            String username = ((Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getClaim("preferred_username");
             if (username == null) throw new AppException(ErrorCode.UNAUTHORIZED);
 
             String cartKey = CART_KEY_PREFIX + username;

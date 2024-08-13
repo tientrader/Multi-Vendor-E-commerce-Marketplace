@@ -35,15 +35,15 @@ public class CartController {
 
       @GetMapping
       public ApiResponse<CartResponse> getMyCart() {
-            CartResponse cartResponse = cartService.getCart();
+            CartResponse cartResponse = cartService.getMyCart();
             return ApiResponse.<CartResponse>builder()
                     .result(cartResponse)
                     .build();
       }
 
-      @DeleteMapping
-      public ApiResponse<String> deleteCart() {
-            cartService.deleteCart();
+      @DeleteMapping("/delete")
+      public ApiResponse<String> deleteMyCart() {
+            cartService.deleteMyCart();
             return ApiResponse.<String>builder()
                     .message("Cart deleted successfully")
                     .build();

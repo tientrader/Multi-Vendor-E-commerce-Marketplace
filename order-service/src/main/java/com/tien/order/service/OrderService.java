@@ -19,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -37,7 +38,8 @@ public class OrderService {
 
       // Create new order
       public void createOrder(OrderCreationRequest request) {
-            String username = SecurityContextHolder.getContext().getAuthentication().getName();
+            String username = ((Jwt) SecurityContextHolder.getContext().getAuthentication()
+                    .getPrincipal()).getClaim("preferred_username");
 
             double total = calculateOrderTotal(request.getItems());
 
@@ -79,7 +81,8 @@ public class OrderService {
 
       // Display all user's orders
       public List<OrderResponse> getAllMyOrder() {
-            String username = SecurityContextHolder.getContext().getAuthentication().getName();
+            String username = ((Jwt) SecurityContextHolder.getContext().getAuthentication()
+                    .getPrincipal()).getClaim("preferred_username");
 
             List<Order> orders = orderRepository.findByUsername(username);
             if (orders.isEmpty()) {
@@ -93,7 +96,8 @@ public class OrderService {
 
       // // Display user's order by ID
       public OrderResponse getMyOrderById(Long orderId) {
-            String username = SecurityContextHolder.getContext().getAuthentication().getName();
+            String username = ((Jwt) SecurityContextHolder.getContext().getAuthentication()
+                    .getPrincipal()).getClaim("preferred_username");
 
             Order order = orderRepository.findById(orderId)
                     .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
