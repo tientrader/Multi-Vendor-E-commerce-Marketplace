@@ -29,51 +29,45 @@ public class ShopService {
       KafkaTemplate<String , Object> kafkaTemplate;
       ShopMapper shopMapper;
 
+      private String getCurrentUsername() {
+            Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            return jwt.getClaim("preferred_username");
+      }
+
       @Transactional
       public ShopResponse createShop(ShopCreationRequest request) {
-            String username = ((Jwt) SecurityContextHolder.getContext().getAuthentication()
-                    .getPrincipal()).getClaim("preferred_username");
-
+            String username = getCurrentUsername();
             if (shopRepository.existsByOwnerUsername(username)) {
                   throw new AppException(ErrorCode.ALREADY_HAVE_A_SHOP);
             }
-
             Shop shop = shopMapper.toShop(request);
             shop.setOwnerUsername(username);
             shop = shopRepository.save(shop);
 
-            NotificationEvent notificationEvent = NotificationEvent.builder()
+            kafkaTemplate.send("shop-created-successful", NotificationEvent.builder()
                     .channel("EMAIL")
                     .recipient(request.getEmail())
                     .subject("Shop Created Successfully")
                     .body("Thanks for choosing us. Wish you all the best!")
-                    .build();
-
-            kafkaTemplate.send("shop-created-successful", notificationEvent);
+                    .build());
 
             return shopMapper.toShopResponse(shop);
       }
 
       @Transactional
       public ShopResponse updateShop(ShopUpdateRequest request) {
-            String username = ((Jwt) SecurityContextHolder.getContext().getAuthentication()
-                    .getPrincipal()).getClaim("preferred_username");
+            String username = getCurrentUsername();
             Shop shop = shopRepository.findByOwnerUsername(username)
                     .orElseThrow(() -> new AppException(ErrorCode.SHOP_NOT_FOUND));
-
             shopMapper.updateShop(shop, request);
-            shop = shopRepository.save(shop);
-
-            return shopMapper.toShopResponse(shop);
+            return shopMapper.toShopResponse(shopRepository.save(shop));
       }
 
       @Transactional
       public void deleteShop() {
-            String username = ((Jwt) SecurityContextHolder.getContext().getAuthentication()
-                    .getPrincipal()).getClaim("preferred_username");
+            String username = getCurrentUsername();
             Shop shop = shopRepository.findByOwnerUsername(username)
                     .orElseThrow(() -> new AppException(ErrorCode.SHOP_NOT_FOUND));
-
             shopRepository.delete(shop);
       }
 

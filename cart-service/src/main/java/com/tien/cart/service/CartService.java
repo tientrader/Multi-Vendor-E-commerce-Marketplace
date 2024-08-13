@@ -38,9 +38,13 @@ public class CartService {
 
       private static final String CART_KEY_PREFIX = "cart:";
 
+      private String getCurrentUsername() {
+            return ((Jwt) SecurityContextHolder.getContext()
+                    .getAuthentication().getPrincipal()).getClaim("preferred_username");
+      }
+
       public CartResponse createCart(CartCreationRequest request) {
-            String username = ((Jwt) SecurityContextHolder.getContext().getAuthentication()
-                    .getPrincipal()).getClaim("preferred_username");
+            String username = getCurrentUsername();
 
             String existingCartKey = CART_KEY_PREFIX + username;
             Cart existingCart = (Cart) redisTemplate.opsForValue().get(existingCartKey);
@@ -111,8 +115,7 @@ public class CartService {
       }
 
       public void createOrderFromCart() {
-            String username = ((Jwt) SecurityContextHolder.getContext().getAuthentication()
-                    .getPrincipal()).getClaim("preferred_username");
+            String username = getCurrentUsername();
             if (username == null) throw new AppException(ErrorCode.UNAUTHORIZED);
 
             String cartKey = CART_KEY_PREFIX + username;
@@ -129,8 +132,7 @@ public class CartService {
       }
 
       public CartResponse getMyCart() {
-            String username = ((Jwt) SecurityContextHolder.getContext().getAuthentication()
-                    .getPrincipal()).getClaim("preferred_username");
+            String username = getCurrentUsername();
             if (username == null) throw new AppException(ErrorCode.UNAUTHORIZED);
 
             String cartKey = CART_KEY_PREFIX + username;
@@ -142,7 +144,7 @@ public class CartService {
       }
 
       public void deleteMyCart() {
-            String username = ((Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getClaim("preferred_username");
+            String username = getCurrentUsername();
             if (username == null) throw new AppException(ErrorCode.UNAUTHORIZED);
 
             String cartKey = CART_KEY_PREFIX + username;

@@ -21,6 +21,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -36,9 +37,14 @@ public class OrderService {
       OrderMapper orderMapper;
       KafkaTemplate<String, Object> kafkaTemplate;
 
+      private String getCurrentUsername() {
+            return ((Jwt) SecurityContextHolder.getContext()
+                    .getAuthentication().getPrincipal()).getClaim("preferred_username");
+      }
+
+      @Transactional
       public void createOrder(OrderCreationRequest request) {
-            String username = ((Jwt) SecurityContextHolder.getContext().getAuthentication()
-                    .getPrincipal()).getClaim("preferred_username");
+            String username = getCurrentUsername();
 
             double total = calculateOrderTotal(request.getItems());
 
@@ -53,14 +59,13 @@ public class OrderService {
 
             orderRepository.save(order);
 
-            NotificationEvent notificationEvent = NotificationEvent.builder()
+            kafkaTemplate.send("order-created-successful", NotificationEvent.builder()
                     .channel("EMAIL")
                     .recipient(request.getEmail())
                     .subject("Order created successfully")
                     .body("Thank " + request.getUsername() + " for buying our products! \n" +
                             "The total amount is " + request.getTotal())
-                    .build();
-            kafkaTemplate.send("order-created-successful", notificationEvent);
+                    .build());
       }
 
       private double calculateOrderTotal(List<OrderItemCreationRequest> items) {
@@ -78,8 +83,7 @@ public class OrderService {
       }
 
       public List<OrderResponse> getAllMyOrder() {
-            String username = ((Jwt) SecurityContextHolder.getContext().getAuthentication()
-                    .getPrincipal()).getClaim("preferred_username");
+            String username = getCurrentUsername();
 
             List<Order> orders = orderRepository.findByUsername(username);
             if (orders.isEmpty()) {
@@ -92,8 +96,7 @@ public class OrderService {
       }
 
       public OrderResponse getMyOrderById(Long orderId) {
-            String username = ((Jwt) SecurityContextHolder.getContext().getAuthentication()
-                    .getPrincipal()).getClaim("preferred_username");
+            String username = getCurrentUsername();
 
             Order order = orderRepository.findById(orderId)
                     .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));

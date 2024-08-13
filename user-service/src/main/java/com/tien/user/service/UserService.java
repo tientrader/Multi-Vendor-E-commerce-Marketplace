@@ -49,6 +49,10 @@ public class UserService {
     @NonFinal
     String clientSecret;
 
+    private String getCurrentUserId() {
+        return SecurityContextHolder.getContext().getAuthentication().getName();
+    }
+
     public UserResponse register(RegistrationRequest request) {
         try {
             String token = getAccessToken();
@@ -77,14 +81,13 @@ public class UserService {
             user.setUserId(userId);
             user = userRepository.save(user);
 
-            NotificationEvent notificationEvent = NotificationEvent.builder()
+            kafkaTemplate.send("register-successful", NotificationEvent.builder()
                     .channel("EMAIL")
                     .recipient(request.getEmail())
                     .subject("Welcome to TienProApp")
                     .body("Hello, " + request.getUsername())
-                    .build();
+                    .build());
 
-            kafkaTemplate.send("register-successful", notificationEvent);
             return userMapper.toUserResponse(user);
         } catch (FeignException e) {
             handleFeignException(e);
@@ -93,7 +96,7 @@ public class UserService {
     }
 
     public UserResponse getMyInfo() {
-        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
+        String userId = getCurrentUserId();
         User user = userRepository.findByUserId(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.PROFILE_NOT_FOUND));
         return userMapper.toUserResponse(user);
@@ -122,14 +125,11 @@ public class UserService {
         }
 
         userMapper.updateUser(user, updateRequest);
-        user = userRepository.save(user);
-
-        return userMapper.toUserResponse(user);
+        return userMapper.toUserResponse(userRepository.save(user));
     }
 
     public void resetPassword(String newPassword) {
-        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
-
+        String userId = getCurrentUserId();
         try {
             identityClient.resetPassword("Bearer " + getAccessToken(), userId,
                     Credential.builder()
