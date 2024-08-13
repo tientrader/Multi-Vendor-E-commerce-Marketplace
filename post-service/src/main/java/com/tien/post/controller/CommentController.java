@@ -39,6 +39,7 @@ public class CommentController {
       public ApiResponse<Void> updateComment(@PathVariable String commentId, @RequestBody CommentUpdateRequest request) {
             commentService.updateComment(commentId, request);
             return ApiResponse.<Void>builder()
+                    .message("Comment updated successfully")
                     .build();
       }
 
@@ -46,6 +47,7 @@ public class CommentController {
       public ApiResponse<Void> deleteComment(@PathVariable String commentId) {
             commentService.deleteComment(commentId);
             return ApiResponse.<Void>builder()
+                    .message("Comment deleted successfully")
                     .build();
       }
 

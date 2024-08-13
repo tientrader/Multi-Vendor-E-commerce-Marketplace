@@ -52,6 +52,7 @@ public class PostController {
       public ApiResponse<Void> deletePost(@PathVariable String postId) {
             postService.deletePost(postId);
             return ApiResponse.<Void>builder()
+                    .message("Post deleted successfully")
                     .build();
       }
 
