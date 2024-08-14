@@ -25,6 +25,8 @@ services:
     environment:
       - MONGO_INITDB_ROOT_USERNAME=
       - MONGO_INITDB_ROOT_PASSWORD=
+    volumes:
+      - mongodb-data:/data/db
     networks:
       - tien-network
 
@@ -36,17 +38,8 @@ services:
     environment:
       - MYSQL_ROOT_USER=
       - MYSQL_ROOT_PASSWORD=
-    networks:
-      - tien-network
-
-  neo4j:
-    image: neo4j:latest
-    container_name: neo4j
-    ports:
-      - "7474:7474"
-      - "7687:7687"
-    environment:
-      - NEO4J_AUTH=/
+    volumes:
+      - mysql-data:/var/lib/mysql
     networks:
       - tien-network
 
@@ -70,14 +63,8 @@ services:
     environment:
       - REDIS_PASSWORD=
     command: [ "redis-server", "--requirepass", "" ]
-    networks:
-      - tien-network
-
-  zipkin:
-    image: openzipkin/zipkin
-    container_name: zipkin
-    ports:
-      - "9411:9411"
+    volumes:
+      - redis-data:/data
     networks:
       - tien-network
 
@@ -89,6 +76,7 @@ services:
       - --config.file=/etc/prometheus/prometheus.yml
     volumes:
       - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
     ports:
       - "9090:9090"
     networks:
@@ -100,6 +88,8 @@ services:
     command: [ "-config.file=/etc/loki/local-config.yaml" ]
     ports:
       - "3100:3100"
+    volumes:
+      - loki-data:/loki
     networks:
       - tien-network
 
@@ -129,6 +119,13 @@ services:
       - "3000:3000"
     networks:
       - tien-network
+
+volumes:
+  mongodb-data:
+  mysql-data:
+  redis-data:
+  prometheus-data:
+  loki-data:
 
 networks:
   tien-network:
