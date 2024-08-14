@@ -2,7 +2,7 @@
 
 ## Overview
 
-This project is an E-commerce and Social Platform built with a microservices architecture. It supports a wide range of functionalities, including user authentication/authorization, shop & product management, order processing, social interactions (posts, likes, comments), notifications, and search capabilities. The system is designed to be scalable, fault-tolerant, and secure, making it suitable for modern web applications.
+This project is a robust E-commerce and Social Platform built with a microservices architecture. It encompasses a range of functionalities including user authentication, shop & product management, order processing, social interactions (posts, likes, comments), notifications, and search capabilities. The system is designed for scalability, fault-tolerance, and advanced security, making it suitable for modern web applications.
 
 ## Table of Contents
 
@@ -19,6 +19,7 @@ This project is an E-commerce and Social Platform built with a microservices arc
   - [Notification Service](#notification-service)
   - [File Service](#file-service)
   - [Shop Service](#shop-service)
+  - [Search Service](#search-service)
 
 ## Technologies
 
@@ -29,91 +30,72 @@ This project is an E-commerce and Social Platform built with a microservices arc
 
 ## Architecture
 
-The system is composed of multiple microservices, each responsible for a specific domain within the application. These microservices communicate with each other primarily through HTTP REST APIs, managed by Spring Cloud Gateway. Keycloak is employed for identity and access management, enabling secure authentication and authorization across the system. Kafka is used for event-driven communication between services, such as sending notifications after certain actions.
+The platform is structured around microservices, each handling distinct domain functionalities. Communication between services is managed through HTTP REST APIs, with Spring Cloud Gateway overseeing routing. Keycloak provides comprehensive identity and access management, while Kafka facilitates event-driven communication, such as sending notifications.
 
 ### Key Components
 
-- **API Gateway**: Manages routing, load balancing, and security for incoming API requests using Spring Cloud Gateway.
-- **Keycloak**: Centralized identity management solution, handling authentication, authorization, SSO, and social logins.
-- **Reactive Programming**: Utilized in services that require non-blocking, asynchronous processing for scalability.
-- **Caching**: Redis is used to cache data and manage user sessions, enhancing system performance.
-- **Search**: Elasticsearch provides fast, scalable full-text search capabilities across entities like products and posts.
+- **API Gateway**: Employs Spring Cloud Gateway for effective routing, load balancing, and security of API requests.
+- **Keycloak**: Offers centralized identity management, handling authentication, authorization, SSO, and social logins.
+- **Reactive Programming**: Utilizes Reactor to build scalable, non-blocking asynchronous operations within services.
+- **Caching**: Redis enhances performance with in-memory caching and session management.
+- **Search**: Elasticsearch delivers fast, scalable full-text search capabilities across entities.
 
 ## Security
 
-- **Identity and Access Management**: Keycloak is used to manage user identities, roles, and permissions across all services.
-- **OAuth2**: Provides secure authorization for accessing services.
-- **SSO**: Single Sign-On (SSO) is implemented via Keycloak, with support for social logins (Google, Facebook).
+- **Keycloak Integration**: Architected a robust identity management system with advanced SSO and social login capabilities, enhancing security and providing a seamless user experience.
+- **OAuth2**: Ensures secure authorization for service access.
+- **SSO**: Implements Single Sign-On (SSO) through Keycloak, supporting social logins (Google, Facebook) for a unified user experience.
 
 ## Observability and Monitoring
 
-- **Prometheus**: Collects metrics from various services for monitoring.
-- **Grafana**: Visualizes metrics data and provides real-time dashboards.
-- **Loki**: Centralized log management and analysis.
-- **Tempo**: Distributed tracing for performance monitoring and debugging.
+- **Prometheus**: Collects real-time metrics from various services.
+- **Grafana**: Visualizes metrics data and offers real-time dashboards.
+- **Loki**: Centralizes log management for effective aggregation and analysis.
+- **Tempo**: Provides distributed tracing to monitor and debug performance issues.
+
 ## Microservices
 
 ### User Service
 
 - **Description**: Manages user profiles, roles, and authentication via Keycloak.
-- **Key Features**:
-  - User registration and login
-  - Profile management
-  - Role-based access control (RBAC)
+- **Key Features**: User registration, login, profile management, and role-based access control.
 
 ### Product Service
 
-- **Description**: Handles product listings, categories, and inventory management.
-- **Key Features**:
-  - CRUD operations for products and categories
-  - Integration with Elasticsearch for fast and scalable product search
-  - Inventory management
-  - Integration with Order Service to manage stock levels
+- **Description**: Handles product listings, categories, and inventory.
+- **Key Features**: CRUD operations for products and categories, integration with Elasticsearch for scalable search, and inventory management.
 
 ### Order Service
 
 - **Description**: Manages order processing, payment integration, and order history.
-- **Key Features**:
-  - Order creation, tracking, and cancellation
-  - Payment processing (integrated with third-party payment services like PayPal and Stripe)
-  - Integration with Product Service for stock management
-  - Interaction with Cart Service to create orders from user carts
+- **Key Features**: Order creation, stock management with Product Service, and integration with Cart Service.
 
 ### Cart Service
 
-- **Description**: Handles shopping cart management for users.
-- **Key Features**:
-  - CRUD operations for shopping carts
-  - Integration with Order Service for seamless order creation
-  - Caching and session management using Redis
+- **Description**: Manages shopping cart functionality.
+- **Key Features**: CRUD operations, integration with Order Service, and caching/session management with Redis.
 
 ### Post Service
 
-- **Description**: Manages user-generated content, including posts, likes, and comments.
-- **Key Features**:
-  - CRUD operations for posts, likes, and comments
-  - User interaction tracking and content moderation
+- **Description**: Manages user-generated content including posts, likes, and comments.
+- **Key Features**: CRUD operations, user interaction tracking, and content moderation.
 
 ### Notification Service
 
-- **Description**: Handles real-time notifications for users.
-- **Key Features**:
-  - Event-driven notification system using Kafka
-  - Management of notification preferences
-  - Integration with other services to send notifications based on user activity
+- **Description**: Handles real-time user notifications.
+- **Key Features**: Event-driven notifications using Kafka, notification preferences management, and integration with other services.
 
 ### File Service
 
-- **Description**: Manages file uploads and storage for user profiles and product images.
-- **Key Features**:
-  - Secure file upload and download
-  - Metadata management for files
-  - Integration with User and Product services
+- **Description**: Manages file uploads and storage.
+- **Key Features**: Secure file upload/download, metadata management, and integration with User and Product services.
 
 ### Shop Service
 
-- **Description**: Manages the creation and management of shops by users.
-- **Key Features**:
-  - CRUD operations for shops
-  - Integration with Product Service for categorizing products under specific shops
-  - Permission management for shop owners, ensuring only authorized users can manage shops
+- **Description**: Manages shop creation and management by users.
+- **Key Features**: CRUD operations for shops, integration with Product Service for shop-related product management, and permission management for shop owners.
+
+### Search Service
+
+- **Description**: Provides advanced search functionalities across various entities.
+- **Key Features**: Full-text search capabilities using Elasticsearch, allowing efficient and scalable search operations for products, posts, and other entities.
