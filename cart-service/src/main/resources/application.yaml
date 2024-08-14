@@ -1,5 +1,5 @@
 server:
-  port: 8086
+  port: 8083
   servlet:
     context-path: /cart
 
@@ -13,7 +13,7 @@ spring:
 
 app:
   services:
-    product: http://localhost:8083/product
+    product: http://localhost:8082/product
     order: http://localhost:8084/order
 
 resilience4j:

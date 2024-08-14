@@ -10,44 +10,32 @@ spring:
   cloud:
     gateway:
       routes:
-        - id: identity_service
+        - id: user_service
           uri: http://localhost:8080
           predicates:
-            - Path=${app.api-prefix}/identity/**
+            - Path=${app.api-prefix}/user/**
           filters:
             - StripPrefix=2
             - name: CircuitBreaker
               args:
-                name: identityService
+                name: userService
             - name: Retry
               args:
                 name: default
-        - id: profile_service
+        - id: shop-service
           uri: http://localhost:8081
           predicates:
-            - Path=${app.api-prefix}/profile/users/**
+            - Path=${app.api-prefix}/shop/**
           filters:
             - StripPrefix=2
             - name: CircuitBreaker
               args:
-                name: profileService
-            - name: Retry
-              args:
-                name: default
-        - id: notification_service
-          uri: http://localhost:8082
-          predicates:
-            - Path=${app.api-prefix}/notification/**
-          filters:
-            - StripPrefix=2
-            - name: CircuitBreaker
-              args:
-                name: notificationService
+                name: shopService
             - name: Retry
               args:
                 name: default
         - id: product_service
-          uri: http://localhost:8083
+          uri: http://localhost:8082
           predicates:
             - Path=${app.api-prefix}/product/**
           filters:
@@ -55,6 +43,18 @@ spring:
             - name: CircuitBreaker
               args:
                 name: productService
+            - name: Retry
+              args:
+                name: default
+        - id: cart_service
+          uri: http://localhost:8083
+          predicates:
+            - Path=${app.api-prefix}/cart/**
+          filters:
+            - StripPrefix=2
+            - name: CircuitBreaker
+              args:
+                name: cartService
             - name: Retry
               args:
                 name: default
@@ -70,56 +70,8 @@ spring:
             - name: Retry
               args:
                 name: default
-        - id: payment_service
-          uri: http://localhost:8085
-          predicates:
-            - Path=${app.api-prefix}/payment/**
-          filters:
-            - StripPrefix=2
-            - name: CircuitBreaker
-              args:
-                name: paymentService
-            - name: Retry
-              args:
-                name: default
-        - id: cart_service
-          uri: http://localhost:8086
-          predicates:
-            - Path=${app.api-prefix}/cart/**
-          filters:
-            - StripPrefix=2
-            - name: CircuitBreaker
-              args:
-                name: cartService
-            - name: Retry
-              args:
-                name: default
-        - id: shipping_service
-          uri: http://localhost:8087
-          predicates:
-            - Path=${app.api-prefix}/shipping/**
-          filters:
-            - StripPrefix=2
-            - name: CircuitBreaker
-              args:
-                name: shippingService
-            - name: Retry
-              args:
-                name: default
-        - id: user_service
-          uri: http://localhost:8088
-          predicates:
-            - Path=${app.api-prefix}/user/**
-          filters:
-            - StripPrefix=2
-            - name: CircuitBreaker
-              args:
-                name: userService
-            - name: Retry
-              args:
-                name: default
         - id: post_service
-          uri: http://localhost:8089
+          uri: http://localhost:8085
           predicates:
             - Path=${app.api-prefix}/post/**
           filters:
@@ -130,15 +82,15 @@ spring:
             - name: Retry
               args:
                 name: default
-        - id: shop-service
-          uri: http://localhost:8090
+        - id: notification_service
+          uri: http://localhost:8086
           predicates:
-            - Path=${app.api-prefix}/shop/**
+            - Path=${app.api-prefix}/notification/**
           filters:
             - StripPrefix=2
             - name: CircuitBreaker
               args:
-                name: shopService
+                name: notificationService
             - name: Retry
               args:
                 name: default
@@ -162,27 +114,19 @@ resilience4j:
         slidingWindowSize: 10
         slidingWindowType: COUNT_BASED
     instances:
-      identityService:
+      userService:
         baseConfig: default
-      profileService:
-        baseConfig: default
-      notificationService:
+      shopService:
         baseConfig: default
       productService:
         baseConfig: default
-      orderService:
-        baseConfig: default
-      paymentService:
-        baseConfig: default
       cartService:
         baseConfig: default
-      shippingService:
-        baseConfig: default
-      userService:
+      orderService:
         baseConfig: default
       postService:
         baseConfig: default
-      shopService:
+      notificationService:
         baseConfig: default
 
   retry:
@@ -191,27 +135,19 @@ resilience4j:
         maxRetryAttempts: 3
         waitDuration: 2s
     instances:
-      identityService:
+      userService:
         baseConfig: default
-      profileService:
-        baseConfig: default
-      notificationService:
+      shopService:
         baseConfig: default
       productService:
         baseConfig: default
-      orderService:
-        baseConfig: default
-      paymentService:
-        baseConfig: default
       cartService:
         baseConfig: default
-      shippingService:
-        baseConfig: default
-      userService:
+      orderService:
         baseConfig: default
       postService:
         baseConfig: default
-      shopService:
+      notificationService:
         baseConfig: default
 
 management:

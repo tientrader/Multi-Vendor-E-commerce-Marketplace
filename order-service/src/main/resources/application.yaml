@@ -23,8 +23,7 @@ spring:
 
 app:
   services:
-    product: http://localhost:8083/product
-    payment: http://localhost:8085/payment
+    product: http://localhost:8082/product
 
 resilience4j:
   circuitbreaker:

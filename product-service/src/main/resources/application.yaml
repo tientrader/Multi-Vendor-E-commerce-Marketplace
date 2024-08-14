@@ -1,5 +1,5 @@
 server:
-  port: 8083
+  port: 8082
   servlet:
     context-path: /product
 
@@ -12,7 +12,7 @@ spring:
 
 app:
   services:
-    shop: http://localhost:8090/shop
+    shop: http://localhost:8081/shop
 
 resilience4j:
   circuitbreaker:
