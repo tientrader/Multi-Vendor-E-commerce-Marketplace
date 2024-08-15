@@ -23,7 +23,7 @@ public class SecurityConfig {
     CustomJwtDecoder customJwtDecoder;
 
     private static final String[] PUBLIC_ENDPOINTS = {
-            "/email/send", "/actuator/**"
+            "/actuator/**"
     };
 
     @Bean
