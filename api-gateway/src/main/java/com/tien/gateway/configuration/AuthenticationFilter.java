@@ -31,14 +31,13 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
     ReactiveJwtDecoder jwtDecoder;
 
     @NonFinal
-    private String[] publicEndpoints = {
-            "/actuator/**",
-            "/user/register"
+    String[] publicEndpoints = {
+            "/actuator/**", "/user/register"
     };
 
     @Value("${app.api-prefix}")
     @NonFinal
-    private String apiPrefix;
+    String apiPrefix;
 
     private boolean isPublicEndpoint(ServerHttpRequest request) {
         return Arrays.stream(publicEndpoints).anyMatch(
