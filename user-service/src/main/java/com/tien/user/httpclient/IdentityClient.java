@@ -26,11 +26,6 @@ public interface IdentityClient {
                                  @PathVariable("id") String userId,
                                  @RequestBody UserUpdateRequest param);
 
-    @GetMapping(value = "/admin/realms/tienproapp/users",
-                consumes = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<?> getUserByUsername(@RequestHeader("authorization") String token,
-                                        @RequestParam("username") String username);
-
     @DeleteMapping(value = "/admin/realms/tienproapp/users/{id}")
     void deleteUser(@RequestHeader("authorization") String token,
                     @PathVariable("id") String userId);
