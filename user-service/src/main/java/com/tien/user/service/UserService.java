@@ -25,6 +25,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -53,6 +54,7 @@ public class UserService {
         return SecurityContextHolder.getContext().getAuthentication().getName();
     }
 
+    @Transactional
     public UserResponse register(RegistrationRequest request) {
         try {
             String token = getAccessToken();
@@ -114,6 +116,7 @@ public class UserService {
         return userMapper.toUserResponse(user);
     }
 
+    @Transactional
     public UserResponse updateUser(String userId, UserUpdateRequest updateRequest) {
         User user = userRepository.findByUserId(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.PROFILE_NOT_FOUND));
@@ -128,6 +131,7 @@ public class UserService {
         return userMapper.toUserResponse(userRepository.save(user));
     }
 
+    @Transactional
     public void resetPassword(String newPassword) {
         String userId = getCurrentUserId();
         try {
@@ -142,6 +146,7 @@ public class UserService {
         }
     }
 
+    @Transactional
     public void deleteUser(String userId) {
         try {
             identityClient.deleteUser("Bearer " + getAccessToken(), userId);
