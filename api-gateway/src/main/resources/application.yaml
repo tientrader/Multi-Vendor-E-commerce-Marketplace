@@ -19,6 +19,7 @@ spring:
             - name: CircuitBreaker
               args:
                 name: userService
+                fallbackUri: forward:/fallback/user
             - name: Retry
               args:
                 name: default
@@ -31,6 +32,7 @@ spring:
             - name: CircuitBreaker
               args:
                 name: shopService
+                fallbackUri: forward:/fallback/shop
             - name: Retry
               args:
                 name: default
@@ -43,6 +45,7 @@ spring:
             - name: CircuitBreaker
               args:
                 name: productService
+                fallbackUri: forward:/fallback/product
             - name: Retry
               args:
                 name: default
@@ -55,6 +58,7 @@ spring:
             - name: CircuitBreaker
               args:
                 name: cartService
+                fallbackUri: forward:/fallback/cart
             - name: Retry
               args:
                 name: default
@@ -67,6 +71,7 @@ spring:
             - name: CircuitBreaker
               args:
                 name: orderService
+                fallbackUri: forward:/fallback/order
             - name: Retry
               args:
                 name: default
@@ -79,6 +84,7 @@ spring:
             - name: CircuitBreaker
               args:
                 name: postService
+                fallbackUri: forward:/fallback/post
             - name: Retry
               args:
                 name: default
@@ -91,6 +97,7 @@ spring:
             - name: CircuitBreaker
               args:
                 name: notificationService
+                fallbackUri: forward:/fallback/notification
             - name: Retry
               args:
                 name: default

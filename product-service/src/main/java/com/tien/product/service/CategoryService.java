@@ -1,5 +1,6 @@
 package com.tien.product.service;
 
+import com.tien.product.dto.ApiResponse;
 import com.tien.product.dto.response.CategoryResponse;
 import com.tien.product.dto.response.ShopResponse;
 import com.tien.product.entity.Category;
@@ -34,10 +35,8 @@ public class CategoryService {
 
       @Transactional
       public CategoryResponse createCategory(CategoryCreationRequest request) {
-            String username = ((Jwt) SecurityContextHolder.getContext().getAuthentication()
-                    .getPrincipal()).getClaim("preferred_username");
-
-            ShopResponse shopResponse = shopClient.getShopByOwnerUsername(username).getResult();
+            String username = getCurrentUsername();
+            ShopResponse shopResponse = getShopByOwnerUsername(username);
             if (shopResponse == null) throw new AppException(ErrorCode.SHOP_NOT_FOUND);
 
             Category category = categoryMapper.toCategory(request);
@@ -47,12 +46,25 @@ public class CategoryService {
             return categoryMapper.toCategoryResponse(savedCategory);
       }
 
+      public List<CategoryResponse> getAllCategories() {
+            return categoryRepository.findAll().stream()
+                    .map(categoryMapper::toCategoryResponse)
+                    .collect(Collectors.toList());
+      }
+
+      public CategoryResponse getCategoryById(String categoryId) {
+            return categoryMapper.toCategoryResponse(categoryRepository.findById(categoryId)
+                    .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND)));
+      }
+
       @Transactional
       public CategoryResponse updateCategory(String categoryId, CategoryUpdateRequest request) {
-            String username = ((Jwt) SecurityContextHolder.getContext().getAuthentication()
-                    .getPrincipal()).getClaim("preferred_username");
-            ShopResponse shopResponse = shopClient.getShopByOwnerUsername(username).getResult();
-            if (shopResponse == null) throw new AppException(ErrorCode.SHOP_NOT_FOUND);
+            String username = getCurrentUsername();
+            ShopResponse shopResponse = getShopByOwnerUsername(username);
+
+            if (shopResponse == null) {
+                  throw new AppException(ErrorCode.SHOP_NOT_FOUND);
+            }
 
             Category category = categoryRepository.findById(categoryId)
                     .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
@@ -69,10 +81,12 @@ public class CategoryService {
 
       @Transactional
       public void deleteCategory(String categoryId) {
-            String username = ((Jwt) SecurityContextHolder.getContext().getAuthentication()
-                    .getPrincipal()).getClaim("preferred_username");
-            ShopResponse shopResponse = shopClient.getShopByOwnerUsername(username).getResult();
-            if (shopResponse == null) throw new AppException(ErrorCode.SHOP_NOT_FOUND);
+            String username = getCurrentUsername();
+            ShopResponse shopResponse = getShopByOwnerUsername(username);
+
+            if (shopResponse == null) {
+                  throw new AppException(ErrorCode.SHOP_NOT_FOUND);
+            }
 
             Category category = categoryRepository.findById(categoryId)
                     .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
@@ -84,15 +98,17 @@ public class CategoryService {
             categoryRepository.deleteById(categoryId);
       }
 
-      public List<CategoryResponse> getAllCategories() {
-            return categoryRepository.findAll().stream()
-                    .map(categoryMapper::toCategoryResponse)
-                    .collect(Collectors.toList());
+      private String getCurrentUsername() {
+            return ((Jwt) SecurityContextHolder.getContext().getAuthentication()
+                    .getPrincipal()).getClaim("preferred_username");
       }
 
-      public CategoryResponse getCategoryById(String categoryId) {
-            return categoryMapper.toCategoryResponse(categoryRepository.findById(categoryId)
-                    .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND)));
+      private ShopResponse getShopByOwnerUsername(String username) {
+            ApiResponse<ShopResponse> response = shopClient.getShopByOwnerUsername(username);
+            if (response.getCode() == ErrorCode.SHOP_SERVICE_UNAVAILABLE.getCode()) {
+                  throw new AppException(ErrorCode.SHOP_SERVICE_UNAVAILABLE);
+            }
+            return response.getResult();
       }
 
 }

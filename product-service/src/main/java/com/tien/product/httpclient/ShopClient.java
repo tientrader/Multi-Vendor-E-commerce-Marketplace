@@ -3,6 +3,7 @@ package com.tien.product.httpclient;
 import com.tien.product.configuration.AuthenticationRequestInterceptor;
 import com.tien.product.dto.ApiResponse;
 import com.tien.product.dto.response.ShopResponse;
+import com.tien.product.exception.ErrorCode;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -21,7 +22,8 @@ public interface ShopClient {
 
       default ApiResponse<ShopResponse> getShopByOwnerUsernameFallback(String username, Throwable throwable) {
             return ApiResponse.<ShopResponse>builder()
-                    .message("Service unavailable")
+                    .code(ErrorCode.SHOP_SERVICE_UNAVAILABLE.getCode())
+                    .message("Shop service is currently unavailable. Please try again later.")
                     .build();
       }
 

@@ -1,5 +1,6 @@
 package com.tien.product.service;
 
+import com.tien.product.dto.ApiResponse;
 import com.tien.product.dto.request.ProductUpdateRequest;
 import com.tien.product.dto.response.ExistsResponse;
 import com.tien.product.dto.response.ShopResponse;
@@ -43,10 +44,12 @@ public class ProductService {
 
       @Transactional
       public ProductResponse createProduct(ProductCreationRequest request) {
-            String username = ((Jwt) SecurityContextHolder.getContext().getAuthentication()
-                    .getPrincipal()).getClaim("preferred_username");
-            ShopResponse shopResponse = shopClient.getShopByOwnerUsername(username).getResult();
-            if (shopResponse == null) throw new AppException(ErrorCode.SHOP_NOT_FOUND);
+            String username = getCurrentUsername();
+            ShopResponse shopResponse = getShopByOwnerUsername(username);
+
+            if (shopResponse == null) {
+                  throw new AppException(ErrorCode.SHOP_NOT_FOUND);
+            }
 
             Category category = categoryRepository.findById(request.getCategoryId())
                     .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
@@ -67,11 +70,12 @@ public class ProductService {
 
       @Transactional
       public ProductResponse updateProduct(String productId, ProductUpdateRequest request) {
-            String username = ((Jwt) SecurityContextHolder.getContext().getAuthentication()
-                    .getPrincipal()).getClaim("preferred_username");
+            String username = getCurrentUsername();
+            ShopResponse shopResponse = getShopByOwnerUsername(username);
 
-            ShopResponse shopResponse = shopClient.getShopByOwnerUsername(username).getResult();
-            if (shopResponse == null) throw new AppException(ErrorCode.SHOP_NOT_FOUND);
+            if (shopResponse == null) {
+                  throw new AppException(ErrorCode.SHOP_NOT_FOUND);
+            }
 
             Product product = productRepository.findById(productId)
                     .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
@@ -111,11 +115,12 @@ public class ProductService {
 
       @Transactional
       public void deleteProduct(String productId) {
-            String username = ((Jwt) SecurityContextHolder.getContext().getAuthentication()
-                    .getPrincipal()).getClaim("preferred_username");
+            String username = getCurrentUsername();
+            ShopResponse shopResponse = getShopByOwnerUsername(username);
 
-            ShopResponse shopResponse = shopClient.getShopByOwnerUsername(username).getResult();
-            if (shopResponse == null) throw new AppException(ErrorCode.SHOP_NOT_FOUND);
+            if (shopResponse == null) {
+                  throw new AppException(ErrorCode.SHOP_NOT_FOUND);
+            }
 
             Product product = productRepository.findById(productId)
                     .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
@@ -148,8 +153,7 @@ public class ProductService {
             }
 
             Query query = Query.query(criteria);
-            Pageable pageable = PageRequest.of
-                    (page, size, Sort.by(Sort.Direction.fromString(sortDirection), sortBy));
+            Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(sortDirection), sortBy));
             query.with(pageable);
 
             List<Product> products = mongoTemplate.find(query, Product.class);
@@ -179,6 +183,19 @@ public class ProductService {
       public ExistsResponse existsProduct(String productId) {
             boolean exists = productRepository.existsById(productId);
             return new ExistsResponse(exists);
+      }
+
+      private String getCurrentUsername() {
+            return ((Jwt) SecurityContextHolder.getContext().getAuthentication()
+                    .getPrincipal()).getClaim("preferred_username");
+      }
+
+      private ShopResponse getShopByOwnerUsername(String username) {
+            ApiResponse<ShopResponse> response = shopClient.getShopByOwnerUsername(username);
+            if (response.getCode() == ErrorCode.SHOP_SERVICE_UNAVAILABLE.getCode()) {
+                  throw new AppException(ErrorCode.SHOP_SERVICE_UNAVAILABLE);
+            }
+            return response.getResult();
       }
 
 }

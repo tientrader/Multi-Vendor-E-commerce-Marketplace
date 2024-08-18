@@ -1,8 +1,8 @@
 package com.tien.cart.httpclient;
 
 import com.tien.cart.configuration.AuthenticationRequestInterceptor;
+import com.tien.cart.dto.ApiResponse;
 import com.tien.cart.dto.request.OrderCreationRequest;
-import com.tien.cart.exception.AppException;
 import com.tien.cart.exception.ErrorCode;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
@@ -18,10 +18,13 @@ public interface OrderClient {
       @CircuitBreaker(name = "createOrder", fallbackMethod = "createOrderFallback")
       @Retry(name = "createOrder")
       @PostMapping(value = "/create", produces = MediaType.APPLICATION_JSON_VALUE)
-      void createOrder(@RequestBody OrderCreationRequest request);
+      ApiResponse<Void> createOrder(@RequestBody OrderCreationRequest request);
 
-      default void createOrderFallback(OrderCreationRequest request, Throwable throwable) {
-            throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
+      default ApiResponse<Void> createOrderFallback(OrderCreationRequest request, Throwable throwable) {
+            return ApiResponse.<Void>builder()
+                    .code(ErrorCode.ORDER_SERVICE_UNAVAILABLE.getCode())
+                    .message("Order service is currently unavailable. Please try again later.")
+                    .build();
       }
 
 }

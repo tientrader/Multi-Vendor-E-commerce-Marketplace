@@ -24,7 +24,6 @@ public class OrderCreationRequest {
 
       double total;
 
-      @NotBlank(message = "STATUS_IS_REQUIRED")
       String status;
 
 }

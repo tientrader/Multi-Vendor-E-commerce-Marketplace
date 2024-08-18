@@ -2,7 +2,6 @@ package com.tien.order.httpclient;
 
 import com.tien.order.configuration.AuthenticationRequestInterceptor;
 import com.tien.order.dto.ApiResponse;
-import com.tien.order.exception.AppException;
 import com.tien.order.exception.ErrorCode;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
@@ -28,11 +27,17 @@ public interface ProductClient {
     ApiResponse<Void> updateStock(@PathVariable String productId, @RequestParam int quantity);
 
     default ApiResponse<Double> getProductPriceByIdFallback(String productId, Throwable throwable) {
-        throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
+        return ApiResponse.<Double>builder()
+                .code(ErrorCode.PRODUCT_SERVICE_UNAVAILABLE.getCode())
+                .message("Product service is currently unavailable. Please try again later.")
+                .build();
     }
 
     default ApiResponse<Void> updateStockFallback(String productId, int quantity, Throwable throwable) {
-        throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
+        return ApiResponse.<Void>builder()
+                .code(ErrorCode.ORDER_SERVICE_UNAVAILABLE.getCode())
+                .message("Order service is currently unavailable. Please try again later.")
+                .build();
     }
 
 }

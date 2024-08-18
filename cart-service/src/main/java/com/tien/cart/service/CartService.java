@@ -57,8 +57,14 @@ public class CartService {
 
             for (ProductInCartCreationRequest item : request.getProductInCarts()) {
                   String productId = item.getProductId();
-                  ExistsResponse existsResponse = productClient.existsProduct(productId);
-                  if (!existsResponse.isExists()) throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
+                  try {
+                        ExistsResponse existsResponse = productClient.existsProduct(productId);
+                        if (!existsResponse.isExists()) {
+                              throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
+                        }
+                  } catch (Exception e) {
+                        throw new AppException(ErrorCode.PRODUCT_SERVICE_UNAVAILABLE);
+                  }
             }
 
             List<String> productIds = request.getProductInCarts().stream()
@@ -70,8 +76,12 @@ public class CartService {
                     .collect(Collectors.toMap(
                             productId -> productId,
                             productId -> {
-                                  ApiResponse<Double> response = productClient.getProductPriceById(productId);
-                                  return response.getResult();
+                                  try {
+                                        ApiResponse<Double> response = productClient.getProductPriceById(productId);
+                                        return response.getResult();
+                                  } catch (Exception e) {
+                                        throw new AppException(ErrorCode.PRODUCT_SERVICE_UNAVAILABLE);
+                                  }
                             }
                     ));
 
@@ -126,7 +136,15 @@ public class CartService {
             orderRequest.setStatus("PENDING");
             orderRequest.setEmail(cart.getEmail());
 
-            orderClient.createOrder(orderRequest);
+            ApiResponse<Void> response;
+            try {
+                  response = orderClient.createOrder(orderRequest);
+                  if (response.getCode() == ErrorCode.ORDER_SERVICE_UNAVAILABLE.getCode()) {
+                        throw new AppException(ErrorCode.ORDER_SERVICE_UNAVAILABLE);
+                  }
+            } catch (Exception e) {
+                  throw new AppException(ErrorCode.ORDER_SERVICE_UNAVAILABLE);
+            }
 
             redisTemplate.delete(cartKey);
       }
