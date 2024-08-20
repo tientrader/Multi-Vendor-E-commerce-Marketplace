@@ -65,7 +65,10 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
         log.info("Token: {}", token);
 
         return jwtDecoder.decode(token)
-                .flatMap(jwt -> chain.filter(exchange))
+                .flatMap(jwt -> {
+                    log.info("JWT decoded successfully.");
+                    return chain.filter(exchange);
+                })
                 .onErrorResume(throwable -> {
                     log.error("Error during authentication: ", throwable);
                     return unauthenticated(exchange.getResponse());

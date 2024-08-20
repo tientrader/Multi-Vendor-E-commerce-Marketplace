@@ -52,7 +52,7 @@ public class OrderService {
                   int quantityToUpdate = -item.getQuantity();
                   try {
                         ApiResponse<Void> stockResponse = productClient.updateStock(item.getProductId(), quantityToUpdate);
-                        if (stockResponse.getCode() != ErrorCode.PRODUCT_SERVICE_UNAVAILABLE.getCode()) {
+                        if (stockResponse.getCode() == ErrorCode.PRODUCT_SERVICE_UNAVAILABLE.getCode()) {
                               throw new AppException(ErrorCode.PRODUCT_SERVICE_UNAVAILABLE);
                         }
                   } catch (Exception e) {
@@ -77,7 +77,7 @@ public class OrderService {
             for (OrderItemCreationRequest item : items) {
                   try {
                         ApiResponse<Double> priceResponse = productClient.getProductPriceById(item.getProductId());
-                        if (priceResponse.getCode() != ErrorCode.PRODUCT_SERVICE_UNAVAILABLE.getCode()) {
+                        if (priceResponse.getCode() == ErrorCode.PRODUCT_SERVICE_UNAVAILABLE.getCode()) {
                               throw new AppException(ErrorCode.PRODUCT_SERVICE_UNAVAILABLE);
                         }
                         Double price = priceResponse.getResult();

@@ -35,8 +35,8 @@ public interface ProductClient {
 
     default ApiResponse<Void> updateStockFallback(String productId, int quantity, Throwable throwable) {
         return ApiResponse.<Void>builder()
-                .code(ErrorCode.ORDER_SERVICE_UNAVAILABLE.getCode())
-                .message("Order service is currently unavailable. Please try again later.")
+                .code(ErrorCode.PRODUCT_SERVICE_UNAVAILABLE.getCode())
+                .message("Product service is currently unavailable. Please try again later.")
                 .build();
     }
 
