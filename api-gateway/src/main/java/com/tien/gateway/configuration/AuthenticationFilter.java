@@ -72,7 +72,7 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
                 });
     }
 
-    Mono<Void> unauthenticated(ServerHttpResponse response) {
+    private Mono<Void> unauthenticated(ServerHttpResponse response) {
         response.setStatusCode(HttpStatus.UNAUTHORIZED);
         return response.setComplete();
     }
