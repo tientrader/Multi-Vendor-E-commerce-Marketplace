@@ -14,15 +14,12 @@ import reactor.core.publisher.Mono;
 public class SecurityHeadersFilter implements GlobalFilter {
 
       static final String STRICT_TRANSPORT_SECURITY = "Strict-Transport-Security";
-      static final String X_XSS_PROTECTION = "X-XSS-Protection";
 
       @Override
       public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
             ServerHttpResponse response = exchange.getResponse();
-
-            response.getHeaders().add(STRICT_TRANSPORT_SECURITY, "max-age=31536000; includeSubDomains");
-            response.getHeaders().add(X_XSS_PROTECTION, "1; mode=block");
-
+            response.getHeaders().add(STRICT_TRANSPORT_SECURITY,
+                    "max-age=31536000; includeSubDomains");
             return chain.filter(exchange);
       }
 

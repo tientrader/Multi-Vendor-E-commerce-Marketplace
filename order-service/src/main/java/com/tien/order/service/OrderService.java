@@ -67,8 +67,8 @@ public class OrderService {
                     .channel("EMAIL")
                     .recipient(request.getEmail())
                     .subject("Order created successfully")
-                    .body("Thank " + request.getUsername() + " for buying our products! \n" +
-                            "The total amount is " + request.getTotal())
+                    .body("Thank " + username + " for buying our products! \n" +
+                            "The total amount is " + total)
                     .build());
       }
 
