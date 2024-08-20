@@ -1,6 +1,5 @@
 package com.tien.product.service;
 
-import com.tien.product.dto.ApiResponse;
 import com.tien.product.dto.response.CategoryResponse;
 import com.tien.product.dto.response.ShopResponse;
 import com.tien.product.entity.Category;
@@ -104,11 +103,7 @@ public class CategoryService {
       }
 
       private ShopResponse getShopByOwnerUsername(String username) {
-            ApiResponse<ShopResponse> response = shopClient.getShopByOwnerUsername(username);
-            if (response.getCode() == ErrorCode.SHOP_SERVICE_UNAVAILABLE.getCode()) {
-                  throw new AppException(ErrorCode.SHOP_SERVICE_UNAVAILABLE);
-            }
-            return response.getResult();
+            return shopClient.getShopByOwnerUsername(username).getResult();
       }
 
 }

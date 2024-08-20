@@ -3,7 +3,6 @@ package com.tien.cart.httpclient;
 import com.tien.cart.configuration.AuthenticationRequestInterceptor;
 import com.tien.cart.dto.ApiResponse;
 import com.tien.cart.dto.response.ExistsResponse;
-import com.tien.cart.exception.ErrorCode;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -26,16 +25,11 @@ public interface ProductClient {
       ExistsResponse existsProduct(@PathVariable String productId);
 
       default ApiResponse<Double> getProductPriceByIdFallback(String productId, Throwable throwable) {
-            return ApiResponse.<Double>builder()
-                    .code(ErrorCode.PRODUCT_SERVICE_UNAVAILABLE.getCode())
-                    .message("Product service is currently unavailable. Please try again later.")
-                    .build();
+            throw new RuntimeException();
       }
 
       default ExistsResponse existsProductFallback(String productId, Throwable throwable) {
-            return ExistsResponse.builder()
-                    .exists(false)
-                    .build();
+            throw new RuntimeException();
       }
 
 }

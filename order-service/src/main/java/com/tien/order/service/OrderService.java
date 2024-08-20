@@ -50,15 +50,7 @@ public class OrderService {
 
             for (OrderItemCreationRequest item : request.getItems()) {
                   int quantityToUpdate = -item.getQuantity();
-                  try {
-                        ApiResponse<Void> stockResponse = productClient.updateStock(item.getProductId(), quantityToUpdate);
-                        if (stockResponse.getCode() == ErrorCode.PRODUCT_SERVICE_UNAVAILABLE.getCode()) {
-                              throw new AppException(ErrorCode.PRODUCT_SERVICE_UNAVAILABLE);
-                        }
-                  } catch (Exception e) {
-                        log.error("Failed to update stock for product ID {}: {}", item.getProductId(), e.getMessage());
-                        throw new AppException(ErrorCode.ORDER_SERVICE_UNAVAILABLE);
-                  }
+                  productClient.updateStock(item.getProductId(), quantityToUpdate);
             }
 
             orderRepository.save(order);
@@ -75,20 +67,12 @@ public class OrderService {
       private double calculateOrderTotal(List<OrderItemCreationRequest> items) {
             double total = 0.0;
             for (OrderItemCreationRequest item : items) {
-                  try {
-                        ApiResponse<Double> priceResponse = productClient.getProductPriceById(item.getProductId());
-                        if (priceResponse.getCode() == ErrorCode.PRODUCT_SERVICE_UNAVAILABLE.getCode()) {
-                              throw new AppException(ErrorCode.PRODUCT_SERVICE_UNAVAILABLE);
-                        }
-                        Double price = priceResponse.getResult();
-                        if (price != null) {
-                              total += price * item.getQuantity();
-                        } else {
-                              log.warn("Price for product ID {} is not available", item.getProductId());
-                        }
-                  } catch (Exception e) {
-                        log.error("Failed to retrieve price for product ID {}: {}", item.getProductId(), e.getMessage());
-                        throw new AppException(ErrorCode.PRODUCT_SERVICE_UNAVAILABLE);
+                  ApiResponse<Double> priceResponse = productClient.getProductPriceById(item.getProductId());
+                  Double price = priceResponse.getResult();
+                  if (price != null) {
+                        total += price * item.getQuantity();
+                  } else {
+                        log.warn("Price for product ID {} is not available", item.getProductId());
                   }
             }
             return total;

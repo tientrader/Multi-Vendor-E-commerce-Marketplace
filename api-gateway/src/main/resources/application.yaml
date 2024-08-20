@@ -106,7 +106,7 @@ spring:
           predicates:
             - Path=/actuator/**
           filters:
-            - StripPrefix=1
+            - StripPrefix=2
 
 resilience4j:
   circuitbreaker:
