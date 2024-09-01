@@ -13,8 +13,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-@Component
 @Slf4j
+@Component
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ErrorNormalizer {
 

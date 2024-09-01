@@ -27,11 +27,6 @@ public class ShopService {
       KafkaTemplate<String , Object> kafkaTemplate;
       ShopMapper shopMapper;
 
-      private String getCurrentUsername() {
-            Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            return jwt.getClaim("preferred_username");
-      }
-
       @Transactional
       public ShopResponse createShop(ShopCreationRequest request) {
             String username = getCurrentUsername();
@@ -73,6 +68,11 @@ public class ShopService {
             Shop shop = shopRepository.findByOwnerUsername(ownerUsername)
                     .orElseThrow(() -> new AppException(ErrorCode.SHOP_NOT_FOUND));
             return shopMapper.toShopResponse(shop);
+      }
+
+      private String getCurrentUsername() {
+            Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            return jwt.getClaim("preferred_username");
       }
 
 }

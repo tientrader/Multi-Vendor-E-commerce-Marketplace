@@ -50,10 +50,6 @@ public class UserService {
     @NonFinal
     String clientSecret;
 
-    private String getCurrentUserId() {
-        return SecurityContextHolder.getContext().getAuthentication().getName();
-    }
-
     @Transactional
     public UserResponse register(RegistrationRequest request) {
         try {
@@ -154,6 +150,10 @@ public class UserService {
         } catch (FeignException e) {
             handleFeignException(e);
         }
+    }
+
+    private String getCurrentUserId() {
+        return SecurityContextHolder.getContext().getAuthentication().getName();
     }
 
     private String extractUserId(ResponseEntity<?> response) {
