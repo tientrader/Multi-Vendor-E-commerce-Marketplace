@@ -27,6 +27,13 @@ public class OrderController {
                     .build();
       }
 
+      @GetMapping("/orders")
+      public ApiResponse<List<OrderResponse>> getAllOrders() {
+            return ApiResponse.<List<OrderResponse>>builder()
+                    .result(orderService.getAllOrders())
+                    .build();
+      }
+
       @GetMapping("/my-orders")
       public ApiResponse<List<OrderResponse>> getAllMyOrder() {
             List<OrderResponse> orderResponses = orderService.getAllMyOrder();

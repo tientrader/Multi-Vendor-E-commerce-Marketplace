@@ -18,6 +18,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
@@ -76,6 +77,19 @@ public class OrderService {
                   }
             }
             return total;
+      }
+
+      @PreAuthorize("hasRole('ADMIN')")
+      public List<OrderResponse> getAllOrders() {
+            List<Order> orders = orderRepository.findAll();
+
+            if (orders.isEmpty()) {
+                  throw new AppException(ErrorCode.ORDER_NOT_FOUND);
+            }
+
+            return orders.stream()
+                    .map(orderMapper::toOrderResponse)
+                    .collect(Collectors.toList());
       }
 
       public List<OrderResponse> getAllMyOrder() {
