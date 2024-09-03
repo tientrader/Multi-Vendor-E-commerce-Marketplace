@@ -1,4 +1,0 @@
-jwt:
-  signerKey: ${JWT_SIGNER_KEY_PROD}
-  valid-duration: 7200 # in second
-  refreshable-duration: 72000 # in seconds
