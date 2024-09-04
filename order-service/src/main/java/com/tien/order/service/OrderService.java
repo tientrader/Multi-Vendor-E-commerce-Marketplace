@@ -65,20 +65,6 @@ public class OrderService {
                     .build());
       }
 
-      private double calculateOrderTotal(List<OrderItemCreationRequest> items) {
-            double total = 0.0;
-            for (OrderItemCreationRequest item : items) {
-                  ApiResponse<Double> priceResponse = productClient.getProductPriceById(item.getProductId());
-                  Double price = priceResponse.getResult();
-                  if (price != null) {
-                        total += price * item.getQuantity();
-                  } else {
-                        log.warn("Price for product ID {} is not available", item.getProductId());
-                  }
-            }
-            return total;
-      }
-
       @PreAuthorize("hasRole('ADMIN')")
       public List<OrderResponse> getAllOrders() {
             List<Order> orders = orderRepository.findAll();
@@ -92,7 +78,7 @@ public class OrderService {
                     .collect(Collectors.toList());
       }
 
-      public List<OrderResponse> getAllMyOrder() {
+      public List<OrderResponse> getMyOrders() {
             String username = getCurrentUsername();
 
             List<Order> orders = orderRepository.findByUsername(username);
@@ -121,6 +107,20 @@ public class OrderService {
       private String getCurrentUsername() {
             return ((Jwt) SecurityContextHolder.getContext()
                     .getAuthentication().getPrincipal()).getClaim("preferred_username");
+      }
+
+      private double calculateOrderTotal(List<OrderItemCreationRequest> items) {
+            double total = 0.0;
+            for (OrderItemCreationRequest item : items) {
+                  ApiResponse<Double> priceResponse = productClient.getProductPriceById(item.getProductId());
+                  Double price = priceResponse.getResult();
+                  if (price != null) {
+                        total += price * item.getQuantity();
+                  } else {
+                        log.warn("Price for product ID {} is not available", item.getProductId());
+                  }
+            }
+            return total;
       }
 
 }
