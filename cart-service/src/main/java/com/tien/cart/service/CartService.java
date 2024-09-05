@@ -38,11 +38,6 @@ public class CartService {
 
       private static final String CART_KEY_PREFIX = "cart:";
 
-      private String getCurrentUsername() {
-            return ((Jwt) SecurityContextHolder.getContext()
-                    .getAuthentication().getPrincipal()).getClaim("preferred_username");
-      }
-
       public CartResponse createCart(CartCreationRequest request) {
             String username = getCurrentUsername();
 
@@ -155,6 +150,11 @@ public class CartService {
             if (cart == null) throw new AppException(ErrorCode.CART_NOT_FOUND);
 
             redisTemplate.delete(cartKey);
+      }
+
+      private String getCurrentUsername() {
+            return ((Jwt) SecurityContextHolder.getContext()
+                    .getAuthentication().getPrincipal()).getClaim("preferred_username");
       }
 
 }

@@ -53,13 +53,21 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-        log.info("Enter authentication filter....");
+        ServerHttpResponse response = exchange.getResponse();
+        ServerHttpRequest request = exchange.getRequest();
 
-        if (isPublicEndpoint(exchange.getRequest()))
+        response.getHeaders().add(
+                "Strict-Transport-Security",
+                "max-age=31536000; includeSubDomains");
+
+        if (isPublicEndpoint(request)) {
             return chain.filter(exchange);
+        }
 
-        List<String> authHeader = exchange.getRequest().getHeaders().get(HttpHeaders.AUTHORIZATION);
-        if (CollectionUtils.isEmpty(authHeader)) return unauthenticated(exchange.getResponse());
+        List<String> authHeader = request.getHeaders().get(HttpHeaders.AUTHORIZATION);
+        if (CollectionUtils.isEmpty(authHeader)) {
+            return unauthenticated(response);
+        }
 
         String token = authHeader.getFirst().replace("Bearer ", "");
         log.info("Token: {}", token);
@@ -71,7 +79,7 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
                 })
                 .onErrorResume(throwable -> {
                     log.error("Error during authentication: ", throwable);
-                    return unauthenticated(exchange.getResponse());
+                    return unauthenticated(response);
                 });
     }
 
