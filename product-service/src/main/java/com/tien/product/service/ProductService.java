@@ -112,30 +112,7 @@ public class ProductService {
             productRepository.save(product);
       }
 
-      @Transactional
-      public void deleteProduct(String productId) {
-            String username = getCurrentUsername();
-            ShopResponse shopResponse = getShopByOwnerUsername(username);
-
-            if (shopResponse == null) {
-                  throw new AppException(ErrorCode.SHOP_NOT_FOUND);
-            }
-
-            Product product = productRepository.findById(productId)
-                    .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
-
-            if (!product.getCategory().getShopId().equals(shopResponse.getId())) {
-                  throw new AppException(ErrorCode.UNAUTHORIZED);
-            }
-
-            Category category = product.getCategory();
-            category.getProducts().remove(product);
-            categoryRepository.save(category);
-
-            productRepository.deleteById(productId);
-      }
-
-      public Page<ProductResponse> getFilteredSortedPaginatedProducts(
+      public Page<ProductResponse> searchProducts(
               int page, int size, String sortBy, String sortDirection,
               String categoryId, Double minPrice, Double maxPrice) {
 
@@ -182,6 +159,29 @@ public class ProductService {
       public ExistsResponse existsProduct(String productId) {
             boolean exists = productRepository.existsById(productId);
             return new ExistsResponse(exists);
+      }
+
+      @Transactional
+      public void deleteProduct(String productId) {
+            String username = getCurrentUsername();
+            ShopResponse shopResponse = getShopByOwnerUsername(username);
+
+            if (shopResponse == null) {
+                  throw new AppException(ErrorCode.SHOP_NOT_FOUND);
+            }
+
+            Product product = productRepository.findById(productId)
+                    .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+
+            if (!product.getCategory().getShopId().equals(shopResponse.getId())) {
+                  throw new AppException(ErrorCode.UNAUTHORIZED);
+            }
+
+            Category category = product.getCategory();
+            category.getProducts().remove(product);
+            categoryRepository.save(category);
+
+            productRepository.deleteById(productId);
       }
 
       private String getCurrentUsername() {

@@ -45,17 +45,6 @@ public class CategoryService {
             return categoryMapper.toCategoryResponse(savedCategory);
       }
 
-      public List<CategoryResponse> getAllCategories() {
-            return categoryRepository.findAll().stream()
-                    .map(categoryMapper::toCategoryResponse)
-                    .collect(Collectors.toList());
-      }
-
-      public CategoryResponse getCategoryById(String categoryId) {
-            return categoryMapper.toCategoryResponse(categoryRepository.findById(categoryId)
-                    .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND)));
-      }
-
       @Transactional
       public CategoryResponse updateCategory(String categoryId, CategoryUpdateRequest request) {
             String username = getCurrentUsername();
@@ -76,6 +65,22 @@ public class CategoryService {
             Category updatedCategory = categoryRepository.save(category);
 
             return categoryMapper.toCategoryResponse(updatedCategory);
+      }
+
+      public List<CategoryResponse> getAllCategories() {
+            return categoryRepository.findAll().stream()
+                    .map(categoryMapper::toCategoryResponse)
+                    .collect(Collectors.toList());
+      }
+
+      public CategoryResponse getCategoryById(String categoryId) {
+            return categoryMapper.toCategoryResponse(categoryRepository.findById(categoryId)
+                    .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND)));
+      }
+
+      public List<CategoryResponse> getCategoriesByShopId(String shopId) {
+            List<Category> categories = categoryRepository.findByShopId(shopId);
+            return categoryMapper.toCategoryResponses(categories);
       }
 
       @Transactional

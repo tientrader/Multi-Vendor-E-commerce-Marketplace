@@ -11,6 +11,7 @@ import org.mapstruct.MappingTarget;
 import org.mapstruct.Named;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -36,6 +37,12 @@ public interface CategoryMapper {
                   return products.stream().map(Product::getId).collect(Collectors.toSet());
             }
             return Collections.emptySet();
+      }
+
+      default List<CategoryResponse> toCategoryResponses(List<Category> categories) {
+            return categories.stream()
+                    .map(this::toCategoryResponse)
+                    .collect(Collectors.toList());
       }
 
 }

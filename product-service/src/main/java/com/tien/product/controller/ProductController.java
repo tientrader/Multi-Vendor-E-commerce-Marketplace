@@ -45,16 +45,8 @@ public class ProductController {
                     .build();
       }
 
-      @DeleteMapping("/{productId}")
-      ApiResponse<String> deleteProduct(@PathVariable String productId) {
-            productService.deleteProduct(productId);
-            return ApiResponse.<String>builder()
-                    .result("Product has been deleted")
-                    .build();
-      }
-
       @GetMapping
-      public ApiResponse<Page<ProductResponse>> getFilteredSortedPaginatedProducts(
+      public ApiResponse<Page<ProductResponse>> searchProducts(
               @RequestParam(defaultValue = "0") int page,
               @RequestParam(defaultValue = "10") int size,
               @RequestParam(defaultValue = "name") String sortBy,
@@ -62,7 +54,7 @@ public class ProductController {
               @RequestParam(required = false) String categoryId,
               @RequestParam(required = false) Double minPrice,
               @RequestParam(required = false) Double maxPrice) {
-            Page<ProductResponse> productsPage = productService.getFilteredSortedPaginatedProducts(
+            Page<ProductResponse> productsPage = productService.searchProducts(
                     page, size, sortBy, sortDirection, categoryId, minPrice, maxPrice);
 
             return ApiResponse.<Page<ProductResponse>>builder()
@@ -86,15 +78,22 @@ public class ProductController {
 
       @GetMapping("/{productId}/price")
       ApiResponse<Double> getProductPriceById(@PathVariable String productId) {
-            double price = productService.getProductPriceById(productId);
             return ApiResponse.<Double>builder()
-                    .result(price)
+                    .result(productService.getProductPriceById(productId))
                     .build();
       }
 
       @GetMapping("/{productId}/exists")
       ExistsResponse existsProduct(@PathVariable String productId) {
             return productService.existsProduct(productId);
+      }
+
+      @DeleteMapping("/{productId}")
+      ApiResponse<String> deleteProduct(@PathVariable String productId) {
+            productService.deleteProduct(productId);
+            return ApiResponse.<String>builder()
+                    .result("Product has been deleted")
+                    .build();
       }
 
 }
