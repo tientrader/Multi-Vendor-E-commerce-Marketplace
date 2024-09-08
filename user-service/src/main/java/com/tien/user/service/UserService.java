@@ -108,8 +108,14 @@ public class UserService {
                 .toList();
     }
 
-    public UserResponse getUserById(String id) {
-        User user = userRepository.findById(id)
+    public UserResponse getUserByUserId(String userId) {
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.PROFILE_NOT_FOUND));
+        return userMapper.toUserResponse(user);
+    }
+
+    public UserResponse getUserByProfileId(String profileId) {
+        User user = userRepository.findById(profileId)
                 .orElseThrow(() -> new AppException(ErrorCode.PROFILE_NOT_FOUND));
         return userMapper.toUserResponse(user);
     }

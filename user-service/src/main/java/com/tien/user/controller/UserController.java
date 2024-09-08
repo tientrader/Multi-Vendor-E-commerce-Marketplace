@@ -42,15 +42,22 @@ public class UserController {
                 .build();
     }
 
-    @GetMapping("/{profileId}")
-    ApiResponse<UserResponse> getUserById(@PathVariable String profileId) {
+    @GetMapping("/{userId}")
+    ApiResponse<UserResponse> getUserByUserId(@PathVariable String userId) {
         return ApiResponse.<UserResponse>builder()
-                .result(userService.getUserById(profileId))
+                .result(userService.getUserByUserId(userId))
+                .build();
+    }
+
+    @GetMapping("/profile/{profileId}")
+    ApiResponse<UserResponse> getUserByProfileId(@PathVariable String profileId) {
+        return ApiResponse.<UserResponse>builder()
+                .result(userService.getUserByProfileId(profileId))
                 .build();
     }
 
     @PutMapping("/{userId}")
-    public ApiResponse<UserResponse> updateUserProfile(@PathVariable String userId, @RequestBody @Valid UserUpdateRequest request) {
+    ApiResponse<UserResponse> updateUserProfile(@PathVariable String userId, @RequestBody @Valid UserUpdateRequest request) {
         return ApiResponse.<UserResponse>builder()
                 .result(userService.updateUser(userId, request))
                 .build();
@@ -65,7 +72,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{userId}")
-    public ApiResponse<Void> deleteUser(@PathVariable String userId) {
+    ApiResponse<Void> deleteUser(@PathVariable String userId) {
         userService.deleteUser(userId);
         return ApiResponse.<Void>builder()
                 .message("Deleted successfully")

@@ -1,9 +1,11 @@
 package com.tien.post.service;
 
 import com.tien.post.dto.PageResponse;
+import com.tien.post.dto.response.UserResponse;
 import com.tien.post.entity.Post;
 import com.tien.post.exception.AppException;
 import com.tien.post.exception.ErrorCode;
+import com.tien.post.httpclient.UserClient;
 import com.tien.post.mapper.PostMapper;
 import com.tien.post.dto.request.PostCreationRequest;
 import com.tien.post.dto.request.PostUpdateRequest;
@@ -12,6 +14,7 @@ import com.tien.post.repository.PostRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -19,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -28,6 +32,7 @@ public class PostService {
       PostRepository postRepository;
       PostMapper postMapper;
       AuthService authService;
+      UserClient userClient;
 
       public PostResponse createPost(PostCreationRequest request) {
             String userId = authService.getAuthenticatedUserId();
@@ -67,8 +72,12 @@ public class PostService {
             Pageable pageable = PageRequest.of(page - 1, size, sort);
             var pageData = postRepository.findAllByUserId(userId, pageable);
 
+            UserResponse userResponse = userClient.getUserByUserId(userId).getResult();
+
+            String username = userResponse != null ? userResponse.getUsername() : null;
             var postList = pageData.getContent().stream().map(post -> {
                   var postResponse = postMapper.toPostResponse(post);
+                  postResponse.setUsername(username);
                   postResponse.setCreated(dateTimeFormatter.format(post.getCreatedDate()));
                   return postResponse;
             }).toList();
