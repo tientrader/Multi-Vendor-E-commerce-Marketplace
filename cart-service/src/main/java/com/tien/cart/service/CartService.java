@@ -38,7 +38,7 @@ public class CartService {
 
       private static final String CART_KEY_PREFIX = "cart:";
 
-      public CartResponse createCart(CartCreationRequest request) {
+      public CartResponse upsertCart(CartCreationRequest request) {
             String username = getCurrentUsername();
 
             String existingCartKey = CART_KEY_PREFIX + username;
@@ -90,27 +90,6 @@ public class CartService {
             return cartMapper.toCartResponse(cart);
       }
 
-      private void updateCart(Cart existingCart, CartCreationRequest cartCreationRequest) {
-            List<ProductInCart> productInCarts = cartCreationRequest.getProductInCarts().stream()
-                    .map(request -> ProductInCart.builder()
-                            .productId(request.getProductId())
-                            .quantity(request.getQuantity())
-                            .build())
-                    .collect(Collectors.toList());
-
-            existingCart.setProductInCarts(productInCarts);
-
-            double total = productInCarts.stream()
-                    .mapToDouble(productInCart -> {
-                          Double price = productClient.getProductPriceById
-                                  (productInCart.getProductId()).getResult();
-                          if (price == null) price = 0.0;
-                          return price * productInCart.getQuantity();
-                    }).sum();
-
-            existingCart.setTotal(total);
-      }
-
       public void createOrderFromCart() {
             String username = getCurrentUsername();
             if (username == null) throw new AppException(ErrorCode.UNAUTHORIZED);
@@ -150,6 +129,27 @@ public class CartService {
             if (cart == null) throw new AppException(ErrorCode.CART_NOT_FOUND);
 
             redisTemplate.delete(cartKey);
+      }
+
+      private void updateCart(Cart existingCart, CartCreationRequest cartCreationRequest) {
+            List<ProductInCart> productInCarts = cartCreationRequest.getProductInCarts().stream()
+                    .map(request -> ProductInCart.builder()
+                            .productId(request.getProductId())
+                            .quantity(request.getQuantity())
+                            .build())
+                    .collect(Collectors.toList());
+
+            existingCart.setProductInCarts(productInCarts);
+
+            double total = productInCarts.stream()
+                    .mapToDouble(productInCart -> {
+                          Double price = productClient.getProductPriceById
+                                  (productInCart.getProductId()).getResult();
+                          if (price == null) price = 0.0;
+                          return price * productInCart.getQuantity();
+                    }).sum();
+
+            existingCart.setTotal(total);
       }
 
       private String getCurrentUsername() {
