@@ -30,9 +30,11 @@ public class ShopService {
       @Transactional
       public ShopResponse createShop(ShopCreationRequest request) {
             String username = getCurrentUsername();
+
             if (shopRepository.existsByOwnerUsername(username)) {
                   throw new AppException(ErrorCode.ALREADY_HAVE_A_SHOP);
             }
+
             Shop shop = shopMapper.toShop(request);
             shop.setOwnerUsername(username);
             shop = shopRepository.save(shop);
