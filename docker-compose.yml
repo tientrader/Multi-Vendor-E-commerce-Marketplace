@@ -14,6 +14,8 @@ services:
       - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092,EXTERNAL://localhost:9094
       - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT
       - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+    volumes:
+      - kafka-data:/bitnami/kafka
     networks:
       - tien-network
 
@@ -51,6 +53,8 @@ services:
     environment:
       - KEYCLOAK_ADMIN=
       - KEYCLOAK_ADMIN_PASSWORD=
+    volumes:
+      - keycloak-data:/opt/keycloak/data
     command: ["start-dev"]
     networks:
       - tien-network
@@ -111,6 +115,7 @@ services:
     container_name: grafana
     volumes:
       - ./docker/grafana:/etc/grafana/provisioning/datasources:ro
+      - grafana-data:/var/lib/grafana
     environment:
       - GF_AUTH_ANONYMOUS_ENABLED=true
       - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
@@ -121,11 +126,15 @@ services:
       - tien-network
 
 volumes:
+  kafka-data:
   mongodb-data:
   mysql-data:
   redis-data:
   prometheus-data:
   loki-data:
+  grafana-data:
+  tempo-data:
+  keycloak-data:
 
 networks:
   tien-network:
