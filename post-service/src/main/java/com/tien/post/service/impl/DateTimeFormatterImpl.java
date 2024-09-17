@@ -1,5 +1,6 @@
-package com.tien.post.service;
+package com.tien.post.service.impl;
 
+import com.tien.post.service.DateTimeFormatterService;
 import org.springframework.stereotype.Component;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -9,7 +10,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 @Component
-public class DateTimeFormatter {
+public class DateTimeFormatterImpl implements DateTimeFormatterService {
 
       private static final java.time.format.DateTimeFormatter DATE_FORMATTER = java.time.format.DateTimeFormatter.ISO_DATE;
 

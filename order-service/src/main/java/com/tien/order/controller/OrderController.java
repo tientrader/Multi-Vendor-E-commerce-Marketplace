@@ -36,17 +36,30 @@ public class OrderController {
 
       @GetMapping("/my-orders")
       public ApiResponse<List<OrderResponse>> getMyOrders() {
-            List<OrderResponse> orderResponses = orderService.getMyOrders();
             return ApiResponse.<List<OrderResponse>>builder()
-                    .result(orderResponses)
+                    .result(orderService.getMyOrders())
                     .build();
       }
 
-      @GetMapping("/{orderId}")
-      public ApiResponse<OrderResponse> getMyOrderById(@PathVariable Long orderId) {
-            OrderResponse orderResponse = orderService.getMyOrderById(orderId);
+      @GetMapping("/{username}")
+      public ApiResponse<List<OrderResponse>> getOrdersByUsername(@PathVariable String username) {
+            return ApiResponse.<List<OrderResponse>>builder()
+                    .result(orderService.getOrdersByUsername(username))
+                    .build();
+      }
+
+      @GetMapping("/my-order/{orderId}")
+      public ApiResponse<OrderResponse> getMyOrderByOrderId(@PathVariable Long orderId) {
             return ApiResponse.<OrderResponse>builder()
-                    .result(orderResponse)
+                    .result(orderService.getMyOrderByOrderId(orderId))
+                    .build();
+      }
+
+      @DeleteMapping("/{orderId}")
+      public ApiResponse<Void> deleteOrder(@PathVariable Long orderId) {
+            orderService.deleteOrder(orderId);
+            return ApiResponse.<Void>builder()
+                    .message("Order deleted successfully")
                     .build();
       }
 

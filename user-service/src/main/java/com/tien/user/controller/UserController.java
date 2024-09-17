@@ -63,9 +63,9 @@ public class UserController {
                 .build();
     }
 
-    @PutMapping("/reset-password")
-    ApiResponse<Void> resetPassword(@RequestBody @Valid ResetPasswordRequest request) {
-        userService.resetPassword(request.getNewPassword());
+    @PutMapping("/change-password")
+    ApiResponse<Void> changePassword(@RequestBody @Valid ResetPasswordRequest request) {
+        userService.changePassword(request.getNewPassword());
         return ApiResponse.<Void>builder()
                 .message("Password reset successfully")
                 .build();
