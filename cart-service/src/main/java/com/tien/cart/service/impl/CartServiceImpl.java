@@ -41,44 +41,17 @@ public class CartServiceImpl implements CartService {
 
       public CartResponse upsertCart(CartCreationRequest request) {
             String username = getCurrentUsername();
-
-            String existingCartKey = CART_KEY_PREFIX + username;
-            Cart existingCart = (Cart) redisTemplate.opsForValue().get(existingCartKey);
+            String cartKey = CART_KEY_PREFIX + username;
+            Cart existingCart = (Cart) redisTemplate.opsForValue().get(cartKey);
 
             if (existingCart != null) {
                   updateCart(existingCart, request);
-                  redisTemplate.opsForValue().set(existingCartKey, existingCart);
+                  redisTemplate.opsForValue().set(cartKey, existingCart);
                   return cartMapper.toCartResponse(existingCart);
             }
 
-            for (ProductInCartCreationRequest item : request.getProductInCarts()) {
-                  String productId = item.getProductId();
-                  ExistsResponse existsResponse = productClient.existsProduct(productId);
-                  if (!existsResponse.isExists()) {
-                        throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
-                  }
-            }
-
-            List<String> productIds = request.getProductInCarts().stream()
-                    .map(ProductInCartCreationRequest::getProductId)
-                    .distinct()
-                    .toList();
-
-            Map<String, Double> productPriceMap = productIds.stream()
-                    .collect(Collectors.toMap(
-                            productId -> productId,
-                            productId -> {
-                                  ApiResponse<Double> response = productClient.getProductPriceById(productId);
-                                  return response.getResult();
-                            }
-                    ));
-
-            double total = request.getProductInCarts().stream()
-                    .mapToDouble(productInCart -> {
-                          Double price = productPriceMap.get(productInCart.getProductId());
-                          if (price == null) price = 0.0;
-                          return price * productInCart.getQuantity();
-                    }).sum();
+            validateProducts(request.getProductInCarts());
+            double total = calculateTotal(request.getProductInCarts());
 
             Cart cart = cartMapper.toCart(request);
             cart.setId(UUID.randomUUID().toString());
@@ -86,8 +59,7 @@ public class CartServiceImpl implements CartService {
             cart.setUsername(username);
             cart.setEmail(request.getEmail());
 
-            redisTemplate.opsForValue().set(CART_KEY_PREFIX + username, cart);
-
+            redisTemplate.opsForValue().set(cartKey, cart);
             return cartMapper.toCartResponse(cart);
       }
 
@@ -104,7 +76,6 @@ public class CartServiceImpl implements CartService {
             orderRequest.setEmail(cart.getEmail());
 
             orderClient.createOrder(orderRequest);
-
             redisTemplate.delete(cartKey);
       }
 
@@ -113,7 +84,6 @@ public class CartServiceImpl implements CartService {
             if (username == null) throw new AppException(ErrorCode.UNAUTHORIZED);
 
             String cartKey = CART_KEY_PREFIX + username;
-            
             Cart cart = (Cart) redisTemplate.opsForValue().get(cartKey);
             if (cart == null) throw new AppException(ErrorCode.CART_NOT_FOUND);
 
@@ -125,7 +95,6 @@ public class CartServiceImpl implements CartService {
             if (username == null) throw new AppException(ErrorCode.UNAUTHORIZED);
 
             String cartKey = CART_KEY_PREFIX + username;
-
             Cart cart = (Cart) redisTemplate.opsForValue().get(cartKey);
             if (cart == null) throw new AppException(ErrorCode.CART_NOT_FOUND);
 
@@ -144,13 +113,45 @@ public class CartServiceImpl implements CartService {
 
             double total = productInCarts.stream()
                     .mapToDouble(productInCart -> {
-                          Double price = productClient.getProductPriceById
-                                  (productInCart.getProductId()).getResult();
+                          Double price = productClient.getProductPriceById(productInCart.getProductId()).getResult();
                           if (price == null) price = 0.0;
                           return price * productInCart.getQuantity();
                     }).sum();
 
             existingCart.setTotal(total);
+      }
+
+      private void validateProducts(List<ProductInCartCreationRequest> productInCarts) {
+            for (ProductInCartCreationRequest item : productInCarts) {
+                  String productId = item.getProductId();
+                  ExistsResponse existsResponse = productClient.existsProduct(productId);
+                  if (!existsResponse.isExists()) {
+                        throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
+                  }
+            }
+      }
+
+      private double calculateTotal(List<ProductInCartCreationRequest> productInCarts) {
+            List<String> productIds = productInCarts.stream()
+                    .map(ProductInCartCreationRequest::getProductId)
+                    .distinct()
+                    .toList();
+
+            Map<String, Double> productPriceMap = productIds.stream()
+                    .collect(Collectors.toMap(
+                            productId -> productId,
+                            productId -> {
+                                  ApiResponse<Double> response = productClient.getProductPriceById(productId);
+                                  return response.getResult();
+                            }
+                    ));
+
+            return productInCarts.stream()
+                    .mapToDouble(productInCart -> {
+                          Double price = productPriceMap.get(productInCart.getProductId());
+                          if (price == null) price = 0.0;
+                          return price * productInCart.getQuantity();
+                    }).sum();
       }
 
       private String getCurrentUsername() {
