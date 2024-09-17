@@ -25,17 +25,17 @@ public class ShopController {
                     .build();
       }
 
-      @PutMapping("/update")
-      public ApiResponse<ShopResponse> updateShop(@RequestBody @Valid ShopUpdateRequest request) {
-            return ApiResponse.<ShopResponse>builder()
-                    .result(shopService.updateShop(request))
-                    .build();
-      }
-
       @GetMapping("/owner/{username}")
       public ApiResponse<ShopResponse> getShopByOwnerUsername(@PathVariable("username") String username) {
             return ApiResponse.<ShopResponse>builder()
                     .result(shopService.getShopByOwnerUsername(username))
+                    .build();
+      }
+
+      @PutMapping("/update")
+      public ApiResponse<ShopResponse> updateShop(@RequestBody @Valid ShopUpdateRequest request) {
+            return ApiResponse.<ShopResponse>builder()
+                    .result(shopService.updateShop(request))
                     .build();
       }
 

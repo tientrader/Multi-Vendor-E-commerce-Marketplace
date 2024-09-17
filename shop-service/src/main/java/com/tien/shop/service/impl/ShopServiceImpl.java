@@ -50,6 +50,17 @@ public class ShopServiceImpl implements ShopService {
             return shopMapper.toShopResponse(shop);
       }
 
+      public ShopResponse getShopByOwnerUsername(String ownerUsername) {
+            Shop shop = shopRepository.findByOwnerUsername(ownerUsername)
+                    .orElseThrow(() -> new AppException(ErrorCode.SHOP_NOT_FOUND));
+            return shopMapper.toShopResponse(shop);
+      }
+
+      private String getCurrentUsername() {
+            Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            return jwt.getClaim("preferred_username");
+      }
+
       @Transactional
       public ShopResponse updateShop(ShopUpdateRequest request) {
             String username = getCurrentUsername();
@@ -65,17 +76,6 @@ public class ShopServiceImpl implements ShopService {
             Shop shop = shopRepository.findByOwnerUsername(username)
                     .orElseThrow(() -> new AppException(ErrorCode.SHOP_NOT_FOUND));
             shopRepository.delete(shop);
-      }
-
-      public ShopResponse getShopByOwnerUsername(String ownerUsername) {
-            Shop shop = shopRepository.findByOwnerUsername(ownerUsername)
-                    .orElseThrow(() -> new AppException(ErrorCode.SHOP_NOT_FOUND));
-            return shopMapper.toShopResponse(shop);
-      }
-
-      private String getCurrentUsername() {
-            Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            return jwt.getClaim("preferred_username");
       }
 
 }

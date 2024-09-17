@@ -68,51 +68,6 @@ public class ProductServiceImpl implements ProductService {
             return productMapper.toProductResponse(product);
       }
 
-      @Transactional
-      public ProductResponse updateProduct(String productId, ProductUpdateRequest request) {
-            String username = getCurrentUsername();
-            ShopResponse shopResponse = getShopByOwnerUsername(username);
-
-            if (shopResponse == null) {
-                  throw new AppException(ErrorCode.SHOP_NOT_FOUND);
-            }
-
-            Product product = productRepository.findById(productId)
-                    .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
-
-            Category newCategory = categoryRepository.findById(request.getCategoryId())
-                    .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
-
-            if (!newCategory.getShopId().equals(shopResponse.getId())) {
-                  throw new AppException(ErrorCode.UNAUTHORIZED);
-            }
-
-            Category oldCategory = product.getCategory();
-            oldCategory.getProducts().remove(product);
-            categoryRepository.save(oldCategory);
-
-            productMapper.updateProduct(product, request);
-            product.setCategory(newCategory);
-            product = productRepository.save(product);
-
-            newCategory.getProducts().add(product);
-            categoryRepository.save(newCategory);
-
-            return productMapper.toProductResponse(product);
-      }
-
-      @Transactional
-      public void updateStock(String productId, int quantity) {
-            Product product = productRepository.findById(productId)
-                    .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
-
-            int newStock = product.getStock() + quantity;
-            if (newStock < 0) throw new AppException(ErrorCode.OUT_OF_STOCK);
-
-            product.setStock(newStock);
-            productRepository.save(product);
-      }
-
       public Page<ProductResponse> searchProducts(
               int page, int size, String sortBy, String sortDirection,
               String categoryId, Double minPrice, Double maxPrice) {
@@ -160,6 +115,51 @@ public class ProductServiceImpl implements ProductService {
       public ExistsResponse existsProduct(String productId) {
             boolean exists = productRepository.existsById(productId);
             return new ExistsResponse(exists);
+      }
+
+      @Transactional
+      public ProductResponse updateProduct(String productId, ProductUpdateRequest request) {
+            String username = getCurrentUsername();
+            ShopResponse shopResponse = getShopByOwnerUsername(username);
+
+            if (shopResponse == null) {
+                  throw new AppException(ErrorCode.SHOP_NOT_FOUND);
+            }
+
+            Product product = productRepository.findById(productId)
+                    .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+
+            Category newCategory = categoryRepository.findById(request.getCategoryId())
+                    .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
+
+            if (!newCategory.getShopId().equals(shopResponse.getId())) {
+                  throw new AppException(ErrorCode.UNAUTHORIZED);
+            }
+
+            Category oldCategory = product.getCategory();
+            oldCategory.getProducts().remove(product);
+            categoryRepository.save(oldCategory);
+
+            productMapper.updateProduct(product, request);
+            product.setCategory(newCategory);
+            product = productRepository.save(product);
+
+            newCategory.getProducts().add(product);
+            categoryRepository.save(newCategory);
+
+            return productMapper.toProductResponse(product);
+      }
+
+      @Transactional
+      public void updateStock(String productId, int quantity) {
+            Product product = productRepository.findById(productId)
+                    .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+
+            int newStock = product.getStock() + quantity;
+            if (newStock < 0) throw new AppException(ErrorCode.OUT_OF_STOCK);
+
+            product.setStock(newStock);
+            productRepository.save(product);
       }
 
       @Transactional

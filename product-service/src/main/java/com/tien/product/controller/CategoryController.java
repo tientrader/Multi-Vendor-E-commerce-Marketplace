@@ -28,14 +28,6 @@ public class CategoryController {
                     .build();
       }
 
-      @PutMapping("/{categoryId}")
-      ApiResponse<CategoryResponse> updateCategory(@PathVariable String categoryId,
-                                                   @RequestBody @Valid CategoryUpdateRequest request) {
-            return ApiResponse.<CategoryResponse>builder()
-                    .result(categoryService.updateCategory(categoryId, request))
-                    .build();
-      }
-
       @GetMapping("/{categoryId}")
       ApiResponse<CategoryResponse> getCategoryById(@PathVariable("categoryId") String categoryId) {
             return ApiResponse.<CategoryResponse>builder()
@@ -55,6 +47,14 @@ public class CategoryController {
             List<CategoryResponse> categoryResponses = categoryService.getCategoriesByShopId(shopId);
             return ApiResponse.<List<CategoryResponse>>builder()
                     .result(categoryResponses)
+                    .build();
+      }
+
+      @PutMapping("/{categoryId}")
+      ApiResponse<CategoryResponse> updateCategory(@PathVariable String categoryId,
+                                                   @RequestBody @Valid CategoryUpdateRequest request) {
+            return ApiResponse.<CategoryResponse>builder()
+                    .result(categoryService.updateCategory(categoryId, request))
                     .build();
       }
 

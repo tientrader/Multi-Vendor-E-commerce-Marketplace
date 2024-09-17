@@ -46,24 +46,6 @@ public class PostServiceImpl implements PostService {
             return postMapper.toPostResponse(post);
       }
 
-      public PostResponse updatePost(String postId, PostUpdateRequest request) {
-            String userId = authenticationService.getAuthenticatedUserId();
-
-            Post post = postRepository.findById(postId)
-                    .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));
-
-            if (!post.getUserId().equals(userId)) {
-                  throw new AppException(ErrorCode.UNAUTHENTICATED);
-            }
-
-            postMapper.updatePost(post, request);
-            post.setModifiedDate(Instant.now());
-
-            postRepository.save(post);
-
-            return postMapper.toPostResponse(post);
-      }
-
       public PageResponse<PostResponse> getMyPosts(int page, int size) {
             String userId = authenticationService.getAuthenticatedUserId();
 
@@ -93,6 +75,24 @@ public class PostServiceImpl implements PostService {
       public PostResponse getPostById(String postId) {
             Post post = postRepository.findById(postId)
                     .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));
+            return postMapper.toPostResponse(post);
+      }
+
+      public PostResponse updatePost(String postId, PostUpdateRequest request) {
+            String userId = authenticationService.getAuthenticatedUserId();
+
+            Post post = postRepository.findById(postId)
+                    .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));
+
+            if (!post.getUserId().equals(userId)) {
+                  throw new AppException(ErrorCode.UNAUTHENTICATED);
+            }
+
+            postMapper.updatePost(post, request);
+            post.setModifiedDate(Instant.now());
+
+            postRepository.save(post);
+
             return postMapper.toPostResponse(post);
       }
 

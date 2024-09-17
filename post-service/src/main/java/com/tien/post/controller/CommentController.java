@@ -28,6 +28,13 @@ public class CommentController {
                     .build();
       }
 
+      @GetMapping("/post/{postId}")
+      public ApiResponse<List<CommentResponse>> getCommentsByPostId(@PathVariable String postId) {
+            return ApiResponse.<List<CommentResponse>>builder()
+                    .result(commentService.getCommentsByPostId(postId))
+                    .build();
+      }
+
       @GetMapping("/{commentId}")
       public ApiResponse<CommentResponse> getCommentById(@PathVariable String commentId) {
             return ApiResponse.<CommentResponse>builder()
@@ -48,13 +55,6 @@ public class CommentController {
             commentService.deleteComment(commentId);
             return ApiResponse.<Void>builder()
                     .message("Comment deleted successfully")
-                    .build();
-      }
-
-      @GetMapping("/post/{postId}")
-      public ApiResponse<List<CommentResponse>> getCommentsByPostId(@PathVariable String postId) {
-            return ApiResponse.<List<CommentResponse>>builder()
-                    .result(commentService.getCommentsByPostId(postId))
                     .build();
       }
 

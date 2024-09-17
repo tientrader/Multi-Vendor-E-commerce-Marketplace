@@ -29,22 +29,6 @@ public class ProductController {
                     .build();
       }
 
-      @PutMapping("/{productId}")
-      ApiResponse<ProductResponse> updateProduct(@PathVariable String productId,
-                                                 @RequestBody @Valid ProductUpdateRequest request) {
-            return ApiResponse.<ProductResponse>builder()
-                    .result(productService.updateProduct(productId, request))
-                    .build();
-      }
-
-      @PutMapping("/{productId}/stock")
-      ApiResponse<Void> updateStock(@PathVariable String productId, @RequestParam int quantity) {
-            productService.updateStock(productId, quantity);
-            return ApiResponse.<Void>builder()
-                    .message("Stock updated successfully")
-                    .build();
-      }
-
       @GetMapping
       public ApiResponse<Page<ProductResponse>> searchProducts(
               @RequestParam(defaultValue = "0") int page,
@@ -86,6 +70,22 @@ public class ProductController {
       @GetMapping("/{productId}/exists")
       ExistsResponse existsProduct(@PathVariable String productId) {
             return productService.existsProduct(productId);
+      }
+
+      @PutMapping("/{productId}")
+      ApiResponse<ProductResponse> updateProduct(@PathVariable String productId,
+                                                 @RequestBody @Valid ProductUpdateRequest request) {
+            return ApiResponse.<ProductResponse>builder()
+                    .result(productService.updateProduct(productId, request))
+                    .build();
+      }
+
+      @PutMapping("/{productId}/stock")
+      ApiResponse<Void> updateStock(@PathVariable String productId, @RequestParam int quantity) {
+            productService.updateStock(productId, quantity);
+            return ApiResponse.<Void>builder()
+                    .message("Stock updated successfully")
+                    .build();
       }
 
       @DeleteMapping("/{productId}")
