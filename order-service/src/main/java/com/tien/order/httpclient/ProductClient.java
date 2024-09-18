@@ -20,16 +20,10 @@ public interface ProductClient {
     @GetMapping(value = "/{productId}/price", produces = MediaType.APPLICATION_JSON_VALUE)
     ApiResponse<Double> getProductPriceById(@PathVariable("productId") String productId);
 
-    @CircuitBreaker(name = "updateStock", fallbackMethod = "updateStockFallback")
-    @Retry(name = "updateStock")
     @PutMapping("/{productId}/stock")
     ApiResponse<Void> updateStock(@PathVariable String productId, @RequestParam int quantity);
 
     default ApiResponse<Double> getProductPriceByIdFallback(String productId, Throwable throwable) {
-        throw new RuntimeException();
-    }
-
-    default ApiResponse<Void> updateStockFallback(String productId, int quantity, Throwable throwable) {
         throw new RuntimeException();
     }
 

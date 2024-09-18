@@ -52,7 +52,12 @@ public class OrderServiceImpl implements OrderService {
 
             for (OrderItemCreationRequest item : request.getItems()) {
                   int quantityToUpdate = -item.getQuantity();
-                  productClient.updateStock(item.getProductId(), quantityToUpdate);
+                  try {
+                        productClient.updateStock(item.getProductId(), quantityToUpdate);
+                  } catch (Exception e) {
+                        log.error("Error updating stock for product {}", item.getProductId());
+                        throw new AppException(ErrorCode.OUT_OF_STOCK);
+                  }
             }
 
             orderRepository.save(order);
