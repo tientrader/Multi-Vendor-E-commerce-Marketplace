@@ -20,11 +20,15 @@ public class CustomAuthoritiesConverter implements Converter<Jwt, Collection<Gra
       public Collection<GrantedAuthority> convert(Jwt source) {
             Map<String, Object> realmAccessMap = source.getClaimAsMap(REALM_ACCESS);
 
-            List<String> roles = (List<String>) realmAccessMap.getOrDefault(ROLES, List.of());
+            Object rolesObject = realmAccessMap.get(ROLES);
+            if (rolesObject instanceof List<?> rolesList) {
 
-            return roles.stream()
-                        .map(role -> new SimpleGrantedAuthority(ROLE_PREFIX + role))
-                        .collect(Collectors.toList());
+                  return rolesList.stream()
+                          .filter(role -> role instanceof String)
+                          .map(role -> new SimpleGrantedAuthority(ROLE_PREFIX + role))
+                          .collect(Collectors.toList());
+            }
+
+            return List.of();
       }
-
 }
