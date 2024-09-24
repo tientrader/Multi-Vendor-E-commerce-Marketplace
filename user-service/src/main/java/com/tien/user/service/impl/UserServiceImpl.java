@@ -55,9 +55,10 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     public UserResponse register(RegistrationRequest request) {
+        log.info("Starting user registration for username: {}", request.getUsername());
         try {
             String token = getAccessToken();
-            log.info("TokenInfo {}", token);
+            log.debug("Token retrieved: {}", token);
 
             ResponseEntity<?> creationResponse = identityClient.createUser(
                     "Bearer " + token,
@@ -76,12 +77,13 @@ public class UserServiceImpl implements UserService {
                             .build());
 
             String userId = extractUserId(creationResponse);
-            log.info("UserId {}", userId);
+            log.info("User created with userId: {}", userId);
 
             User user = userMapper.toUser(request);
             user.setUserId(userId);
             user = userRepository.save(user);
 
+            log.info("Sending Kafka message for user registration: {}", request.getEmail());
             kafkaTemplate.send("register-successful", NotificationEvent.builder()
                     .channel("EMAIL")
                     .recipient(request.getEmail())
@@ -89,57 +91,113 @@ public class UserServiceImpl implements UserService {
                     .body("Hello, " + request.getUsername())
                     .build());
 
+            log.info("User registered successfully with userId: {}", userId);
             return userMapper.toUserResponse(user);
         } catch (FeignException e) {
+            log.error("FeignException during registration for username: {}", request.getUsername(), e);
             handleFeignException(e);
         }
+
         return null;
     }
 
     public UserResponse getMyInfo() {
         String userId = getCurrentUserId();
+
+        log.info("Fetching info for current user: {}", userId);
         User user = userRepository.findByUserId(userId)
-                .orElseThrow(() -> new AppException(ErrorCode.PROFILE_NOT_FOUND));
+                .orElseThrow(() -> {
+                    log.error("(getMyInfo) Profile not found for userId: {}", userId);
+                    return new AppException(ErrorCode.PROFILE_NOT_FOUND);
+                });
+
         return userMapper.toUserResponse(user);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     public List<UserResponse> getAllUsers() {
-        return userRepository.findAll().stream()
+        log.info("Fetching all users");
+
+        List<UserResponse> users = userRepository.findAll().stream()
                 .map(userMapper::toUserResponse)
                 .toList();
+        log.info("Fetched all users successfully");
+
+        return users;
     }
 
     public UserResponse getUserByUserId(String userId) {
+        log.info("Fetching user with userId: {}", userId);
+
         User user = userRepository.findByUserId(userId)
-                .orElseThrow(() -> new AppException(ErrorCode.PROFILE_NOT_FOUND));
+                .orElseThrow(() -> {
+                    log.error("(getUserByUserId) Profile not found for userId: {}", userId);
+                    return new AppException(ErrorCode.PROFILE_NOT_FOUND);
+                });
+
         return userMapper.toUserResponse(user);
     }
 
     public UserResponse getUserByProfileId(String profileId) {
+        log.info("Fetching user with profileId: {}", profileId);
+
         User user = userRepository.findById(profileId)
-                .orElseThrow(() -> new AppException(ErrorCode.PROFILE_NOT_FOUND));
+                .orElseThrow(() -> {
+                    log.error("(getUserByProfileId) Profile not found for profileId: {}", profileId);
+                    return new AppException(ErrorCode.PROFILE_NOT_FOUND);
+                });
+
         return userMapper.toUserResponse(user);
     }
 
     @Transactional
+    @PreAuthorize("hasRole('ADMIN')")
     public UserResponse updateUser(String userId, UserUpdateRequest updateRequest) {
+        log.info("Updating user with userId: {}", userId);
+
         User user = userRepository.findByUserId(userId)
-                .orElseThrow(() -> new AppException(ErrorCode.PROFILE_NOT_FOUND));
+                .orElseThrow(() -> {
+                    log.error("(updateUser) Profile not found for userId: {}", userId);
+                    return new AppException(ErrorCode.PROFILE_NOT_FOUND);
+                });
 
         try {
             identityClient.updateUser("Bearer " + getAccessToken(), userId, updateRequest);
         } catch (FeignException e) {
+            log.error("FeignException during user update for userId: {}", userId, e);
             handleFeignException(e);
         }
 
         userMapper.updateUser(user, updateRequest);
-        return userMapper.toUserResponse(userRepository.save(user));
+        UserResponse updatedUser = userMapper.toUserResponse(userRepository.save(user));
+        log.info("User updated successfully with userId: {}", userId);
+
+        return updatedUser;
+    }
+
+    @Transactional
+    public UserResponse updateMyInfo(UserUpdateRequest updateRequest) {
+        String currentUserId = getCurrentUserId();
+        log.info("Updating own info for userId: {}", currentUserId);
+
+        User user = userRepository.findByUserId(currentUserId)
+                .orElseThrow(() -> {
+                    log.error("(updateMyInfo) Profile not found for userId: {}", currentUserId);
+                    return new AppException(ErrorCode.PROFILE_NOT_FOUND);
+                });
+
+        userMapper.updateUser(user, updateRequest);
+        UserResponse updatedUser = userMapper.toUserResponse(userRepository.save(user));
+        log.info("User info updated successfully for userId: {}", currentUserId);
+
+        return updatedUser;
     }
 
     @Transactional
     public void changePassword(String newPassword) {
         String userId = getCurrentUserId();
+        log.info("Changing password for userId: {}", userId);
+
         try {
             identityClient.resetPassword("Bearer " + getAccessToken(), userId,
                     Credential.builder()
@@ -147,20 +205,32 @@ public class UserServiceImpl implements UserService {
                             .temporary(false)
                             .value(newPassword)
                             .build());
+            log.info("Password changed successfully for userId: {}", userId);
         } catch (FeignException e) {
+            log.error("FeignException during password change for userId: {}", userId, e);
             handleFeignException(e);
         }
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
     @Transactional
+    @PreAuthorize("hasRole('ADMIN')")
     public void deleteUser(String userId) {
+        log.info("Attempting to delete user with userId: {}", userId);
+
+        if (!userRepository.existsByUserId(userId)) {
+            log.error("User not found for userId: {}", userId);
+            throw new AppException(ErrorCode.PROFILE_NOT_FOUND);
+        }
+
         try {
             identityClient.deleteUser("Bearer " + getAccessToken(), userId);
-            userRepository.deleteByUserId(userId);
         } catch (FeignException e) {
+            log.error("FeignException during user deletion for userId: {}", userId, e);
             handleFeignException(e);
         }
+
+        userRepository.deleteByUserId(userId);
+        log.info("User deleted successfully with userId: {}", userId);
     }
 
     private String getCurrentUserId() {

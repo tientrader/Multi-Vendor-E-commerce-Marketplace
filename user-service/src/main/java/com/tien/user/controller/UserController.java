@@ -63,6 +63,13 @@ public class UserController {
                 .build();
     }
 
+    @PutMapping("/my-info")
+    ApiResponse<UserResponse> updateMyInfo(@RequestBody @Valid UserUpdateRequest request) {
+        return ApiResponse.<UserResponse>builder()
+                .result(userService.updateMyInfo(request))
+                .build();
+    }
+
     @PutMapping("/change-password")
     ApiResponse<Void> changePassword(@RequestBody @Valid ResetPasswordRequest request) {
         userService.changePassword(request.getNewPassword());
