@@ -41,41 +41,37 @@ public class OrderServiceImpl implements OrderService {
 
       @Transactional
       public void createOrder(OrderCreationRequest request) {
+            log.info("Starting order creation for user: {}", request.getEmail());
             String username = getCurrentUsername();
-
-            double total = calculateOrderTotal(request.getItems());
 
             Order order = orderMapper.toOrder(request);
             order.setUsername(username);
-            order.setTotal(total);
+            order.setTotal(calculateOrderTotal(request.getItems()));
             order.setStatus("PENDING");
 
-            for (OrderItemCreationRequest item : request.getItems()) {
-                  int quantityToUpdate = -item.getQuantity();
-                  try {
-                        productClient.updateStock(item.getProductId(), quantityToUpdate);
-                  } catch (Exception e) {
-                        log.error("Error updating stock for product {}", item.getProductId());
-                        throw new AppException(ErrorCode.OUT_OF_STOCK);
-                  }
-            }
+            log.info("Order created for user: {}, total amount: {}", username, order.getTotal());
+
+            updateProductStock(request.getItems());
 
             orderRepository.save(order);
+            log.info("Order saved successfully for user: {}", username);
 
             kafkaTemplate.send("order-created-successful", NotificationEvent.builder()
                     .channel("EMAIL")
                     .recipient(request.getEmail())
                     .subject("Order created successfully")
-                    .body("Thank " + username + " for buying our products! \n" +
-                            "The total amount is " + total)
+                    .body("Thank " + username + " for buying our products!")
                     .build());
+            log.info("Notification email sent to: {}", request.getEmail());
       }
 
       @PreAuthorize("hasRole('ADMIN')")
       public List<OrderResponse> getAllOrders() {
+            log.info("Fetching all orders.");
             List<Order> orders = orderRepository.findAll();
 
             if (orders.isEmpty()) {
+                  log.warn("No orders found.");
                   throw new AppException(ErrorCode.ORDER_NOT_FOUND);
             }
 
@@ -86,9 +82,11 @@ public class OrderServiceImpl implements OrderService {
 
       public List<OrderResponse> getMyOrders() {
             String username = getCurrentUsername();
+            log.info("(getMyOrders) Fetching orders for user: {}", username);
 
             List<Order> orders = orderRepository.findByUsername(username);
             if (orders.isEmpty()) {
+                  log.warn("(getMyOrders) No orders found for user {}", username);
                   throw new AppException(ErrorCode.ORDER_NOT_FOUND);
             }
 
@@ -99,9 +97,11 @@ public class OrderServiceImpl implements OrderService {
 
       @PreAuthorize("hasRole('ADMIN')")
       public List<OrderResponse> getOrdersByUsername(String username) {
+            log.info("(getOrdersByUsername) Fetching orders for user: {}", username);
             List<Order> orders = orderRepository.findByUsername(username);
 
             if (orders.isEmpty()) {
+                  log.warn("(getOrdersByUsername) No orders found for user {}", username);
                   throw new AppException(ErrorCode.ORDER_NOT_FOUND);
             }
 
@@ -112,24 +112,29 @@ public class OrderServiceImpl implements OrderService {
 
       public OrderResponse getMyOrderByOrderId(Long orderId) {
             String username = getCurrentUsername();
+            log.info("Fetching order ID: {} for user: {}", orderId, username);
 
             Order order = orderRepository.findById(orderId)
                     .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
 
             if (!order.getUsername().equals(username)) {
+                  log.warn("User {} attempted to access an order that is not theirs.", username);
                   throw new AppException(ErrorCode.ORDER_IS_NOT_YOURS);
             }
 
+            log.info("Order ID: {} fetched successfully for user: {}", orderId, username);
             return orderMapper.toOrderResponse(order);
       }
 
       @PreAuthorize("hasRole('ADMIN')")
       @Transactional
       public void deleteOrder(Long orderId) {
+            log.info("Deleting order ID: {}", orderId);
             Order order = orderRepository.findById(orderId)
                     .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
 
             orderRepository.delete(order);
+            log.info("Order with ID {} has been deleted.", orderId);
       }
 
       private String getCurrentUsername() {
@@ -138,6 +143,7 @@ public class OrderServiceImpl implements OrderService {
       }
 
       private double calculateOrderTotal(List<OrderItemCreationRequest> items) {
+            log.info("Calculating total for order items.");
             double total = 0.0;
             for (OrderItemCreationRequest item : items) {
                   ApiResponse<Double> priceResponse = productClient.getProductPriceById(item.getProductId());
@@ -148,7 +154,22 @@ public class OrderServiceImpl implements OrderService {
                         log.warn("Price for product ID {} is not available", item.getProductId());
                   }
             }
+            log.info("Total calculated: {}", total);
             return total;
       }
 
+      private void updateProductStock(List<OrderItemCreationRequest> items) {
+            log.info("Updating product stock for {} items.", items.size());
+            for (OrderItemCreationRequest item : items) {
+                  int quantityToUpdate = -item.getQuantity();
+                  try {
+                        log.info("Updating stock for product ID: {} with quantity: {}", item.getProductId(), quantityToUpdate);
+                        productClient.updateStock(item.getProductId(), quantityToUpdate);
+                        log.info("Successfully updated stock for product ID: {}", item.getProductId());
+                  } catch (Exception e) {
+                        log.error("Error updating stock for product ID {}: {}", item.getProductId(), e.getMessage());
+                        throw new AppException(ErrorCode.OUT_OF_STOCK);
+                  }
+            }
+      }
 }
