@@ -11,41 +11,42 @@ import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 @Slf4j
 @Component
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ErrorNormalizer {
 
-    ObjectMapper objectMapper;
-    Map<String, ErrorCode> errorCodeMap;
+    ObjectMapper objectMapper = new ObjectMapper();
+    Map<String, ErrorCode> errorCodeMap = initializeErrorCodeMap();
 
-    public ErrorNormalizer() {
-        objectMapper = new ObjectMapper();
-        errorCodeMap = new HashMap<>();
+    private Map<String, ErrorCode> initializeErrorCodeMap() {
+        Map<String, ErrorCode> map = new HashMap<>();
 
-        errorCodeMap.put("User exists with same username", ErrorCode.USER_EXISTED);
-        errorCodeMap.put("User exists with same email", ErrorCode.EMAIL_EXISTED);
-        errorCodeMap.put("User name is missing", ErrorCode.USERNAME_IS_MISSING);
-        errorCodeMap.put("Password policy not met", ErrorCode.INVALID_PASSWORD);
-        errorCodeMap.put("Role not found", ErrorCode.ROLE_NOT_FOUND);
-        errorCodeMap.put("Client not found", ErrorCode.UNAUTHORIZED);
-        errorCodeMap.put("Realm not found", ErrorCode.UNAUTHORIZED);
-        errorCodeMap.put("Invalid username or password", ErrorCode.INVALID_USERNAME);
+        map.put("User exists with same username", ErrorCode.USER_EXISTED);
+        map.put("User exists with same email", ErrorCode.EMAIL_EXISTED);
+        map.put("User name is missing", ErrorCode.USERNAME_IS_MISSING);
+        map.put("Password policy not met", ErrorCode.INVALID_PASSWORD);
+        map.put("Role not found", ErrorCode.ROLE_NOT_FOUND);
+        map.put("Client not found", ErrorCode.UNAUTHORIZED);
+        map.put("Realm not found", ErrorCode.UNAUTHORIZED);
+        map.put("Invalid username or password", ErrorCode.INVALID_USERNAME);
+
+        return map;
     }
 
     public AppException handleKeyCloakException(FeignException exception) {
-        try {
-            log.warn("Cannot complete request", exception);
-            var response = objectMapper.readValue(exception.contentUTF8(), KeyCloakError.class);
+        log.warn("Cannot complete request", exception);
 
-            if (Objects.nonNull(response.getErrorMessage())
-                    && Objects.nonNull(errorCodeMap.get(response.getErrorMessage()))) {
-                return new AppException(errorCodeMap.get(response.getErrorMessage()));
+        try {
+            KeyCloakError response = objectMapper.readValue(exception.contentUTF8(), KeyCloakError.class);
+            String errorMessage = response.getErrorMessage();
+
+            if (errorMessage != null && errorCodeMap.containsKey(errorMessage)) {
+                return new AppException(errorCodeMap.get(errorMessage));
             }
         } catch (JsonProcessingException e) {
-            log.error("Cannot deserialize content", e);
+            log.error("Error deserializing KeyCloakError response", e);
         }
 
         return new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
