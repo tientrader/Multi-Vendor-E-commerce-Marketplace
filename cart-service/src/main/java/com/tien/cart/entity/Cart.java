@@ -20,7 +20,7 @@ public class Cart {
       String id;
       String username;
       String email;
-      List<ProductInCart> productInCarts = new ArrayList<>();
+      List<CartItem> items = new ArrayList<>();
       double total;
 
 }

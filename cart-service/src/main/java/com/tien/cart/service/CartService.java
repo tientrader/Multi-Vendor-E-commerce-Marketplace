@@ -5,7 +5,7 @@ import com.tien.cart.dto.response.CartResponse;
 
 public interface CartService {
 
-      CartResponse upsertCart(CartCreationRequest request);
+      CartResponse upsertProductInCart(CartCreationRequest request);
       void createOrderFromCart();
       CartResponse getMyCart();
       void deleteMyCart();

@@ -2,16 +2,12 @@ package com.tien.cart.mapper;
 
 import com.tien.cart.dto.request.CartCreationRequest;
 import com.tien.cart.dto.request.OrderCreationRequest;
-import com.tien.cart.dto.request.OrderItemCreationRequest;
 import com.tien.cart.dto.response.CartResponse;
 import com.tien.cart.entity.Cart;
-import com.tien.cart.entity.ProductInCart;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-import java.util.List;
-
-@Mapper(componentModel = "spring", uses = ProductInCartMapper.class)
+@Mapper(componentModel = "spring")
 public interface CartMapper {
 
       @Mapping(target = "total", ignore = true)
@@ -24,17 +20,7 @@ public interface CartMapper {
       @Mapping(target = "status", ignore = true)
       @Mapping(source = "username", target = "username")
       @Mapping(source = "total", target = "total")
-      @Mapping(source = "productInCarts", target = "items")
+      @Mapping(source = "items", target = "items")
       OrderCreationRequest toOrderCreationRequest(Cart cart);
-
-      default List<OrderItemCreationRequest> mapProductInCartsToOrderItemRequests
-              (List<ProductInCart> productInCarts) {
-            return productInCarts.stream()
-                    .map(productInCart -> OrderItemCreationRequest.builder()
-                            .productId(productInCart.getProductId())
-                            .quantity(productInCart.getQuantity())
-                            .build())
-                    .toList();
-      }
 
 }

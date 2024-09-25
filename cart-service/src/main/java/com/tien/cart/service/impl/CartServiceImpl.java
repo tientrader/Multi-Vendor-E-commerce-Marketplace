@@ -1,9 +1,9 @@
 package com.tien.cart.service.impl;
 
+import com.tien.cart.dto.request.CartItemCreationRequest;
 import com.tien.cart.dto.request.OrderCreationRequest;
-import com.tien.cart.dto.request.ProductInCartCreationRequest;
 import com.tien.cart.entity.Cart;
-import com.tien.cart.entity.ProductInCart;
+import com.tien.cart.entity.CartItem;
 import com.tien.cart.exception.AppException;
 import com.tien.cart.exception.ErrorCode;
 import com.tien.cart.httpclient.OrderClient;
@@ -12,21 +12,21 @@ import com.tien.cart.dto.request.CartCreationRequest;
 import com.tien.cart.dto.response.ExistsResponse;
 import com.tien.cart.dto.response.CartResponse;
 import com.tien.cart.httpclient.ProductClient;
-import com.tien.cart.dto.ApiResponse;
 import com.tien.cart.service.CartService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -39,19 +39,27 @@ public class CartServiceImpl implements CartService {
 
       private static final String CART_KEY_PREFIX = "cart:";
 
-      public CartResponse upsertCart(CartCreationRequest request) {
+      @Override
+      public CartResponse upsertProductInCart(CartCreationRequest request) {
             String username = getCurrentUsername();
+            validateUsername(username);
             String cartKey = CART_KEY_PREFIX + username;
-            Cart existingCart = (Cart) redisTemplate.opsForValue().get(cartKey);
 
-            if (existingCart != null) {
-                  updateCart(existingCart, request);
-                  redisTemplate.opsForValue().set(cartKey, existingCart);
-                  return cartMapper.toCartResponse(existingCart);
+            Cart existingCart = (Cart) redisTemplate.opsForValue().get(cartKey);
+            if (existingCart == null) {
+                  existingCart = createNewCart(request, username);
+            } else {
+                  updateCartItems(existingCart, request);
             }
 
-            validateProducts(request.getProductInCarts());
-            double total = calculateTotal(request.getProductInCarts());
+            redisTemplate.opsForValue().set(cartKey, existingCart);
+            log.info("Cart processed for user: {}", username);
+            return cartMapper.toCartResponse(existingCart);
+      }
+
+      private Cart createNewCart(CartCreationRequest request, String username) {
+            validateProducts(request.getItems());
+            double total = calculateTotalPriceForCartItems(request.getItems());
 
             Cart cart = cartMapper.toCart(request);
             cart.setId(UUID.randomUUID().toString());
@@ -59,104 +67,135 @@ public class CartServiceImpl implements CartService {
             cart.setUsername(username);
             cart.setEmail(request.getEmail());
 
-            redisTemplate.opsForValue().set(cartKey, cart);
-            return cartMapper.toCartResponse(cart);
+            log.info("New cart created for user: {}", username);
+            return cart;
       }
 
+      private double calculateTotalPriceForCartItems(List<CartItemCreationRequest> cartItems) {
+            validateProducts(cartItems);
+
+            return cartItems.stream()
+                    .mapToDouble(cartItem -> {
+                          Double price = productClient.getProductPriceById(cartItem.getProductId()).getResult();
+                          return (price != null ? price : 0.0) * cartItem.getQuantity();
+                    }).sum();
+      }
+
+      private void updateCartItems(Cart existingCart, CartCreationRequest cartCreationRequest) {
+            List<CartItem> updatedItems = existingCart.getItems();
+
+            for (CartItemCreationRequest request : cartCreationRequest.getItems()) {
+                  boolean itemFound = false;
+
+                  for (CartItem cartItem : updatedItems) {
+                        if (cartItem.getProductId().equals(request.getProductId())) {
+                              itemFound = true;
+
+                              if (request.getQuantity() > 0) {
+                                    cartItem.setQuantity(request.getQuantity());
+                                    log.info("Updated item quantity in cart: {}", cartItem.getProductId());
+                              } else {
+                                    updatedItems.remove(cartItem);
+                                    log.info("Item removed from cart: {}", cartItem.getProductId());
+                              }
+                              break;
+                        }
+                  }
+
+                  if (!itemFound && request.getQuantity() > 0) {
+                        CartItem newItem = new CartItem();
+                        newItem.setProductId(request.getProductId());
+                        newItem.setQuantity(request.getQuantity());
+                        updatedItems.add(newItem);
+                        log.info("Item added to cart: {}", request.getProductId());
+                  }
+            }
+
+            existingCart.setTotal(calculateTotalPriceForExistingCart(updatedItems));
+            log.debug("Updated cart total: {}", existingCart.getTotal());
+      }
+
+      private double calculateTotalPriceForExistingCart(List<CartItem> cartItems) {
+            return cartItems.stream()
+                    .mapToDouble(cartItem -> {
+                          Double price = productClient.getProductPriceById(cartItem.getProductId()).getResult();
+                          return (price != null ? price : 0.0) * cartItem.getQuantity();
+                    }).sum();
+      }
+
+      @Override
       public void createOrderFromCart() {
             String username = getCurrentUsername();
-            if (username == null) throw new AppException(ErrorCode.UNAUTHORIZED);
+            validateUsername(username);
 
             String cartKey = CART_KEY_PREFIX + username;
             Cart cart = (Cart) redisTemplate.opsForValue().get(cartKey);
-            if (cart == null) throw new AppException(ErrorCode.CART_NOT_FOUND);
+            validateCart(cart);
 
             OrderCreationRequest orderRequest = cartMapper.toOrderCreationRequest(cart);
             orderRequest.setStatus("PENDING");
-            orderRequest.setEmail(cart.getEmail());
+            orderRequest.setEmail(Objects.requireNonNull(cart).getEmail());
 
             orderClient.createOrder(orderRequest);
             redisTemplate.delete(cartKey);
+            log.info("Order created from cart for user: {}", username);
       }
 
+      @Override
       public CartResponse getMyCart() {
             String username = getCurrentUsername();
-            if (username == null) throw new AppException(ErrorCode.UNAUTHORIZED);
+            validateUsername(username);
 
             String cartKey = CART_KEY_PREFIX + username;
             Cart cart = (Cart) redisTemplate.opsForValue().get(cartKey);
-            if (cart == null) throw new AppException(ErrorCode.CART_NOT_FOUND);
+            validateCart(cart);
 
+            log.info("Fetched cart for user: {}", username);
             return cartMapper.toCartResponse(cart);
       }
 
+      @Override
       public void deleteMyCart() {
             String username = getCurrentUsername();
-            if (username == null) throw new AppException(ErrorCode.UNAUTHORIZED);
+            validateUsername(username);
 
             String cartKey = CART_KEY_PREFIX + username;
             Cart cart = (Cart) redisTemplate.opsForValue().get(cartKey);
-            if (cart == null) throw new AppException(ErrorCode.CART_NOT_FOUND);
+            validateCart(cart);
 
             redisTemplate.delete(cartKey);
-      }
-
-      private void updateCart(Cart existingCart, CartCreationRequest cartCreationRequest) {
-            List<ProductInCart> productInCarts = cartCreationRequest.getProductInCarts().stream()
-                    .map(request -> ProductInCart.builder()
-                            .productId(request.getProductId())
-                            .quantity(request.getQuantity())
-                            .build())
-                    .collect(Collectors.toList());
-
-            existingCart.setProductInCarts(productInCarts);
-
-            double total = productInCarts.stream()
-                    .mapToDouble(productInCart -> {
-                          Double price = productClient.getProductPriceById(productInCart.getProductId()).getResult();
-                          if (price == null) price = 0.0;
-                          return price * productInCart.getQuantity();
-                    }).sum();
-
-            existingCart.setTotal(total);
-      }
-
-      private void validateProducts(List<ProductInCartCreationRequest> productInCarts) {
-            for (ProductInCartCreationRequest item : productInCarts) {
-                  String productId = item.getProductId();
-                  ExistsResponse existsResponse = productClient.existsProduct(productId);
-                  if (!existsResponse.isExists()) {
-                        throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
-                  }
-            }
-      }
-
-      private double calculateTotal(List<ProductInCartCreationRequest> productInCarts) {
-            List<String> productIds = productInCarts.stream()
-                    .map(ProductInCartCreationRequest::getProductId)
-                    .distinct()
-                    .toList();
-
-            Map<String, Double> productPriceMap = productIds.stream()
-                    .collect(Collectors.toMap(
-                            productId -> productId,
-                            productId -> {
-                                  ApiResponse<Double> response = productClient.getProductPriceById(productId);
-                                  return response.getResult();
-                            }
-                    ));
-
-            return productInCarts.stream()
-                    .mapToDouble(productInCart -> {
-                          Double price = productPriceMap.get(productInCart.getProductId());
-                          if (price == null) price = 0.0;
-                          return price * productInCart.getQuantity();
-                    }).sum();
+            log.info("Cart deleted for user: {}", username);
       }
 
       private String getCurrentUsername() {
             Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             return jwt.getClaim("preferred_username");
+      }
+
+      private void validateUsername(String username) {
+            if (username == null) {
+                  log.error("Unauthorized access attempt");
+                  throw new AppException(ErrorCode.UNAUTHORIZED);
+            }
+      }
+
+      private void validateCart(Cart cart) {
+            if (cart == null) {
+                  log.error("Cart not found");
+                  throw new AppException(ErrorCode.CART_NOT_FOUND);
+            }
+      }
+
+      private void validateProducts(List<CartItemCreationRequest> cartItems) {
+            for (CartItemCreationRequest item : cartItems) {
+                  String productId = item.getProductId();
+                  ExistsResponse existsResponse = productClient.existsProduct(productId);
+                  if (!existsResponse.isExists()) {
+                        log.error("Product not found: {}", productId);
+                        throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
+                  }
+                  log.debug("Product exists: {}", productId);
+            }
       }
 
 }

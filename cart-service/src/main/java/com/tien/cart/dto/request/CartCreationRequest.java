@@ -20,6 +20,6 @@ public class CartCreationRequest {
       String email;
 
       @NotEmpty(message = "PRODUCTS_LIST_CANNOT_BE_EMPTY")
-      List<ProductInCartCreationRequest> productInCarts;
+      List<CartItemCreationRequest> items;
 
 }

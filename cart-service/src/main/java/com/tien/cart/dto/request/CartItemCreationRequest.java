@@ -11,7 +11,7 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ProductInCartCreationRequest {
+public class CartItemCreationRequest {
 
       @NotBlank(message = "PRODUCT_ID_IS_REQUIRED")
       String productId;

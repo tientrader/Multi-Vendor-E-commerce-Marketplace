@@ -15,7 +15,7 @@ public class CartResponse {
       String cartId;
       String username;
       String email;
-      List<ProductInCartResponse> productInCarts;
+      List<CartItemResponse> items;
       double total;
 
 }
