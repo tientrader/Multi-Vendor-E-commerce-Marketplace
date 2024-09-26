@@ -39,6 +39,7 @@ public class OrderServiceImpl implements OrderService {
       OrderMapper orderMapper;
       KafkaTemplate<String, Object> kafkaTemplate;
 
+      @Override
       @Transactional
       public void createOrder(OrderCreationRequest request) {
             log.info("Starting order creation for user: {}", request.getEmail());
@@ -65,6 +66,7 @@ public class OrderServiceImpl implements OrderService {
             log.info("Notification email sent to: {}", request.getEmail());
       }
 
+      @Override
       @PreAuthorize("hasRole('ADMIN')")
       public List<OrderResponse> getAllOrders() {
             log.info("Fetching all orders.");
@@ -80,6 +82,7 @@ public class OrderServiceImpl implements OrderService {
                     .collect(Collectors.toList());
       }
 
+      @Override
       public List<OrderResponse> getMyOrders() {
             String username = getCurrentUsername();
             log.info("(getMyOrders) Fetching orders for user: {}", username);
@@ -95,6 +98,7 @@ public class OrderServiceImpl implements OrderService {
                     .collect(Collectors.toList());
       }
 
+      @Override
       @PreAuthorize("hasRole('ADMIN')")
       public List<OrderResponse> getOrdersByUsername(String username) {
             log.info("(getOrdersByUsername) Fetching orders for user: {}", username);
@@ -110,6 +114,7 @@ public class OrderServiceImpl implements OrderService {
                     .collect(Collectors.toList());
       }
 
+      @Override
       public OrderResponse getMyOrderByOrderId(Long orderId) {
             String username = getCurrentUsername();
             log.info("Fetching order ID: {} for user: {}", orderId, username);
@@ -126,6 +131,7 @@ public class OrderServiceImpl implements OrderService {
             return orderMapper.toOrderResponse(order);
       }
 
+      @Override
       @PreAuthorize("hasRole('ADMIN')")
       @Transactional
       public void deleteOrder(Long orderId) {
@@ -172,4 +178,5 @@ public class OrderServiceImpl implements OrderService {
                   }
             }
       }
+
 }
