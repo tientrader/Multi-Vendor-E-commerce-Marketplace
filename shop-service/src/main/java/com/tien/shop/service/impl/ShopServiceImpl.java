@@ -30,6 +30,7 @@ public class ShopServiceImpl implements ShopService {
       KafkaTemplate<String, Object> kafkaTemplate;
       ShopMapper shopMapper;
 
+      @Override
       @Transactional
       public ShopResponse createShop(ShopCreationRequest request) {
             String username = getCurrentUsername();
@@ -55,6 +56,7 @@ public class ShopServiceImpl implements ShopService {
             return shopMapper.toShopResponse(shop);
       }
 
+      @Override
       public ShopResponse getShopByOwnerUsername(String ownerUsername) {
             log.info("Fetching shop for owner: {}", ownerUsername);
 
@@ -68,6 +70,7 @@ public class ShopServiceImpl implements ShopService {
             return shopMapper.toShopResponse(shop);
       }
 
+      @Override
       @Transactional
       public ShopResponse updateShop(ShopUpdateRequest request) {
             String username = getCurrentUsername();
@@ -86,6 +89,7 @@ public class ShopServiceImpl implements ShopService {
             return updatedShopResponse;
       }
 
+      @Override
       @Transactional
       public void deleteShop() {
             String username = getCurrentUsername();
