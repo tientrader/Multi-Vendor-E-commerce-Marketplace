@@ -34,16 +34,13 @@ public class CategoryServiceImpl implements CategoryService {
       CategoryMapper categoryMapper;
       ShopClient shopClient;
 
+      @Override
       @Transactional
       public CategoryResponse createCategory(CategoryCreationRequest request) {
             String username = getCurrentUsername();
             log.info("Creating category for shop owner: {}", username);
 
-            ShopResponse shopResponse = getShopByOwnerUsername(username)
-                    .orElseThrow(() -> {
-                          log.error("(createCategory) Shop not found for owner: {}", username);
-                          return new AppException(ErrorCode.SHOP_NOT_FOUND);
-                    });
+            ShopResponse shopResponse = getShopByOwnerUsername(username);
 
             Category category = categoryMapper.toCategory(request);
             category.setShopId(shopResponse.getId());
@@ -53,6 +50,7 @@ public class CategoryServiceImpl implements CategoryService {
             return categoryMapper.toCategoryResponse(savedCategory);
       }
 
+      @Override
       public List<CategoryResponse> getAllCategories() {
             log.info("Fetching all categories");
             return categoryRepository.findAll().stream()
@@ -60,6 +58,7 @@ public class CategoryServiceImpl implements CategoryService {
                     .collect(Collectors.toList());
       }
 
+      @Override
       public CategoryResponse getCategoryById(String categoryId) {
             log.info("Fetching category with ID: {}", categoryId);
             return categoryMapper.toCategoryResponse(categoryRepository.findById(categoryId)
@@ -69,32 +68,20 @@ public class CategoryServiceImpl implements CategoryService {
                     }));
       }
 
+      @Override
       public List<CategoryResponse> getCategoriesByShopId(String shopId) {
             log.info("Fetching categories for shop ID: {}", shopId);
             return categoryMapper.toCategoryResponses(categoryRepository.findByShopId(shopId));
       }
 
+      @Override
       @Transactional
       public CategoryResponse updateCategory(String categoryId, CategoryUpdateRequest request) {
             String username = getCurrentUsername();
             log.info("Updating category with ID: {} by shop owner: {}", categoryId, username);
 
-            ShopResponse shopResponse = getShopByOwnerUsername(username)
-                    .orElseThrow(() -> {
-                          log.error("(updateCategory) Shop not found for owner: {}", username);
-                          return new AppException(ErrorCode.SHOP_NOT_FOUND);
-                    });
-
-            Category category = categoryRepository.findById(categoryId)
-                    .orElseThrow(() -> {
-                          log.error("(updateCategory) Category not found with ID: {}", categoryId);
-                          return new AppException(ErrorCode.CATEGORY_NOT_FOUND);
-                    });
-
-            if (!category.getShopId().equals(shopResponse.getId())) {
-                  log.error("Unauthorized update attempt by owner: {}", username);
-                  throw new AppException(ErrorCode.UNAUTHORIZED);
-            }
+            ShopResponse shopResponse = getShopByOwnerUsername(username);
+            Category category = validateCategoryOwnership(categoryId, shopResponse.getId(), username);
 
             categoryMapper.updateCategory(category, request);
             Category updatedCategory = categoryRepository.save(category);
@@ -103,27 +90,14 @@ public class CategoryServiceImpl implements CategoryService {
             return categoryMapper.toCategoryResponse(updatedCategory);
       }
 
+      @Override
       @Transactional
       public void deleteCategory(String categoryId) {
             String username = getCurrentUsername();
             log.info("Deleting category with ID: {} by shop owner: {}", categoryId, username);
 
-            ShopResponse shopResponse = getShopByOwnerUsername(username)
-                    .orElseThrow(() -> {
-                          log.error("(deleteCategory) Shop not found for owner: {}", username);
-                          return new AppException(ErrorCode.SHOP_NOT_FOUND);
-                    });
-
-            Category category = categoryRepository.findById(categoryId)
-                    .orElseThrow(() -> {
-                          log.error("(deleteCategory) Category not found with ID: {}", categoryId);
-                          return new AppException(ErrorCode.CATEGORY_NOT_FOUND);
-                    });
-
-            if (!category.getShopId().equals(shopResponse.getId())) {
-                  log.error("Unauthorized delete attempt by owner: {}", username);
-                  throw new AppException(ErrorCode.UNAUTHORIZED);
-            }
+            ShopResponse shopResponse = getShopByOwnerUsername(username);
+            validateCategoryOwnership(categoryId, shopResponse.getId(), username);
 
             categoryRepository.deleteById(categoryId);
             log.info("Category deleted with ID: {}", categoryId);
@@ -134,8 +108,27 @@ public class CategoryServiceImpl implements CategoryService {
             return jwt.getClaim("preferred_username");
       }
 
-      private Optional<ShopResponse> getShopByOwnerUsername(String username) {
-            return Optional.ofNullable(shopClient.getShopByOwnerUsername(username).getResult());
+      private ShopResponse getShopByOwnerUsername(String username) {
+            return Optional.ofNullable(shopClient.getShopByOwnerUsername(username).getResult())
+                    .orElseThrow(() -> {
+                          log.error("Shop not found for owner: {}", username);
+                          return new AppException(ErrorCode.SHOP_NOT_FOUND);
+                    });
+      }
+
+      private Category validateCategoryOwnership(String categoryId, String shopId, String username) {
+            Category category = categoryRepository.findById(categoryId)
+                    .orElseThrow(() -> {
+                          log.error("Category not found with ID: {}", categoryId);
+                          return new AppException(ErrorCode.CATEGORY_NOT_FOUND);
+                    });
+
+            if (!category.getShopId().equals(shopId)) {
+                  log.error("Unauthorized access attempt by owner: {}", username);
+                  throw new AppException(ErrorCode.UNAUTHORIZED);
+            }
+
+            return category;
       }
 
 }

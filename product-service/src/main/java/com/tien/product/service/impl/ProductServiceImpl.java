@@ -43,27 +43,15 @@ public class ProductServiceImpl implements ProductService {
       MongoTemplate mongoTemplate;
       ShopClient shopClient;
 
+      @Override
       @Transactional
       public ProductResponse createProduct(ProductCreationRequest request) {
             String username = getCurrentUsername();
             log.info("Creating product for shop owner: {}", username);
 
-            ShopResponse shopResponse = getShopByOwnerUsername(username)
-                    .orElseThrow(() -> {
-                          log.error("(createProduct) Shop not found for owner: {}", username);
-                          return new AppException(ErrorCode.SHOP_NOT_FOUND);
-                    });
-
-            Category category = categoryRepository.findById(request.getCategoryId())
-                    .orElseThrow(() -> {
-                          log.error("(createProduct) Category not found with ID: {}", request.getCategoryId());
-                          return new AppException(ErrorCode.CATEGORY_NOT_FOUND);
-                    });
-
-            if (!category.getShopId().equals(shopResponse.getId())) {
-                  log.error("Unauthorized product creation attempt for category: {}", request.getCategoryId());
-                  throw new AppException(ErrorCode.UNAUTHORIZED);
-            }
+            ShopResponse shopResponse = getShopByOwnerUsername(username);
+            Category category = findCategoryById(request.getCategoryId());
+            checkCategoryOwnership(category, shopResponse.getId());
 
             Product product = productMapper.toProduct(request);
             product.setCategory(category);
@@ -76,6 +64,7 @@ public class ProductServiceImpl implements ProductService {
             return productMapper.toProductResponse(product);
       }
 
+      @Override
       public Page<ProductResponse> searchProducts(
               int page, int size, String sortBy, String sortDirection,
               String categoryId, Double minPrice, Double maxPrice) {
@@ -104,6 +93,7 @@ public class ProductServiceImpl implements ProductService {
             return new PageImpl<>(productResponses, pageable, total);
       }
 
+      @Override
       public List<ProductResponse> getAllProducts() {
             log.info("Fetching all products");
             return productRepository.findAll().stream()
@@ -111,6 +101,7 @@ public class ProductServiceImpl implements ProductService {
                     .collect(Collectors.toList());
       }
 
+      @Override
       public ProductResponse getProductById(String productId) {
             log.info("Fetching product with ID: {}", productId);
             return productMapper.toProductResponse(productRepository.findById(productId)
@@ -120,6 +111,7 @@ public class ProductServiceImpl implements ProductService {
                     }));
       }
 
+      @Override
       public double getProductPriceById(String productId) {
             log.info("Fetching price for product with ID: {}", productId);
             Product product = productRepository.findById(productId)
@@ -130,39 +122,24 @@ public class ProductServiceImpl implements ProductService {
             return product.getPrice();
       }
 
+      @Override
       public ExistsResponse existsProduct(String productId) {
             log.info("Checking existence for product with ID: {}", productId);
             boolean exists = productRepository.existsById(productId);
             return new ExistsResponse(exists);
       }
 
+      @Override
       @Transactional
       public ProductResponse updateProduct(String productId, ProductUpdateRequest request) {
             String username = getCurrentUsername();
             log.info("Updating product with ID: {} by shop owner: {}", productId, username);
 
-            ShopResponse shopResponse = getShopByOwnerUsername(username)
-                    .orElseThrow(() -> {
-                          log.error("(updateProduct) Shop not found for owner: {}", username);
-                          return new AppException(ErrorCode.SHOP_NOT_FOUND);
-                    });
+            ShopResponse shopResponse = getShopByOwnerUsername(username);
 
-            Product product = productRepository.findById(productId)
-                    .orElseThrow(() -> {
-                          log.error("(updateProduct) Product not found with ID: {}", productId);
-                          return new AppException(ErrorCode.PRODUCT_NOT_FOUND);
-                    });
-
-            Category newCategory = categoryRepository.findById(request.getCategoryId())
-                    .orElseThrow(() -> {
-                          log.error("(updateProduct) Category not found with ID: {}", request.getCategoryId());
-                          return new AppException(ErrorCode.CATEGORY_NOT_FOUND);
-                    });
-
-            if (!newCategory.getShopId().equals(shopResponse.getId())) {
-                  log.error("Unauthorized update attempt for product ID: {} to category ID: {}", productId, request.getCategoryId());
-                  throw new AppException(ErrorCode.UNAUTHORIZED);
-            }
+            Product product = findProductById(productId);
+            Category newCategory = findCategoryById(request.getCategoryId());
+            checkCategoryOwnership(newCategory, shopResponse.getId());
 
             Category oldCategory = product.getCategory();
             oldCategory.getProducts().remove(product);
@@ -179,6 +156,7 @@ public class ProductServiceImpl implements ProductService {
             return productMapper.toProductResponse(product);
       }
 
+      @Override
       @Transactional
       public void updateStock(String productId, int quantity) {
             log.info("Updating stock for product with ID: {}. Quantity: {}", productId, quantity);
@@ -199,27 +177,16 @@ public class ProductServiceImpl implements ProductService {
             log.info("Stock updated for product ID: {}. New stock: {}", productId, newStock);
       }
 
+      @Override
       @Transactional
       public void deleteProduct(String productId) {
             String username = getCurrentUsername();
             log.info("Deleting product with ID: {} by shop owner: {}", productId, username);
 
-            ShopResponse shopResponse = getShopByOwnerUsername(username)
-                    .orElseThrow(() -> {
-                          log.error("(deleteProduct) Shop not found for owner: {}", username);
-                          return new AppException(ErrorCode.SHOP_NOT_FOUND);
-                    });
+            ShopResponse shopResponse = getShopByOwnerUsername(username);
 
-            Product product = productRepository.findById(productId)
-                    .orElseThrow(() -> {
-                          log.error("(deleteProduct) Product not found with ID: {}", productId);
-                          return new AppException(ErrorCode.PRODUCT_NOT_FOUND);
-                    });
-
-            if (!product.getCategory().getShopId().equals(shopResponse.getId())) {
-                  log.error("Unauthorized delete attempt for product ID: {}", productId);
-                  throw new AppException(ErrorCode.UNAUTHORIZED);
-            }
+            Product product = findProductById(productId);
+            checkCategoryOwnership(product.getCategory(), shopResponse.getId());
 
             Category category = product.getCategory();
             category.getProducts().remove(product);
@@ -234,8 +201,35 @@ public class ProductServiceImpl implements ProductService {
             return jwt.getClaim("preferred_username");
       }
 
-      private Optional<ShopResponse> getShopByOwnerUsername(String username) {
-            return Optional.ofNullable(shopClient.getShopByOwnerUsername(username).getResult());
+      private ShopResponse getShopByOwnerUsername(String username) {
+            return Optional.ofNullable(shopClient.getShopByOwnerUsername(username).getResult())
+                    .orElseThrow(() -> {
+                          log.error("Shop not found for owner: {}", username);
+                          return new AppException(ErrorCode.SHOP_NOT_FOUND);
+                    });
+      }
+
+      private Product findProductById(String productId) {
+            return productRepository.findById(productId)
+                    .orElseThrow(() -> {
+                          log.error("(findProductById) Product not found with ID: {}", productId);
+                          return new AppException(ErrorCode.PRODUCT_NOT_FOUND);
+                    });
+      }
+
+      private Category findCategoryById(String categoryId) {
+            return categoryRepository.findById(categoryId)
+                    .orElseThrow(() -> {
+                          log.error("(findCategoryById) Category not found with ID: {}", categoryId);
+                          return new AppException(ErrorCode.CATEGORY_NOT_FOUND);
+                    });
+      }
+
+      private void checkCategoryOwnership(Category category, String shopId) {
+            if (!category.getShopId().equals(shopId)) {
+                  log.error("Unauthorized access attempt for category: {}", category.getId());
+                  throw new AppException(ErrorCode.UNAUTHORIZED);
+            }
       }
 
 }
