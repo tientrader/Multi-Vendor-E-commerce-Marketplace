@@ -57,6 +57,55 @@ public class CartServiceImpl implements CartService {
             return cartMapper.toCartResponse(existingCart);
       }
 
+      @Override
+      public void createOrderFromCart() {
+            String username = getCurrentUsername();
+            validateUsername(username);
+
+            String cartKey = CART_KEY_PREFIX + username;
+            Cart cart = (Cart) redisTemplate.opsForValue().get(cartKey);
+            validateCart(cart);
+
+            OrderCreationRequest orderRequest = cartMapper.toOrderCreationRequest(cart);
+            orderRequest.setStatus("PENDING");
+            orderRequest.setEmail(Objects.requireNonNull(cart).getEmail());
+
+            orderClient.createOrder(orderRequest);
+            redisTemplate.delete(cartKey);
+            log.info("Order created from cart for user: {}", username);
+      }
+
+      @Override
+      public CartResponse getMyCart() {
+            String username = getCurrentUsername();
+            validateUsername(username);
+
+            String cartKey = CART_KEY_PREFIX + username;
+            Cart cart = (Cart) redisTemplate.opsForValue().get(cartKey);
+            validateCart(cart);
+
+            log.info("Fetched cart for user: {}", username);
+            return cartMapper.toCartResponse(cart);
+      }
+
+      @Override
+      public void deleteMyCart() {
+            String username = getCurrentUsername();
+            validateUsername(username);
+
+            String cartKey = CART_KEY_PREFIX + username;
+            Cart cart = (Cart) redisTemplate.opsForValue().get(cartKey);
+            validateCart(cart);
+
+            redisTemplate.delete(cartKey);
+            log.info("Cart deleted for user: {}", username);
+      }
+
+      private String getCurrentUsername() {
+            Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            return jwt.getClaim("preferred_username");
+      }
+
       private Cart createNewCart(CartCreationRequest request, String username) {
             validateProducts(request.getItems());
             double total = calculateTotalPriceForCartItems(request.getItems());
@@ -121,55 +170,6 @@ public class CartServiceImpl implements CartService {
                           Double price = productClient.getProductPriceById(cartItem.getProductId()).getResult();
                           return (price != null ? price : 0.0) * cartItem.getQuantity();
                     }).sum();
-      }
-
-      @Override
-      public void createOrderFromCart() {
-            String username = getCurrentUsername();
-            validateUsername(username);
-
-            String cartKey = CART_KEY_PREFIX + username;
-            Cart cart = (Cart) redisTemplate.opsForValue().get(cartKey);
-            validateCart(cart);
-
-            OrderCreationRequest orderRequest = cartMapper.toOrderCreationRequest(cart);
-            orderRequest.setStatus("PENDING");
-            orderRequest.setEmail(Objects.requireNonNull(cart).getEmail());
-
-            orderClient.createOrder(orderRequest);
-            redisTemplate.delete(cartKey);
-            log.info("Order created from cart for user: {}", username);
-      }
-
-      @Override
-      public CartResponse getMyCart() {
-            String username = getCurrentUsername();
-            validateUsername(username);
-
-            String cartKey = CART_KEY_PREFIX + username;
-            Cart cart = (Cart) redisTemplate.opsForValue().get(cartKey);
-            validateCart(cart);
-
-            log.info("Fetched cart for user: {}", username);
-            return cartMapper.toCartResponse(cart);
-      }
-
-      @Override
-      public void deleteMyCart() {
-            String username = getCurrentUsername();
-            validateUsername(username);
-
-            String cartKey = CART_KEY_PREFIX + username;
-            Cart cart = (Cart) redisTemplate.opsForValue().get(cartKey);
-            validateCart(cart);
-
-            redisTemplate.delete(cartKey);
-            log.info("Cart deleted for user: {}", username);
-      }
-
-      private String getCurrentUsername() {
-            Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            return jwt.getClaim("preferred_username");
       }
 
       private void validateUsername(String username) {
