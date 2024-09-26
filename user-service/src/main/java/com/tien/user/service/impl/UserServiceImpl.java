@@ -53,6 +53,7 @@ public class UserServiceImpl implements UserService {
     @NonFinal
     String clientSecret;
 
+    @Override
     @Transactional
     public UserResponse register(RegistrationRequest request) {
         log.info("Starting user registration for username: {}", request.getUsername());
@@ -101,6 +102,7 @@ public class UserServiceImpl implements UserService {
         return null;
     }
 
+    @Override
     public UserResponse getMyInfo() {
         String userId = getCurrentUserId();
 
@@ -114,6 +116,7 @@ public class UserServiceImpl implements UserService {
         return userMapper.toUserResponse(user);
     }
 
+    @Override
     @PreAuthorize("hasRole('ADMIN')")
     public List<UserResponse> getAllUsers() {
         log.info("Fetching all users");
@@ -126,6 +129,7 @@ public class UserServiceImpl implements UserService {
         return users;
     }
 
+    @Override
     public UserResponse getUserByUserId(String userId) {
         log.info("Fetching user with userId: {}", userId);
 
@@ -138,6 +142,7 @@ public class UserServiceImpl implements UserService {
         return userMapper.toUserResponse(user);
     }
 
+    @Override
     public UserResponse getUserByProfileId(String profileId) {
         log.info("Fetching user with profileId: {}", profileId);
 
@@ -150,6 +155,7 @@ public class UserServiceImpl implements UserService {
         return userMapper.toUserResponse(user);
     }
 
+    @Override
     @Transactional
     @PreAuthorize("hasRole('ADMIN')")
     public UserResponse updateUser(String userId, UserUpdateRequest updateRequest) {
@@ -175,6 +181,7 @@ public class UserServiceImpl implements UserService {
         return updatedUser;
     }
 
+    @Override
     @Transactional
     public UserResponse updateMyInfo(UserUpdateRequest updateRequest) {
         String currentUserId = getCurrentUserId();
@@ -193,6 +200,7 @@ public class UserServiceImpl implements UserService {
         return updatedUser;
     }
 
+    @Override
     @Transactional
     public void changePassword(String newPassword) {
         String userId = getCurrentUserId();
@@ -212,6 +220,7 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    @Override
     @Transactional
     @PreAuthorize("hasRole('ADMIN')")
     public void deleteUser(String userId) {
