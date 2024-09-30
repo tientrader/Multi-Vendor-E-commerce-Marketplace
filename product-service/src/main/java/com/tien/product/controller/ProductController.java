@@ -80,11 +80,11 @@ public class ProductController {
                     .build();
       }
 
-      @PutMapping("/{productId}/stock")
-      ApiResponse<Void> updateStock(@PathVariable String productId, @RequestParam int quantity) {
-            productService.updateStock(productId, quantity);
+      @PutMapping("/{productId}/update-stock-sold")
+      ApiResponse<Void> updateStockAndSoldQuantity(@PathVariable String productId, @RequestParam int quantity) {
+            productService.updateStockAndSoldQuantity(productId, quantity);
             return ApiResponse.<Void>builder()
-                    .message("Stock updated successfully")
+                    .message("Stock and sold quantity updated successfully")
                     .build();
       }
 

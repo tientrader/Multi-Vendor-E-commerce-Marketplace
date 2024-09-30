@@ -158,23 +158,28 @@ public class ProductServiceImpl implements ProductService {
 
       @Override
       @Transactional
-      public void updateStock(String productId, int quantity) {
-            log.info("Updating stock for product with ID: {}. Quantity: {}", productId, quantity);
+      public void updateStockAndSoldQuantity(String productId, int quantity) {
+            log.info("Updating stock and sold quantity for product with ID: {}. Quantity: {}", productId, quantity);
+
             Product product = productRepository.findById(productId)
                     .orElseThrow(() -> {
-                          log.error("(updateStock) Product not found with ID: {}", productId);
+                          log.error("(updateStockAndSoldQuantity) Product not found with ID: {}", productId);
                           return new AppException(ErrorCode.PRODUCT_NOT_FOUND);
                     });
 
-            int newStock = product.getStock() + quantity;
-            if (newStock <= 0) {
+            int newStock = product.getStock() - quantity;
+            if (newStock < 0) {
                   log.error("Attempted to reduce stock below zero for product ID: {}", productId);
                   throw new AppException(ErrorCode.OUT_OF_STOCK);
             }
 
             product.setStock(newStock);
+            product.setSoldQuantity(product.getSoldQuantity() + quantity);
+
             productRepository.save(product);
-            log.info("Stock updated for product ID: {}. New stock: {}", productId, newStock);
+
+            log.info("Stock and sold quantity updated for product ID: {}. New stock: {}, Sold quantity: {}",
+                    productId, newStock, product.getSoldQuantity());
       }
 
       @Override

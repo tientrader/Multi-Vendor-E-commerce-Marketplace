@@ -18,7 +18,7 @@ public interface ProductService {
       double getProductPriceById(String productId);
       ExistsResponse existsProduct(String productId);
       ProductResponse updateProduct(String productId, ProductUpdateRequest request);
-      void updateStock(String productId, int quantity);
+      void updateStockAndSoldQuantity(String productId, int quantity);
       void deleteProduct(String productId);
 
 }

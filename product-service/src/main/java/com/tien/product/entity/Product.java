@@ -21,6 +21,7 @@ public class Product {
       String description;
       double price;
       int stock;
+      int soldQuantity;
 
       @DBRef
       Category category;

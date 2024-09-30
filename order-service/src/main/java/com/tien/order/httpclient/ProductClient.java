@@ -20,8 +20,8 @@ public interface ProductClient {
     @GetMapping(value = "/{productId}/price", produces = MediaType.APPLICATION_JSON_VALUE)
     ApiResponse<Double> getProductPriceById(@PathVariable("productId") String productId);
 
-    @PutMapping("/{productId}/stock")
-    ApiResponse<Void> updateStock(@PathVariable String productId, @RequestParam int quantity);
+    @PutMapping("/{productId}/update-stock-sold")
+    ApiResponse<Void> updateStockAndSoldQuantity(@PathVariable String productId, @RequestParam int quantity);
 
     default ApiResponse<Double> getProductPriceByIdFallback(String productId, Throwable throwable) {
         throw new RuntimeException();

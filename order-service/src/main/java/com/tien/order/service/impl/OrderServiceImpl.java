@@ -52,7 +52,7 @@ public class OrderServiceImpl implements OrderService {
 
             log.info("Order created for user: {}, total amount: {}", username, order.getTotal());
 
-            updateProductStock(request.getItems());
+            updateStockAndSoldQuantity(request.getItems());
 
             orderRepository.save(order);
             log.info("Order saved successfully for user: {}", username);
@@ -164,16 +164,16 @@ public class OrderServiceImpl implements OrderService {
             return total;
       }
 
-      private void updateProductStock(List<OrderItemCreationRequest> items) {
-            log.info("Updating product stock for {} items.", items.size());
+      private void updateStockAndSoldQuantity(List<OrderItemCreationRequest> items) {
+            log.info("Updating product stock and sold quantity for {} items.", items.size());
             for (OrderItemCreationRequest item : items) {
-                  int quantityToUpdate = -item.getQuantity();
+                  int quantityToUpdate = item.getQuantity();
                   try {
-                        log.info("Updating stock for product ID: {} with quantity: {}", item.getProductId(), quantityToUpdate);
-                        productClient.updateStock(item.getProductId(), quantityToUpdate);
-                        log.info("Successfully updated stock for product ID: {}", item.getProductId());
+                        log.info("Updating stock and sold quantity for product ID: {} with quantity: {}", item.getProductId(), quantityToUpdate);
+                        productClient.updateStockAndSoldQuantity(item.getProductId(), quantityToUpdate);
+                        log.info("Successfully updated stock and sold quantity for product ID: {}", item.getProductId());
                   } catch (Exception e) {
-                        log.error("Error updating stock for product ID {}: {}", item.getProductId(), e.getMessage());
+                        log.error("Error updating stock and sold quantity for product ID {}: {}", item.getProductId(), e.getMessage());
                         throw new AppException(ErrorCode.OUT_OF_STOCK);
                   }
             }
