@@ -1,9 +1,5 @@
 # Social-Marketplace Microservices
 
-## Overview
-
-This project represents a highly scalable and fault-tolerant Marketplace and Social Platform, designed using a microservices architecture. It includes comprehensive features for user management, product and order processing, social interactions (posts, likes, comments), notifications, and advanced search capabilities. The platform emphasizes high availability, security, and performance, making it ideal for modern web applications.
-
 ## Table of Contents
 
 - [Technologies](#technologies)
