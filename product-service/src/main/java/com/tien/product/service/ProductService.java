@@ -11,8 +11,19 @@ import java.util.List;
 public interface ProductService {
 
       ProductResponse createProduct(ProductCreationRequest request);
-      Page<ProductResponse> searchProducts(int page, int size, String sortBy, String sortDirection,
-                                           String categoryId, Double minPrice, Double maxPrice);
+
+      Page<ProductResponse> getHomepageProductList(
+              int page, int size, String sortBy, String sortDirection,
+              String categoryId, Double minPrice, Double maxPrice);
+
+      Page<ProductResponse> getProductsByShop(
+              String shopId, int page, int size, String sortBy, String sortDirection,
+              String categoryId, Double minPrice, Double maxPrice);
+
+      Page<ProductResponse> getProductsByCategoryId(
+              String category, int page, int size, String sortBy, String sortDirection,
+              Double minPrice, Double maxPrice);
+
       List<ProductResponse> getAllProducts();
       ProductResponse getProductById(String productId);
       double getProductPriceById(String productId);

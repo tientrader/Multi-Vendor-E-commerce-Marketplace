@@ -30,7 +30,7 @@ public class ProductController {
       }
 
       @GetMapping
-      public ApiResponse<Page<ProductResponse>> searchProducts(
+      public ApiResponse<Page<ProductResponse>> getHomepageProductList(
               @RequestParam(defaultValue = "0") int page,
               @RequestParam(defaultValue = "10") int size,
               @RequestParam(defaultValue = "name") String sortBy,
@@ -38,8 +38,45 @@ public class ProductController {
               @RequestParam(required = false) String categoryId,
               @RequestParam(required = false) Double minPrice,
               @RequestParam(required = false) Double maxPrice) {
-            Page<ProductResponse> productsPage = productService.searchProducts(
+            Page<ProductResponse> productsPage = productService.getHomepageProductList(
                     page, size, sortBy, sortDirection, categoryId, minPrice, maxPrice);
+
+            return ApiResponse.<Page<ProductResponse>>builder()
+                    .result(productsPage)
+                    .build();
+      }
+
+      @GetMapping("/shop/{shopId}")
+      public ApiResponse<Page<ProductResponse>> getProductsByShop(
+              @PathVariable String shopId,
+              @RequestParam(defaultValue = "0") int page,
+              @RequestParam(defaultValue = "10") int size,
+              @RequestParam(defaultValue = "name") String sortBy,
+              @RequestParam(defaultValue = "asc") String sortDirection,
+              @RequestParam(required = false) String categoryId,
+              @RequestParam(required = false) Double minPrice,
+              @RequestParam(required = false) Double maxPrice) {
+
+            Page<ProductResponse> productsPage = productService.getProductsByShop(
+                    shopId, page, size, sortBy, sortDirection, categoryId, minPrice, maxPrice);
+
+            return ApiResponse.<Page<ProductResponse>>builder()
+                    .result(productsPage)
+                    .build();
+      }
+
+      @GetMapping("/categoryInShop/{categoryId}")
+      public ApiResponse<Page<ProductResponse>> getProductsByCategoryId(
+              @PathVariable String categoryId,
+              @RequestParam(defaultValue = "0") int page,
+              @RequestParam(defaultValue = "10") int size,
+              @RequestParam(defaultValue = "name") String sortBy,
+              @RequestParam(defaultValue = "asc") String sortDirection,
+              @RequestParam(required = false) Double minPrice,
+              @RequestParam(required = false) Double maxPrice) {
+
+            Page<ProductResponse> productsPage = productService.getProductsByCategoryId(
+                    categoryId, page, size, sortBy, sortDirection, minPrice, maxPrice);
 
             return ApiResponse.<Page<ProductResponse>>builder()
                     .result(productsPage)

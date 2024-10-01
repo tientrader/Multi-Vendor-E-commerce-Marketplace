@@ -17,6 +17,7 @@ public class Product {
 
       @Id
       String id;
+      String shopId;
       String name;
       String description;
       double price;

@@ -11,6 +11,7 @@ import lombok.experimental.FieldDefaults;
 public class ProductResponse {
 
       String id;
+      String shopId;
       String name;
       String description;
       double price;

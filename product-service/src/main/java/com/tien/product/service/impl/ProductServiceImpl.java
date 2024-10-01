@@ -55,6 +55,7 @@ public class ProductServiceImpl implements ProductService {
 
             Product product = productMapper.toProduct(request);
             product.setCategory(category);
+            product.setShopId(shopResponse.getId());
             product = productRepository.save(product);
 
             category.getProducts().add(product);
@@ -65,32 +66,44 @@ public class ProductServiceImpl implements ProductService {
       }
 
       @Override
-      public Page<ProductResponse> searchProducts(
+      public Page<ProductResponse> getHomepageProductList(
               int page, int size, String sortBy, String sortDirection,
               String categoryId, Double minPrice, Double maxPrice) {
 
             Criteria criteria = new Criteria();
+            Optional.ofNullable(categoryId).ifPresent(id -> criteria.and("categoryId").is(id));
+
+            addPriceCriteria(criteria, minPrice, maxPrice);
+
+            return getProductsPage(criteria, page, size, sortBy, sortDirection);
+      }
+
+      @Override
+      public Page<ProductResponse> getProductsByShop(
+              String shopId, int page, int size, String sortBy, String sortDirection,
+              String categoryId, Double minPrice, Double maxPrice) {
+
+            Criteria criteria = new Criteria();
+            criteria.and("shopId").is(shopId);
 
             Optional.ofNullable(categoryId).ifPresent(id -> criteria.and("categoryId").is(id));
 
-            if (minPrice != null && maxPrice != null) {
-                  criteria.and("price").gte(minPrice).lte(maxPrice);
-            } else if (minPrice != null) {
-                  criteria.and("price").gte(minPrice);
-            } else if (maxPrice != null) {
-                  criteria.and("price").lte(maxPrice);
-            }
+            addPriceCriteria(criteria, minPrice, maxPrice);
 
-            Query query = Query.query(criteria);
-            Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(sortDirection), sortBy));
-            query.with(pageable);
+            return getProductsPage(criteria, page, size, sortBy, sortDirection);
+      }
 
-            List<Product> products = mongoTemplate.find(query, Product.class);
-            long total = mongoTemplate.count(query, Product.class);
-            List<ProductResponse> productResponses = productMapper.toProductResponses(products);
+      @Override
+      public Page<ProductResponse> getProductsByCategoryId(
+              String categoryId, int page, int size, String sortBy, String sortDirection,
+              Double minPrice, Double maxPrice) {
 
-            log.info("Found {} products", productResponses.size());
-            return new PageImpl<>(productResponses, pageable, total);
+            Criteria criteria = new Criteria();
+            criteria.and("category.id").is(categoryId);
+
+            addPriceCriteria(criteria, minPrice, maxPrice);
+
+            return getProductsPage(criteria, page, size, sortBy, sortDirection);
       }
 
       @Override
@@ -235,6 +248,30 @@ public class ProductServiceImpl implements ProductService {
                   log.error("Unauthorized access attempt for category: {}", category.getId());
                   throw new AppException(ErrorCode.UNAUTHORIZED);
             }
+      }
+
+      private void addPriceCriteria(Criteria criteria, Double minPrice, Double maxPrice) {
+            if (minPrice != null && maxPrice != null) {
+                  criteria.and("price").gte(minPrice).lte(maxPrice);
+            } else if (minPrice != null) {
+                  criteria.and("price").gte(minPrice);
+            } else if (maxPrice != null) {
+                  criteria.and("price").lte(maxPrice);
+            }
+      }
+
+      private Page<ProductResponse> getProductsPage(
+              Criteria criteria, int page, int size, String sortBy, String sortDirection) {
+
+            Query query = Query.query(criteria);
+            Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(sortDirection), sortBy));
+            query.with(pageable);
+
+            List<Product> products = mongoTemplate.find(query, Product.class);
+            long total = mongoTemplate.count(query, Product.class);
+            List<ProductResponse> productResponses = productMapper.toProductResponses(products);
+
+            return new PageImpl<>(productResponses, pageable, total);
       }
 
 }
