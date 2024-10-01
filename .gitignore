@@ -24,3 +24,17 @@
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 replay_pid*
+
+
+# Ignore OS generated files
+.DS_Store
+
+# Ignore docker-compose files
+docker-compose.app.yml
+docker-compose.dev.yml
+
+# Ignore Docker data directories
+docker/tempo/tempo-data/
+
+# Ignore Maven wrapper jar files
+**/.mvn/wrapper/maven-wrapper.jar
