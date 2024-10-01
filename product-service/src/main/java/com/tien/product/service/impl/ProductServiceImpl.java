@@ -66,40 +66,22 @@ public class ProductServiceImpl implements ProductService {
       }
 
       @Override
-      public Page<ProductResponse> getHomepageProductList(
+      public Page<ProductResponse> getProducts(
+              String shopId, String categoryId,
               int page, int size, String sortBy, String sortDirection,
-              String categoryId, Double minPrice, Double maxPrice) {
-
-            Criteria criteria = new Criteria();
-            Optional.ofNullable(categoryId).ifPresent(id -> criteria.and("categoryId").is(id));
-
-            addPriceCriteria(criteria, minPrice, maxPrice);
-
-            return getProductsPage(criteria, page, size, sortBy, sortDirection);
-      }
-
-      @Override
-      public Page<ProductResponse> getProductsByShop(
-              String shopId, int page, int size, String sortBy, String sortDirection,
-              String categoryId, Double minPrice, Double maxPrice) {
-
-            Criteria criteria = new Criteria();
-            criteria.and("shopId").is(shopId);
-
-            Optional.ofNullable(categoryId).ifPresent(id -> criteria.and("categoryId").is(id));
-
-            addPriceCriteria(criteria, minPrice, maxPrice);
-
-            return getProductsPage(criteria, page, size, sortBy, sortDirection);
-      }
-
-      @Override
-      public Page<ProductResponse> getProductsByCategoryId(
-              String categoryId, int page, int size, String sortBy, String sortDirection,
               Double minPrice, Double maxPrice) {
 
             Criteria criteria = new Criteria();
-            criteria.and("category.id").is(categoryId);
+
+            if (shopId != null) {
+                  criteria.and("shopId").is(shopId);
+                  log.info("Fetching products for shopId: {}", shopId);
+            } else if (categoryId != null) {
+                  criteria.and("category.id").is(categoryId);
+                  log.info("Fetching products for categoryId: {}", categoryId);
+            } else {
+                  log.info("Fetching products for homepage");
+            }
 
             addPriceCriteria(criteria, minPrice, maxPrice);
 

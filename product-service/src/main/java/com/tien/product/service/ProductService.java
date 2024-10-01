@@ -12,16 +12,21 @@ public interface ProductService {
 
       ProductResponse createProduct(ProductCreationRequest request);
 
-      Page<ProductResponse> getHomepageProductList(
+//      Page<ProductResponse> getHomepageProductList(
+//              int page, int size, String sortBy, String sortDirection,
+//              String categoryId, Double minPrice, Double maxPrice);
+//
+//      Page<ProductResponse> getProductsByShop(
+//              String shopId, int page, int size, String sortBy, String sortDirection,
+//              String categoryId, Double minPrice, Double maxPrice);
+//
+//      Page<ProductResponse> getProductsByCategoryId(
+//              String category, int page, int size, String sortBy, String sortDirection,
+//              Double minPrice, Double maxPrice);
+
+      Page<ProductResponse> getProducts(
+              String shopId, String categoryId,
               int page, int size, String sortBy, String sortDirection,
-              String categoryId, Double minPrice, Double maxPrice);
-
-      Page<ProductResponse> getProductsByShop(
-              String shopId, int page, int size, String sortBy, String sortDirection,
-              String categoryId, Double minPrice, Double maxPrice);
-
-      Page<ProductResponse> getProductsByCategoryId(
-              String category, int page, int size, String sortBy, String sortDirection,
               Double minPrice, Double maxPrice);
 
       List<ProductResponse> getAllProducts();
