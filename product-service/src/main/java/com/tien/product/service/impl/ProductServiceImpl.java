@@ -27,6 +27,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -56,6 +57,7 @@ public class ProductServiceImpl implements ProductService {
             Product product = productMapper.toProduct(request);
             product.setCategory(category);
             product.setShopId(shopResponse.getId());
+            product.setCreatedAt(LocalDateTime.now());
             product = productRepository.save(product);
 
             category.getProducts().add(product);
@@ -69,7 +71,11 @@ public class ProductServiceImpl implements ProductService {
       public Page<ProductResponse> getProducts(
               String shopId, String categoryId,
               int page, int size, String sortBy, String sortDirection,
-              Double minPrice, Double maxPrice) {
+              Double minPrice, Double maxPrice, ProductSort productSort) {
+
+            if (productSort == null) {
+                  productSort = ProductSort.DEFAULT;
+            }
 
             Criteria criteria = new Criteria();
 
@@ -85,7 +91,16 @@ public class ProductServiceImpl implements ProductService {
 
             addPriceCriteria(criteria, minPrice, maxPrice);
 
-            return getProductsPage(criteria, page, size, sortBy, sortDirection);
+            Sort sort;
+            if (productSort == ProductSort.BEST_SELLING) {
+                  sort = Sort.by(Sort.Direction.DESC, "soldQuantity");
+            } else if (productSort == ProductSort.NEWEST) {
+                  sort = Sort.by(Sort.Direction.DESC, "createdAt");
+            } else {
+                  sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
+            }
+
+            return getProductsPage(criteria, page, size, sort);
       }
 
       @Override
@@ -243,10 +258,10 @@ public class ProductServiceImpl implements ProductService {
       }
 
       private Page<ProductResponse> getProductsPage(
-              Criteria criteria, int page, int size, String sortBy, String sortDirection) {
+              Criteria criteria, int page, int size, Sort sort) {
 
             Query query = Query.query(criteria);
-            Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(sortDirection), sortBy));
+            Pageable pageable = PageRequest.of(page, size, sort);
             query.with(pageable);
 
             List<Product> products = mongoTemplate.find(query, Product.class);

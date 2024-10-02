@@ -3,6 +3,8 @@ package com.tien.product.dto.response;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDateTime;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -17,6 +19,7 @@ public class ProductResponse {
       double price;
       int stock;
       int soldQuantity;
+      LocalDateTime createdAt;
       String categoryId;
 
 }

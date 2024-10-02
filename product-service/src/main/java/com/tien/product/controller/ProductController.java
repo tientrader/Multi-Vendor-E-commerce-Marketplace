@@ -6,6 +6,7 @@ import com.tien.product.dto.request.ProductCreationRequest;
 import com.tien.product.dto.response.ExistsResponse;
 import com.tien.product.dto.response.ProductResponse;
 import com.tien.product.service.ProductService;
+import com.tien.product.service.impl.ProductSort;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -30,18 +31,19 @@ public class ProductController {
       }
 
       @GetMapping
-      public ApiResponse<Page<ProductResponse>> getProducts(
+      ApiResponse<Page<ProductResponse>> getProducts(
               @RequestParam(required = false) String shopId,
               @RequestParam(required = false) String categoryId,
               @RequestParam(defaultValue = "0") int page,
               @RequestParam(defaultValue = "10") int size,
-              @RequestParam(defaultValue = "name") String sortBy,
+              @RequestParam(defaultValue = "DEFAULT") ProductSort productSort,
               @RequestParam(defaultValue = "asc") String sortDirection,
               @RequestParam(required = false) Double minPrice,
-              @RequestParam(required = false) Double maxPrice) {
+              @RequestParam(required = false) Double maxPrice,
+              @RequestParam(defaultValue = "name") String sortBy) {
 
             Page<ProductResponse> productsPage = productService.getProducts(
-                    shopId, categoryId, page, size, sortBy, sortDirection, minPrice, maxPrice);
+                    shopId, categoryId, page, size, sortBy, sortDirection, minPrice, maxPrice, productSort);
 
             return ApiResponse.<Page<ProductResponse>>builder()
                     .result(productsPage)
