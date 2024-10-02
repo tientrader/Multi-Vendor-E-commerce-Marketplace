@@ -22,6 +22,8 @@ import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -114,6 +116,17 @@ public class UserServiceImpl implements UserService {
                 });
 
         return userMapper.toUserResponse(user);
+    }
+
+    @Override
+    public Page<UserResponse> getUsers(int page, int size) {
+        log.info("Fetching all users with pagination: page = {}, size = {}", page, size);
+
+        Page<User> userPage = userRepository.findAll(PageRequest.of(page, size));
+
+        log.info("Fetched all users successfully with total elements: {}", userPage.getTotalElements());
+
+        return userPage.map(userMapper::toUserResponse);
     }
 
     @Override
