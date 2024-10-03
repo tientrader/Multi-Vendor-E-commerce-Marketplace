@@ -152,7 +152,7 @@ public class OrderServiceImpl implements OrderService {
             log.info("Calculating total for order items.");
             double total = 0.0;
             for (OrderItemCreationRequest item : items) {
-                  ApiResponse<Double> priceResponse = productClient.getProductPriceById(item.getProductId());
+                  ApiResponse<Double> priceResponse = productClient.getProductPriceById(item.getProductId(), item.getVariantId()); // Sử dụng variantId
                   Double price = priceResponse.getResult();
                   if (price != null) {
                         total += price * item.getQuantity();
@@ -170,7 +170,7 @@ public class OrderServiceImpl implements OrderService {
                   int quantityToUpdate = item.getQuantity();
                   try {
                         log.info("Updating stock and sold quantity for product ID: {} with quantity: {}", item.getProductId(), quantityToUpdate);
-                        productClient.updateStockAndSoldQuantity(item.getProductId(), quantityToUpdate);
+                        productClient.updateStockAndSoldQuantity(item.getProductId(), item.getVariantId(), quantityToUpdate); // Sử dụng variantId
                         log.info("Successfully updated stock and sold quantity for product ID: {}", item.getProductId());
                   } catch (Exception e) {
                         log.error("Error updating stock and sold quantity for product ID {}: {}", item.getProductId(), e.getMessage());

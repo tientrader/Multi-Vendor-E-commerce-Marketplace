@@ -23,6 +23,9 @@ public class OrderItem {
       String productId;
 
       @Column(nullable = false)
+      String variantId;
+
+      @Column(nullable = false)
       int quantity;
 
 }

@@ -16,19 +16,20 @@ public interface ProductClient {
 
       @CircuitBreaker(name = "getProductPriceById", fallbackMethod = "getProductPriceByIdFallback")
       @Retry(name = "getProductPriceById")
-      @GetMapping(value = "/{productId}/price", produces = MediaType.APPLICATION_JSON_VALUE)
-      ApiResponse<Double> getProductPriceById(@PathVariable("productId") String productId);
+      @GetMapping(value = "/{productId}/price/{variantId}", produces = MediaType.APPLICATION_JSON_VALUE)
+      ApiResponse<Double> getProductPriceById(@PathVariable("productId") String productId,
+                                              @PathVariable("variantId") String variantId);
 
       @CircuitBreaker(name = "existsProduct", fallbackMethod = "existsProductFallback")
       @Retry(name = "existsProduct")
-      @GetMapping("/{productId}/exists")
-      ExistsResponse existsProduct(@PathVariable String productId);
+      @GetMapping("/{productId}/exists/{variantId}")
+      ExistsResponse existsProduct(@PathVariable String productId, @PathVariable String variantId);
 
-      default ApiResponse<Double> getProductPriceByIdFallback(String productId, Throwable throwable) {
+      default ApiResponse<Double> getProductPriceByIdFallback(String productId, String variantId, Throwable throwable) {
             throw new RuntimeException();
       }
 
-      default ExistsResponse existsProductFallback(String productId, Throwable throwable) {
+      default ExistsResponse existsProductFallback(String productId, String variantId, Throwable throwable) {
             throw new RuntimeException();
       }
 

@@ -14,7 +14,7 @@ public interface ProductQueryService {
                                         Double maxPrice, ProductSort productSort);
       ProductResponse getProductById(String productId);
       List<ProductResponse> getAllProducts();
-      double getProductPriceById(String productId);
-      ExistsResponse existsProduct(String productId);
+      double getProductPriceById(String productId, String variantId);
+      ExistsResponse existsProduct(String productId, String variantId);
 
 }

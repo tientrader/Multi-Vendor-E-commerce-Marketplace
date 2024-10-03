@@ -35,10 +35,11 @@ public class ProductCommandController {
 
       @PutMapping("/{productId}/update-stock-sold")
       ApiResponse<Void> updateStockAndSoldQuantity(@PathVariable String productId,
+                                                   @RequestParam String variantId,
                                                    @RequestParam int quantity) {
-            productCommandService.updateStockAndSoldQuantity(productId, quantity);
+            productCommandService.updateStockAndSoldQuantity(productId, variantId, quantity);
             return ApiResponse.<Void>builder()
-                    .message("Stock and sold quantity updated successfully")
+                    .message("Variant stock and sold quantity updated successfully")
                     .build();
       }
 

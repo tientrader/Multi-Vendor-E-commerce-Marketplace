@@ -54,16 +54,16 @@ public class ProductQueryController {
                     .build();
       }
 
-      @GetMapping("/{productId}/price")
-      ApiResponse<Double> getProductPriceById(@PathVariable String productId) {
+      @GetMapping("/{productId}/price/{variantId}")
+      ApiResponse<Double> getProductPriceById(@PathVariable String productId, @PathVariable String variantId) {
             return ApiResponse.<Double>builder()
-                    .result(productQueryService.getProductPriceById(productId))
+                    .result(productQueryService.getProductPriceById(productId, variantId))
                     .build();
       }
 
-      @GetMapping("/{productId}/exists")
-      ExistsResponse existsProduct(@PathVariable String productId) {
-            return productQueryService.existsProduct(productId);
+      @GetMapping("/{productId}/exists/{variantId}")
+      ExistsResponse existsProduct(@PathVariable String productId, @PathVariable String variantId) {
+            return productQueryService.existsProduct(productId, variantId);
       }
 
 }

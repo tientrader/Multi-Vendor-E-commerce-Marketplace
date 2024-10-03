@@ -2,10 +2,14 @@ package com.tien.cart.mapper;
 
 import com.tien.cart.dto.request.CartCreationRequest;
 import com.tien.cart.dto.request.OrderCreationRequest;
+import com.tien.cart.dto.request.OrderItemCreationRequest;
 import com.tien.cart.dto.response.CartResponse;
 import com.tien.cart.entity.Cart;
+import com.tien.cart.entity.CartItem;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+
+import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface CartMapper {
@@ -22,5 +26,7 @@ public interface CartMapper {
       @Mapping(source = "total", target = "total")
       @Mapping(source = "items", target = "items")
       OrderCreationRequest toOrderCreationRequest(Cart cart);
+
+      List<OrderItemCreationRequest> mapCartItemsToOrderItems(List<CartItem> cartItems);
 
 }

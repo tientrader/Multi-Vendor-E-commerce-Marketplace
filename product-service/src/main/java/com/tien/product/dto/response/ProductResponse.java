@@ -4,6 +4,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Builder
@@ -16,10 +17,9 @@ public class ProductResponse {
       String shopId;
       String name;
       String description;
-      double price;
-      int stock;
       int soldQuantity;
-      LocalDateTime createdAt;
+      List<ProductVariantResponse> variants;
       String categoryId;
+      LocalDateTime createdAt;
 
 }

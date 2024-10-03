@@ -1,9 +1,10 @@
 package com.tien.product.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Positive;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+
+import java.util.List;
 
 @Data
 @Builder
@@ -17,13 +18,9 @@ public class ProductCreationRequest {
 
       String description;
 
-      @Positive(message = "PRICE_MUST_BE_POSITIVE")
-      double price;
-
-      @Positive(message = "STOCK_MUST_BE_POSITIVE")
-      int stock;
-
       @NotBlank(message = "CATEGORY_ID_IS_REQUIRED")
       String categoryId;
+
+      List<ProductVariantRequest> variants;
 
 }

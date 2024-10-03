@@ -6,6 +6,7 @@ import com.tien.product.dto.response.ProductResponse;
 import com.tien.product.dto.response.ShopResponse;
 import com.tien.product.entity.Category;
 import com.tien.product.entity.Product;
+import com.tien.product.entity.ProductVariant;
 import com.tien.product.exception.AppException;
 import com.tien.product.exception.ErrorCode;
 import com.tien.product.httpclient.ShopClient;
@@ -88,28 +89,32 @@ public class ProductCommandServiceImpl implements ProductCommandService {
 
       @Override
       @Transactional
-      public void updateStockAndSoldQuantity(String productId, int quantity) {
-            log.info("Updating stock and sold quantity for product with ID: {}. Quantity: {}", productId, quantity);
+      public void updateStockAndSoldQuantity(String productId, String variantId, int quantity) {
+            log.info("Updating stock for variant with ID: {} for product ID: {}. Quantity: {}", variantId, productId, quantity);
 
-            Product product = productRepository.findById(productId)
+            Product product = findProductById(productId);
+            ProductVariant variant = product.getVariants().stream()
+                    .filter(v -> v.getVariantId().equals(variantId))
+                    .findFirst()
                     .orElseThrow(() -> {
-                          log.error("(updateStockAndSoldQuantity) Product not found with ID: {}", productId);
-                          return new AppException(ErrorCode.PRODUCT_NOT_FOUND);
+                          log.error("(updateStockAndSoldQuantity) Variant not found with ID: {}", variantId);
+                          return new AppException(ErrorCode.VARIANT_NOT_FOUND);
                     });
 
-            int newStock = product.getStock() - quantity;
+            int newStock = variant.getStock() - quantity;
             if (newStock < 0) {
-                  log.error("Attempted to reduce stock below zero for product ID: {}", productId);
+                  log.error("Attempted to reduce stock below zero for variant ID: {}", variantId);
                   throw new AppException(ErrorCode.OUT_OF_STOCK);
             }
 
-            product.setStock(newStock);
+            variant.setStock(newStock);
+
             product.setSoldQuantity(product.getSoldQuantity() + quantity);
 
             productRepository.save(product);
 
-            log.info("Stock and sold quantity updated for product ID: {}. New stock: {}, Sold quantity: {}",
-                    productId, newStock, product.getSoldQuantity());
+            log.info("Stock updated for variant ID: {}. New stock: {}", variantId, newStock);
+            log.info("Sold quantity updated for product ID: {}. New sold quantity: {}", productId, product.getSoldQuantity());
       }
 
       @Override

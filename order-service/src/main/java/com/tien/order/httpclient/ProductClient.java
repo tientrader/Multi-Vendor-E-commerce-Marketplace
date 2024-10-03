@@ -17,13 +17,16 @@ public interface ProductClient {
 
     @CircuitBreaker(name = "getProductPriceById", fallbackMethod = "getProductPriceByIdFallback")
     @Retry(name = "getProductPriceById")
-    @GetMapping(value = "/{productId}/price", produces = MediaType.APPLICATION_JSON_VALUE)
-    ApiResponse<Double> getProductPriceById(@PathVariable("productId") String productId);
+    @GetMapping(value = "/{productId}/price/{variantId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    ApiResponse<Double> getProductPriceById(@PathVariable("productId") String productId,
+                                            @PathVariable("variantId") String variantId);
 
     @PutMapping("/{productId}/update-stock-sold")
-    ApiResponse<Void> updateStockAndSoldQuantity(@PathVariable String productId, @RequestParam int quantity);
+    ApiResponse<Void> updateStockAndSoldQuantity(@PathVariable String productId,
+                                                 @RequestParam String variantId,
+                                                 @RequestParam int quantity);
 
-    default ApiResponse<Double> getProductPriceByIdFallback(String productId, Throwable throwable) {
+    default ApiResponse<Double> getProductPriceByIdFallback(String productId, String variantId, Throwable throwable) {
         throw new RuntimeException();
     }
 

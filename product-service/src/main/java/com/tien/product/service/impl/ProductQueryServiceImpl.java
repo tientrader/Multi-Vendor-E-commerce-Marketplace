@@ -3,6 +3,7 @@ package com.tien.product.service.impl;
 import com.tien.product.dto.response.ExistsResponse;
 import com.tien.product.dto.response.ProductResponse;
 import com.tien.product.entity.Product;
+import com.tien.product.entity.ProductVariant;
 import com.tien.product.exception.AppException;
 import com.tien.product.exception.ErrorCode;
 import com.tien.product.mapper.ProductMapper;
@@ -68,21 +69,40 @@ public class ProductQueryServiceImpl implements ProductQueryService {
       }
 
       @Override
-      public double getProductPriceById(String productId) {
-            log.info("Fetching price for product with ID: {}", productId);
+      public double getProductPriceById(String productId, String variantId) {
+            log.info("Fetching price for product with ID: {} and variant ID: {}", productId, variantId);
+
             Product product = productRepository.findById(productId)
                     .orElseThrow(() -> {
                           log.error("(getProductPriceById) Product not found with ID: {}", productId);
                           return new AppException(ErrorCode.PRODUCT_NOT_FOUND);
                     });
-            return product.getPrice();
+
+            ProductVariant variant = product.getVariants().stream()
+                    .filter(v -> v.getVariantId().equals(variantId))
+                    .findFirst()
+                    .orElseThrow(() -> {
+                          log.error("(getProductPriceById) Variant not found with ID: {}", variantId);
+                          return new AppException(ErrorCode.VARIANT_NOT_FOUND);
+                    });
+
+            return variant.getPrice();
       }
 
       @Override
-      public ExistsResponse existsProduct(String productId) {
-            log.info("Checking existence for product with ID: {}", productId);
-            boolean exists = productRepository.existsById(productId);
-            return new ExistsResponse(exists);
+      public ExistsResponse existsProduct(String productId, String variantId) {
+            log.info("Checking existence for product with ID: {} and variant ID: {}", productId, variantId);
+
+            Product product = productRepository.findById(productId)
+                    .orElseThrow(() -> {
+                          log.error("(existsProduct) Product not found with ID: {}", productId);
+                          return new AppException(ErrorCode.PRODUCT_NOT_FOUND);
+                    });
+
+            boolean variantExists = product.getVariants().stream()
+                    .anyMatch(variant -> variant.getVariantId().equals(variantId));
+
+            return new ExistsResponse(variantExists);
       }
 
       private Criteria buildCriteriaAndPrice(String shopId, String categoryId, Double minPrice, Double maxPrice) {

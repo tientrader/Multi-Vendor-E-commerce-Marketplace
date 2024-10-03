@@ -16,6 +16,9 @@ public class CartItemCreationRequest {
       @NotBlank(message = "PRODUCT_ID_IS_REQUIRED")
       String productId;
 
+      @NotNull(message = "VARIANT_ID_IS_REQUIRED")
+      String variantId;
+
       @NotNull(message = "QUANTITY_IS_REQUIRED")
       @Positive(message = "QUANTITY_MUST_BE_POSITIVE")
       Integer quantity;

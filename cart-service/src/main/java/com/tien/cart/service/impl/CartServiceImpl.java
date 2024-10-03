@@ -125,7 +125,7 @@ public class CartServiceImpl implements CartService {
 
             return cartItems.stream()
                     .mapToDouble(cartItem -> {
-                          Double price = productClient.getProductPriceById(cartItem.getProductId()).getResult();
+                          Double price = productClient.getProductPriceById(cartItem.getProductId(), cartItem.getVariantId()).getResult();
                           return (price != null ? price : 0.0) * cartItem.getQuantity();
                     }).sum();
       }
@@ -137,7 +137,8 @@ public class CartServiceImpl implements CartService {
                   boolean itemFound = false;
 
                   for (CartItem cartItem : updatedItems) {
-                        if (cartItem.getProductId().equals(request.getProductId())) {
+                        if (cartItem.getProductId().equals(request.getProductId()) &&
+                                cartItem.getVariantId().equals(request.getVariantId())) {
                               itemFound = true;
 
                               if (request.getQuantity() > 0) {
@@ -154,6 +155,7 @@ public class CartServiceImpl implements CartService {
                   if (!itemFound && request.getQuantity() > 0) {
                         CartItem newItem = new CartItem();
                         newItem.setProductId(request.getProductId());
+                        newItem.setVariantId(request.getVariantId());
                         newItem.setQuantity(request.getQuantity());
                         updatedItems.add(newItem);
                         log.info("Item added to cart: {}", request.getProductId());
@@ -167,7 +169,7 @@ public class CartServiceImpl implements CartService {
       private double calculateTotalPriceForExistingCart(List<CartItem> cartItems) {
             return cartItems.stream()
                     .mapToDouble(cartItem -> {
-                          Double price = productClient.getProductPriceById(cartItem.getProductId()).getResult();
+                          Double price = productClient.getProductPriceById(cartItem.getProductId(), cartItem.getVariantId()).getResult();
                           return (price != null ? price : 0.0) * cartItem.getQuantity();
                     }).sum();
       }
@@ -189,12 +191,14 @@ public class CartServiceImpl implements CartService {
       private void validateProducts(List<CartItemCreationRequest> cartItems) {
             for (CartItemCreationRequest item : cartItems) {
                   String productId = item.getProductId();
-                  ExistsResponse existsResponse = productClient.existsProduct(productId);
+                  String variantId = item.getVariantId();
+
+                  ExistsResponse existsResponse = productClient.existsProduct(productId, variantId);
                   if (!existsResponse.isExists()) {
-                        log.error("Product not found: {}", productId);
+                        log.error("Product or variant not found: productId = {}, variantId = {}", productId, variantId);
                         throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
                   }
-                  log.debug("Product exists: {}", productId);
+                  log.debug("Product exists: productId = {}, variantId = {}", productId, variantId);
             }
       }
 

@@ -8,7 +8,7 @@ public interface ProductCommandService {
 
       ProductResponse createProduct(ProductCreationRequest request);
       ProductResponse updateProduct(String productId, ProductUpdateRequest request);
-      void updateStockAndSoldQuantity(String productId, int quantity);
+      void updateStockAndSoldQuantity(String productId, String variantId, int quantity);
       void deleteProduct(String productId);
 
 }
