@@ -43,7 +43,8 @@ public class ProductController {
               @RequestParam(defaultValue = "name") String sortBy) {
 
             Page<ProductResponse> productsPage = productService.getProducts(
-                    shopId, categoryId, page, size, sortBy, sortDirection, minPrice, maxPrice, productSort);
+                    shopId, categoryId, page, size,
+                    sortBy, sortDirection, minPrice, maxPrice, productSort);
 
             return ApiResponse.<Page<ProductResponse>>builder()
                     .result(productsPage)
@@ -85,7 +86,8 @@ public class ProductController {
       }
 
       @PutMapping("/{productId}/update-stock-sold")
-      ApiResponse<Void> updateStockAndSoldQuantity(@PathVariable String productId, @RequestParam int quantity) {
+      ApiResponse<Void> updateStockAndSoldQuantity(@PathVariable String productId,
+                                                   @RequestParam int quantity) {
             productService.updateStockAndSoldQuantity(productId, quantity);
             return ApiResponse.<Void>builder()
                     .message("Stock and sold quantity updated successfully")

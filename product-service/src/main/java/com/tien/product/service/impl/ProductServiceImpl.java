@@ -73,32 +73,10 @@ public class ProductServiceImpl implements ProductService {
               int page, int size, String sortBy, String sortDirection,
               Double minPrice, Double maxPrice, ProductSort productSort) {
 
-            if (productSort == null) {
-                  productSort = ProductSort.DEFAULT;
-            }
+            productSort = Optional.ofNullable(productSort).orElse(ProductSort.DEFAULT);
 
-            Criteria criteria = new Criteria();
-
-            if (shopId != null) {
-                  criteria.and("shopId").is(shopId);
-                  log.info("Fetching products for shopId: {}", shopId);
-            } else if (categoryId != null) {
-                  criteria.and("category.id").is(categoryId);
-                  log.info("Fetching products for categoryId: {}", categoryId);
-            } else {
-                  log.info("Fetching products for homepage");
-            }
-
-            addPriceCriteria(criteria, minPrice, maxPrice);
-
-            Sort sort;
-            if (productSort == ProductSort.BEST_SELLING) {
-                  sort = Sort.by(Sort.Direction.DESC, "soldQuantity");
-            } else if (productSort == ProductSort.NEWEST) {
-                  sort = Sort.by(Sort.Direction.DESC, "createdAt");
-            } else {
-                  sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
-            }
+            Criteria criteria = buildCriteriaAndPrice(shopId, categoryId, minPrice, maxPrice);
+            Sort sort = determineSortOrder(productSort, sortBy, sortDirection);
 
             return getProductsPage(criteria, page, size, sort);
       }
@@ -247,7 +225,19 @@ public class ProductServiceImpl implements ProductService {
             }
       }
 
-      private void addPriceCriteria(Criteria criteria, Double minPrice, Double maxPrice) {
+      private Criteria buildCriteriaAndPrice(String shopId, String categoryId, Double minPrice, Double maxPrice) {
+            Criteria criteria = new Criteria();
+
+            if (shopId != null) {
+                  criteria.and("shopId").is(shopId);
+                  log.info("Fetching products for shopId: {}", shopId);
+            } else if (categoryId != null) {
+                  criteria.and("category.id").is(categoryId);
+                  log.info("Fetching products for categoryId: {}", categoryId);
+            } else {
+                  log.info("Fetching products for homepage");
+            }
+
             if (minPrice != null && maxPrice != null) {
                   criteria.and("price").gte(minPrice).lte(maxPrice);
             } else if (minPrice != null) {
@@ -255,20 +245,26 @@ public class ProductServiceImpl implements ProductService {
             } else if (maxPrice != null) {
                   criteria.and("price").lte(maxPrice);
             }
+
+            return criteria;
       }
 
-      private Page<ProductResponse> getProductsPage(
-              Criteria criteria, int page, int size, Sort sort) {
+      private Sort determineSortOrder(ProductSort productSort, String sortBy, String sortDirection) {
+            return switch (productSort) {
+                  case BEST_SELLING -> Sort.by(Sort.Direction.DESC, "soldQuantity");
+                  case NEWEST -> Sort.by(Sort.Direction.DESC, "createdAt");
+                  default -> Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
+            };
+      }
 
-            Query query = Query.query(criteria);
-            Pageable pageable = PageRequest.of(page, size, sort);
-            query.with(pageable);
+      private Page<ProductResponse> getProductsPage(Criteria criteria, int page, int size, Sort sort) {
+            Query query = Query.query(criteria).with(PageRequest.of(page, size, sort));
 
             List<Product> products = mongoTemplate.find(query, Product.class);
             long total = mongoTemplate.count(query, Product.class);
             List<ProductResponse> productResponses = productMapper.toProductResponses(products);
 
-            return new PageImpl<>(productResponses, pageable, total);
+            return new PageImpl<>(productResponses, PageRequest.of(page, size, sort), total);
       }
 
 }
