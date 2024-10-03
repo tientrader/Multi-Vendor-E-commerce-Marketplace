@@ -50,14 +50,6 @@ public class ProductQueryServiceImpl implements ProductQueryService {
       }
 
       @Override
-      public List<ProductResponse> getAllProducts() {
-            log.info("Fetching all products");
-            return productRepository.findAll().stream()
-                    .map(productMapper::toProductResponse)
-                    .collect(Collectors.toList());
-      }
-
-      @Override
       public ProductResponse getProductById(String productId) {
             log.info("Fetching product with ID: {}", productId);
             return productMapper.toProductResponse(productRepository.findById(productId)
@@ -65,6 +57,14 @@ public class ProductQueryServiceImpl implements ProductQueryService {
                           log.error("(getProductById) Product not found with ID: {}", productId);
                           return new AppException(ErrorCode.PRODUCT_NOT_FOUND);
                     }));
+      }
+
+      @Override
+      public List<ProductResponse> getAllProducts() {
+            log.info("Fetching all products");
+            return productRepository.findAll().stream()
+                    .map(productMapper::toProductResponse)
+                    .collect(Collectors.toList());
       }
 
       @Override

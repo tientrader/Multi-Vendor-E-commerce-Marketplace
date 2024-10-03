@@ -9,12 +9,12 @@ import java.util.List;
 
 public interface ProductQueryService {
 
-      ProductResponse getProductById(String productId);
-      double getProductPriceById(String productId);
-      ExistsResponse existsProduct(String productId);
-      List<ProductResponse> getAllProducts();
       Page<ProductResponse> getProducts(String shopId, String categoryId, int page, int size,
                                         String sortBy, String sortDirection, Double minPrice,
                                         Double maxPrice, ProductSort productSort);
+      ProductResponse getProductById(String productId);
+      List<ProductResponse> getAllProducts();
+      double getProductPriceById(String productId);
+      ExistsResponse existsProduct(String productId);
 
 }
