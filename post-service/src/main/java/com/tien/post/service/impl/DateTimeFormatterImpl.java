@@ -23,6 +23,7 @@ public class DateTimeFormatterImpl implements DateTimeFormatterService {
             STRATEGY_MAP.put(Long.MAX_VALUE, elapsed -> LocalDateTime.now().minusSeconds(elapsed).format(DATE_FORMATTER));
       }
 
+      @Override
       public String format(Instant instant) {
             long elapsedSeconds = ChronoUnit.SECONDS.between(instant, Instant.now());
 

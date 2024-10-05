@@ -18,6 +18,6 @@ public class Like {
     String id;
 
     String postId;
-    String userId;
+    String username;
 
 }

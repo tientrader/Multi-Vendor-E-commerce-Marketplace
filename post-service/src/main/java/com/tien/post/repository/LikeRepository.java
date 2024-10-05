@@ -8,9 +8,7 @@ import org.springframework.stereotype.Repository;
 public interface LikeRepository extends MongoRepository<Like, String> {
 
       long countByPostId(String postId);
-
-      boolean existsByPostIdAndUserId(String postId, String userId);
-
-      void deleteByPostIdAndUserId(String postId, String userId);
+      boolean existsByPostIdAndUsername(String postId, String username);
+      void deleteByPostIdAndUsername(String postId, String username);
 
 }

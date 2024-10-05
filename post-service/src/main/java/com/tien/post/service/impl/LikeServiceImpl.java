@@ -21,45 +21,39 @@ public class LikeServiceImpl implements LikeService {
       PostRepository postRepository;
       AuthenticationServiceImpl authenticationService;
 
-      public void addLike(String postId) {
-            String userId = authenticationService.getAuthenticatedUserId();
+      @Override
+      public boolean toggleLike(String postId) {
+            String username = authenticationService.getAuthenticatedUsername();
 
             Post post = postRepository.findById(postId)
                     .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));
 
-            if (!likeRepository.existsByPostIdAndUserId(postId, userId)) {
+            if (likeRepository.existsByPostIdAndUsername(postId, username)) {
+                  likeRepository.deleteByPostIdAndUsername(postId, username);
+                  post.setLikesCount(post.getLikesCount() - 1);
+                  postRepository.save(post);
+                  return false;
+            } else {
                   Like like = new Like();
                   like.setPostId(postId);
-                  like.setUserId(userId);
+                  like.setUsername(username);
                   likeRepository.save(like);
 
                   post.setLikesCount(post.getLikesCount() + 1);
                   postRepository.save(post);
+                  return true;
             }
       }
 
-      public void removeLike(String postId) {
-            String userId = authenticationService.getAuthenticatedUserId();
-
-            if (likeRepository.existsByPostIdAndUserId(postId, userId)) {
-                  likeRepository.deleteByPostIdAndUserId(postId, userId);
-
-                  Post post = postRepository.findById(postId)
-                          .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));
-                  post.setLikesCount(post.getLikesCount() - 1);
-                  postRepository.save(post);
-            } else {
-                  throw new AppException(ErrorCode.LIKE_NOT_FOUND);
-            }
-      }
-
+      @Override
       public long getLikesCount(String postId) {
             return likeRepository.countByPostId(postId);
       }
 
+      @Override
       public boolean hasLiked(String postId) {
-            String userId = authenticationService.getAuthenticatedUserId();
-            return likeRepository.existsByPostIdAndUserId(postId, userId);
+            String username = authenticationService.getAuthenticatedUsername();
+            return likeRepository.existsByPostIdAndUsername(postId, username);
       }
 
 }

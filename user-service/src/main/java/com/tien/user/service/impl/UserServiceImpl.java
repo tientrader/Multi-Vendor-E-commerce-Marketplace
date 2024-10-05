@@ -143,6 +143,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @PreAuthorize("hasRole('ADMIN')")
     public UserResponse getUserByUserId(String userId) {
         log.info("Fetching user with userId: {}", userId);
 
@@ -180,6 +181,11 @@ public class UserServiceImpl implements UserService {
                     return new AppException(ErrorCode.PROFILE_NOT_FOUND);
                 });
 
+        if (isEmailExists(updateRequest.getEmail(), userId)) {
+            log.error("(updateUser) Email already exists: {}", updateRequest.getEmail());
+            throw new AppException(ErrorCode.EMAIL_EXISTED);
+        }
+
         try {
             identityClient.updateUser("Bearer " + getAccessToken(), userId, updateRequest);
         } catch (FeignException e) {
@@ -199,6 +205,18 @@ public class UserServiceImpl implements UserService {
     public UserResponse updateMyInfo(UserUpdateRequest updateRequest) {
         String currentUserId = getCurrentUserId();
         log.info("Updating own info for userId: {}", currentUserId);
+
+        if (isEmailExists(updateRequest.getEmail(), currentUserId)) {
+            log.error("(updateMyInfo) Email already exists: {}", updateRequest.getEmail());
+            throw new AppException(ErrorCode.EMAIL_EXISTED);
+        }
+
+        try {
+            identityClient.updateUser("Bearer " + getAccessToken(), currentUserId, updateRequest);
+        } catch (FeignException e) {
+            log.error("FeignException during user update for userId: {}", currentUserId, e);
+            handleFeignException(e);
+        }
 
         User user = userRepository.findByUserId(currentUserId)
                 .orElseThrow(() -> {
@@ -281,6 +299,12 @@ public class UserServiceImpl implements UserService {
 
     private void handleFeignException(FeignException exception) {
         throw errorNormalizer.handleKeyCloakException(exception);
+    }
+
+    private boolean isEmailExists(String email, String userId) {
+        return userRepository.findByEmail(email)
+                .map(existingUser -> !existingUser.getUserId().equals(userId))
+                .orElse(false);
     }
 
 }

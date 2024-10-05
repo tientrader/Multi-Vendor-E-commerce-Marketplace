@@ -29,14 +29,15 @@ public class CommentServiceImpl implements CommentService {
       PostRepository postRepository;
       AuthenticationServiceImpl authenticationService;
 
+      @Override
       public CommentResponse createComment(String postId, CommentCreationRequest request) {
-            String userId = authenticationService.getAuthenticatedUserId();
+            String username = authenticationService.getAuthenticatedUsername();
 
             postRepository.findById(postId)
                     .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));
 
             Comment comment = commentMapper.toComment(request);
-            comment.setUserId(userId);
+            comment.setUsername(username);
             comment.setPostId(postId);
             comment.setCreatedDate(Instant.now());
             comment.setModifiedDate(Instant.now());
@@ -51,6 +52,7 @@ public class CommentServiceImpl implements CommentService {
             return commentMapper.toCommentResponse(savedComment);
       }
 
+      @Override
       public List<CommentResponse> getCommentsByPostId(String postId) {
             return commentRepository.findAllByPostId(postId)
                     .stream()
@@ -58,19 +60,21 @@ public class CommentServiceImpl implements CommentService {
                     .toList();
       }
 
+      @Override
       public CommentResponse getCommentById(String commentId) {
             Comment comment = commentRepository.findById(commentId)
                     .orElseThrow(() -> new AppException(ErrorCode.COMMENT_NOT_FOUND));
             return commentMapper.toCommentResponse(comment);
       }
 
+      @Override
       public void updateComment(String commentId, CommentUpdateRequest request) {
-            String userId = authenticationService.getAuthenticatedUserId();
+            String username = authenticationService.getAuthenticatedUsername();
 
             Comment comment = commentRepository.findById(commentId)
                     .orElseThrow(() -> new AppException(ErrorCode.COMMENT_NOT_FOUND));
 
-            if (!comment.getUserId().equals(userId)) {
+            if (!comment.getUsername().equals(username)) {
                   throw new AppException(ErrorCode.UNAUTHENTICATED);
             }
 
@@ -79,13 +83,14 @@ public class CommentServiceImpl implements CommentService {
             commentRepository.save(comment);
       }
 
+      @Override
       public void deleteComment(String commentId) {
-            String userId = authenticationService.getAuthenticatedUserId();
+            String username = authenticationService.getAuthenticatedUsername();
 
             Comment comment = commentRepository.findById(commentId)
                     .orElseThrow(() -> new AppException(ErrorCode.COMMENT_NOT_FOUND));
 
-            if (!comment.getUserId().equals(userId)) {
+            if (!comment.getUsername().equals(username)) {
                   throw new AppException(ErrorCode.UNAUTHENTICATED);
             }
 

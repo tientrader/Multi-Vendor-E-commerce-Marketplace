@@ -15,35 +15,25 @@ public class LikeController {
 
       LikeService likeService;
 
-      @PostMapping("/add")
-      public ApiResponse<String> addLike(@RequestParam String postId) {
-            likeService.addLike(postId);
+      @PostMapping("/toggle/{postId}")
+      public ApiResponse<String> toggleLike(@PathVariable String postId) {
+            boolean isLiked = likeService.toggleLike(postId);
             return ApiResponse.<String>builder()
-                    .result("Like added successfully")
+                    .result(isLiked ? "Like added successfully" : "Like removed successfully")
                     .build();
       }
 
-      @PostMapping("/remove")
-      public ApiResponse<String> removeLike(@RequestParam String postId) {
-            likeService.removeLike(postId);
-            return ApiResponse.<String>builder()
-                    .result("Like removed successfully")
-                    .build();
-      }
-
-      @GetMapping("/count")
-      public ApiResponse<Long> getLikesCount(@RequestParam String postId) {
-            long count = likeService.getLikesCount(postId);
+      @GetMapping("/count/{postId}")
+      public ApiResponse<Long> getLikesCount(@PathVariable String postId) {
             return ApiResponse.<Long>builder()
-                    .result(count)
+                    .result(likeService.getLikesCount(postId))
                     .build();
       }
 
-      @GetMapping("/hasLiked")
-      public ApiResponse<Boolean> hasLiked(@RequestParam String postId) {
-            boolean hasLiked = likeService.hasLiked(postId);
+      @GetMapping("/hasLiked/{postId}")
+      public ApiResponse<Boolean> hasLiked(@PathVariable String postId) {
             return ApiResponse.<Boolean>builder()
-                    .result(hasLiked)
+                    .result(likeService.hasLiked(postId))
                     .build();
       }
 

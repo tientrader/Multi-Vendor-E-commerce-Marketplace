@@ -1,11 +1,9 @@
 package com.tien.post.service.impl;
 
 import com.tien.post.dto.PageResponse;
-import com.tien.post.dto.response.UserResponse;
 import com.tien.post.entity.Post;
 import com.tien.post.exception.AppException;
 import com.tien.post.exception.ErrorCode;
-import com.tien.post.httpclient.UserClient;
 import com.tien.post.mapper.PostMapper;
 import com.tien.post.dto.request.PostCreationRequest;
 import com.tien.post.dto.request.PostUpdateRequest;
@@ -31,14 +29,14 @@ public class PostServiceImpl implements PostService {
       PostRepository postRepository;
       PostMapper postMapper;
       AuthenticationServiceImpl authenticationService;
-      UserClient userClient;
 
+      @Override
       public PostResponse createPost(PostCreationRequest request) {
-            String userId = authenticationService.getAuthenticatedUserId();
+            String username = authenticationService.getAuthenticatedUsername();
 
             Post post = postRepository.save(Post.builder()
                     .content(request.getContent())
-                    .userId(userId)
+                    .username(username)
                     .createdDate(Instant.now())
                     .modifiedDate(Instant.now())
                     .build());
@@ -46,16 +44,14 @@ public class PostServiceImpl implements PostService {
             return postMapper.toPostResponse(post);
       }
 
+      @Override
       public PageResponse<PostResponse> getMyPosts(int page, int size) {
-            String userId = authenticationService.getAuthenticatedUserId();
+            String username = authenticationService.getAuthenticatedUsername();
 
             Sort sort = Sort.by("createdDate").descending();
             Pageable pageable = PageRequest.of(page - 1, size, sort);
-            var pageData = postRepository.findAllByUserId(userId, pageable);
+            var pageData = postRepository.findAllByUsername(username, pageable);
 
-            UserResponse userResponse = userClient.getUserByUserId(userId).getResult();
-
-            String username = userResponse != null ? userResponse.getUsername() : null;
             var postList = pageData.getContent().stream().map(post -> {
                   var postResponse = postMapper.toPostResponse(post);
                   postResponse.setUsername(username);
@@ -72,19 +68,21 @@ public class PostServiceImpl implements PostService {
                     .build();
       }
 
+      @Override
       public PostResponse getPostById(String postId) {
             Post post = postRepository.findById(postId)
                     .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));
             return postMapper.toPostResponse(post);
       }
 
+      @Override
       public PostResponse updatePost(String postId, PostUpdateRequest request) {
-            String userId = authenticationService.getAuthenticatedUserId();
+            String username = authenticationService.getAuthenticatedUsername();
 
             Post post = postRepository.findById(postId)
                     .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));
 
-            if (!post.getUserId().equals(userId)) {
+            if (!post.getUsername().equals(username)) {
                   throw new AppException(ErrorCode.UNAUTHENTICATED);
             }
 
@@ -96,12 +94,13 @@ public class PostServiceImpl implements PostService {
             return postMapper.toPostResponse(post);
       }
 
+      @Override
       public void deletePost(String postId) {
-            String userId = authenticationService.getAuthenticatedUserId();
+            String username = authenticationService.getAuthenticatedUsername();
             Post post = postRepository.findById(postId)
                     .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));
 
-            if (!post.getUserId().equals(userId)) {
+            if (!post.getUsername().equals(username)) {
                   throw new AppException(ErrorCode.UNAUTHENTICATED);
             }
 

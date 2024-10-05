@@ -9,6 +9,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface PostRepository extends MongoRepository<Post, String> {
 
-      Page<Post> findAllByUserId(String userId, Pageable pageable);
+      Page<Post> findAllByUsername(String username, Pageable pageable);
 
 }

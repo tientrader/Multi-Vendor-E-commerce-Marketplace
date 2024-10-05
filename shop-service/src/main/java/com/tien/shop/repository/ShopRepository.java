@@ -10,7 +10,6 @@ import java.util.Optional;
 public interface ShopRepository extends MongoRepository<Shop, String> {
 
       boolean existsByOwnerUsername(String ownerUsername);
-
       Optional<Shop> findByOwnerUsername(String ownerUsername);
 
 }

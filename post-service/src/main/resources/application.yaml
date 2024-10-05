@@ -10,10 +10,6 @@ spring:
     mongodb:
       uri: mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@localhost:27017/post-service?authSource=admin
 
-app:
-  services:
-    user: http://localhost:8080/user
-
 management:
   endpoints:
     web:

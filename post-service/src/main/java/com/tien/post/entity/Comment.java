@@ -19,7 +19,7 @@ public class Comment {
       String id;
 
       String postId;
-      String userId;
+      String username;
       String content;
       Instant createdDate;
       Instant modifiedDate;
