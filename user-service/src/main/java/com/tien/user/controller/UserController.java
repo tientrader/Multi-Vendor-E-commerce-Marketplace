@@ -24,14 +24,14 @@ public class UserController {
 
     UserService userService;
 
-    @PostMapping("/register")
+    @PostMapping("/auth/register")
     ApiResponse<UserResponse> register(@RequestBody @Valid RegistrationRequest request) {
         return ApiResponse.<UserResponse>builder()
                 .result(userService.register(request))
                 .build();
     }
 
-    @PostMapping("/login")
+    @PostMapping("/auth/login")
     ApiResponse<UserLoginResponse> login(@RequestBody @Valid UserLoginRequest request) {
         return ApiResponse.<UserLoginResponse>builder()
                 .result(userService.login(request))
