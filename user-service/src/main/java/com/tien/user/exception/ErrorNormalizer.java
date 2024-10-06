@@ -27,6 +27,7 @@ public class ErrorNormalizer {
         map.put("User exists with same email", ErrorCode.EMAIL_EXISTED);
         map.put("User name is missing", ErrorCode.USERNAME_IS_MISSING);
         map.put("Password policy not met", ErrorCode.INVALID_PASSWORD);
+        map.put("Session doesn't have required client", ErrorCode.UNAUTHENTICATED);
 
         return map;
     }
@@ -40,7 +41,7 @@ public class ErrorNormalizer {
 
         try {
             KeyCloakError response = objectMapper.readValue(exception.contentUTF8(), KeyCloakError.class);
-            String errorMessage = response.getErrorMessage();
+            String errorMessage = response.getErrorDescription();
 
             if (errorMessage != null && errorCodeMap.containsKey(errorMessage)) {
                 return new AppException(errorCodeMap.get(errorMessage));

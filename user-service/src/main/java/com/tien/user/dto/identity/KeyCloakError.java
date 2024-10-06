@@ -1,5 +1,6 @@
 package com.tien.user.dto.identity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -10,6 +11,10 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class KeyCloakError {
 
-    String errorMessage;
+    @JsonProperty("error")
+    String error;
+
+    @JsonProperty("error_description")
+    String errorDescription;
 
 }

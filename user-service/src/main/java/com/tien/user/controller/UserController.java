@@ -5,7 +5,7 @@ import com.tien.user.dto.request.RegistrationRequest;
 import com.tien.user.dto.request.ResetPasswordRequest;
 import com.tien.user.dto.request.UserLoginRequest;
 import com.tien.user.dto.request.UserUpdateRequest;
-import com.tien.user.dto.response.UserLoginResponse;
+import com.tien.user.dto.response.TokenResponse;
 import com.tien.user.dto.response.UserResponse;
 import com.tien.user.service.UserService;
 import jakarta.validation.Valid;
@@ -32,9 +32,16 @@ public class UserController {
     }
 
     @PostMapping("/auth/login")
-    ApiResponse<UserLoginResponse> login(@RequestBody @Valid UserLoginRequest request) {
-        return ApiResponse.<UserLoginResponse>builder()
+    ApiResponse<TokenResponse> login(@RequestBody @Valid UserLoginRequest request) {
+        return ApiResponse.<TokenResponse>builder()
                 .result(userService.login(request))
+                .build();
+    }
+
+    @PostMapping("/auth/refresh")
+    ApiResponse<TokenResponse> refresh(@RequestBody TokenResponse response) {
+        return ApiResponse.<TokenResponse>builder()
+                .result(userService.refreshToken(response.getRefreshToken()))
                 .build();
     }
 

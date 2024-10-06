@@ -8,7 +8,7 @@ import com.tien.user.dto.identity.UserCreationParam;
 import com.tien.user.dto.request.RegistrationRequest;
 import com.tien.user.dto.request.UserLoginRequest;
 import com.tien.user.dto.request.UserUpdateRequest;
-import com.tien.user.dto.response.UserLoginResponse;
+import com.tien.user.dto.response.TokenResponse;
 import com.tien.user.dto.response.UserResponse;
 import com.tien.user.entity.User;
 import com.tien.user.exception.AppException;
@@ -109,7 +109,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserLoginResponse login(UserLoginRequest request) {
+    public TokenResponse login(UserLoginRequest request) {
         log.info("User {} is attempting to log in", request.getUsername());
 
         TokenExchangeParam tokenExchangeParam = TokenExchangeParam.builder()
@@ -125,7 +125,31 @@ public class UserServiceImpl implements UserService {
             log.info("User {} logged in successfully", request.getUsername());
             return userMapper.toUserLoginResponse(tokenResponse);
         } catch (FeignException e) {
-            log.error("FeignException caught: Status {}, Message: {}", e.status(), e.getMessage());
+            log.error("FeignException caught while refreshing login: Status {}, Message: {}", e.status(), e.getMessage());
+            handleFeignException(e);
+        }
+
+        return null;
+    }
+
+    @Override
+    @Transactional
+    public TokenResponse refreshToken(String refreshToken) {
+        log.info("Refreshing token for user");
+
+        TokenExchangeParam tokenExchangeParam = TokenExchangeParam.builder()
+                .grant_type("refresh_token")
+                .client_id(clientId)
+                .client_secret(clientSecret)
+                .refresh_token(refreshToken)
+                .build();
+
+        try {
+            TokenExchangeResponse tokenResponse = identityClient.exchangeToken(tokenExchangeParam);
+            log.info("Token refreshed successfully");
+            return userMapper.toUserLoginResponse(tokenResponse);
+        } catch (FeignException e) {
+            log.error("FeignException caught while refreshing token: Status {}, Message: {}", e.status(), e.getMessage());
             handleFeignException(e);
         }
 
