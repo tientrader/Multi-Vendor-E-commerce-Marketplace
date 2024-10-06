@@ -31,4 +31,5 @@ public class CustomAuthoritiesConverter implements Converter<Jwt, Collection<Gra
 
             return List.of();
       }
+
 }
