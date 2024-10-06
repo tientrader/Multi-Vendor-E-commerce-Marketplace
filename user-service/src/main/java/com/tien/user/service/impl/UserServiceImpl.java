@@ -3,9 +3,12 @@ package com.tien.user.service.impl;
 import com.tien.event.dto.NotificationEvent;
 import com.tien.user.dto.identity.Credential;
 import com.tien.user.dto.identity.TokenExchangeParam;
+import com.tien.user.dto.identity.TokenExchangeResponse;
 import com.tien.user.dto.identity.UserCreationParam;
 import com.tien.user.dto.request.RegistrationRequest;
+import com.tien.user.dto.request.UserLoginRequest;
 import com.tien.user.dto.request.UserUpdateRequest;
+import com.tien.user.dto.response.UserLoginResponse;
 import com.tien.user.dto.response.UserResponse;
 import com.tien.user.entity.User;
 import com.tien.user.exception.AppException;
@@ -98,6 +101,31 @@ public class UserServiceImpl implements UserService {
             return userMapper.toUserResponse(user);
         } catch (FeignException e) {
             log.error("FeignException during registration for username: {}", request.getUsername(), e);
+            handleFeignException(e);
+        }
+
+        return null;
+    }
+
+    @Override
+    @Transactional
+    public UserLoginResponse login(UserLoginRequest request) {
+        log.info("User {} is attempting to log in", request.getUsername());
+
+        TokenExchangeParam tokenExchangeParam = TokenExchangeParam.builder()
+                .grant_type("password")
+                .client_id(clientId)
+                .client_secret(clientSecret)
+                .username(request.getUsername())
+                .password(request.getPassword())
+                .build();
+
+        try {
+            TokenExchangeResponse tokenResponse = identityClient.exchangeToken(tokenExchangeParam);
+            log.info("User {} logged in successfully", request.getUsername());
+            return userMapper.toUserLoginResponse(tokenResponse);
+        } catch (FeignException e) {
+            log.error("FeignException caught: Status {}, Message: {}", e.status(), e.getMessage());
             handleFeignException(e);
         }
 

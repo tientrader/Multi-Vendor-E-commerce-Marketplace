@@ -27,16 +27,16 @@ public class ErrorNormalizer {
         map.put("User exists with same email", ErrorCode.EMAIL_EXISTED);
         map.put("User name is missing", ErrorCode.USERNAME_IS_MISSING);
         map.put("Password policy not met", ErrorCode.INVALID_PASSWORD);
-        map.put("Role not found", ErrorCode.ROLE_NOT_FOUND);
-        map.put("Client not found", ErrorCode.UNAUTHORIZED);
-        map.put("Realm not found", ErrorCode.UNAUTHORIZED);
-        map.put("Invalid username or password", ErrorCode.INVALID_USERNAME);
 
         return map;
     }
 
     public AppException handleKeyCloakException(FeignException exception) {
-        log.warn("Cannot complete request", exception);
+        log.warn("Cannot complete request: Status {}, Content: {}", exception.status(), exception.contentUTF8());
+
+        if (exception.status() == 401) {
+            return new AppException(ErrorCode.INVALID_USERNAME_OR_PASSWORD);
+        }
 
         try {
             KeyCloakError response = objectMapper.readValue(exception.contentUTF8(), KeyCloakError.class);

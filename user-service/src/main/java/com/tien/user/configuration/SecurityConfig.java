@@ -15,7 +15,7 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
       private static final String[] PUBLIC_ENDPOINTS = {
-              "/register", "/actuator/**"
+              "/login", "/register", "/actuator/**"
       };
 
       @Bean

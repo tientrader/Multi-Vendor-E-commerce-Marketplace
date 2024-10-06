@@ -12,11 +12,11 @@ import org.springframework.web.bind.annotation.*;
 public interface IdentityClient {
 
     @PostMapping(value = "/realms/tienproapp/protocol/openid-connect/token",
-                consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+            consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     TokenExchangeResponse exchangeToken(@QueryMap TokenExchangeParam param);
 
     @PostMapping(value = "/admin/realms/tienproapp/users",
-                consumes = MediaType.APPLICATION_JSON_VALUE)
+            consumes = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<?> createUser(@RequestHeader("authorization") String token,
                                  @RequestBody UserCreationParam param);
 
@@ -31,7 +31,7 @@ public interface IdentityClient {
                     @PathVariable("id") String userId);
 
     @PutMapping(value = "/admin/realms/tienproapp/users/{id}/reset-password",
-                consumes = MediaType.APPLICATION_JSON_VALUE)
+            consumes = MediaType.APPLICATION_JSON_VALUE)
     void resetPassword(@RequestHeader("authorization") String token,
                        @PathVariable("id") String userId,
                        @RequestBody Credential credential);

@@ -14,6 +14,7 @@ import lombok.experimental.FieldDefaults;
 public class TokenExchangeResponse {
 
     String accessToken;
+    String refreshToken;
     String expiresIn;
     String refreshExpiresIn;
     String tokenType;

@@ -3,7 +3,9 @@ package com.tien.user.controller;
 import com.tien.user.dto.ApiResponse;
 import com.tien.user.dto.request.RegistrationRequest;
 import com.tien.user.dto.request.ResetPasswordRequest;
+import com.tien.user.dto.request.UserLoginRequest;
 import com.tien.user.dto.request.UserUpdateRequest;
+import com.tien.user.dto.response.UserLoginResponse;
 import com.tien.user.dto.response.UserResponse;
 import com.tien.user.service.UserService;
 import jakarta.validation.Valid;
@@ -26,6 +28,13 @@ public class UserController {
     ApiResponse<UserResponse> register(@RequestBody @Valid RegistrationRequest request) {
         return ApiResponse.<UserResponse>builder()
                 .result(userService.register(request))
+                .build();
+    }
+
+    @PostMapping("/login")
+    ApiResponse<UserLoginResponse> login(@RequestBody @Valid UserLoginRequest request) {
+        return ApiResponse.<UserLoginResponse>builder()
+                .result(userService.login(request))
                 .build();
     }
 
