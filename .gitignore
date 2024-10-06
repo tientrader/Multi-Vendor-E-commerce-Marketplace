@@ -25,10 +25,6 @@
 hs_err_pid*
 replay_pid*
 
-
-# Ignore OS generated files
-.DS_Store
-
 # Ignore docker-compose files
 docker-compose.app.yml
 docker-compose.dev.yml
