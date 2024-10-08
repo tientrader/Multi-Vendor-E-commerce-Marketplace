@@ -37,6 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @Service
@@ -88,6 +89,9 @@ public class UserServiceImpl implements UserService {
             User user = userMapper.toUser(request);
             user.setUserId(userId);
             user = userRepository.save(user);
+
+            log.debug("Sending verification email for userId: {}", userId);
+            sendVerificationEmailAsync("Bearer " + token, userId);
 
             log.info("Sending Kafka message for user registration: {}", request.getEmail());
             kafkaTemplate.send("register-successful", NotificationEvent.builder()
@@ -331,6 +335,10 @@ public class UserServiceImpl implements UserService {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
         return authentication.getName();
+    }
+
+    private void sendVerificationEmailAsync(String token, String userId) {
+        CompletableFuture.runAsync(() -> identityClient.sendVerificationEmail(token, userId));
     }
 
     private String extractUserId(ResponseEntity<?> response) {
