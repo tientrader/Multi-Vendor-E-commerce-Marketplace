@@ -1,8 +1,8 @@
 package com.tien.user.exception;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.tien.user.dto.identity.KeyCloakError;
 import feign.FeignException;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
@@ -40,12 +40,20 @@ public class ErrorNormalizer {
         }
 
         try {
-            KeyCloakError response = objectMapper.readValue(exception.contentUTF8(), KeyCloakError.class);
-            String errorMessage = response.getErrorDescription();
+            String content = exception.contentUTF8();
+            Map<String, String> responseMap = objectMapper.readValue(content, new TypeReference<>() {});
+
+            String errorMessage = responseMap.get("errorMessage");
+            String errorDescription = responseMap.get("error_description");
 
             if (errorMessage != null && errorCodeMap.containsKey(errorMessage)) {
                 return new AppException(errorCodeMap.get(errorMessage));
             }
+
+            if (errorDescription != null && errorCodeMap.containsKey(errorDescription)) {
+                return new AppException(errorCodeMap.get(errorDescription));
+            }
+
         } catch (JsonProcessingException e) {
             log.error("Error deserializing KeyCloakError response", e);
         }

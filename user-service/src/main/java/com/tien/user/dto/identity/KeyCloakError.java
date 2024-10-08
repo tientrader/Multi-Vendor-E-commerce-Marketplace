@@ -17,4 +17,7 @@ public class KeyCloakError {
     @JsonProperty("error_description")
     String errorDescription;
 
+    @JsonProperty("errorMessage")
+    String errorMessage;
+
 }
