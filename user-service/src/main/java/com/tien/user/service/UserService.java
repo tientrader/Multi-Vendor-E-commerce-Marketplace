@@ -1,8 +1,6 @@
 package com.tien.user.service;
 
-import com.tien.user.dto.request.RegistrationRequest;
-import com.tien.user.dto.request.UserLoginRequest;
-import com.tien.user.dto.request.UserUpdateRequest;
+import com.tien.user.dto.request.*;
 import com.tien.user.dto.response.TokenResponse;
 import com.tien.user.dto.response.UserResponse;
 import org.springframework.data.domain.Page;
@@ -14,6 +12,7 @@ public interface UserService {
       UserResponse register(RegistrationRequest request);
       TokenResponse login(UserLoginRequest request);
       TokenResponse refreshToken(String refreshToken);
+      void forgotPassword(ForgotPasswordRequest request);
       UserResponse getMyInfo();
       Page<UserResponse> getUsers(int page, int size);
       List<UserResponse> getAllUsers();
@@ -21,7 +20,7 @@ public interface UserService {
       UserResponse getUserByProfileId(String profileId);
       UserResponse updateUser(String userId, UserUpdateRequest updateRequest);
       UserResponse updateMyInfo(UserUpdateRequest updateRequest);
-      void changePassword(String newPassword);
+      void resetPassword(ResetPasswordRequest request);
       void deleteUser(String userId);
 
 }

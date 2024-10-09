@@ -1,10 +1,7 @@
 package com.tien.user.controller;
 
 import com.tien.user.dto.ApiResponse;
-import com.tien.user.dto.request.RegistrationRequest;
-import com.tien.user.dto.request.ResetPasswordRequest;
-import com.tien.user.dto.request.UserLoginRequest;
-import com.tien.user.dto.request.UserUpdateRequest;
+import com.tien.user.dto.request.*;
 import com.tien.user.dto.response.TokenResponse;
 import com.tien.user.dto.response.UserResponse;
 import com.tien.user.service.UserService;
@@ -42,6 +39,14 @@ public class UserController {
     ApiResponse<TokenResponse> refresh(@RequestBody TokenResponse response) {
         return ApiResponse.<TokenResponse>builder()
                 .result(userService.refreshToken(response.getRefreshToken()))
+                .build();
+    }
+
+    @PostMapping("/auth/forgot-password")
+    ApiResponse<Void> forgotPassword(@RequestBody @Valid ForgotPasswordRequest request) {
+        userService.forgotPassword(request);
+        return ApiResponse.<Void>builder()
+                .message("Reset password email sent successfully")
                 .build();
     }
 
@@ -96,9 +101,9 @@ public class UserController {
                 .build();
     }
 
-    @PutMapping("/change-password")
-    ApiResponse<Void> changePassword(@RequestBody @Valid ResetPasswordRequest request) {
-        userService.changePassword(request.getNewPassword());
+    @PutMapping("/auth/reset-password")
+    ApiResponse<Void> resetPassword(@RequestBody @Valid ResetPasswordRequest request) {
+        userService.resetPassword(request);
         return ApiResponse.<Void>builder()
                 .message("Password reset successfully")
                 .build();

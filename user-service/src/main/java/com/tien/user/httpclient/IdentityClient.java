@@ -39,4 +39,8 @@ public interface IdentityClient {
     @PutMapping(value = "/admin/realms/tienproapp/users/{id}/send-verify-email")
     void sendVerificationEmail(@RequestHeader("Authorization") String authHeader, @PathVariable("id") String userId);
 
+    @PutMapping(value = "/admin/realms/tienproapp/users/{id}/reset-password-email")
+    void sendResetPasswordEmail(@RequestHeader("authorization") String token,
+                                @PathVariable("id") String userId);
+
 }

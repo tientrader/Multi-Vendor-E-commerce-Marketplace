@@ -5,9 +5,7 @@ import com.tien.user.dto.identity.Credential;
 import com.tien.user.dto.identity.TokenExchangeParam;
 import com.tien.user.dto.identity.TokenExchangeResponse;
 import com.tien.user.dto.identity.UserCreationParam;
-import com.tien.user.dto.request.RegistrationRequest;
-import com.tien.user.dto.request.UserLoginRequest;
-import com.tien.user.dto.request.UserUpdateRequest;
+import com.tien.user.dto.request.*;
 import com.tien.user.dto.response.TokenResponse;
 import com.tien.user.dto.response.UserResponse;
 import com.tien.user.entity.User;
@@ -91,7 +89,15 @@ public class UserServiceImpl implements UserService {
             user = userRepository.save(user);
 
             log.debug("Sending verification email for userId: {}", userId);
-            sendVerificationEmailAsync("Bearer " + token, userId);
+            CompletableFuture.runAsync(() -> {
+                try {
+                    identityClient.sendVerificationEmail(token, userId);
+                    log.info("Verification email sent successfully for userId: {}", userId);
+                } catch (FeignException e) {
+                    log.error("FeignException during sending verification email for userId: {}", userId, e);
+                    handleFeignException(e);
+                }
+            });
 
             log.info("Sending Kafka message for user registration: {}", request.getEmail());
             kafkaTemplate.send("register-successful", NotificationEvent.builder()
@@ -158,6 +164,31 @@ public class UserServiceImpl implements UserService {
         }
 
         return null;
+    }
+
+    @Override
+    @Transactional
+    public void forgotPassword(ForgotPasswordRequest request) {
+        log.info("Sending reset password email for email: {}", request.getEmail());
+
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> {
+                    log.error("(forgotPassword) Profile not found for email: {}", request.getEmail());
+                    return new AppException(ErrorCode.PROFILE_NOT_FOUND);
+                });
+
+        String userId = user.getUserId();
+        log.info("UserId retrieved: {}", userId);
+
+        CompletableFuture.runAsync(() -> {
+            try {
+                identityClient.sendResetPasswordEmail("Bearer " + getAccessToken(), userId);
+                log.info("Reset password email sent successfully for userId: {}", userId);
+            } catch (FeignException e) {
+                log.error("FeignException during sending reset password email for userId: {}", userId, e);
+                handleFeignException(e);
+            }
+        });
     }
 
     @Override
@@ -289,20 +320,21 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void changePassword(String newPassword) {
+    public void resetPassword(ResetPasswordRequest request) {
         String userId = getCurrentUserId();
-        log.info("Changing password for userId: {}", userId);
+        log.info("Resetting password for userId: {}", userId);
 
         try {
             identityClient.resetPassword("Bearer " + getAccessToken(), userId,
                     Credential.builder()
                             .type("password")
                             .temporary(false)
-                            .value(newPassword)
+                            .value(request.getNewPassword())
                             .build());
-            log.info("Password changed successfully for userId: {}", userId);
+
+            log.info("Password reset successfully for userId: {}", userId);
         } catch (FeignException e) {
-            log.error("FeignException during password change for userId: {}", userId, e);
+            log.error("FeignException during password reset for userId: {}", userId, e);
             handleFeignException(e);
         }
     }
@@ -335,10 +367,6 @@ public class UserServiceImpl implements UserService {
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }
         return authentication.getName();
-    }
-
-    private void sendVerificationEmailAsync(String token, String userId) {
-        CompletableFuture.runAsync(() -> identityClient.sendVerificationEmail(token, userId));
     }
 
     private String extractUserId(ResponseEntity<?> response) {
