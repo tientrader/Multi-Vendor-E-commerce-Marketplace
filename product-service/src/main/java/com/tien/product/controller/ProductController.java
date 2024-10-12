@@ -1,10 +1,13 @@
 package com.tien.product.controller;
 
 import com.tien.product.dto.ApiResponse;
+import com.tien.product.dto.request.ProductCreationRequest;
+import com.tien.product.dto.request.ProductUpdateRequest;
 import com.tien.product.dto.response.ExistsResponse;
 import com.tien.product.dto.response.ProductResponse;
-import com.tien.product.service.ProductQueryService;
+import com.tien.product.service.ProductService;
 import com.tien.product.service.impl.ProductSort;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -16,9 +19,42 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class ProductQueryController {
+public class ProductController {
 
-      ProductQueryService productQueryService;
+      ProductService productService;
+
+      @PostMapping("/create")
+      ApiResponse<ProductResponse> createProduct(@RequestBody @Valid ProductCreationRequest request) {
+            return ApiResponse.<ProductResponse>builder()
+                    .result(productService.createProduct(request))
+                    .build();
+      }
+
+      @PutMapping("/{productId}")
+      ApiResponse<ProductResponse> updateProduct(@PathVariable String productId,
+                                                 @RequestBody @Valid ProductUpdateRequest request) {
+            return ApiResponse.<ProductResponse>builder()
+                    .result(productService.updateProduct(productId, request))
+                    .build();
+      }
+
+      @PutMapping("/{productId}/update-stock-sold")
+      ApiResponse<Void> updateStockAndSoldQuantity(@PathVariable String productId,
+                                                   @RequestParam String variantId,
+                                                   @RequestParam int quantity) {
+            productService.updateStockAndSoldQuantity(productId, variantId, quantity);
+            return ApiResponse.<Void>builder()
+                    .message("Variant stock and sold quantity updated successfully")
+                    .build();
+      }
+
+      @DeleteMapping("/{productId}")
+      ApiResponse<String> deleteProduct(@PathVariable String productId) {
+            productService.deleteProduct(productId);
+            return ApiResponse.<String>builder()
+                    .result("Product has been deleted")
+                    .build();
+      }
 
       @GetMapping
       ApiResponse<Page<ProductResponse>> getProducts(
@@ -32,7 +68,7 @@ public class ProductQueryController {
               @RequestParam(required = false) Double maxPrice,
               @RequestParam(defaultValue = "name") String sortBy) {
 
-            Page<ProductResponse> productsPage = productQueryService.getProducts(
+            Page<ProductResponse> productsPage = productService.getProducts(
                     shopId, categoryId, page, size, sortBy, sortDirection, minPrice, maxPrice, productSort);
 
             return ApiResponse.<Page<ProductResponse>>builder()
@@ -43,27 +79,27 @@ public class ProductQueryController {
       @GetMapping("/{productId}")
       ApiResponse<ProductResponse> getProductById(@PathVariable String productId) {
             return ApiResponse.<ProductResponse>builder()
-                    .result(productQueryService.getProductById(productId))
+                    .result(productService.getProductById(productId))
                     .build();
       }
 
       @GetMapping("/all")
       ApiResponse<List<ProductResponse>> getAllProducts() {
             return ApiResponse.<List<ProductResponse>>builder()
-                    .result(productQueryService.getAllProducts())
+                    .result(productService.getAllProducts())
                     .build();
       }
 
       @GetMapping("/{productId}/price/{variantId}")
       ApiResponse<Double> getProductPriceById(@PathVariable String productId, @PathVariable String variantId) {
             return ApiResponse.<Double>builder()
-                    .result(productQueryService.getProductPriceById(productId, variantId))
+                    .result(productService.getProductPriceById(productId, variantId))
                     .build();
       }
 
       @GetMapping("/{productId}/exists/{variantId}")
       ExistsResponse existsProduct(@PathVariable String productId, @PathVariable String variantId) {
-            return productQueryService.existsProduct(productId, variantId);
+            return productService.existsProduct(productId, variantId);
       }
 
 }
