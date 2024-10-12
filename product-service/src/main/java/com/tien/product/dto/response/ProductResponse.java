@@ -21,5 +21,6 @@ public class ProductResponse {
       List<ProductVariantResponse> variants;
       String categoryId;
       LocalDateTime createdAt;
+      LocalDateTime updatedAt;
 
 }

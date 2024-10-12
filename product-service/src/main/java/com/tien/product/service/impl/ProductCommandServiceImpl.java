@@ -11,6 +11,7 @@ import com.tien.product.exception.AppException;
 import com.tien.product.exception.ErrorCode;
 import com.tien.product.httpclient.ShopClient;
 import com.tien.product.mapper.ProductMapper;
+import com.tien.product.mapper.ProductVariantMapper;
 import com.tien.product.repository.CategoryRepository;
 import com.tien.product.repository.ProductRepository;
 import com.tien.product.service.ProductCommandService;
@@ -23,8 +24,9 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -34,6 +36,7 @@ public class ProductCommandServiceImpl implements ProductCommandService {
 
       ProductRepository productRepository;
       ProductMapper productMapper;
+      ProductVariantMapper productVariantMapper;
       CategoryRepository categoryRepository;
       ShopClient shopClient;
 
@@ -50,7 +53,12 @@ public class ProductCommandServiceImpl implements ProductCommandService {
             Product product = productMapper.toProduct(request);
             product.setCategory(category);
             product.setShopId(shopResponse.getId());
-            product.setCreatedAt(LocalDateTime.now());
+
+            List<ProductVariant> variants = request.getVariants().stream()
+                    .map(productVariantMapper::toProductVariant)
+                    .collect(Collectors.toList());
+            product.setVariants(variants);
+
             product = productRepository.save(product);
 
             category.getProducts().add(product);
