@@ -95,7 +95,7 @@ public class UserServiceImpl implements UserService {
                     log.info("Verification email sent successfully for userId: {}", userId);
                 } catch (FeignException e) {
                     log.error("FeignException during sending verification email for userId: {}", userId, e);
-                    handleFeignException(e);
+                    throw errorNormalizer.handleKeyCloakException(e);
                 }
             });
 
@@ -111,10 +111,8 @@ public class UserServiceImpl implements UserService {
             return userMapper.toUserResponse(user);
         } catch (FeignException e) {
             log.error("FeignException during registration for username: {}", request.getUsername(), e);
-            handleFeignException(e);
+            throw errorNormalizer.handleKeyCloakException(e);
         }
-
-        return null;
     }
 
     @Override
@@ -136,10 +134,8 @@ public class UserServiceImpl implements UserService {
             return userMapper.toUserLoginResponse(tokenResponse);
         } catch (FeignException e) {
             log.error("FeignException caught while refreshing login: Status {}, Message: {}", e.status(), e.getMessage());
-            handleFeignException(e);
+            throw errorNormalizer.handleKeyCloakException(e);
         }
-
-        return null;
     }
 
     @Override
@@ -160,10 +156,8 @@ public class UserServiceImpl implements UserService {
             return userMapper.toUserLoginResponse(tokenResponse);
         } catch (FeignException e) {
             log.error("FeignException caught while refreshing token: Status {}, Message: {}", e.status(), e.getMessage());
-            handleFeignException(e);
+            throw errorNormalizer.handleKeyCloakException(e);
         }
-
-        return null;
     }
 
     @Override
@@ -186,7 +180,7 @@ public class UserServiceImpl implements UserService {
                 log.info("Reset password email sent successfully for userId: {}", userId);
             } catch (FeignException e) {
                 log.error("FeignException during sending reset password email for userId: {}", userId, e);
-                handleFeignException(e);
+                throw errorNormalizer.handleKeyCloakException(e);
             }
         });
     }
@@ -277,7 +271,7 @@ public class UserServiceImpl implements UserService {
             identityClient.updateUser("Bearer " + getAccessToken(), userId, updateRequest);
         } catch (FeignException e) {
             log.error("FeignException during user update for userId: {}", userId, e);
-            handleFeignException(e);
+            throw errorNormalizer.handleKeyCloakException(e);
         }
 
         userMapper.updateUser(user, updateRequest);
@@ -302,7 +296,7 @@ public class UserServiceImpl implements UserService {
             identityClient.updateUser("Bearer " + getAccessToken(), currentUserId, updateRequest);
         } catch (FeignException e) {
             log.error("FeignException during user update for userId: {}", currentUserId, e);
-            handleFeignException(e);
+            throw errorNormalizer.handleKeyCloakException(e);
         }
 
         User user = userRepository.findByUserId(currentUserId)
@@ -335,7 +329,7 @@ public class UserServiceImpl implements UserService {
             log.info("Password reset successfully for userId: {}", userId);
         } catch (FeignException e) {
             log.error("FeignException during password reset for userId: {}", userId, e);
-            handleFeignException(e);
+            throw errorNormalizer.handleKeyCloakException(e);
         }
     }
 
@@ -354,7 +348,7 @@ public class UserServiceImpl implements UserService {
             identityClient.deleteUser("Bearer " + getAccessToken(), userId);
         } catch (FeignException e) {
             log.error("FeignException during user deletion for userId: {}", userId, e);
-            handleFeignException(e);
+            throw errorNormalizer.handleKeyCloakException(e);
         }
 
         userRepository.deleteByUserId(userId);
@@ -383,10 +377,6 @@ public class UserServiceImpl implements UserService {
                 .client_secret(clientSecret)
                 .scope("openid")
                 .build()).getAccessToken();
-    }
-
-    private void handleFeignException(FeignException exception) {
-        throw errorNormalizer.handleKeyCloakException(exception);
     }
 
     private boolean isEmailExists(String email, String userId) {
