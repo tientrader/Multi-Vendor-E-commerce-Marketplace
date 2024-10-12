@@ -186,71 +186,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponse getMyInfo() {
-        String userId = getCurrentUserId();
-
-        log.info("Fetching info for current user: {}", userId);
-        User user = userRepository.findByUserId(userId)
-                .orElseThrow(() -> {
-                    log.error("(getMyInfo) Profile not found for userId: {}", userId);
-                    return new AppException(ErrorCode.PROFILE_NOT_FOUND);
-                });
-
-        return userMapper.toUserResponse(user);
-    }
-
-    @Override
-    public Page<UserResponse> getUsers(int page, int size) {
-        log.info("Fetching all users with pagination: page = {}, size = {}", page, size);
-
-        Page<User> userPage = userRepository.findAll(PageRequest.of(page, size));
-
-        log.info("Fetched all users successfully with total elements: {}", userPage.getTotalElements());
-
-        return userPage.map(userMapper::toUserResponse);
-    }
-
-    @Override
-    @PreAuthorize("hasRole('ADMIN')")
-    public List<UserResponse> getAllUsers() {
-        log.info("Fetching all users");
-
-        List<UserResponse> users = userRepository.findAll().stream()
-                .map(userMapper::toUserResponse)
-                .toList();
-        log.info("Fetched all users successfully");
-
-        return users;
-    }
-
-    @Override
-    @PreAuthorize("hasRole('ADMIN')")
-    public UserResponse getUserByUserId(String userId) {
-        log.info("Fetching user with userId: {}", userId);
-
-        User user = userRepository.findByUserId(userId)
-                .orElseThrow(() -> {
-                    log.error("(getUserByUserId) Profile not found for userId: {}", userId);
-                    return new AppException(ErrorCode.PROFILE_NOT_FOUND);
-                });
-
-        return userMapper.toUserResponse(user);
-    }
-
-    @Override
-    public UserResponse getUserByProfileId(String profileId) {
-        log.info("Fetching user with profileId: {}", profileId);
-
-        User user = userRepository.findById(profileId)
-                .orElseThrow(() -> {
-                    log.error("(getUserByProfileId) Profile not found for profileId: {}", profileId);
-                    return new AppException(ErrorCode.PROFILE_NOT_FOUND);
-                });
-
-        return userMapper.toUserResponse(user);
-    }
-
-    @Override
     @Transactional
     @PreAuthorize("hasRole('ADMIN')")
     public UserResponse updateUser(String userId, UserUpdateRequest updateRequest) {
@@ -353,6 +288,71 @@ public class UserServiceImpl implements UserService {
 
         userRepository.deleteByUserId(userId);
         log.info("User deleted successfully with userId: {}", userId);
+    }
+
+    @Override
+    public UserResponse getMyInfo() {
+        String userId = getCurrentUserId();
+
+        log.info("Fetching info for current user: {}", userId);
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> {
+                    log.error("(getMyInfo) Profile not found for userId: {}", userId);
+                    return new AppException(ErrorCode.PROFILE_NOT_FOUND);
+                });
+
+        return userMapper.toUserResponse(user);
+    }
+
+    @Override
+    public Page<UserResponse> getUsers(int page, int size) {
+        log.info("Fetching all users with pagination: page = {}, size = {}", page, size);
+
+        Page<User> userPage = userRepository.findAll(PageRequest.of(page, size));
+
+        log.info("Fetched all users successfully with total elements: {}", userPage.getTotalElements());
+
+        return userPage.map(userMapper::toUserResponse);
+    }
+
+    @Override
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<UserResponse> getAllUsers() {
+        log.info("Fetching all users");
+
+        List<UserResponse> users = userRepository.findAll().stream()
+                .map(userMapper::toUserResponse)
+                .toList();
+        log.info("Fetched all users successfully");
+
+        return users;
+    }
+
+    @Override
+    @PreAuthorize("hasRole('ADMIN')")
+    public UserResponse getUserByUserId(String userId) {
+        log.info("Fetching user with userId: {}", userId);
+
+        User user = userRepository.findByUserId(userId)
+                .orElseThrow(() -> {
+                    log.error("(getUserByUserId) Profile not found for userId: {}", userId);
+                    return new AppException(ErrorCode.PROFILE_NOT_FOUND);
+                });
+
+        return userMapper.toUserResponse(user);
+    }
+
+    @Override
+    public UserResponse getUserByProfileId(String profileId) {
+        log.info("Fetching user with profileId: {}", profileId);
+
+        User user = userRepository.findById(profileId)
+                .orElseThrow(() -> {
+                    log.error("(getUserByProfileId) Profile not found for profileId: {}", profileId);
+                    return new AppException(ErrorCode.PROFILE_NOT_FOUND);
+                });
+
+        return userMapper.toUserResponse(user);
     }
 
     private String getCurrentUserId() {

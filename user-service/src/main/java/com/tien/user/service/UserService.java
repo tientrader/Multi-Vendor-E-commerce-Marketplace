@@ -13,14 +13,14 @@ public interface UserService {
       TokenResponse login(UserLoginRequest request);
       TokenResponse refreshToken(String refreshToken);
       void forgotPassword(ForgotPasswordRequest request);
+      UserResponse updateUser(String userId, UserUpdateRequest updateRequest);
+      UserResponse updateMyInfo(UserUpdateRequest updateRequest);
+      void resetPassword(ResetPasswordRequest request);
+      void deleteUser(String userId);
       UserResponse getMyInfo();
       Page<UserResponse> getUsers(int page, int size);
       List<UserResponse> getAllUsers();
       UserResponse getUserByUserId(String userId);
       UserResponse getUserByProfileId(String profileId);
-      UserResponse updateUser(String userId, UserUpdateRequest updateRequest);
-      UserResponse updateMyInfo(UserUpdateRequest updateRequest);
-      void resetPassword(ResetPasswordRequest request);
-      void deleteUser(String userId);
 
 }

@@ -50,6 +50,36 @@ public class UserController {
                 .build();
     }
 
+    @PutMapping("/{userId}")
+    ApiResponse<UserResponse> updateUser(@PathVariable String userId, @RequestBody @Valid UserUpdateRequest request) {
+        return ApiResponse.<UserResponse>builder()
+                .result(userService.updateUser(userId, request))
+                .build();
+    }
+
+    @PutMapping("/my-info")
+    ApiResponse<UserResponse> updateMyInfo(@RequestBody @Valid UserUpdateRequest request) {
+        return ApiResponse.<UserResponse>builder()
+                .result(userService.updateMyInfo(request))
+                .build();
+    }
+
+    @PutMapping("/reset-password")
+    ApiResponse<Void> resetPassword(@RequestBody @Valid ResetPasswordRequest request) {
+        userService.resetPassword(request);
+        return ApiResponse.<Void>builder()
+                .message("Password reset successfully")
+                .build();
+    }
+
+    @DeleteMapping("/{userId}")
+    ApiResponse<Void> deleteUser(@PathVariable String userId) {
+        userService.deleteUser(userId);
+        return ApiResponse.<Void>builder()
+                .message("Deleted successfully")
+                .build();
+    }
+
     @GetMapping("/my-info")
     ApiResponse<UserResponse> getMyInfo() {
         return ApiResponse.<UserResponse>builder()
@@ -84,36 +114,6 @@ public class UserController {
     ApiResponse<UserResponse> getUserByProfileId(@PathVariable String profileId) {
         return ApiResponse.<UserResponse>builder()
                 .result(userService.getUserByProfileId(profileId))
-                .build();
-    }
-
-    @PutMapping("/{userId}")
-    ApiResponse<UserResponse> updateUserProfile(@PathVariable String userId, @RequestBody @Valid UserUpdateRequest request) {
-        return ApiResponse.<UserResponse>builder()
-                .result(userService.updateUser(userId, request))
-                .build();
-    }
-
-    @PutMapping("/my-info")
-    ApiResponse<UserResponse> updateMyInfo(@RequestBody @Valid UserUpdateRequest request) {
-        return ApiResponse.<UserResponse>builder()
-                .result(userService.updateMyInfo(request))
-                .build();
-    }
-
-    @PutMapping("/reset-password")
-    ApiResponse<Void> resetPassword(@RequestBody @Valid ResetPasswordRequest request) {
-        userService.resetPassword(request);
-        return ApiResponse.<Void>builder()
-                .message("Password reset successfully")
-                .build();
-    }
-
-    @DeleteMapping("/{userId}")
-    ApiResponse<Void> deleteUser(@PathVariable String userId) {
-        userService.deleteUser(userId);
-        return ApiResponse.<Void>builder()
-                .message("Deleted successfully")
                 .build();
     }
 
