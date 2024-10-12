@@ -22,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -53,9 +52,7 @@ public class CategoryServiceImpl implements CategoryService {
       @Override
       public List<CategoryResponse> getAllCategories() {
             log.info("Fetching all categories");
-            return categoryRepository.findAll().stream()
-                    .map(categoryMapper::toCategoryResponse)
-                    .collect(Collectors.toList());
+            return categoryMapper.toCategoryResponses(categoryRepository.findAll());
       }
 
       @Override

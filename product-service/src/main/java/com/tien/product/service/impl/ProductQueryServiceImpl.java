@@ -24,7 +24,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -63,9 +62,7 @@ public class ProductQueryServiceImpl implements ProductQueryService {
       @Override
       public List<ProductResponse> getAllProducts() {
             log.info("Fetching all products");
-            return productRepository.findAll().stream()
-                    .map(productMapper::toProductResponse)
-                    .collect(Collectors.toList());
+            return productMapper.toProductResponses(productRepository.findAll());
       }
 
       @Override

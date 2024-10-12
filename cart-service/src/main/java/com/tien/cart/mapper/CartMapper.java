@@ -22,9 +22,6 @@ public interface CartMapper {
       CartResponse toCartResponse(Cart cart);
 
       @Mapping(target = "status", ignore = true)
-      @Mapping(source = "username", target = "username")
-      @Mapping(source = "total", target = "total")
-      @Mapping(source = "items", target = "items")
       OrderCreationRequest toOrderCreationRequest(Cart cart);
 
       List<OrderItemCreationRequest> mapCartItemsToOrderItems(List<CartItem> cartItems);

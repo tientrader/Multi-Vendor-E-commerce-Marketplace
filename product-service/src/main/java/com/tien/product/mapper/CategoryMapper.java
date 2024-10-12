@@ -39,10 +39,6 @@ public interface CategoryMapper {
             return Collections.emptySet();
       }
 
-      default List<CategoryResponse> toCategoryResponses(List<Category> categories) {
-            return categories.stream()
-                    .map(this::toCategoryResponse)
-                    .collect(Collectors.toList());
-      }
+      List<CategoryResponse> toCategoryResponses(List<Category> categories);
 
 }

@@ -15,13 +15,21 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface ProductMapper {
 
+      @Mapping(target = "updatedAt", ignore = true)
+      @Mapping(target = "soldQuantity", ignore = true)
+      @Mapping(target = "shopId", ignore = true)
       @Mapping(target = "id", ignore = true)
+      @Mapping(target = "createdAt", ignore = true)
       @Mapping(target = "category", ignore = true)
       Product toProduct(ProductCreationRequest request);
 
       @Mapping(target = "categoryId", source = "category.id")
       ProductResponse toProductResponse(Product product);
 
+      @Mapping(target = "updatedAt", ignore = true)
+      @Mapping(target = "soldQuantity", ignore = true)
+      @Mapping(target = "shopId", ignore = true)
+      @Mapping(target = "createdAt", ignore = true)
       @Mapping(target = "id", ignore = true)
       @Mapping(target = "category", ignore = true)
       void updateProduct(@MappingTarget Product product, ProductUpdateRequest request);
