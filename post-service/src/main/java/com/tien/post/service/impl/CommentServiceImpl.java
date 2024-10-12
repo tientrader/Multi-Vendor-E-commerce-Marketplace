@@ -53,21 +53,6 @@ public class CommentServiceImpl implements CommentService {
       }
 
       @Override
-      public List<CommentResponse> getCommentsByPostId(String postId) {
-            return commentRepository.findAllByPostId(postId)
-                    .stream()
-                    .map(commentMapper::toCommentResponse)
-                    .toList();
-      }
-
-      @Override
-      public CommentResponse getCommentById(String commentId) {
-            Comment comment = commentRepository.findById(commentId)
-                    .orElseThrow(() -> new AppException(ErrorCode.COMMENT_NOT_FOUND));
-            return commentMapper.toCommentResponse(comment);
-      }
-
-      @Override
       public void updateComment(String commentId, CommentUpdateRequest request) {
             String username = authenticationService.getAuthenticatedUsername();
 
@@ -101,6 +86,21 @@ public class CommentServiceImpl implements CommentService {
                     .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));
             post.setCommentsCount(post.getCommentsCount() - 1);
             postRepository.save(post);
+      }
+
+      @Override
+      public List<CommentResponse> getCommentsByPostId(String postId) {
+            return commentRepository.findAllByPostId(postId)
+                    .stream()
+                    .map(commentMapper::toCommentResponse)
+                    .toList();
+      }
+
+      @Override
+      public CommentResponse getCommentById(String commentId) {
+            Comment comment = commentRepository.findById(commentId)
+                    .orElseThrow(() -> new AppException(ErrorCode.COMMENT_NOT_FOUND));
+            return commentMapper.toCommentResponse(comment);
       }
 
 }

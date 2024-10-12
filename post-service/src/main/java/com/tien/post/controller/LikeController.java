@@ -30,11 +30,4 @@ public class LikeController {
                     .build();
       }
 
-      @GetMapping("/hasLiked/{postId}")
-      public ApiResponse<Boolean> hasLiked(@PathVariable String postId) {
-            return ApiResponse.<Boolean>builder()
-                    .result(likeService.hasLiked(postId))
-                    .build();
-      }
-
 }

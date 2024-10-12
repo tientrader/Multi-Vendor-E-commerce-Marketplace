@@ -76,19 +76,6 @@ public class CartServiceImpl implements CartService {
       }
 
       @Override
-      public CartResponse getMyCart() {
-            String username = getCurrentUsername();
-            validateUsername(username);
-
-            String cartKey = CART_KEY_PREFIX + username;
-            Cart cart = (Cart) redisTemplate.opsForValue().get(cartKey);
-            validateCart(cart);
-
-            log.info("Fetched cart for user: {}", username);
-            return cartMapper.toCartResponse(cart);
-      }
-
-      @Override
       public void deleteMyCart() {
             String username = getCurrentUsername();
             validateUsername(username);
@@ -99,6 +86,19 @@ public class CartServiceImpl implements CartService {
 
             redisTemplate.delete(cartKey);
             log.info("Cart deleted for user: {}", username);
+      }
+
+      @Override
+      public CartResponse getMyCart() {
+            String username = getCurrentUsername();
+            validateUsername(username);
+
+            String cartKey = CART_KEY_PREFIX + username;
+            Cart cart = (Cart) redisTemplate.opsForValue().get(cartKey);
+            validateCart(cart);
+
+            log.info("Fetched cart for user: {}", username);
+            return cartMapper.toCartResponse(cart);
       }
 
       private String getCurrentUsername() {

@@ -27,6 +27,14 @@ public class OrderController {
                     .build();
       }
 
+      @DeleteMapping("/{orderId}")
+      public ApiResponse<Void> deleteOrder(@PathVariable Long orderId) {
+            orderService.deleteOrder(orderId);
+            return ApiResponse.<Void>builder()
+                    .message("Order deleted successfully")
+                    .build();
+      }
+
       @GetMapping("/orders")
       public ApiResponse<List<OrderResponse>> getAllOrders() {
             return ApiResponse.<List<OrderResponse>>builder()
@@ -52,14 +60,6 @@ public class OrderController {
       public ApiResponse<OrderResponse> getMyOrderByOrderId(@PathVariable Long orderId) {
             return ApiResponse.<OrderResponse>builder()
                     .result(orderService.getMyOrderByOrderId(orderId))
-                    .build();
-      }
-
-      @DeleteMapping("/{orderId}")
-      public ApiResponse<Void> deleteOrder(@PathVariable Long orderId) {
-            orderService.deleteOrder(orderId);
-            return ApiResponse.<Void>builder()
-                    .message("Order deleted successfully")
                     .build();
       }
 

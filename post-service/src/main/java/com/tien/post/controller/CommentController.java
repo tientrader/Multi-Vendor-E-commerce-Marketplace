@@ -28,20 +28,6 @@ public class CommentController {
                     .build();
       }
 
-      @GetMapping("/post/{postId}")
-      public ApiResponse<List<CommentResponse>> getCommentsByPostId(@PathVariable String postId) {
-            return ApiResponse.<List<CommentResponse>>builder()
-                    .result(commentService.getCommentsByPostId(postId))
-                    .build();
-      }
-
-      @GetMapping("/{commentId}")
-      public ApiResponse<CommentResponse> getCommentById(@PathVariable String commentId) {
-            return ApiResponse.<CommentResponse>builder()
-                    .result(commentService.getCommentById(commentId))
-                    .build();
-      }
-
       @PutMapping("/{commentId}")
       public ApiResponse<Void> updateComment(@PathVariable String commentId, @RequestBody CommentUpdateRequest request) {
             commentService.updateComment(commentId, request);
@@ -55,6 +41,20 @@ public class CommentController {
             commentService.deleteComment(commentId);
             return ApiResponse.<Void>builder()
                     .message("Comment deleted successfully")
+                    .build();
+      }
+
+      @GetMapping("/post/{postId}")
+      public ApiResponse<List<CommentResponse>> getCommentsByPostId(@PathVariable String postId) {
+            return ApiResponse.<List<CommentResponse>>builder()
+                    .result(commentService.getCommentsByPostId(postId))
+                    .build();
+      }
+
+      @GetMapping("/{commentId}")
+      public ApiResponse<CommentResponse> getCommentById(@PathVariable String commentId) {
+            return ApiResponse.<CommentResponse>builder()
+                    .result(commentService.getCommentById(commentId))
                     .build();
       }
 

@@ -25,13 +25,6 @@ public class ShopController {
                     .build();
       }
 
-      @GetMapping("/owner/{username}")
-      public ApiResponse<ShopResponse> getShopByOwnerUsername(@PathVariable("username") String username) {
-            return ApiResponse.<ShopResponse>builder()
-                    .result(shopService.getShopByOwnerUsername(username))
-                    .build();
-      }
-
       @PutMapping("/update")
       public ApiResponse<ShopResponse> updateShop(@RequestBody @Valid ShopUpdateRequest request) {
             return ApiResponse.<ShopResponse>builder()
@@ -44,6 +37,13 @@ public class ShopController {
             shopService.deleteShop();
             return ApiResponse.<Void>builder()
                     .message("Shop deleted successfully")
+                    .build();
+      }
+
+      @GetMapping("/owner/{username}")
+      public ApiResponse<ShopResponse> getShopByOwnerUsername(@PathVariable("username") String username) {
+            return ApiResponse.<ShopResponse>builder()
+                    .result(shopService.getShopByOwnerUsername(username))
                     .build();
       }
 

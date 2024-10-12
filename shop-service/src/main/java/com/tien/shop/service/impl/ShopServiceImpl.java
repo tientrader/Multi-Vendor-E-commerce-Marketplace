@@ -57,20 +57,6 @@ public class ShopServiceImpl implements ShopService {
       }
 
       @Override
-      public ShopResponse getShopByOwnerUsername(String ownerUsername) {
-            log.info("Fetching shop for owner: {}", ownerUsername);
-
-            Shop shop = shopRepository.findByOwnerUsername(ownerUsername)
-                    .orElseThrow(() -> {
-                          log.error("(getShopByOwnerUsername) Shop not found for owner: {}", ownerUsername);
-                          return new AppException(ErrorCode.SHOP_NOT_FOUND);
-                    });
-            log.info("Shop found for owner: {}", ownerUsername);
-
-            return shopMapper.toShopResponse(shop);
-      }
-
-      @Override
       @Transactional
       public ShopResponse updateShop(ShopUpdateRequest request) {
             String username = getCurrentUsername();
@@ -103,6 +89,20 @@ public class ShopServiceImpl implements ShopService {
 
             shopRepository.delete(shop);
             log.info("Shop deleted successfully for owner: {}", username);
+      }
+
+      @Override
+      public ShopResponse getShopByOwnerUsername(String ownerUsername) {
+            log.info("Fetching shop for owner: {}", ownerUsername);
+
+            Shop shop = shopRepository.findByOwnerUsername(ownerUsername)
+                    .orElseThrow(() -> {
+                          log.error("(getShopByOwnerUsername) Shop not found for owner: {}", ownerUsername);
+                          return new AppException(ErrorCode.SHOP_NOT_FOUND);
+                    });
+            log.info("Shop found for owner: {}", ownerUsername);
+
+            return shopMapper.toShopResponse(shop);
       }
 
       private String getCurrentUsername() {

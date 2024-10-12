@@ -8,9 +8,9 @@ import com.tien.post.dto.response.PostResponse;
 public interface PostService {
 
       PostResponse createPost(PostCreationRequest request);
-      PageResponse<PostResponse> getMyPosts(int page, int size);
-      PostResponse getPostById(String postId);
       PostResponse updatePost(String postId, PostUpdateRequest request);
       void deletePost(String postId);
+      PageResponse<PostResponse> getMyPosts(int page, int size);
+      PostResponse getPostById(String postId);
 
 }

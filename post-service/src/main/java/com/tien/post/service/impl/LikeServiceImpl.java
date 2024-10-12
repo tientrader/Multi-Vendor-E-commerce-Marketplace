@@ -50,10 +50,4 @@ public class LikeServiceImpl implements LikeService {
             return likeRepository.countByPostId(postId);
       }
 
-      @Override
-      public boolean hasLiked(String postId) {
-            String username = authenticationService.getAuthenticatedUsername();
-            return likeRepository.existsByPostIdAndUsername(postId, username);
-      }
-
 }

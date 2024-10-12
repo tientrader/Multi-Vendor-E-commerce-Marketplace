@@ -68,6 +68,18 @@ public class OrderServiceImpl implements OrderService {
 
       @Override
       @PreAuthorize("hasRole('ADMIN')")
+      @Transactional
+      public void deleteOrder(Long orderId) {
+            log.info("Deleting order ID: {}", orderId);
+            Order order = orderRepository.findById(orderId)
+                    .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+
+            orderRepository.delete(order);
+            log.info("Order with ID {} has been deleted.", orderId);
+      }
+
+      @Override
+      @PreAuthorize("hasRole('ADMIN')")
       public List<OrderResponse> getAllOrders() {
             log.info("Fetching all orders.");
             List<Order> orders = orderRepository.findAll();
@@ -129,18 +141,6 @@ public class OrderServiceImpl implements OrderService {
 
             log.info("Order ID: {} fetched successfully for user: {}", orderId, username);
             return orderMapper.toOrderResponse(order);
-      }
-
-      @Override
-      @PreAuthorize("hasRole('ADMIN')")
-      @Transactional
-      public void deleteOrder(Long orderId) {
-            log.info("Deleting order ID: {}", orderId);
-            Order order = orderRepository.findById(orderId)
-                    .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
-
-            orderRepository.delete(order);
-            log.info("Order with ID {} has been deleted.", orderId);
       }
 
       private String getCurrentUsername() {

@@ -33,19 +33,19 @@ public class CartController {
                     .build();
       }
 
-      @GetMapping
-      public ApiResponse<CartResponse> getMyCart() {
-            CartResponse cartResponse = cartService.getMyCart();
-            return ApiResponse.<CartResponse>builder()
-                    .result(cartResponse)
-                    .build();
-      }
-
       @DeleteMapping("/delete")
       public ApiResponse<String> deleteMyCart() {
             cartService.deleteMyCart();
             return ApiResponse.<String>builder()
                     .message("Cart deleted successfully")
+                    .build();
+      }
+
+      @GetMapping
+      public ApiResponse<CartResponse> getMyCart() {
+            CartResponse cartResponse = cartService.getMyCart();
+            return ApiResponse.<CartResponse>builder()
+                    .result(cartResponse)
                     .build();
       }
 

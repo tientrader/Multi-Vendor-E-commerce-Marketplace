@@ -7,7 +7,7 @@ public interface CartService {
 
       CartResponse upsertProductInCart(CartCreationRequest request);
       void createOrderFromCart();
-      CartResponse getMyCart();
       void deleteMyCart();
+      CartResponse getMyCart();
 
 }

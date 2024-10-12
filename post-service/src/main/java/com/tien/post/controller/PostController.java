@@ -26,6 +26,21 @@ public class PostController {
                     .build();
       }
 
+      @PutMapping("/{postId}")
+      public ApiResponse<PostResponse> updatePost(@PathVariable String postId, @RequestBody PostUpdateRequest request) {
+            return ApiResponse.<PostResponse>builder()
+                    .result(postService.updatePost(postId, request))
+                    .build();
+      }
+
+      @DeleteMapping("/{postId}")
+      public ApiResponse<Void> deletePost(@PathVariable String postId) {
+            postService.deletePost(postId);
+            return ApiResponse.<Void>builder()
+                    .message("Post deleted successfully")
+                    .build();
+      }
+
       @GetMapping("/my-posts")
       public ApiResponse<PageResponse<PostResponse>> myPosts(
               @RequestParam(value = "page", required = false, defaultValue = "1") int page,
@@ -39,21 +54,6 @@ public class PostController {
       public ApiResponse<PostResponse> getPostById(@PathVariable String postId) {
             return ApiResponse.<PostResponse>builder()
                     .result(postService.getPostById(postId))
-                    .build();
-      }
-
-      @PutMapping("/{postId}")
-      public ApiResponse<PostResponse> updatePost(@PathVariable String postId, @RequestBody PostUpdateRequest request) {
-            return ApiResponse.<PostResponse>builder()
-                    .result(postService.updatePost(postId, request))
-                    .build();
-      }
-
-      @DeleteMapping("/{postId}")
-      public ApiResponse<Void> deletePost(@PathVariable String postId) {
-            postService.deletePost(postId);
-            return ApiResponse.<Void>builder()
-                    .message("Post deleted successfully")
                     .build();
       }
 
