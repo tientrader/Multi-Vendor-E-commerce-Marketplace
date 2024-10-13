@@ -20,10 +20,9 @@ public class OrderController {
       OrderService orderService;
 
       @PostMapping("/create")
-      public ApiResponse<Void> createOrder(@Valid @RequestBody OrderCreationRequest orderCreationRequest) {
-            orderService.createOrder(orderCreationRequest);
-            return ApiResponse.<Void>builder()
-                    .message("Order created successfully")
+      public ApiResponse<OrderResponse> createOrder(@Valid @RequestBody OrderCreationRequest orderCreationRequest) {
+            return ApiResponse.<OrderResponse>builder()
+                    .result(orderService.createOrder(orderCreationRequest))
                     .build();
       }
 

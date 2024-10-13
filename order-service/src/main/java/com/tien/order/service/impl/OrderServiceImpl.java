@@ -41,7 +41,7 @@ public class OrderServiceImpl implements OrderService {
 
       @Override
       @Transactional
-      public void createOrder(OrderCreationRequest request) {
+      public OrderResponse createOrder(OrderCreationRequest request) {
             log.info("Starting order creation for user: {}", request.getEmail());
             String username = getCurrentUsername();
 
@@ -64,6 +64,8 @@ public class OrderServiceImpl implements OrderService {
                     .body("Thank " + username + " for buying our products!")
                     .build());
             log.info("(createOrder) Notification email sent to: {}", request.getEmail());
+
+            return orderMapper.toOrderResponse(order);
       }
 
       @Override
