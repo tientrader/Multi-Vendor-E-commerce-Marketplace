@@ -19,7 +19,7 @@ public class EmailController {
     EmailService emailService;
 
     @PostMapping("/email/send")
-    ApiResponse<EmailResponse> sendEmail(@RequestBody SendEmailRequest request){
+    public ApiResponse<EmailResponse> sendEmail(@RequestBody SendEmailRequest request){
         return ApiResponse.<EmailResponse>builder()
                 .result(emailService.sendEmail(request))
                 .build();

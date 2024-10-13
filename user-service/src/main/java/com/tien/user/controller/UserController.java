@@ -22,28 +22,28 @@ public class UserController {
     UserService userService;
 
     @PostMapping("/auth/register")
-    ApiResponse<UserResponse> register(@RequestBody @Valid RegistrationRequest request) {
+    public ApiResponse<UserResponse> register(@RequestBody @Valid RegistrationRequest request) {
         return ApiResponse.<UserResponse>builder()
                 .result(userService.register(request))
                 .build();
     }
 
     @PostMapping("/auth/login")
-    ApiResponse<TokenResponse> login(@RequestBody @Valid UserLoginRequest request) {
+    public ApiResponse<TokenResponse> login(@RequestBody @Valid UserLoginRequest request) {
         return ApiResponse.<TokenResponse>builder()
                 .result(userService.login(request))
                 .build();
     }
 
     @PostMapping("/auth/refresh")
-    ApiResponse<TokenResponse> refresh(@RequestBody TokenResponse response) {
+    public ApiResponse<TokenResponse> refresh(@RequestBody TokenResponse response) {
         return ApiResponse.<TokenResponse>builder()
                 .result(userService.refreshToken(response.getRefreshToken()))
                 .build();
     }
 
     @PostMapping("/auth/forgot-password")
-    ApiResponse<Void> forgotPassword(@RequestBody @Valid ForgotPasswordRequest request) {
+    public ApiResponse<Void> forgotPassword(@RequestBody @Valid ForgotPasswordRequest request) {
         userService.forgotPassword(request);
         return ApiResponse.<Void>builder()
                 .message("Reset password email sent successfully")
@@ -51,21 +51,21 @@ public class UserController {
     }
 
     @PutMapping("/{userId}")
-    ApiResponse<UserResponse> updateUser(@PathVariable String userId, @RequestBody @Valid UserUpdateRequest request) {
+    public ApiResponse<UserResponse> updateUser(@PathVariable String userId, @RequestBody @Valid UserUpdateRequest request) {
         return ApiResponse.<UserResponse>builder()
                 .result(userService.updateUser(userId, request))
                 .build();
     }
 
     @PutMapping("/my-info")
-    ApiResponse<UserResponse> updateMyInfo(@RequestBody @Valid UserUpdateRequest request) {
+    public ApiResponse<UserResponse> updateMyInfo(@RequestBody @Valid UserUpdateRequest request) {
         return ApiResponse.<UserResponse>builder()
                 .result(userService.updateMyInfo(request))
                 .build();
     }
 
     @PutMapping("/reset-password")
-    ApiResponse<Void> resetPassword(@RequestBody @Valid ResetPasswordRequest request) {
+    public ApiResponse<Void> resetPassword(@RequestBody @Valid ResetPasswordRequest request) {
         userService.resetPassword(request);
         return ApiResponse.<Void>builder()
                 .message("Password reset successfully")
@@ -73,7 +73,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{userId}")
-    ApiResponse<Void> deleteUser(@PathVariable String userId) {
+    public ApiResponse<Void> deleteUser(@PathVariable String userId) {
         userService.deleteUser(userId);
         return ApiResponse.<Void>builder()
                 .message("Deleted successfully")
@@ -81,14 +81,14 @@ public class UserController {
     }
 
     @GetMapping("/my-info")
-    ApiResponse<UserResponse> getMyInfo() {
+    public ApiResponse<UserResponse> getMyInfo() {
         return ApiResponse.<UserResponse>builder()
                 .result(userService.getMyInfo())
                 .build();
     }
 
     @GetMapping
-    ApiResponse<Page<UserResponse>> getUsers(
+    public ApiResponse<Page<UserResponse>> getUsers(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         return ApiResponse.<Page<UserResponse>>builder()
@@ -97,21 +97,21 @@ public class UserController {
     }
 
     @GetMapping("/users")
-    ApiResponse<List<UserResponse>> getAllUsers() {
+    public ApiResponse<List<UserResponse>> getAllUsers() {
         return ApiResponse.<List<UserResponse>>builder()
                 .result(userService.getAllUsers())
                 .build();
     }
 
     @GetMapping("/{userId}")
-    ApiResponse<UserResponse> getUserByUserId(@PathVariable String userId) {
+    public ApiResponse<UserResponse> getUserByUserId(@PathVariable String userId) {
         return ApiResponse.<UserResponse>builder()
                 .result(userService.getUserByUserId(userId))
                 .build();
     }
 
     @GetMapping("/profile/{profileId}")
-    ApiResponse<UserResponse> getUserByProfileId(@PathVariable String profileId) {
+    public ApiResponse<UserResponse> getUserByProfileId(@PathVariable String profileId) {
         return ApiResponse.<UserResponse>builder()
                 .result(userService.getUserByProfileId(profileId))
                 .build();
