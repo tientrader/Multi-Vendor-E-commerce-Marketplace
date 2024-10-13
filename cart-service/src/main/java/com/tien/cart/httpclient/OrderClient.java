@@ -14,12 +14,12 @@ import org.springframework.web.bind.annotation.RequestBody;
         configuration = {AuthenticationRequestInterceptor.class})
 public interface OrderClient {
 
-      @CircuitBreaker(name = "createOrder", fallbackMethod = "createOrderFallback")
+      @CircuitBreaker(name = "createOrderFromCart", fallbackMethod = "createOrderFromCartFallback")
       @Retry(name = "createOrder")
-      @PostMapping(value = "/create", produces = MediaType.APPLICATION_JSON_VALUE)
-      ApiResponse<Void> createOrder(@RequestBody OrderCreationRequest request);
+      @PostMapping(value = "/create-from-cart", produces = MediaType.APPLICATION_JSON_VALUE)
+      ApiResponse<Void> createOrderFromCart(@RequestBody OrderCreationRequest request);
 
-      default ApiResponse<Void> createOrderFallback(OrderCreationRequest request, Throwable throwable) {
+      default ApiResponse<Void> createOrderFromCartFallback(OrderCreationRequest request, Throwable throwable) {
             throw new RuntimeException();
       }
 

@@ -27,6 +27,14 @@ public class OrderController {
                     .build();
       }
 
+      @PostMapping("/create-from-cart")
+      public ApiResponse<Void> createOrderFromCart(@Valid @RequestBody OrderCreationRequest orderCreationRequest) {
+            orderService.createOrderFromCart(orderCreationRequest);
+            return ApiResponse.<Void>builder()
+                    .message("Order created from cart successfully")
+                    .build();
+      }
+
       @DeleteMapping("/{orderId}")
       public ApiResponse<Void> deleteOrder(@PathVariable Long orderId) {
             orderService.deleteOrder(orderId);

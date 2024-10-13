@@ -63,7 +63,32 @@ public class OrderServiceImpl implements OrderService {
                     .subject("Order created successfully")
                     .body("Thank " + username + " for buying our products!")
                     .build());
-            log.info("Notification email sent to: {}", request.getEmail());
+            log.info("(createOrder) Notification email sent to: {}", request.getEmail());
+      }
+
+      @Override
+      @Transactional
+      public void createOrderFromCart(OrderCreationRequest request) {
+            log.info("Starting order creation from cart for user: {}", request.getEmail());
+            String username = getCurrentUsername();
+
+            Order order = orderMapper.toOrder(request);
+            order.setUsername(username);
+            order.setTotal(request.getTotal());
+            order.setStatus("PENDING");
+
+            updateStockAndSoldQuantity(request.getItems());
+
+            orderRepository.save(order);
+            log.info("Order created from cart for user: {}, total amount: {}", username, order.getTotal());
+
+            kafkaTemplate.send("order-created-successful", NotificationEvent.builder()
+                    .channel("EMAIL")
+                    .recipient(request.getEmail())
+                    .subject("Order created successfully")
+                    .body("Thank " + username + " for buying our products!")
+                    .build());
+            log.info("(createOrderFromCart) Notification email sent to: {}", request.getEmail());
       }
 
       @Override

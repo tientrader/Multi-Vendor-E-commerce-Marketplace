@@ -70,7 +70,7 @@ public class CartServiceImpl implements CartService {
             orderRequest.setStatus("PENDING");
             orderRequest.setEmail(Objects.requireNonNull(cart).getEmail());
 
-            orderClient.createOrder(orderRequest);
+            orderClient.createOrderFromCart(orderRequest);
             redisTemplate.delete(cartKey);
             log.info("Order created from cart for user: {}", username);
       }
