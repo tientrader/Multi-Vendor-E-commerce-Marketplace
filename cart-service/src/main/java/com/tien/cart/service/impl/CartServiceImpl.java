@@ -139,12 +139,16 @@ public class CartServiceImpl implements CartService {
                   for (CartItem cartItem : updatedItems) {
                         if (cartItem.getProductId().equals(request.getProductId()) &&
                                 cartItem.getVariantId().equals(request.getVariantId())) {
+
                               itemFound = true;
 
-                              if (request.getQuantity() > 0) {
-                                    cartItem.setQuantity(request.getQuantity());
-                                    log.info("Updated item quantity in cart: {}", cartItem.getProductId());
-                              } else {
+                              int newQuantity = cartItem.getQuantity() + request.getQuantity();
+
+                              if (newQuantity > 0) {
+                                    cartItem.setQuantity(newQuantity);
+                                    log.info("Updated item quantity in cart: {} to {}", cartItem.getProductId(), newQuantity);
+                              }
+                              else {
                                     updatedItems.remove(cartItem);
                                     log.info("Item removed from cart: {}", cartItem.getProductId());
                               }
