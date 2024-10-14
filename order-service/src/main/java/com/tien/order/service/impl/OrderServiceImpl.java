@@ -76,8 +76,6 @@ public class OrderServiceImpl implements OrderService {
 
             Order order = orderMapper.toOrder(request);
             order.setUsername(username);
-            order.setTotal(request.getTotal());
-            order.setStatus("PENDING");
 
             updateStockAndSoldQuantity(request.getItems());
 
