@@ -217,7 +217,8 @@ public class ProductServiceImpl implements ProductService {
       }
 
       private String getCurrentUsername() {
-            return ((Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getClaim("preferred_username");
+            Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            return jwt.getClaim("preferred_username");
       }
 
       private Product findProductById(String productId) {
