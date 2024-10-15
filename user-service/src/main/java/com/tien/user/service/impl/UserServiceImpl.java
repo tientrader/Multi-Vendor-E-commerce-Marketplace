@@ -88,16 +88,8 @@ public class UserServiceImpl implements UserService {
             user.setUserId(userId);
             user = userRepository.save(user);
 
-            log.debug("Sending verification email for userId: {}", userId);
-            CompletableFuture.runAsync(() -> {
-                try {
-                    identityClient.sendVerificationEmail(token, userId);
-                    log.info("Verification email sent successfully for userId: {}", userId);
-                } catch (FeignException e) {
-                    log.error("FeignException during sending verification email for userId: {}", userId, e);
-                    throw errorNormalizer.handleKeyCloakException(e);
-                }
-            });
+            log.info("Sending verification email for userId: {}", userId);
+            CompletableFuture.runAsync(() -> identityClient.sendVerificationEmail(token, userId));
 
             log.info("Sending Kafka message for user registration: {}", request.getEmail());
             kafkaTemplate.send("register-successful", NotificationEvent.builder()
@@ -197,11 +189,6 @@ public class UserServiceImpl implements UserService {
                     return new AppException(ErrorCode.PROFILE_NOT_FOUND);
                 });
 
-        if (isEmailExists(updateRequest.getEmail(), userId)) {
-            log.error("(updateUser) Email already exists: {}", updateRequest.getEmail());
-            throw new AppException(ErrorCode.EMAIL_EXISTED);
-        }
-
         try {
             identityClient.updateUser("Bearer " + getAccessToken(), userId, updateRequest);
         } catch (FeignException e) {
@@ -221,11 +208,6 @@ public class UserServiceImpl implements UserService {
     public UserResponse updateMyInfo(UserUpdateRequest updateRequest) {
         String currentUserId = getCurrentUserId();
         log.info("Updating own info for userId: {}", currentUserId);
-
-        if (isEmailExists(updateRequest.getEmail(), currentUserId)) {
-            log.error("(updateMyInfo) Email already exists: {}", updateRequest.getEmail());
-            throw new AppException(ErrorCode.EMAIL_EXISTED);
-        }
 
         try {
             identityClient.updateUser("Bearer " + getAccessToken(), currentUserId, updateRequest);
@@ -377,12 +359,6 @@ public class UserServiceImpl implements UserService {
                 .client_secret(clientSecret)
                 .scope("openid")
                 .build()).getAccessToken();
-    }
-
-    private boolean isEmailExists(String email, String userId) {
-        return userRepository.findByEmail(email)
-                .map(existingUser -> !existingUser.getUserId().equals(userId))
-                .orElse(false);
     }
 
 }
