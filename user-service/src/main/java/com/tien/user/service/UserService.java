@@ -11,7 +11,7 @@ public interface UserService {
 
       UserResponse register(RegistrationRequest request);
       TokenResponse login(UserLoginRequest request);
-      TokenResponse refreshToken(String refreshToken);
+      TokenResponse refreshToken(RefreshTokenRequest request);
       void forgotPassword(ForgotPasswordRequest request);
       UserResponse updateUser(String userId, UserUpdateRequest updateRequest);
       UserResponse updateMyInfo(UserUpdateRequest updateRequest);

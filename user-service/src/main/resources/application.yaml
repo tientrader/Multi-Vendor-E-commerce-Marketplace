@@ -31,6 +31,12 @@ idp:
   client-id: ${CLIENT_ID}
   client-secret: ${CLIENT_SECRET}
 
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
+
 management:
   endpoints:
     web:

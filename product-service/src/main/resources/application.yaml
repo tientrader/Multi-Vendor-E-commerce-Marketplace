@@ -14,6 +14,12 @@ app:
   services:
     shop: http://localhost:8081/shop
 
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
+
 resilience4j:
   circuitbreaker:
     configs:

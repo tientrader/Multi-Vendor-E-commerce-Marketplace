@@ -10,6 +10,12 @@ spring:
     mongodb:
       uri: mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@localhost:27017/post-service?authSource=admin
 
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
+
 management:
   endpoints:
     web:

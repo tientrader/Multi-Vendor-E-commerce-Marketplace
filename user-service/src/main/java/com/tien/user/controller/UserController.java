@@ -36,9 +36,9 @@ public class UserController {
     }
 
     @PostMapping("/auth/refresh")
-    public ApiResponse<TokenResponse> refresh(@RequestBody TokenResponse response) {
+    public ApiResponse<TokenResponse> refresh(@RequestBody @Valid RefreshTokenRequest request) {
         return ApiResponse.<TokenResponse>builder()
-                .result(userService.refreshToken(response.getRefreshToken()))
+                .result(userService.refreshToken(request))
                 .build();
     }
 

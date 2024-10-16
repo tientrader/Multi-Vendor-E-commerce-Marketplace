@@ -132,14 +132,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public TokenResponse refreshToken(String refreshToken) {
+    public TokenResponse refreshToken(RefreshTokenRequest request) {
         log.info("Refreshing token for user");
 
         TokenExchangeParam tokenExchangeParam = TokenExchangeParam.builder()
                 .grant_type("refresh_token")
                 .client_id(clientId)
                 .client_secret(clientSecret)
-                .refresh_token(refreshToken)
+                .refresh_token(request.getRefreshToken())
                 .build();
 
         try {

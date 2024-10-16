@@ -24,6 +24,12 @@ notification:
     brevo-url: https://api.brevo.com
     brevo-apikey: ${BREVO_API_KEY}
 
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
+
 management:
   endpoints:
     web:

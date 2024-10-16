@@ -16,6 +16,12 @@ app:
     product: http://localhost:8082/product
     order: http://localhost:8084/order
 
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
+
 resilience4j:
   circuitbreaker:
     configs:

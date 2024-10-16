@@ -19,12 +19,12 @@ public interface UserMapper {
 
     UserResponse toUserResponse(User user);
 
-    TokenResponse toUserLoginResponse(TokenExchangeResponse tokenExchangeResponse);
-
     @Mapping(target = "username", ignore = true)
     @Mapping(target = "userId", ignore = true)
     @Mapping(target = "profileId", ignore = true)
     @Mapping(target = "dob", ignore = true)
     void updateUser(@MappingTarget User user, UserUpdateRequest request);
+
+    TokenResponse toUserLoginResponse(TokenExchangeResponse tokenExchangeResponse);
 
 }
