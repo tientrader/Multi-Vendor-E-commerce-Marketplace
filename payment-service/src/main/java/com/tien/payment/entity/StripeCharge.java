@@ -22,7 +22,6 @@ public class StripeCharge {
       String email;
       Double amount;
       Boolean success;
-      String message;
       String chargeId;
       Map<String, Object> additionalInfo;
 

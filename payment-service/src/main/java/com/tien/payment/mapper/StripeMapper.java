@@ -10,7 +10,6 @@ import org.mapstruct.Mapping;
 public interface StripeMapper {
 
       @Mapping(target = "success", ignore = true)
-      @Mapping(target = "message", ignore = true)
       @Mapping(target = "id", ignore = true)
       @Mapping(target = "chargeId", ignore = true)
       StripeCharge toStripeCharge(StripeChargeRequest request);
@@ -23,16 +22,14 @@ public interface StripeMapper {
       @Mapping(target = "id", ignore = true)
       StripeSubscription toStripeSubscription(StripeSubscriptionRequest request);
 
-      @Mapping(target = "subscriptionId", ignore = true)
-      @Mapping(target = "status", ignore = true)
       @Mapping(target = "message", ignore = true)
+      @Mapping(target = "status", ignore = true)
       StripeSubscriptionResponse toStripeSubscriptionResponse(StripeSubscription stripeSubscription);
 
       @Mapping(target = "sessionUrl", ignore = true)
       @Mapping(target = "sessionId", ignore = true)
       Session toSession(PaymentSessionRequest request);
 
-      @Mapping(target = "message", ignore = true)
       SessionResponse toSessionResponse(Session session);
 
 }

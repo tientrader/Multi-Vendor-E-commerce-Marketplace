@@ -10,11 +10,11 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class StripeSubscriptionResponse {
 
+      String id;
       String username;
       String stripeCustomerId;
       String stripeSubscriptionId;
       String stripePaymentMethodId;
-      String subscriptionId;
       String status;
       String message;
 

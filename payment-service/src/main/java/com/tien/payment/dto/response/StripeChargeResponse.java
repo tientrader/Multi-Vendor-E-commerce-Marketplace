@@ -11,7 +11,6 @@ import lombok.experimental.FieldDefaults;
 public class StripeChargeResponse {
 
       Boolean success;
-      String message;
       String chargeId;
 
 }
