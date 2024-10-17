@@ -24,12 +24,23 @@ public class NotificationController {
       @KafkaListener(topics = "register-successful")
       public void listenUserService(NotificationEvent message) {
             emailService.sendEmail(SendEmailRequest.builder()
-                            .to(Recipient.builder()
-                                    .email(message.getRecipient())
-                                    .build())
-                            .subject(message.getSubject())
-                            .htmlContent(message.getBody())
-                            .build());
+                    .to(Recipient.builder()
+                            .email(message.getRecipient())
+                            .build())
+                    .subject(message.getSubject())
+                    .htmlContent(message.getBody())
+                    .build());
+      }
+
+      @KafkaListener(topics = "payment_successful")
+      public void listenPaymentService(NotificationEvent message) {
+            emailService.sendEmail(SendEmailRequest.builder()
+                    .to(Recipient.builder()
+                            .email(message.getRecipient())
+                            .build())
+                    .subject(message.getSubject())
+                    .htmlContent(message.getBody())
+                    .build());
       }
 
       @KafkaListener(topics = "order-created-successful")
