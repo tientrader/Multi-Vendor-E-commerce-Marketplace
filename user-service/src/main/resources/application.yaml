@@ -19,7 +19,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:8180/realms/tienproapp
+          issuer-uri: ${ISSUER_URI}
   kafka:
     bootstrap-servers: localhost:9094
     producer:
