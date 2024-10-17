@@ -105,6 +105,19 @@ spring:
             - name: Retry
               args:
                 name: default
+        - id: payment_service
+          uri: http://localhost:8087
+          predicates:
+            - Path=${app.api-prefix}/payment/**
+          filters:
+            - StripPrefix=2
+            - name: CircuitBreaker
+              args:
+                name: paymentService
+                fallbackUri: forward:/fallback/payment
+            - name: Retry
+              args:
+                name: default
         - id: actuator
           uri: http://localhost:8888
           predicates:
@@ -139,6 +152,8 @@ resilience4j:
         baseConfig: default
       notificationService:
         baseConfig: default
+      paymentService:
+        baseConfig: default
 
   retry:
     configs:
@@ -159,6 +174,8 @@ resilience4j:
       postService:
         baseConfig: default
       notificationService:
+        baseConfig: default
+      paymentService:
         baseConfig: default
 
 management:

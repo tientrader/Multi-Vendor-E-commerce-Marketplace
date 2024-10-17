@@ -50,4 +50,10 @@ public class FallbackController {
                     HttpStatus.SERVICE_UNAVAILABLE);
       }
 
+      @RequestMapping("/fallback/payment")
+      public ResponseEntity<String> paymentServiceFallback() {
+            return new ResponseEntity<>("Payment Service is currently unavailable. Please try again later.",
+                    HttpStatus.SERVICE_UNAVAILABLE);
+      }
+
 }
