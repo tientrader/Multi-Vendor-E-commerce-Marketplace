@@ -24,6 +24,7 @@ spring:
 app:
   services:
     product: http://localhost:8082/product
+    payment: http://localhost:8087/payment
 
 springdoc:
   swagger-ui:

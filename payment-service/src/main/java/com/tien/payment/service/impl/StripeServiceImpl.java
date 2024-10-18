@@ -66,10 +66,10 @@ public class StripeServiceImpl implements StripeService {
                   Map<String, Object> chargeParams = new HashMap<>();
                   chargeParams.put("amount", (int) (request.getAmount() * 100));
                   chargeParams.put("currency", "USD");
-                  chargeParams.put("description", "Payment for id " + request.getAdditionalInfo().getOrDefault("ID_TAG", ""));
+                  chargeParams.put("description", "Payment for order by " + request.getUsername());
                   chargeParams.put("source", request.getStripeToken());
 
-                  HashMap<String, Object> metadata = new HashMap<>(request.getAdditionalInfo());
+                  HashMap<String, Object> metadata = new HashMap<>();
                   metadata.put("username", request.getUsername());
                   chargeParams.put("metadata", metadata);
 

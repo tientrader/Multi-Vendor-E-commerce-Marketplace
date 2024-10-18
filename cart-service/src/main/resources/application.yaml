@@ -39,7 +39,7 @@ resilience4j:
         baseConfig: default
       existsProduct:
         baseConfig: default
-      createOrderFromCart:
+      createOrder:
         baseConfig: default
 
   retry:
@@ -52,7 +52,7 @@ resilience4j:
         baseConfig: default
       existsProduct:
         baseConfig: default
-      createOrderFromCart:
+      createOrder:
         baseConfig: default
 
 management:

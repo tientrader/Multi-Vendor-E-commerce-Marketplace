@@ -1,7 +1,9 @@
 package com.tien.cart.service.impl;
 
+import com.tien.cart.dto.ApiResponse;
 import com.tien.cart.dto.request.CartItemCreationRequest;
 import com.tien.cart.dto.request.OrderCreationRequest;
+import com.tien.cart.dto.response.OrderResponse;
 import com.tien.cart.entity.Cart;
 import com.tien.cart.entity.CartItem;
 import com.tien.cart.exception.AppException;
@@ -58,7 +60,7 @@ public class CartServiceImpl implements CartService {
       }
 
       @Override
-      public void createOrderFromCart() {
+      public OrderResponse createOrderFromCart(String paymentMethod, String paymentToken) {
             String username = getCurrentUsername();
             validateUsername(username);
 
@@ -67,12 +69,16 @@ public class CartServiceImpl implements CartService {
             validateCart(cart);
 
             OrderCreationRequest orderRequest = cartMapper.toOrderCreationRequest(cart);
-            orderRequest.setStatus("PENDING");
             orderRequest.setEmail(Objects.requireNonNull(cart).getEmail());
+            orderRequest.setPaymentMethod(paymentMethod);
+            orderRequest.setPaymentToken(paymentToken);
 
-            orderClient.createOrderFromCart(orderRequest);
+            ApiResponse<OrderResponse> orderResponse = orderClient.createOrder(orderRequest);
+
             redisTemplate.delete(cartKey);
             log.info("Order created from cart for user: {}", username);
+
+            return orderResponse.getResult();
       }
 
       @Override

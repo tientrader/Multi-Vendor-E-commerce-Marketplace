@@ -36,4 +36,6 @@ public class Order {
       @Column(nullable = false)
       String status;
 
+      String paymentMethod;
+
 }

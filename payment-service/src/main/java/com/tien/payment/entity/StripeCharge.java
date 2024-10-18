@@ -5,8 +5,6 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.Map;
-
 @Data
 @Builder
 @NoArgsConstructor
@@ -23,6 +21,5 @@ public class StripeCharge {
       Double amount;
       Boolean success;
       String chargeId;
-      Map<String, Object> additionalInfo;
 
 }

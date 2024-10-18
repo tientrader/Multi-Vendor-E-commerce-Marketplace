@@ -28,4 +28,7 @@ public class OrderCreationRequest {
       @NotBlank(message = "STATUS_IS_REQUIRED")
       String status;
 
+      String paymentMethod;
+      String paymentToken;
+
 }

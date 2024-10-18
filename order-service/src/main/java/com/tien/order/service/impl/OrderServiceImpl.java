@@ -4,10 +4,13 @@ import com.tien.event.dto.NotificationEvent;
 import com.tien.order.dto.ApiResponse;
 import com.tien.order.dto.request.OrderCreationRequest;
 import com.tien.order.dto.request.OrderItemCreationRequest;
+import com.tien.order.dto.request.StripeChargeRequest;
 import com.tien.order.dto.response.OrderResponse;
+import com.tien.order.dto.response.StripeChargeResponse;
 import com.tien.order.entity.Order;
 import com.tien.order.exception.AppException;
 import com.tien.order.exception.ErrorCode;
+import com.tien.order.httpclient.PaymentClient;
 import com.tien.order.httpclient.ProductClient;
 import com.tien.order.mapper.OrderMapper;
 import com.tien.order.repository.OrderRepository;
@@ -35,6 +38,7 @@ import java.util.stream.Collectors;
 public class OrderServiceImpl implements OrderService {
 
       ProductClient productClient;
+      PaymentClient paymentClient;
       OrderRepository orderRepository;
       OrderMapper orderMapper;
       KafkaTemplate<String, Object> kafkaTemplate;
@@ -50,45 +54,46 @@ public class OrderServiceImpl implements OrderService {
             order.setTotal(calculateOrderTotal(request.getItems()));
             order.setStatus("PENDING");
 
-            log.info("Order created for user: {}, total amount: {}", username, order.getTotal());
-
             updateStockAndSoldQuantity(request.getItems());
 
             orderRepository.save(order);
-            log.info("Order saved successfully for user: {}", username);
+            log.info("(createOrder) Order created for user: {}, total amount: {}", username, order.getTotal());
 
             kafkaTemplate.send("order-created-successful", NotificationEvent.builder()
                     .channel("EMAIL")
                     .recipient(request.getEmail())
                     .subject("Order created successfully")
-                    .body("Thank " + username + " for buying our products!")
+                    .body("Thank you for buying our products! " + username)
                     .build());
-            log.info("(createOrder) Notification email sent to: {}", request.getEmail());
+            log.info("Notification email sent to: {}", request.getEmail());
+
+            if ("CARD".equalsIgnoreCase(request.getPaymentMethod())) {
+                  StripeChargeRequest stripeChargeRequest = new StripeChargeRequest();
+                  stripeChargeRequest.setUsername(username);
+                  stripeChargeRequest.setAmount(order.getTotal());
+                  stripeChargeRequest.setStripeToken(request.getPaymentToken());
+                  stripeChargeRequest.setEmail(request.getEmail());
+
+                  ApiResponse<StripeChargeResponse> paymentResponse = paymentClient.charge(stripeChargeRequest);
+
+                  if (paymentResponse.getResult() != null && paymentResponse.getResult().getSuccess()) {
+                        order.setStatus("PAID");
+                        log.info("(processPayment) Payment successful for order ID: {}", order.getOrderId());
+                  } else {
+                        log.error("(processPayment) Payment failed for order ID: {}", order.getOrderId());
+                        throw new AppException(ErrorCode.PAYMENT_FAIL);
+                  }
+            } else if ("COD".equalsIgnoreCase(request.getPaymentMethod())) {
+                  log.info("(processPayment) Order placed with COD payment for order ID: {}", order.getOrderId());
+            } else {
+                  throw new IllegalArgumentException("Invalid payment method: " + request.getPaymentMethod());
+            }
+
+            if ("PAID".equals(order.getStatus())) {
+                  orderRepository.save(order);
+            }
 
             return orderMapper.toOrderResponse(order);
-      }
-
-      @Override
-      @Transactional
-      public void createOrderFromCart(OrderCreationRequest request) {
-            log.info("Starting order creation from cart for user: {}", request.getEmail());
-            String username = getCurrentUsername();
-
-            Order order = orderMapper.toOrder(request);
-            order.setUsername(username);
-
-            updateStockAndSoldQuantity(request.getItems());
-
-            orderRepository.save(order);
-            log.info("Order created from cart for user: {}, total amount: {}", username, order.getTotal());
-
-            kafkaTemplate.send("order-created-successful", NotificationEvent.builder()
-                    .channel("EMAIL")
-                    .recipient(request.getEmail())
-                    .subject("Order created successfully")
-                    .body("Thank " + username + " for buying our products!")
-                    .build());
-            log.info("(createOrderFromCart) Notification email sent to: {}", request.getEmail());
       }
 
       @Override

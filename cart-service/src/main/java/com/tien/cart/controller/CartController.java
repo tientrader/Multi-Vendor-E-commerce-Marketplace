@@ -3,6 +3,7 @@ package com.tien.cart.controller;
 import com.tien.cart.dto.ApiResponse;
 import com.tien.cart.dto.request.CartCreationRequest;
 import com.tien.cart.dto.response.CartResponse;
+import com.tien.cart.dto.response.OrderResponse;
 import com.tien.cart.service.CartService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -26,10 +27,11 @@ public class CartController {
       }
 
       @PostMapping("/create-order")
-      public ApiResponse<Void> createOrderFromCart() {
-            cartService.createOrderFromCart();
-            return ApiResponse.<Void>builder()
-                    .message("Order created successfully")
+      public ApiResponse<OrderResponse> createOrderFromCart(
+              @RequestParam("paymentMethod") String paymentMethod,
+              @RequestParam(value = "paymentToken", required = false) String paymentToken) {
+            return ApiResponse.<OrderResponse>builder()
+                    .result(cartService.createOrderFromCart(paymentMethod, paymentToken))
                     .build();
       }
 

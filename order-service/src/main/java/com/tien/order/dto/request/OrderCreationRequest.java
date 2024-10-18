@@ -23,7 +23,8 @@ public class OrderCreationRequest {
       List<OrderItemCreationRequest> items;
 
       double total;
-
       String status;
+      String paymentMethod;
+      String paymentToken;
 
 }
