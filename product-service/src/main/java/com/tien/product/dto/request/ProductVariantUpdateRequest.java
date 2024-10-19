@@ -13,7 +13,7 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ProductVariantRequest {
+public class ProductVariantUpdateRequest {
 
       @NotNull(message = "PRICE_IS_REQUIRED")
       @Positive(message = "PRICE_MUST_BE_POSITIVE")

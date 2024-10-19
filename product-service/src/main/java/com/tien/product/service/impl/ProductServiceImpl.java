@@ -8,6 +8,7 @@ import com.tien.product.dto.response.ShopResponse;
 import com.tien.product.entity.Category;
 import com.tien.product.entity.Product;
 import com.tien.product.entity.ProductVariant;
+import com.tien.product.enums.ProductSort;
 import com.tien.product.exception.AppException;
 import com.tien.product.exception.ErrorCode;
 import com.tien.product.httpclient.ShopClient;
@@ -96,25 +97,6 @@ public class ProductServiceImpl implements ProductService {
             categoryRepository.save(newCategory);
 
             return productMapper.toProductResponse(product);
-      }
-
-      @Override
-      @Transactional
-      public void updateStockAndSoldQuantity(String productId, String variantId, int quantity) {
-            Product product = findProductById(productId);
-            ProductVariant variant = product.getVariants().stream()
-                    .filter(v -> v.getVariantId().equals(variantId))
-                    .findFirst()
-                    .orElseThrow(() -> new AppException(ErrorCode.VARIANT_NOT_FOUND));
-
-            int newStock = variant.getStock() - quantity;
-            if (newStock < 0) {
-                  throw new AppException(ErrorCode.OUT_OF_STOCK);
-            }
-
-            variant.setStock(newStock);
-            product.setSoldQuantity(product.getSoldQuantity() + quantity);
-            productRepository.save(product);
       }
 
       @Override

@@ -4,8 +4,6 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.util.List;
-
 @Data
 @Builder
 @NoArgsConstructor
@@ -20,7 +18,5 @@ public class ProductUpdateRequest {
 
       @NotBlank(message = "CATEGORY_ID_IS_REQUIRED")
       String categoryId;
-
-      List<ProductVariantRequest> variants;
 
 }

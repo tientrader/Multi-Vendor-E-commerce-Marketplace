@@ -25,7 +25,7 @@ public interface ProductClient {
     ApiResponse<Integer> getProductStockById(@PathVariable("productId") String productId,
                                              @PathVariable("variantId") String variantId);
 
-    @PutMapping("/{productId}/update-stock-sold")
+    @PutMapping("/variants/{productId}/update-stock-sold")
     ApiResponse<Void> updateStockAndSoldQuantity(@PathVariable String productId,
                                                  @RequestParam String variantId,
                                                  @RequestParam int quantity);

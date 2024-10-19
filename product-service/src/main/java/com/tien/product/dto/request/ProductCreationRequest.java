@@ -1,5 +1,6 @@
 package com.tien.product.dto.request;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -21,6 +22,7 @@ public class ProductCreationRequest {
       @NotBlank(message = "CATEGORY_ID_IS_REQUIRED")
       String categoryId;
 
+      @Valid
       List<ProductVariantRequest> variants;
 
 }

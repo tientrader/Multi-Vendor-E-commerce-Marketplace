@@ -1,4 +1,4 @@
-package com.tien.product.service.impl;
+package com.tien.product.enums;
 
 public enum ProductSort {
 

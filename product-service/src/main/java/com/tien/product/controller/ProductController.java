@@ -6,7 +6,7 @@ import com.tien.product.dto.request.ProductUpdateRequest;
 import com.tien.product.dto.response.ExistsResponse;
 import com.tien.product.dto.response.ProductResponse;
 import com.tien.product.service.ProductService;
-import com.tien.product.service.impl.ProductSort;
+import com.tien.product.enums.ProductSort;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -35,16 +35,6 @@ public class ProductController {
                                                  @RequestBody @Valid ProductUpdateRequest request) {
             return ApiResponse.<ProductResponse>builder()
                     .result(productService.updateProduct(productId, request))
-                    .build();
-      }
-
-      @PutMapping("/{productId}/update-stock-sold")
-      public ApiResponse<Void> updateStockAndSoldQuantity(@PathVariable String productId,
-                                                   @RequestParam String variantId,
-                                                   @RequestParam int quantity) {
-            productService.updateStockAndSoldQuantity(productId, variantId, quantity);
-            return ApiResponse.<Void>builder()
-                    .message("Variant stock and sold quantity updated successfully")
                     .build();
       }
 
