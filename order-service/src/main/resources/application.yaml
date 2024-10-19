@@ -47,6 +47,12 @@ resilience4j:
     instances:
       getProductPriceById:
         baseConfig: default
+      getProductStockById:
+        baseConfig: default
+      updateStockAndSoldQuantity:
+        baseConfig: default
+      chargePayment:
+        baseConfig: default
 
   retry:
     configs:
@@ -55,6 +61,12 @@ resilience4j:
         waitDuration: 2s
     instances:
       getProductPriceById:
+        baseConfig: default
+      getProductStockById:
+        baseConfig: default
+      updateStockAndSoldQuantity:
+        baseConfig: default
+      chargePayment:
         baseConfig: default
 
 management:

@@ -55,17 +55,6 @@ public class OrderServiceImpl implements OrderService {
             order.setTotal(calculateOrderTotal(request.getItems()));
             order.setStatus("PENDING");
 
-            updateStockAndSoldQuantity(request.getItems());
-
-            orderRepository.save(order);
-
-            kafkaTemplate.send("order-created-successful", NotificationEvent.builder()
-                    .channel("EMAIL")
-                    .recipient(request.getEmail())
-                    .subject("Order created successfully")
-                    .body("Thank you for your purchase, " + username)
-                    .build());
-
             if ("CARD".equalsIgnoreCase(request.getPaymentMethod())) {
                   StripeChargeRequest stripeChargeRequest = new StripeChargeRequest();
                   stripeChargeRequest.setUsername(username);
@@ -86,9 +75,15 @@ public class OrderServiceImpl implements OrderService {
                   throw new IllegalArgumentException("Invalid payment method: " + request.getPaymentMethod());
             }
 
-            if ("PAID".equals(order.getStatus())) {
-                  orderRepository.save(order);
-            }
+            updateStockAndSoldQuantity(request.getItems());
+            orderRepository.save(order);
+
+            kafkaTemplate.send("order-created-successful", NotificationEvent.builder()
+                    .channel("EMAIL")
+                    .recipient(request.getEmail())
+                    .subject("Order created successfully")
+                    .body("Thank you for your purchase, " + username)
+                    .build());
 
             return orderMapper.toOrderResponse(order);
       }

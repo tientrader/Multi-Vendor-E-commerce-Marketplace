@@ -3,7 +3,14 @@ server:
   compression:
     enabled: true
     min-response-size: 1024
-    mime-types: text/html, text/xml, text/plain, text/css, text/javascript, application/javascript, application/json
+    mime-types:
+      - text/html
+      - text/xml
+      - text/plain
+      - text/css
+      - text/javascript
+      - application/javascript
+      - application/json
 
 app:
   api-prefix: /api/v1
@@ -20,54 +27,155 @@ spring:
             - Path=${app.api-prefix}/user/**
           filters:
             - StripPrefix=2
+            - name: CircuitBreaker
+              args:
+                name: userService
+            - name: Retry
+              args:
+                name: default
         - id: shop-service
           uri: http://localhost:8081
           predicates:
             - Path=${app.api-prefix}/shop/**
           filters:
             - StripPrefix=2
+            - name: CircuitBreaker
+              args:
+                name: shopService
+            - name: Retry
+              args:
+                name: default
         - id: product_service
           uri: http://localhost:8082
           predicates:
             - Path=${app.api-prefix}/product/**
           filters:
             - StripPrefix=2
+            - name: CircuitBreaker
+              args:
+                name: productService
+            - name: Retry
+              args:
+                name: default
         - id: cart_service
           uri: http://localhost:8083
           predicates:
             - Path=${app.api-prefix}/cart/**
           filters:
             - StripPrefix=2
+            - name: CircuitBreaker
+              args:
+                name: cartService
+            - name: Retry
+              args:
+                name: default
         - id: order_service
           uri: http://localhost:8084
           predicates:
             - Path=${app.api-prefix}/order/**
           filters:
             - StripPrefix=2
+            - name: CircuitBreaker
+              args:
+                name: orderService
+            - name: Retry
+              args:
+                name: default
         - id: post_service
           uri: http://localhost:8085
           predicates:
             - Path=${app.api-prefix}/post/**
           filters:
             - StripPrefix=2
+            - name: CircuitBreaker
+              args:
+                name: postService
+            - name: Retry
+              args:
+                name: default
         - id: notification_service
           uri: http://localhost:8086
           predicates:
             - Path=${app.api-prefix}/notification/**
           filters:
             - StripPrefix=2
+            - name: CircuitBreaker
+              args:
+                name: notificationService
+            - name: Retry
+              args:
+                name: default
         - id: payment_service
           uri: http://localhost:8087
           predicates:
             - Path=${app.api-prefix}/payment/**
           filters:
             - StripPrefix=2
+            - name: CircuitBreaker
+              args:
+                name: paymentService
+            - name: Retry
+              args:
+                name: default
         - id: actuator
           uri: http://localhost:8888
           predicates:
             - Path=/actuator/**
           filters:
             - StripPrefix=2
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        registerHealthIndicator: true
+        failureRateThreshold: 50
+        minimumNumberOfCalls: 5
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        waitDurationInOpenState: 5s
+        permittedNumberOfCallsInHalfOpenState: 3
+        slidingWindowSize: 10
+        slidingWindowType: COUNT_BASED
+    instances:
+      userService:
+        baseConfig: default
+      shopService:
+        baseConfig: default
+      productService:
+        baseConfig: default
+      cartService:
+        baseConfig: default
+      orderService:
+        baseConfig: default
+      postService:
+        baseConfig: default
+      notificationService:
+        baseConfig: default
+      paymentService:
+        baseConfig: default
+
+  retry:
+    configs:
+      default:
+        maxRetryAttempts: 3
+        waitDuration: 2s
+    instances:
+      userService:
+        baseConfig: default
+      shopService:
+        baseConfig: default
+      productService:
+        baseConfig: default
+      cartService:
+        baseConfig: default
+      orderService:
+        baseConfig: default
+      postService:
+        baseConfig: default
+      notificationService:
+        baseConfig: default
+      paymentService:
+        baseConfig: default
 
 management:
   endpoints:

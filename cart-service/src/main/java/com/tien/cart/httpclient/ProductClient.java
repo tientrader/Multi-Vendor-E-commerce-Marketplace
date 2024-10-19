@@ -20,6 +20,8 @@ public interface ProductClient {
       ApiResponse<Double> getProductPriceById(@PathVariable("productId") String productId,
                                               @PathVariable("variantId") String variantId);
 
+      @CircuitBreaker(name = "getProductStockById", fallbackMethod = "getProductStockByIdFallback")
+      @Retry(name = "getProductStockById")
       @GetMapping(value = "/{productId}/stock/{variantId}", produces = MediaType.APPLICATION_JSON_VALUE)
       ApiResponse<Integer> getProductStockById(@PathVariable("productId") String productId,
                                                @PathVariable("variantId") String variantId);
@@ -30,6 +32,10 @@ public interface ProductClient {
       ExistsResponse existsProduct(@PathVariable String productId, @PathVariable String variantId);
 
       default ApiResponse<Double> getProductPriceByIdFallback(String productId, String variantId, Throwable throwable) {
+            throw new RuntimeException();
+      }
+
+      default ApiResponse<Integer> getProductStockByIdFallback(String productId, String variantId, Throwable throwable) {
             throw new RuntimeException();
       }
 

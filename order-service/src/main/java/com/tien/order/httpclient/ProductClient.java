@@ -21,16 +21,28 @@ public interface ProductClient {
     ApiResponse<Double> getProductPriceById(@PathVariable("productId") String productId,
                                             @PathVariable("variantId") String variantId);
 
+    @CircuitBreaker(name = "getProductStockById", fallbackMethod = "getProductStockByIdFallback")
+    @Retry(name = "getProductStockById")
     @GetMapping(value = "/{productId}/stock/{variantId}", produces = MediaType.APPLICATION_JSON_VALUE)
     ApiResponse<Integer> getProductStockById(@PathVariable("productId") String productId,
                                              @PathVariable("variantId") String variantId);
 
+    @CircuitBreaker(name = "updateStockAndSoldQuantity", fallbackMethod = "updateStockAndSoldQuantityFallback")
+    @Retry(name = "updateStockAndSoldQuantity")
     @PutMapping("/variants/{productId}/update-stock-sold")
     ApiResponse<Void> updateStockAndSoldQuantity(@PathVariable String productId,
                                                  @RequestParam String variantId,
                                                  @RequestParam int quantity);
 
     default ApiResponse<Double> getProductPriceByIdFallback(String productId, String variantId, Throwable throwable) {
+        throw new RuntimeException();
+    }
+
+    default ApiResponse<Integer> getProductStockByIdFallback(String productId, String variantId, Throwable throwable) {
+        throw new RuntimeException();
+    }
+
+    default ApiResponse<Void> updateStockAndSoldQuantityFallback(String productId, String variantId, int quantity, Throwable throwable) {
         throw new RuntimeException();
     }
 

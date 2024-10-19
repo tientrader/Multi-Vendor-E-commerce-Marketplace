@@ -37,6 +37,8 @@ resilience4j:
     instances:
       getProductPriceById:
         baseConfig: default
+      getProductStockById:
+        baseConfig: default
       existsProduct:
         baseConfig: default
       createOrder:
@@ -49,6 +51,8 @@ resilience4j:
         waitDuration: 2s
     instances:
       getProductPriceById:
+        baseConfig: default
+      getProductStockById:
         baseConfig: default
       existsProduct:
         baseConfig: default
