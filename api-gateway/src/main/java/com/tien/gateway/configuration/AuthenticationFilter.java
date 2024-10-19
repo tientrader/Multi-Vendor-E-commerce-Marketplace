@@ -72,17 +72,10 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
         }
 
         String token = authHeader.getFirst().replace("Bearer ", "");
-        log.info("Token: {}", token);
 
         return jwtDecoder.decode(token)
-                .flatMap(jwt -> {
-                    log.info("JWT decoded successfully.");
-                    return chain.filter(exchange);
-                })
-                .onErrorResume(throwable -> {
-                    log.error("Error during authentication: ", throwable);
-                    return unauthenticated(response);
-                });
+                .flatMap(jwt -> chain.filter(exchange))
+                .onErrorResume(throwable -> unauthenticated(response));
     }
 
     private Mono<Void> unauthenticated(ServerHttpResponse response) {
