@@ -29,5 +29,9 @@ public class User {
     String firstName;
     String lastName;
     LocalDate dob;
+    boolean vipStatus;
+    LocalDate vipStartDate;
+    LocalDate vipEndDate;
+    String stripeSubscriptionId;
 
 }
