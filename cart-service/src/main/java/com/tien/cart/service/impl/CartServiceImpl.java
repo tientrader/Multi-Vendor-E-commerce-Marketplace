@@ -68,6 +68,8 @@ public class CartServiceImpl implements CartService {
             Cart cart = (Cart) redisTemplate.opsForValue().get(cartKey);
             validateCart(cart);
 
+            validateStockAvailability(Objects.requireNonNull(cart).getItems());
+
             OrderCreationRequest orderRequest = cartMapper.toOrderCreationRequest(cart);
             orderRequest.setEmail(Objects.requireNonNull(cart).getEmail());
             orderRequest.setPaymentMethod(paymentMethod);
@@ -210,6 +212,19 @@ public class CartServiceImpl implements CartService {
                   }
                   log.debug("Product exists: productId = {}, variantId = {}", productId, variantId);
             }
+      }
+
+      private void validateStockAvailability(List<CartItem> items) {
+            items.forEach(item -> {
+                  int stockQuantity = productClient.getProductStockById(
+                          item.getProductId(),
+                          item.getVariantId()
+                  ).getResult();
+
+                  if (stockQuantity < item.getQuantity()) {
+                        throw new AppException(ErrorCode.OUT_OF_STOCK);
+                  }
+            });
       }
 
 }

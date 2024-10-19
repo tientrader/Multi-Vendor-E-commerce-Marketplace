@@ -48,12 +48,13 @@ public class OrderServiceImpl implements OrderService {
       public OrderResponse createOrder(OrderCreationRequest request) {
             String username = getCurrentUsername();
 
+            validateStockAvailability(request.getItems());
+
             Order order = orderMapper.toOrder(request);
             order.setUsername(username);
             order.setTotal(calculateOrderTotal(request.getItems()));
             order.setStatus("PENDING");
 
-            validateStockAvailability(request.getItems());
             updateStockAndSoldQuantity(request.getItems());
 
             orderRepository.save(order);
