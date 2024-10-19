@@ -21,6 +21,10 @@ public interface ProductClient {
     ApiResponse<Double> getProductPriceById(@PathVariable("productId") String productId,
                                             @PathVariable("variantId") String variantId);
 
+    @GetMapping(value = "/{productId}/stock/{variantId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    ApiResponse<Integer> getProductStockById(@PathVariable("productId") String productId,
+                                             @PathVariable("variantId") String variantId);
+
     @PutMapping("/{productId}/update-stock-sold")
     ApiResponse<Void> updateStockAndSoldQuantity(@PathVariable String productId,
                                                  @RequestParam String variantId,

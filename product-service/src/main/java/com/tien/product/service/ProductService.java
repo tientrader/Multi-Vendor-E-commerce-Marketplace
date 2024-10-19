@@ -21,6 +21,7 @@ public interface ProductService {
       ProductResponse getProductById(String productId);
       List<ProductResponse> getAllProducts();
       double getProductPriceById(String productId, String variantId);
+      int getProductStockById(String productId, String variantId);
       ExistsResponse existsProduct(String productId, String variantId);
 
 }

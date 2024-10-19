@@ -83,6 +83,13 @@ public class ProductController {
                     .build();
       }
 
+      @GetMapping("/{productId}/stock/{variantId}")
+      public ApiResponse<Integer> getProductStockById(@PathVariable String productId, @PathVariable String variantId) {
+            return ApiResponse.<Integer>builder()
+                    .result(productService.getProductStockById(productId, variantId))
+                    .build();
+      }
+
       @GetMapping("/all")
       public ApiResponse<List<ProductResponse>> getAllProducts() {
             return ApiResponse.<List<ProductResponse>>builder()

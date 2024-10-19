@@ -201,6 +201,27 @@ public class ProductServiceImpl implements ProductService {
       }
 
       @Override
+      public int getProductStockById(String productId, String variantId) {
+            log.info("Fetching stock for product with ID: {} and variant ID: {}", productId, variantId);
+
+            Product product = productRepository.findById(productId)
+                    .orElseThrow(() -> {
+                          log.error("(getProductStockById) Product not found with ID: {}", productId);
+                          return new AppException(ErrorCode.PRODUCT_NOT_FOUND);
+                    });
+
+            ProductVariant variant = product.getVariants().stream()
+                    .filter(v -> v.getVariantId().equals(variantId))
+                    .findFirst()
+                    .orElseThrow(() -> {
+                          log.error("(getProductStockById) Variant not found with ID: {}", variantId);
+                          return new AppException(ErrorCode.VARIANT_NOT_FOUND);
+                    });
+
+            return variant.getStock();
+      }
+
+      @Override
       public ExistsResponse existsProduct(String productId, String variantId) {
             log.info("Checking existence for product with ID: {} and variant ID: {}", productId, variantId);
 
