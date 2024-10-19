@@ -27,12 +27,12 @@ spring:
             - Path=${app.api-prefix}/user/**
           filters:
             - StripPrefix=2
-            - name: CircuitBreaker
-              args:
-                name: userService
-            - name: Retry
-              args:
-                name: default
+#            - name: CircuitBreaker
+#              args:
+#                name: userService
+#            - name: Retry
+#              args:
+#                name: default
         - id: shop-service
           uri: http://localhost:8081
           predicates:
@@ -111,12 +111,12 @@ spring:
             - Path=${app.api-prefix}/payment/**
           filters:
             - StripPrefix=2
-            - name: CircuitBreaker
-              args:
-                name: paymentService
-            - name: Retry
-              args:
-                name: default
+#            - name: CircuitBreaker
+#              args:
+#                name: paymentService
+#            - name: Retry
+#              args:
+#                name: default
         - id: actuator
           uri: http://localhost:8888
           predicates:

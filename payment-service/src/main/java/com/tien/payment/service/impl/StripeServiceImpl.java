@@ -33,7 +33,6 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -99,53 +98,54 @@ public class StripeServiceImpl implements StripeService {
       public StripeSubscriptionResponse createSubscription(StripeSubscriptionRequest request) {
             StripeSubscription stripeSubscription = stripeMapper.toStripeSubscription(request);
 
-            StripeSubscriptionResponse response = StripeSubscriptionResponse.builder()
-                    .status("processing")
-                    .message("Your subscription is being processed.")
-                    .build();
+            try {
+                  Map<String, Object> paymentMethodParams = new HashMap<>();
+                  paymentMethodParams.put("type", "card");
+                  paymentMethodParams.put("card", Map.of("token", request.getStripeToken()));
+                  PaymentMethod paymentMethod = PaymentMethod.create(paymentMethodParams);
 
-            CompletableFuture.runAsync(() -> {
-                  try {
-                        Map<String, Object> paymentMethodParams = new HashMap<>();
-                        paymentMethodParams.put("type", "card");
-                        paymentMethodParams.put("card", Map.of("token", request.getStripeToken()));
-                        PaymentMethod paymentMethod = PaymentMethod.create(paymentMethodParams);
+                  Map<String, Object> customerMap = new HashMap<>();
+                  customerMap.put("name", request.getUsername());
+                  customerMap.put("email", request.getEmail());
+                  customerMap.put("payment_method", paymentMethod.getId());
+                  Customer customer = Customer.create(customerMap);
 
-                        Map<String, Object> customerMap = new HashMap<>();
-                        customerMap.put("name", request.getUsername());
-                        customerMap.put("email", request.getEmail());
-                        customerMap.put("payment_method", paymentMethod.getId());
-                        Customer customer = Customer.create(customerMap);
+                  List<Object> items = new ArrayList<>();
+                  items.add(Map.of("price", request.getPriceId(), "quantity", request.getNumberOfLicense()));
+                  Subscription subscription = Subscription.create(Map.of(
+                          "customer", customer.getId(),
+                          "default_payment_method", paymentMethod.getId(),
+                          "items", items
+                  ));
 
-                        List<Object> items = new ArrayList<>();
-                        items.add(Map.of("price", request.getPriceId(), "quantity", request.getNumberOfLicense()));
-                        Subscription subscription = Subscription.create(Map.of(
-                                "customer", customer.getId(),
-                                "default_payment_method", paymentMethod.getId(),
-                                "items", items
-                        ));
+                  stripeSubscription.setStripeCustomerId(customer.getId());
+                  stripeSubscription.setStripeSubscriptionId(subscription.getId());
+                  stripeSubscription.setStripePaymentMethodId(paymentMethod.getId());
+                  stripeSubscription.setUsername(request.getUsername());
+                  stripeSubscription.setPriceId(request.getPriceId());
+                  stripeSubscription.setNumberOfLicense(request.getNumberOfLicense());
+                  stripeSubscriptionRepository.save(stripeSubscription);
 
-                        stripeSubscription.setStripeCustomerId(customer.getId());
-                        stripeSubscription.setStripeSubscriptionId(subscription.getId());
-                        stripeSubscription.setStripePaymentMethodId(paymentMethod.getId());
-                        stripeSubscription.setUsername(request.getUsername());
-                        stripeSubscription.setPriceId(request.getPriceId());
-                        stripeSubscription.setNumberOfLicense(request.getNumberOfLicense());
-                        stripeSubscriptionRepository.save(stripeSubscription);
+                  kafkaTemplate.send("payment_successful", NotificationEvent.builder()
+                          .channel("email")
+                          .recipient(request.getEmail())
+                          .subject("Subscription Created")
+                          .body("Your subscription has been created successfully.")
+                          .build());
 
-                        kafkaTemplate.send("payment_successful", NotificationEvent.builder()
-                                .channel("email")
-                                .recipient(request.getEmail())
-                                .subject("Subscription Created")
-                                .body("Your subscription has been created successfully.")
-                                .build());
+                  return StripeSubscriptionResponse.builder()
+                          .id(subscription.getId())
+                          .username(request.getUsername())
+                          .stripeCustomerId(customer.getId())
+                          .stripeSubscriptionId(subscription.getId())
+                          .stripePaymentMethodId(paymentMethod.getId())
+                          .status("active")
+                          .message("Your subscription has been created successfully.")
+                          .build();
 
-                  } catch (StripeException e) {
-                        throw new RuntimeException(e.getMessage());
-                  }
-            });
-
-            return response;
+            } catch (StripeException e) {
+                  throw new RuntimeException("Error creating subscription: " + e.getMessage(), e);
+            }
       }
 
       @Override

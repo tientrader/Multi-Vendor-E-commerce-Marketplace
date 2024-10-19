@@ -31,6 +31,10 @@ idp:
   client-id: ${CLIENT_ID}
   client-secret: ${CLIENT_SECRET}
 
+app:
+  services:
+    payment: http://localhost:8087/payment
+
 springdoc:
   swagger-ui:
     path: /swagger-ui.html
