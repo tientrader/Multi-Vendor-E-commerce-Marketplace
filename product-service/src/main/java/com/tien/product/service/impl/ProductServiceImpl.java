@@ -53,8 +53,6 @@ public class ProductServiceImpl implements ProductService {
       @Transactional
       public ProductResponse createProduct(ProductCreationRequest request) {
             String username = getCurrentUsername();
-            log.info("Creating product for shop owner: {}", username);
-
             ShopResponse shopResponse = getShopByOwnerUsername(username);
             Category category = findCategoryById(request.getCategoryId());
             checkCategoryOwnership(category, shopResponse.getId());
@@ -73,7 +71,6 @@ public class ProductServiceImpl implements ProductService {
             category.getProducts().add(product);
             categoryRepository.save(category);
 
-            log.info("Product created with ID: {}", product.getId());
             return productMapper.toProductResponse(product);
       }
 
@@ -81,8 +78,6 @@ public class ProductServiceImpl implements ProductService {
       @Transactional
       public ProductResponse updateProduct(String productId, ProductUpdateRequest request) {
             String username = getCurrentUsername();
-            log.info("Updating product with ID: {} by shop owner: {}", productId, username);
-
             ShopResponse shopResponse = getShopByOwnerUsername(username);
 
             Product product = findProductById(productId);
@@ -100,44 +95,32 @@ public class ProductServiceImpl implements ProductService {
             newCategory.getProducts().add(product);
             categoryRepository.save(newCategory);
 
-            log.info("Product updated with ID: {}", product.getId());
             return productMapper.toProductResponse(product);
       }
 
       @Override
       @Transactional
       public void updateStockAndSoldQuantity(String productId, String variantId, int quantity) {
-            log.info("Updating stock for variant with ID: {} for product ID: {}. Quantity: {}", variantId, productId, quantity);
-
             Product product = findProductById(productId);
             ProductVariant variant = product.getVariants().stream()
                     .filter(v -> v.getVariantId().equals(variantId))
                     .findFirst()
-                    .orElseThrow(() -> {
-                          log.error("(updateStockAndSoldQuantity) Variant not found with ID: {}", variantId);
-                          return new AppException(ErrorCode.VARIANT_NOT_FOUND);
-                    });
+                    .orElseThrow(() -> new AppException(ErrorCode.VARIANT_NOT_FOUND));
 
             int newStock = variant.getStock() - quantity;
             if (newStock < 0) {
-                  log.error("Attempted to reduce stock below zero for variant ID: {}", variantId);
                   throw new AppException(ErrorCode.OUT_OF_STOCK);
             }
 
             variant.setStock(newStock);
             product.setSoldQuantity(product.getSoldQuantity() + quantity);
             productRepository.save(product);
-
-            log.info("Stock updated for variant ID: {}. New stock: {}", variantId, newStock);
-            log.info("Sold quantity updated for product ID: {}. New sold quantity: {}", productId, product.getSoldQuantity());
       }
 
       @Override
       @Transactional
       public void deleteProduct(String productId) {
             String username = getCurrentUsername();
-            log.info("Deleting product with ID: {} by shop owner: {}", productId, username);
-
             ShopResponse shopResponse = getShopByOwnerUsername(username);
 
             Product product = findProductById(productId);
@@ -148,7 +131,6 @@ public class ProductServiceImpl implements ProductService {
             categoryRepository.save(category);
 
             productRepository.deleteById(productId);
-            log.info("Product deleted with ID: {}", productId);
       }
 
       @Override
@@ -158,78 +140,77 @@ public class ProductServiceImpl implements ProductService {
               Double minPrice, Double maxPrice, ProductSort productSort) {
 
             productSort = Optional.ofNullable(productSort).orElse(ProductSort.DEFAULT);
-            Criteria criteria = buildCriteriaAndPrice(shopId, categoryId, minPrice, maxPrice);
-            Sort sort = determineSortOrder(productSort, sortBy, sortDirection);
-            return getProductsPage(criteria, page, size, sort);
+            Criteria criteria = new Criteria();
+
+            if (shopId != null) {
+                  criteria.and("shopId").is(shopId);
+            }
+            if (categoryId != null) {
+                  criteria.and("category.id").is(categoryId);
+            }
+            if (minPrice != null && maxPrice != null) {
+                  criteria.and("price").gte(minPrice).lte(maxPrice);
+            } else if (minPrice != null) {
+                  criteria.and("price").gte(minPrice);
+            } else if (maxPrice != null) {
+                  criteria.and("price").lte(maxPrice);
+            }
+
+            Sort sort = switch (productSort) {
+                  case BEST_SELLING -> Sort.by(Sort.Direction.DESC, "soldQuantity");
+                  case NEWEST -> Sort.by(Sort.Direction.DESC, "createdAt");
+                  default -> Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
+            };
+
+            Query query = Query.query(criteria).with(PageRequest.of(page, size, sort));
+            List<Product> products = mongoTemplate.find(query, Product.class);
+            long total = mongoTemplate.count(query.skip(-1).limit(-1), Product.class);
+            List<ProductResponse> responses = productMapper.toProductResponses(products);
+
+            return new PageImpl<>(responses, PageRequest.of(page, size), total);
       }
 
       @Override
       public ProductResponse getProductById(String productId) {
-            log.info("Fetching product with ID: {}", productId);
             return productMapper.toProductResponse(productRepository.findById(productId)
-                    .orElseThrow(() -> {
-                          log.error("(getProductById) Product not found with ID: {}", productId);
-                          return new AppException(ErrorCode.PRODUCT_NOT_FOUND);
-                    }));
+                    .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND)));
       }
 
       @Override
       public List<ProductResponse> getAllProducts() {
-            log.info("Fetching all products");
             return productMapper.toProductResponses(productRepository.findAll());
       }
 
       @Override
       public double getProductPriceById(String productId, String variantId) {
-            log.info("Fetching price for product with ID: {} and variant ID: {}", productId, variantId);
-
             Product product = productRepository.findById(productId)
-                    .orElseThrow(() -> {
-                          log.error("(getProductPriceById) Product not found with ID: {}", productId);
-                          return new AppException(ErrorCode.PRODUCT_NOT_FOUND);
-                    });
+                    .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
 
             ProductVariant variant = product.getVariants().stream()
                     .filter(v -> v.getVariantId().equals(variantId))
                     .findFirst()
-                    .orElseThrow(() -> {
-                          log.error("(getProductPriceById) Variant not found with ID: {}", variantId);
-                          return new AppException(ErrorCode.VARIANT_NOT_FOUND);
-                    });
+                    .orElseThrow(() -> new AppException(ErrorCode.VARIANT_NOT_FOUND));
 
             return variant.getPrice();
       }
 
       @Override
       public int getProductStockById(String productId, String variantId) {
-            log.info("Fetching stock for product with ID: {} and variant ID: {}", productId, variantId);
-
             Product product = productRepository.findById(productId)
-                    .orElseThrow(() -> {
-                          log.error("(getProductStockById) Product not found with ID: {}", productId);
-                          return new AppException(ErrorCode.PRODUCT_NOT_FOUND);
-                    });
+                    .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
 
             ProductVariant variant = product.getVariants().stream()
                     .filter(v -> v.getVariantId().equals(variantId))
                     .findFirst()
-                    .orElseThrow(() -> {
-                          log.error("(getProductStockById) Variant not found with ID: {}", variantId);
-                          return new AppException(ErrorCode.VARIANT_NOT_FOUND);
-                    });
+                    .orElseThrow(() -> new AppException(ErrorCode.VARIANT_NOT_FOUND));
 
             return variant.getStock();
       }
 
       @Override
       public ExistsResponse existsProduct(String productId, String variantId) {
-            log.info("Checking existence for product with ID: {} and variant ID: {}", productId, variantId);
-
             Product product = productRepository.findById(productId)
-                    .orElseThrow(() -> {
-                          log.error("(existsProduct) Product not found with ID: {}", productId);
-                          return new AppException(ErrorCode.PRODUCT_NOT_FOUND);
-                    });
+                    .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
 
             boolean variantExists = product.getVariants().stream()
                     .anyMatch(variant -> variant.getVariantId().equals(variantId));
@@ -244,74 +225,23 @@ public class ProductServiceImpl implements ProductService {
 
       private Product findProductById(String productId) {
             return productRepository.findById(productId)
-                    .orElseThrow(() -> {
-                          log.error("(findProductById) Product not found with ID: {}", productId);
-                          return new AppException(ErrorCode.PRODUCT_NOT_FOUND);
-                    });
+                    .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
       }
 
       private Category findCategoryById(String categoryId) {
             return categoryRepository.findById(categoryId)
-                    .orElseThrow(() -> {
-                          log.error("(findCategoryById) Category not found with ID: {}", categoryId);
-                          return new AppException(ErrorCode.CATEGORY_NOT_FOUND);
-                    });
+                    .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
       }
 
       private void checkCategoryOwnership(Category category, String shopId) {
             if (!category.getShopId().equals(shopId)) {
-                  log.error("Unauthorized access to category with ID: {} by shopId: {}", category.getId(), shopId);
                   throw new AppException(ErrorCode.UNAUTHORIZED);
             }
       }
 
       private ShopResponse getShopByOwnerUsername(String username) {
             return Optional.ofNullable(shopClient.getShopByOwnerUsername(username).getResult())
-                    .orElseThrow(() -> {
-                          log.error("Shop not found for owner: {}", username);
-                          return new AppException(ErrorCode.SHOP_NOT_FOUND);
-                    });
-      }
-
-      private Criteria buildCriteriaAndPrice(String shopId, String categoryId, Double minPrice, Double maxPrice) {
-            Criteria criteria = new Criteria();
-
-            if (shopId != null) {
-                  criteria.and("shopId").is(shopId);
-                  log.info("Fetching products for shopId: {}", shopId);
-            } else if (categoryId != null) {
-                  criteria.and("category.id").is(categoryId);
-                  log.info("Fetching products for categoryId: {}", categoryId);
-            } else {
-                  log.info("Fetching products for homepage");
-            }
-
-            if (minPrice != null && maxPrice != null) {
-                  criteria.and("price").gte(minPrice).lte(maxPrice);
-            } else if (minPrice != null) {
-                  criteria.and("price").gte(minPrice);
-            } else if (maxPrice != null) {
-                  criteria.and("price").lte(maxPrice);
-            }
-
-            return criteria;
-      }
-
-      private Sort determineSortOrder(ProductSort productSort, String sortBy, String sortDirection) {
-            return switch (productSort) {
-                  case BEST_SELLING -> Sort.by(Sort.Direction.DESC, "soldQuantity");
-                  case NEWEST -> Sort.by(Sort.Direction.DESC, "createdAt");
-                  default -> Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
-            };
-      }
-
-      private Page<ProductResponse> getProductsPage(Criteria criteria, int page, int size, Sort sort) {
-            Query query = Query.query(criteria).with(PageRequest.of(page, size, sort));
-            List<Product> products = mongoTemplate.find(query, Product.class);
-            long total = mongoTemplate.count(query.skip(-1).limit(-1), Product.class);
-            List<ProductResponse> responses = productMapper.toProductResponses(products);
-
-            return new PageImpl<>(responses, PageRequest.of(page, size), total);
+                    .orElseThrow(() -> new AppException(ErrorCode.SHOP_NOT_FOUND));
       }
 
 }

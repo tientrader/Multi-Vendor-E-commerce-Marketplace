@@ -28,6 +28,22 @@ public class CategoryController {
                     .build();
       }
 
+      @PutMapping("/{categoryId}")
+      public ApiResponse<CategoryResponse> updateCategory(@PathVariable String categoryId,
+                                                   @RequestBody @Valid CategoryUpdateRequest request) {
+            return ApiResponse.<CategoryResponse>builder()
+                    .result(categoryService.updateCategory(categoryId, request))
+                    .build();
+      }
+
+      @DeleteMapping("/{categoryId}")
+      public ApiResponse<String> deleteCategory(@PathVariable String categoryId) {
+            categoryService.deleteCategory(categoryId);
+            return ApiResponse.<String>builder()
+                    .result("Category has been deleted")
+                    .build();
+      }
+
       @GetMapping("/{categoryId}")
       public ApiResponse<CategoryResponse> getCategoryById(@PathVariable("categoryId") String categoryId) {
             return ApiResponse.<CategoryResponse>builder()
@@ -44,25 +60,8 @@ public class CategoryController {
 
       @GetMapping("/shop/{shopId}")
       public ApiResponse<List<CategoryResponse>> getCategoriesByShopId(@PathVariable String shopId) {
-            List<CategoryResponse> categoryResponses = categoryService.getCategoriesByShopId(shopId);
             return ApiResponse.<List<CategoryResponse>>builder()
-                    .result(categoryResponses)
-                    .build();
-      }
-
-      @PutMapping("/{categoryId}")
-      public ApiResponse<CategoryResponse> updateCategory(@PathVariable String categoryId,
-                                                   @RequestBody @Valid CategoryUpdateRequest request) {
-            return ApiResponse.<CategoryResponse>builder()
-                    .result(categoryService.updateCategory(categoryId, request))
-                    .build();
-      }
-
-      @DeleteMapping("/{categoryId}")
-      public ApiResponse<String> deleteCategory(@PathVariable String categoryId) {
-            categoryService.deleteCategory(categoryId);
-            return ApiResponse.<String>builder()
-                    .result("Category has been deleted")
+                    .result(categoryService.getCategoriesByShopId(shopId))
                     .build();
       }
 

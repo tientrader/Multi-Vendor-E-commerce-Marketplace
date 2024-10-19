@@ -55,7 +55,6 @@ public class CartServiceImpl implements CartService {
             }
 
             redisTemplate.opsForValue().set(cartKey, existingCart);
-            log.info("Cart processed for user: {}", username);
             return cartMapper.toCartResponse(existingCart);
       }
 
@@ -78,7 +77,6 @@ public class CartServiceImpl implements CartService {
             ApiResponse<OrderResponse> orderResponse = orderClient.createOrder(orderRequest);
 
             redisTemplate.delete(cartKey);
-            log.info("Order created from cart for user: {}", username);
 
             return orderResponse.getResult();
       }
@@ -93,7 +91,6 @@ public class CartServiceImpl implements CartService {
             validateCart(cart);
 
             redisTemplate.delete(cartKey);
-            log.info("Cart deleted for user: {}", username);
       }
 
       @Override
@@ -105,7 +102,6 @@ public class CartServiceImpl implements CartService {
             Cart cart = (Cart) redisTemplate.opsForValue().get(cartKey);
             validateCart(cart);
 
-            log.info("Fetched cart for user: {}", username);
             return cartMapper.toCartResponse(cart);
       }
 
@@ -124,7 +120,6 @@ public class CartServiceImpl implements CartService {
             cart.setUsername(username);
             cart.setEmail(request.getEmail());
 
-            log.info("New cart created for user: {}", username);
             return cart;
       }
 
@@ -154,11 +149,9 @@ public class CartServiceImpl implements CartService {
 
                               if (newQuantity > 0) {
                                     cartItem.setQuantity(newQuantity);
-                                    log.info("Updated item quantity in cart: {} to {}", cartItem.getProductId(), newQuantity);
                               }
                               else {
                                     updatedItems.remove(cartItem);
-                                    log.info("Item removed from cart: {}", cartItem.getProductId());
                               }
                               break;
                         }
@@ -170,12 +163,10 @@ public class CartServiceImpl implements CartService {
                         newItem.setVariantId(request.getVariantId());
                         newItem.setQuantity(request.getQuantity());
                         updatedItems.add(newItem);
-                        log.info("Item added to cart: {}", request.getProductId());
                   }
             }
 
             existingCart.setTotal(calculateTotalPriceForExistingCart(updatedItems));
-            log.debug("Updated cart total: {}", existingCart.getTotal());
       }
 
       private double calculateTotalPriceForExistingCart(List<CartItem> cartItems) {
@@ -188,14 +179,12 @@ public class CartServiceImpl implements CartService {
 
       private void validateUsername(String username) {
             if (username == null) {
-                  log.error("Unauthorized access attempt");
                   throw new AppException(ErrorCode.UNAUTHORIZED);
             }
       }
 
       private void validateCart(Cart cart) {
             if (cart == null) {
-                  log.error("Cart not found");
                   throw new AppException(ErrorCode.CART_NOT_FOUND);
             }
       }
@@ -207,10 +196,8 @@ public class CartServiceImpl implements CartService {
 
                   ExistsResponse existsResponse = productClient.existsProduct(productId, variantId);
                   if (!existsResponse.isExists()) {
-                        log.error("Product or variant not found: productId = {}, variantId = {}", productId, variantId);
                         throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
                   }
-                  log.debug("Product exists: productId = {}, variantId = {}", productId, variantId);
             }
       }
 

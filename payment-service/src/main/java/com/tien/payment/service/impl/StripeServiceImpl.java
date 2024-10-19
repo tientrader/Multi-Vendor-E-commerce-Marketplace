@@ -60,7 +60,6 @@ public class StripeServiceImpl implements StripeService {
       @Override
       public StripeChargeResponse charge(StripeChargeRequest request) {
             StripeCharge stripeCharge = stripeMapper.toStripeCharge(request);
-            log.info("Starting charge process for user: {}", request.getUsername());
 
             try {
                   Map<String, Object> chargeParams = new HashMap<>();
@@ -73,14 +72,11 @@ public class StripeServiceImpl implements StripeService {
                   metadata.put("username", request.getUsername());
                   chargeParams.put("metadata", metadata);
 
-                  log.info("Charge parameters: {}", chargeParams);
-
                   Charge charge = Charge.create(chargeParams);
 
                   if (charge.getPaid()) {
                         stripeCharge.setChargeId(charge.getId());
                         stripeCharge.setSuccess(true);
-                        log.info("Charge successful for user: {}. Charge ID: {}", request.getUsername(), charge.getId());
 
                         kafkaTemplate.send("payment_successful", NotificationEvent.builder()
                                 .channel("email")
@@ -90,14 +86,11 @@ public class StripeServiceImpl implements StripeService {
                                 .build());
                   } else {
                         stripeCharge.setSuccess(false);
-                        log.warn("Charge was not successful for user: {}", request.getUsername());
                   }
 
                   stripeChargeRepository.save(stripeCharge);
-                  log.info("Stripe charge details saved for user: {}", request.getUsername());
                   return stripeMapper.toStripeChargeResponse(stripeCharge);
             } catch (StripeException e) {
-                  log.error("StripeService (charge) error for user: {}. Error: {}", request.getUsername(), e.getMessage());
                   throw new RuntimeException(e.getMessage());
             }
       }
@@ -148,7 +141,6 @@ public class StripeServiceImpl implements StripeService {
                                 .build());
 
                   } catch (StripeException e) {
-                        log.error("StripeService (createSubscription)", e);
                         throw new RuntimeException(e.getMessage());
                   }
             });
@@ -210,10 +202,8 @@ public class StripeServiceImpl implements StripeService {
 
                   return stripeMapper.toSessionResponse(paymentSession);
             } catch (StripeException e) {
-                  log.error("Error creating payment session: {}", e.getMessage());
                   throw new RuntimeException("Failed to create payment session: " + e.getMessage());
             } catch (Exception e) {
-                  log.error("Unexpected error: {}", e.getMessage());
                   throw new RuntimeException("An unexpected error occurred: " + e.getMessage());
             }
       }
@@ -268,7 +258,7 @@ public class StripeServiceImpl implements StripeService {
                           .body("Your subscription session has been created successfully.")
                           .build());
             } catch (StripeException e) {
-                  log.error("StripeService (createSubscriptionSession)", e);
+                  throw new RuntimeException("Failed to create subscription session: " + e.getMessage());
             }
             return sessionResponse;
       }
@@ -283,7 +273,7 @@ public class StripeServiceImpl implements StripeService {
                   response.setStripeSubscriptionId(canceledSubscription.getId());
                   response.setStatus(canceledSubscription.getStatus());
             } catch (StripeException e) {
-                  log.error("StripeService (cancelSubscription)", e);
+                  throw new RuntimeException("Failed to cancel subscription: " + e.getMessage());
             }
             return response;
       }
@@ -303,7 +293,6 @@ public class StripeServiceImpl implements StripeService {
                         throw new RuntimeException("Subscription not found.");
                   }
             } catch (Exception e) {
-                  log.error("StripeService (retrieveSubscriptionDetails) error for subscriptionId: {}. Error: {}", stripeSubscriptionId, e.getMessage());
                   throw new RuntimeException("Failed to retrieve subscription details: " + e.getMessage());
             }
       }
@@ -316,7 +305,6 @@ public class StripeServiceImpl implements StripeService {
                           .map(stripeMapper::toStripeSubscriptionResponse)
                           .collect(Collectors.toList());
             } catch (Exception e) {
-                  log.error("StripeService (retrieveAllSubscriptions) error: {}", e.getMessage());
                   throw new RuntimeException("Failed to retrieve subscriptions: " + e.getMessage());
             }
       }

@@ -13,6 +13,7 @@ import com.tien.post.service.PostService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -72,6 +74,7 @@ public class PostServiceImpl implements PostService {
       public PostResponse getPostById(String postId) {
             Post post = postRepository.findById(postId)
                     .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));
+
             return postMapper.toPostResponse(post);
       }
 
@@ -88,7 +91,6 @@ public class PostServiceImpl implements PostService {
 
             postMapper.updatePost(post, request);
             post.setModifiedDate(Instant.now());
-
             postRepository.save(post);
 
             return postMapper.toPostResponse(post);
