@@ -281,34 +281,11 @@ public class StripeServiceImpl implements StripeService {
       }
 
       @Override
-      public StripeSubscriptionResponse retrieveSubscriptionDetails(String stripeSubscriptionId) {
-            try {
-                  Optional<StripeSubscription> optionalSubscription = stripeSubscriptionRepository.findByStripeSubscriptionId(stripeSubscriptionId);
-
-                  if (optionalSubscription.isPresent()) {
-                        StripeSubscription stripeSubscription = optionalSubscription.get();
-                        StripeSubscriptionResponse response = stripeMapper.toStripeSubscriptionResponse(stripeSubscription);
-                        response.setStatus("active");
-                        response.setMessage("Subscription retrieved successfully.");
-                        return response;
-                  } else {
-                        throw new RuntimeException("Subscription not found.");
-                  }
-            } catch (Exception e) {
-                  throw new RuntimeException("Failed to retrieve subscription details: " + e.getMessage());
-            }
-      }
-
-      @Override
       public List<StripeSubscriptionResponse> retrieveAllSubscriptions() {
-            try {
-                  List<StripeSubscription> subscriptions = stripeSubscriptionRepository.findAll();
-                  return subscriptions.stream()
-                          .map(stripeMapper::toStripeSubscriptionResponse)
-                          .collect(Collectors.toList());
-            } catch (Exception e) {
-                  throw new RuntimeException("Failed to retrieve subscriptions: " + e.getMessage());
-            }
+            List<StripeSubscription> subscriptions = stripeSubscriptionRepository.findAll();
+            return subscriptions.stream()
+                    .map(stripeMapper::toStripeSubscriptionResponse)
+                    .collect(Collectors.toList());
       }
 
       private Customer findOrCreateCustomer(String email, String fullName) throws StripeException {

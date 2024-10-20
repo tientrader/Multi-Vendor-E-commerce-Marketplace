@@ -56,13 +56,6 @@ public class StripeController {
                     .build();
       }
 
-      @GetMapping("/subscription/{id}")
-      public ApiResponse<StripeSubscriptionResponse> retrieveSubscriptionDetails(@PathVariable String id) {
-            return ApiResponse.<StripeSubscriptionResponse>builder()
-                    .result(stripeService.retrieveSubscriptionDetails(id))
-                    .build();
-      }
-
       @GetMapping("/subscriptions")
       public ApiResponse<List<StripeSubscriptionResponse>> retrieveAllSubscriptions() {
             return ApiResponse.<List<StripeSubscriptionResponse>>builder()

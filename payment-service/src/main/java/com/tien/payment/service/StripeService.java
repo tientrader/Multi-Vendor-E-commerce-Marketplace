@@ -14,7 +14,6 @@ public interface StripeService {
       SessionResponse createPaymentSession(PaymentSessionRequest request);
       SessionResponse createSubscriptionSession(SubscriptionSessionRequest request);
       StripeSubscriptionResponse cancelSubscription(String subscriptionId);
-      StripeSubscriptionResponse retrieveSubscriptionDetails(String stripeSubscriptionId);
       List<StripeSubscriptionResponse> retrieveAllSubscriptions();
 
 }
