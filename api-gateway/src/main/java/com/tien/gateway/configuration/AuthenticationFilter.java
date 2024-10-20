@@ -11,6 +11,7 @@ import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder;
@@ -75,12 +76,22 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
 
         return jwtDecoder.decode(token)
                 .flatMap(jwt -> chain.filter(exchange))
-                .onErrorResume(throwable -> unauthenticated(response));
+                .onErrorResume(throwable -> {
+                    log.error("Authentication error: {}", throwable.getMessage());
+                    return serviceUnavailable(response);
+                });
     }
 
     private Mono<Void> unauthenticated(ServerHttpResponse response) {
         response.setStatusCode(HttpStatus.UNAUTHORIZED);
-        return response.setComplete();
+        response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
+        return response.writeWith(Mono.just(response.bufferFactory().wrap("{\"error\":\"Unauthorized\"}".getBytes())));
+    }
+
+    private Mono<Void> serviceUnavailable(ServerHttpResponse response) {
+        response.setStatusCode(HttpStatus.SERVICE_UNAVAILABLE);
+        response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
+        return response.writeWith(Mono.just(response.bufferFactory().wrap("{\"error\":\"Service Unavailable\"}".getBytes())));
     }
 
 }
