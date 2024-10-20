@@ -34,4 +34,11 @@ public class VIPUserController {
                     .build();
       }
 
+      @GetMapping("/check/{username}")
+      public ApiResponse<VIPUserResponse> checkIfUserIsVIP(@PathVariable String username) {
+            return ApiResponse.<VIPUserResponse>builder()
+                    .result(vipUserService.checkIfUserIsVIP(username))
+                    .build();
+      }
+
 }

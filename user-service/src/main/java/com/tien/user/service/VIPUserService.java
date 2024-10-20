@@ -7,5 +7,6 @@ public interface VIPUserService {
 
       VIPUserResponse createVIPUser(VIPUserRequest request);
       VIPUserResponse cancelVIPUserSubscription(String username);
+      VIPUserResponse checkIfUserIsVIP(String username);
 
 }

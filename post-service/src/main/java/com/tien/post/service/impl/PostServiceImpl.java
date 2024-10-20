@@ -4,12 +4,14 @@ import com.tien.post.dto.PageResponse;
 import com.tien.post.entity.Post;
 import com.tien.post.exception.AppException;
 import com.tien.post.exception.ErrorCode;
+import com.tien.post.httpclient.UserClient;
 import com.tien.post.mapper.PostMapper;
 import com.tien.post.dto.request.PostCreationRequest;
 import com.tien.post.dto.request.PostUpdateRequest;
 import com.tien.post.dto.response.PostResponse;
 import com.tien.post.repository.PostRepository;
 import com.tien.post.service.PostService;
+import feign.FeignException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -27,6 +29,7 @@ import java.time.Instant;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class PostServiceImpl implements PostService {
 
+      UserClient userClient;
       DateTimeFormatterImpl dateTimeFormatter;
       PostRepository postRepository;
       PostMapper postMapper;
@@ -36,12 +39,22 @@ public class PostServiceImpl implements PostService {
       public PostResponse createPost(PostCreationRequest request) {
             String username = authenticationService.getAuthenticatedUsername();
 
-            Post post = postRepository.save(Post.builder()
+            try {
+                  userClient.checkIfUserIsVIP(username);
+            } catch (FeignException e) {
+                  if (e.status() == 400 && e.getMessage().contains("USER_NOT_VIP")) {
+                        throw new AppException(ErrorCode.USER_NOT_VIP);
+                  }
+                  throw new AppException(ErrorCode.EXTERNAL_SERVICE_ERROR);
+            }
+
+            Post post = Post.builder()
                     .content(request.getContent())
                     .username(username)
                     .createdDate(Instant.now())
                     .modifiedDate(Instant.now())
-                    .build());
+                    .build();
+            post = postRepository.save(post);
 
             return postMapper.toPostResponse(post);
       }

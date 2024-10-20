@@ -151,7 +151,7 @@ resilience4j:
         timeout-duration: 3s
         cancel-running-future: false
       userService:
-        timeout-duration: 5s
+        timeout-duration: 6s
       productService:
         timeout-duration: 3s
       cartService:

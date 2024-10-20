@@ -94,6 +94,18 @@ public class VIPUserServiceImpl implements VIPUserService {
             return vipUserMapper.userToVipUserResponse(user);
       }
 
+      @Override
+      public VIPUserResponse checkIfUserIsVIP(String username) {
+            User user = userRepository.findByUsername(username)
+                    .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+            if (!user.isVipStatus()) {
+                  throw new AppException(ErrorCode.USER_NOT_VIP);
+            }
+
+            return vipUserMapper.userToVipUserResponse(user);
+      }
+
       private String getCurrentUsername() {
             Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             return jwt.getClaim("preferred_username");

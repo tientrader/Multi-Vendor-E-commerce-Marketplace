@@ -16,6 +16,10 @@ springdoc:
   api-docs:
     path: /v3/api-docs
 
+app:
+  services:
+    user: http://localhost:8080/user
+
 management:
   endpoints:
     web:
