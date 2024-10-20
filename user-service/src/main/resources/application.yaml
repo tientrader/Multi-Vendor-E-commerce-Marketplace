@@ -34,6 +34,11 @@ idp:
 app:
   services:
     payment: http://localhost:8087/payment
+  vip:
+    price-ids:
+      monthly: ${VIP_1_MONTH}
+      semiannual: ${VIP_6_MONTHS}
+      annual: ${VIP_1_YEAR}
 
 springdoc:
   swagger-ui:

@@ -9,12 +9,15 @@ import com.tien.user.entity.User;
 import com.tien.user.exception.AppException;
 import com.tien.user.exception.ErrorCode;
 import com.tien.user.httpclient.PaymentClient;
+import com.tien.user.mapper.VIPUserMapper;
 import com.tien.user.repository.UserRepository;
 import com.tien.user.service.VIPUserService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
@@ -29,63 +32,47 @@ public class VIPUserServiceImpl implements VIPUserService {
 
       UserRepository userRepository;
       PaymentClient paymentClient;
+      VIPUserMapper vipUserMapper;
+
+      @Value("${app.vip.price-ids.monthly}")
+      @NonFinal
+      String monthlyPriceId;
+
+      @Value("${app.vip.price-ids.semiannual}")
+      @NonFinal
+      String semiannualPriceId;
+
+      @Value("${app.vip.price-ids.annual}")
+      @NonFinal
+      String annualPriceId;
 
       @Override
       public VIPUserResponse createVIPUser(VIPUserRequest request) {
-            try {
-                  String username = getCurrentUsername();
+            String username = getCurrentUsername();
 
-                  StripeSubscriptionRequest subscriptionRequest = StripeSubscriptionRequest.builder()
-                          .stripeToken(request.getStripeToken())
-                          .email(request.getEmail())
-                          .priceId(request.getPriceId())
-                          .username(username)
-                          .numberOfLicense(request.getNumberOfLicense())
-                          .build();
+            StripeSubscriptionRequest subscriptionRequest = StripeSubscriptionRequest.builder()
+                    .stripeToken(request.getStripeToken())
+                    .email(request.getEmail())
+                    .priceId(request.getPriceId())
+                    .username(username)
+                    .numberOfLicense(request.getNumberOfLicense())
+                    .build();
 
-                  ApiResponse<StripeSubscriptionResponse> subscriptionResponse = paymentClient.createSubscription(subscriptionRequest);
+            ApiResponse<StripeSubscriptionResponse> subscriptionResponse = paymentClient.createSubscription(subscriptionRequest);
 
-                  User user = userRepository.findByUsername(username)
-                          .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+            User user = userRepository.findByUsername(username)
+                    .orElse(vipUserMapper.vipUserRequestToUser(request));
 
-                  LocalDate vipStartDate = LocalDate.now();
-                  user.setVipStartDate(vipStartDate);
+            LocalDate vipStartDate = LocalDate.now();
+            user.setVipStartDate(vipStartDate);
 
-                  LocalDate vipEndDate = switch (request.getPriceId()) {
-                        case "price_1QAX8ZC9fPubZMQMNeWli1FU" ->
-                                vipStartDate.plusMonths(1);
-                        case "price_1QAX8ZC9fPubZMQMmdG6vK1G" ->
-                                vipStartDate.plusMonths(6);
-                        case "price_1QBe0vC9fPubZMQMR1GiXMX4" ->
-                                vipStartDate.plusYears(1);
-                        default ->
-                                throw new RuntimeException("Invalid priceId");
-                  };
+            LocalDate vipEndDate = getVipEndDateBasedOnPriceId(request.getPriceId(), vipStartDate);
+            user.setVipEndDate(vipEndDate);
+            user.setStripeSubscriptionId(subscriptionResponse.getResult().getStripeSubscriptionId());
+            user.setVipStatus(true);
+            userRepository.save(user);
 
-                  user.setVipEndDate(vipEndDate);
-                  user.setStripeSubscriptionId(subscriptionResponse.getResult().getStripeSubscriptionId());
-                  user.setVipStatus(true);
-                  userRepository.save(user);
-
-                  return VIPUserResponse.builder()
-                          .stripeSubscriptionId(user.getStripeSubscriptionId())
-                          .username(user.getUsername())
-                          .email(request.getEmail())
-                          .vipStatus(true)
-                          .vipStartDate(vipStartDate)
-                          .vipEndDate(vipEndDate)
-                          .build();
-            } catch (Exception e) {
-                  log.error("Error creating VIP user: {}", e.getMessage());
-                  return VIPUserResponse.builder()
-                          .stripeSubscriptionId(null)
-                          .username(request.getUsername())
-                          .email(request.getEmail())
-                          .vipStatus(false)
-                          .vipStartDate(null)
-                          .vipEndDate(null)
-                          .build();
-            }
+            return vipUserMapper.userToVipUserResponse(user);
       }
 
       @Override
@@ -93,7 +80,7 @@ public class VIPUserServiceImpl implements VIPUserService {
             String currentUsername = getCurrentUsername();
 
             User user = userRepository.findByUsername(currentUsername)
-                    .orElseThrow(() -> new RuntimeException("User not found"));
+                    .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
             if (user.getStripeSubscriptionId() != null) {
                   paymentClient.cancelSubscription(user.getStripeSubscriptionId());
@@ -104,17 +91,24 @@ public class VIPUserServiceImpl implements VIPUserService {
                   userRepository.save(user);
             }
 
-            return VIPUserResponse.builder()
-                    .stripeSubscriptionId(null)
-                    .username(user.getUsername())
-                    .email(user.getEmail())
-                    .vipStatus(false)
-                    .build();
+            return vipUserMapper.userToVipUserResponse(user);
       }
 
       private String getCurrentUsername() {
             Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             return jwt.getClaim("preferred_username");
+      }
+
+      private LocalDate getVipEndDateBasedOnPriceId(String priceId, LocalDate vipStartDate) {
+            if (priceId.equals(monthlyPriceId)) {
+                  return vipStartDate.plusMonths(1);
+            } else if (priceId.equals(semiannualPriceId)) {
+                  return vipStartDate.plusMonths(6);
+            } else if (priceId.equals(annualPriceId)) {
+                  return vipStartDate.plusYears(1);
+            } else {
+                  throw new AppException(ErrorCode.INVALID_PRICE_ID);
+            }
       }
 
 }

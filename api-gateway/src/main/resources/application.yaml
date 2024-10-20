@@ -111,12 +111,12 @@ spring:
             - Path=${app.api-prefix}/payment/**
           filters:
             - StripPrefix=2
-#            - name: CircuitBreaker
-#              args:
-#                name: paymentService
-#            - name: Retry
-#              args:
-#                name: default
+            - name: CircuitBreaker
+              args:
+                name: paymentService
+            - name: Retry
+              args:
+                name: default
         - id: actuator
           uri: http://localhost:8888
           predicates:
@@ -153,6 +153,11 @@ resilience4j:
         baseConfig: default
       paymentService:
         baseConfig: default
+
+  timeout:
+    instances:
+      userService:
+        timeoutDuration: 10s
 
   retry:
     configs:

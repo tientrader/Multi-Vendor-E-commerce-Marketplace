@@ -22,4 +22,9 @@ public class UserResponse {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     LocalDate dob;
 
+    boolean vipStatus;
+    LocalDate vipStartDate;
+    LocalDate vipEndDate;
+    String stripeSubscriptionId;
+
 }
