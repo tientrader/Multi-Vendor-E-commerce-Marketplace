@@ -16,6 +16,8 @@ import com.tien.payment.dto.response.StripeChargeResponse;
 import com.tien.payment.dto.response.StripeSubscriptionResponse;
 import com.tien.payment.entity.StripeCharge;
 import com.tien.payment.entity.StripeSubscription;
+import com.tien.payment.exception.AppException;
+import com.tien.payment.exception.ErrorCode;
 import com.tien.payment.mapper.StripeMapper;
 import com.tien.payment.repository.SessionRepository;
 import com.tien.payment.repository.StripeChargeRepository;
@@ -90,7 +92,7 @@ public class StripeServiceImpl implements StripeService {
                   stripeChargeRepository.save(stripeCharge);
                   return stripeMapper.toStripeChargeResponse(stripeCharge);
             } catch (StripeException e) {
-                  throw new RuntimeException(e.getMessage());
+                  throw new AppException(ErrorCode.PAYMENT_FAILED);
             }
       }
 
@@ -144,7 +146,7 @@ public class StripeServiceImpl implements StripeService {
                           .build();
 
             } catch (StripeException e) {
-                  throw new RuntimeException("Error creating subscription: " + e.getMessage(), e);
+                  throw new AppException(ErrorCode.SUBSCRIPTION_CREATION_FAILED);
             }
       }
 
@@ -202,9 +204,9 @@ public class StripeServiceImpl implements StripeService {
 
                   return stripeMapper.toSessionResponse(paymentSession);
             } catch (StripeException e) {
-                  throw new RuntimeException("Failed to create payment session: " + e.getMessage());
+                  throw new AppException(ErrorCode.PAYMENT_SESSION_CREATION_FAILED);
             } catch (Exception e) {
-                  throw new RuntimeException("An unexpected error occurred: " + e.getMessage());
+                  throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
             }
       }
 
@@ -258,7 +260,7 @@ public class StripeServiceImpl implements StripeService {
                           .body("Your subscription session has been created successfully.")
                           .build());
             } catch (StripeException e) {
-                  throw new RuntimeException("Failed to create subscription session: " + e.getMessage());
+                  throw new AppException(ErrorCode.SUBSCRIPTION_SESSION_CREATION_FAILED);
             }
             return sessionResponse;
       }
@@ -273,7 +275,7 @@ public class StripeServiceImpl implements StripeService {
                   response.setStripeSubscriptionId(canceledSubscription.getId());
                   response.setStatus(canceledSubscription.getStatus());
             } catch (StripeException e) {
-                  throw new RuntimeException("Failed to cancel subscription: " + e.getMessage());
+                  throw new AppException(ErrorCode.SUBSCRIPTION_CANCEL_FAILED);
             }
             return response;
       }
