@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.security.oauth2.jwt.ReactiveJwtDecoder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
@@ -78,7 +79,11 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
                 .flatMap(jwt -> chain.filter(exchange))
                 .onErrorResume(throwable -> {
                     log.error("Authentication error: {}", throwable.getMessage());
-                    return serviceUnavailable(response);
+                    if (throwable instanceof JwtException) {
+                        return unauthenticated(response);
+                    } else {
+                        return serviceUnavailable(response);
+                    }
                 });
     }
 
