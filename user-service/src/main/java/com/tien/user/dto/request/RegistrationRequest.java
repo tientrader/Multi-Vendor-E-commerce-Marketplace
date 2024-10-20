@@ -18,25 +18,25 @@ import java.time.LocalDate;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class RegistrationRequest {
 
-    @Size(min = 4, message = "INVALID_USERNAME")
-    String username;
+      @Size(min = 4, message = "INVALID_USERNAME")
+      String username;
 
-    @Size(min = 6, message = "INVALID_PASSWORD")
-    String password;
+      @Size(min = 6, message = "INVALID_PASSWORD")
+      String password;
 
-    @Email(message = "INVALID_EMAIL")
-    @NotBlank(message = "EMAIL_IS_REQUIRED")
-    String email;
+      @Email(message = "INVALID_EMAIL")
+      @NotBlank(message = "EMAIL_IS_REQUIRED")
+      String email;
 
-    @NotNull(message = "FIRSTNAME_NULL")
-    String firstName;
+      @NotNull(message = "FIRSTNAME_NULL")
+      String firstName;
 
-    @NotNull(message = "LASTNAME_NULL")
-    String lastName;
+      @NotNull(message = "LASTNAME_NULL")
+      String lastName;
 
-    @DobConstraint(min = 10, message = "INVALID_DOB")
-    @NotNull(message = "DOB_NULL")
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-    LocalDate dob;
+      @DobConstraint(min = 10, message = "INVALID_DOB")
+      @NotNull(message = "DOB_NULL")
+      @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+      LocalDate dob;
 
 }

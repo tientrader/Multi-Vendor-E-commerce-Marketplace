@@ -13,12 +13,12 @@ import lombok.experimental.FieldDefaults;
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class TokenExchangeResponse {
 
-    String accessToken;
-    String refreshToken;
-    String expiresIn;
-    String refreshExpiresIn;
-    String tokenType;
-    String idToken;
-    String scope;
+      String accessToken;
+      String refreshToken;
+      String expiresIn;
+      String refreshExpiresIn;
+      String tokenType;
+      String idToken;
+      String scope;
 
 }

@@ -13,18 +13,18 @@ import java.time.LocalDate;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserResponse {
 
-    String profileId;
-    String email;
-    String username;
-    String firstName;
-    String lastName;
+      String profileId;
+      String email;
+      String username;
+      String firstName;
+      String lastName;
 
-    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-    LocalDate dob;
+      @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+      LocalDate dob;
 
-    boolean vipStatus;
-    LocalDate vipStartDate;
-    LocalDate vipEndDate;
-    String stripeSubscriptionId;
+      boolean vipStatus;
+      LocalDate vipStartDate;
+      LocalDate vipEndDate;
+      String stripeSubscriptionId;
 
 }

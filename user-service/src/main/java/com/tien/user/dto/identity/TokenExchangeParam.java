@@ -10,12 +10,12 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class TokenExchangeParam {
 
-    String grant_type;
-    String client_id;
-    String client_secret;
-    String refresh_token;
-    String scope;
-    String username;
-    String password;
+      String grant_type;
+      String client_id;
+      String client_secret;
+      String refresh_token;
+      String scope;
+      String username;
+      String password;
 
 }

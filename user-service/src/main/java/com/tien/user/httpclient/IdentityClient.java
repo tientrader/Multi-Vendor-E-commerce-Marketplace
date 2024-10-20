@@ -11,37 +11,37 @@ import org.springframework.web.bind.annotation.*;
 @FeignClient(name = "identity-client", url = "${idp.url}")
 public interface IdentityClient {
 
-    @PostMapping(value = "/realms/tienproapp/protocol/openid-connect/token",
-            consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    TokenExchangeResponse exchangeToken(@QueryMap TokenExchangeParam param);
+      @PostMapping(value = "/realms/tienproapp/protocol/openid-connect/token",
+              consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+      TokenExchangeResponse exchangeToken(@QueryMap TokenExchangeParam param);
 
-    @PostMapping(value = "/admin/realms/tienproapp/users",
-            consumes = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<?> createUser(@RequestHeader("authorization") String token,
-                                 @RequestBody UserCreationParam param);
+      @PostMapping(value = "/admin/realms/tienproapp/users",
+              consumes = MediaType.APPLICATION_JSON_VALUE)
+      ResponseEntity<?> createUser(@RequestHeader("authorization") String token,
+                                   @RequestBody UserCreationParam param);
 
-    @PutMapping(value = "/admin/realms/tienproapp/users/{id}",
-            consumes = MediaType.APPLICATION_JSON_VALUE)
-    ResponseEntity<?> updateUser(@RequestHeader("authorization") String token,
-                                 @PathVariable("id") String userId,
-                                 @RequestBody UserUpdateRequest param);
+      @PutMapping(value = "/admin/realms/tienproapp/users/{id}",
+              consumes = MediaType.APPLICATION_JSON_VALUE)
+      ResponseEntity<?> updateUser(@RequestHeader("authorization") String token,
+                                   @PathVariable("id") String userId,
+                                   @RequestBody UserUpdateRequest param);
 
-    @DeleteMapping(value = "/admin/realms/tienproapp/users/{id}")
-    void deleteUser(@RequestHeader("authorization") String token,
-                    @PathVariable("id") String userId);
+      @DeleteMapping(value = "/admin/realms/tienproapp/users/{id}")
+      void deleteUser(@RequestHeader("authorization") String token,
+                      @PathVariable("id") String userId);
 
-    @PutMapping(value = "/admin/realms/tienproapp/users/{id}/reset-password",
-            consumes = MediaType.APPLICATION_JSON_VALUE)
-    void resetPassword(@RequestHeader("authorization") String token,
-                       @PathVariable("id") String userId,
-                       @RequestBody Credential credential);
+      @PutMapping(value = "/admin/realms/tienproapp/users/{id}/reset-password",
+              consumes = MediaType.APPLICATION_JSON_VALUE)
+      void resetPassword(@RequestHeader("authorization") String token,
+                         @PathVariable("id") String userId,
+                         @RequestBody Credential credential);
 
-    @PutMapping(value = "/admin/realms/tienproapp/users/{id}/send-verify-email")
-    void sendVerificationEmail(@RequestHeader("Authorization") String authHeader,
-                               @PathVariable("id") String userId);
+      @PutMapping(value = "/admin/realms/tienproapp/users/{id}/send-verify-email")
+      void sendVerificationEmail(@RequestHeader("Authorization") String authHeader,
+                                 @PathVariable("id") String userId);
 
-    @PutMapping(value = "/admin/realms/tienproapp/users/{id}/reset-password-email")
-    void sendResetPasswordEmail(@RequestHeader("authorization") String token,
-                                @PathVariable("id") String userId);
+      @PutMapping(value = "/admin/realms/tienproapp/users/{id}/reset-password-email")
+      void sendResetPasswordEmail(@RequestHeader("authorization") String token,
+                                  @PathVariable("id") String userId);
 
 }

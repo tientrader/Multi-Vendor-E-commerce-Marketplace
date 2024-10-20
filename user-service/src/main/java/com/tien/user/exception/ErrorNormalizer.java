@@ -17,48 +17,49 @@ import java.util.Map;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ErrorNormalizer {
 
-    ObjectMapper objectMapper = new ObjectMapper();
-    Map<String, ErrorCode> errorCodeMap = initializeErrorCodeMap();
+      ObjectMapper objectMapper = new ObjectMapper();
+      Map<String, ErrorCode> errorCodeMap = initializeErrorCodeMap();
 
-    private Map<String, ErrorCode> initializeErrorCodeMap() {
-        Map<String, ErrorCode> map = new HashMap<>();
+      private Map<String, ErrorCode> initializeErrorCodeMap() {
+            Map<String, ErrorCode> map = new HashMap<>();
 
-        map.put("User exists with same username", ErrorCode.USER_EXISTED);
-        map.put("User exists with same email", ErrorCode.EMAIL_EXISTED);
-        map.put("User name is missing", ErrorCode.USERNAME_IS_MISSING);
-        map.put("Password policy not met", ErrorCode.INVALID_PASSWORD);
-        map.put("Session doesn't have required client", ErrorCode.UNAUTHENTICATED);
+            map.put("User exists with same username", ErrorCode.USER_EXISTED);
+            map.put("User exists with same email", ErrorCode.EMAIL_EXISTED);
+            map.put("User name is missing", ErrorCode.USERNAME_IS_MISSING);
+            map.put("Password policy not met", ErrorCode.INVALID_PASSWORD);
+            map.put("Session doesn't have required client", ErrorCode.UNAUTHENTICATED);
 
-        return map;
-    }
+            return map;
+      }
 
-    public AppException handleKeyCloakException(FeignException exception) {
-        log.warn("Cannot complete request: Status {}, Content: {}", exception.status(), exception.contentUTF8());
+      public AppException handleKeyCloakException(FeignException exception) {
+            log.warn("Cannot complete request: Status {}, Content: {}", exception.status(), exception.contentUTF8());
 
-        if (exception.status() == 401) {
-            return new AppException(ErrorCode.INVALID_USERNAME_OR_PASSWORD);
-        }
-
-        try {
-            String content = exception.contentUTF8();
-            Map<String, String> responseMap = objectMapper.readValue(content, new TypeReference<>() {});
-
-            String errorMessage = responseMap.get("errorMessage");
-            String errorDescription = responseMap.get("error_description");
-
-            if (errorMessage != null && errorCodeMap.containsKey(errorMessage)) {
-                return new AppException(errorCodeMap.get(errorMessage));
+            if (exception.status() == 401) {
+                  return new AppException(ErrorCode.INVALID_USERNAME_OR_PASSWORD);
             }
 
-            if (errorDescription != null && errorCodeMap.containsKey(errorDescription)) {
-                return new AppException(errorCodeMap.get(errorDescription));
+            try {
+                  String content = exception.contentUTF8();
+                  Map<String, String> responseMap = objectMapper.readValue(content, new TypeReference<>() {
+                  });
+
+                  String errorMessage = responseMap.get("errorMessage");
+                  String errorDescription = responseMap.get("error_description");
+
+                  if (errorMessage != null && errorCodeMap.containsKey(errorMessage)) {
+                        return new AppException(errorCodeMap.get(errorMessage));
+                  }
+
+                  if (errorDescription != null && errorCodeMap.containsKey(errorDescription)) {
+                        return new AppException(errorCodeMap.get(errorDescription));
+                  }
+
+            } catch (JsonProcessingException e) {
+                  log.error("Error deserializing KeyCloakError response", e);
             }
 
-        } catch (JsonProcessingException e) {
-            log.error("Error deserializing KeyCloakError response", e);
-        }
-
-        return new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
-    }
+            return new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
+      }
 
 }

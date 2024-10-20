@@ -13,18 +13,26 @@ import org.mapstruct.MappingTarget;
 @Mapper(componentModel = "spring")
 public interface UserMapper {
 
-    @Mapping(target = "userId", ignore = true)
-    @Mapping(target = "profileId", ignore = true)
-    User toUser(RegistrationRequest request);
+      @Mapping(target = "vipStatus", ignore = true)
+      @Mapping(target = "vipStartDate", ignore = true)
+      @Mapping(target = "vipEndDate", ignore = true)
+      @Mapping(target = "stripeSubscriptionId", ignore = true)
+      @Mapping(target = "userId", ignore = true)
+      @Mapping(target = "profileId", ignore = true)
+      User toUser(RegistrationRequest request);
 
-    UserResponse toUserResponse(User user);
+      UserResponse toUserResponse(User user);
 
-    @Mapping(target = "username", ignore = true)
-    @Mapping(target = "userId", ignore = true)
-    @Mapping(target = "profileId", ignore = true)
-    @Mapping(target = "dob", ignore = true)
-    void updateUser(@MappingTarget User user, UserUpdateRequest request);
+      @Mapping(target = "vipStatus", ignore = true)
+      @Mapping(target = "vipStartDate", ignore = true)
+      @Mapping(target = "vipEndDate", ignore = true)
+      @Mapping(target = "stripeSubscriptionId", ignore = true)
+      @Mapping(target = "username", ignore = true)
+      @Mapping(target = "userId", ignore = true)
+      @Mapping(target = "profileId", ignore = true)
+      @Mapping(target = "dob", ignore = true)
+      void updateUser(@MappingTarget User user, UserUpdateRequest request);
 
-    TokenResponse toUserLoginResponse(TokenExchangeResponse tokenExchangeResponse);
+      TokenResponse toUserLoginResponse(TokenExchangeResponse tokenExchangeResponse);
 
 }

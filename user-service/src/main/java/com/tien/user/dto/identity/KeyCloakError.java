@@ -11,13 +11,13 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class KeyCloakError {
 
-    @JsonProperty("error")
-    String error;
+      @JsonProperty("error")
+      String error;
 
-    @JsonProperty("error_description")
-    String errorDescription;
+      @JsonProperty("error_description")
+      String errorDescription;
 
-    @JsonProperty("errorMessage")
-    String errorMessage;
+      @JsonProperty("errorMessage")
+      String errorMessage;
 
 }
