@@ -46,6 +46,35 @@ springdoc:
   api-docs:
     path: /v3/api-docs
 
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        registerHealthIndicator: true
+        failureRateThreshold: 50
+        minimumNumberOfCalls: 5
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        waitDurationInOpenState: 5s
+        permittedNumberOfCallsInHalfOpenState: 3
+        slidingWindowSize: 10
+        slidingWindowType: COUNT_BASED
+    instances:
+      createSubscription:
+        baseConfig: default
+      cancelSubscription:
+        baseConfig: default
+
+  retry:
+    configs:
+      default:
+        maxRetryAttempts: 3
+        waitDuration: 4s
+    instances:
+      createSubscription:
+        baseConfig: default
+      cancelSubscription:
+        baseConfig: default
+
 management:
   endpoints:
     web:
