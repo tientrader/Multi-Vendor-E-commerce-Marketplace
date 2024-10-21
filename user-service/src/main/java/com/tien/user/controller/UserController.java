@@ -42,6 +42,14 @@ public class UserController {
                     .build();
       }
 
+      @PostMapping("/auth/logout")
+      public ApiResponse<Void> logout() {
+            userService.logout();
+            return ApiResponse.<Void>builder()
+                    .message("Logged out successfully")
+                    .build();
+      }
+
       @PostMapping("/auth/forgot-password")
       public ApiResponse<Void> forgotPassword(@RequestBody @Valid ForgotPasswordRequest request) {
             userService.forgotPassword(request);

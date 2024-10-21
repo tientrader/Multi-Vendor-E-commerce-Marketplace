@@ -44,4 +44,8 @@ public interface IdentityClient {
       void sendResetPasswordEmail(@RequestHeader("authorization") String token,
                                   @PathVariable("id") String userId);
 
+      @PostMapping(value = "/admin/realms/tienproapp/users/{id}/logout")
+      void logoutUser(@RequestHeader("authorization") String token,
+                      @PathVariable("id") String userId);
+
 }

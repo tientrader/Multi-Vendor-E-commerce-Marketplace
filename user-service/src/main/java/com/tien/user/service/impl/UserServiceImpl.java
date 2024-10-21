@@ -21,6 +21,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -36,6 +37,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -137,6 +139,18 @@ public class UserServiceImpl implements UserService {
             try {
                   TokenExchangeResponse tokenResponse = identityClient.exchangeToken(tokenExchangeParam);
                   return userMapper.toUserLoginResponse(tokenResponse);
+            } catch (FeignException e) {
+                  throw errorNormalizer.handleKeyCloakException(e);
+            }
+      }
+
+      @Override
+      @Transactional
+      public void logout() {
+            String userId = getCurrentUserId();
+
+            try {
+                  identityClient.logoutUser("Bearer " + getAccessToken(), userId);
             } catch (FeignException e) {
                   throw errorNormalizer.handleKeyCloakException(e);
             }

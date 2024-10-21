@@ -15,6 +15,8 @@ public interface UserService {
 
       TokenResponse refreshToken(RefreshTokenRequest request);
 
+      void logout();
+
       void forgotPassword(ForgotPasswordRequest request);
 
       UserResponse updateUser(String userId, UserUpdateRequest updateRequest);
