@@ -14,10 +14,10 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(collection = "likes")
 public class Like {
 
-    @Id
-    String id;
+      @Id
+      String id;
 
-    String postId;
-    String username;
+      String postId;
+      String username;
 
 }

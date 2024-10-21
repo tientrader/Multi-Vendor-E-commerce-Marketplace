@@ -11,19 +11,19 @@ import org.mapstruct.MappingTarget;
 @Mapper(componentModel = "spring")
 public interface CommentMapper {
 
-    CommentResponse toCommentResponse(Comment comment);
+      CommentResponse toCommentResponse(Comment comment);
 
-    @Mapping(target = "username", ignore = true)
-    @Mapping(target = "modifiedDate", ignore = true)
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "createdDate", ignore = true)
-    Comment toComment(CommentCreationRequest request);
+      @Mapping(target = "username", ignore = true)
+      @Mapping(target = "modifiedDate", ignore = true)
+      @Mapping(target = "id", ignore = true)
+      @Mapping(target = "createdDate", ignore = true)
+      Comment toComment(CommentCreationRequest request);
 
-    @Mapping(target = "username", ignore = true)
-    @Mapping(target = "postId", ignore = true)
-    @Mapping(target = "modifiedDate", ignore = true)
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "createdDate", ignore = true)
-    void updateCommentFromRequest(CommentUpdateRequest request, @MappingTarget Comment comment);
+      @Mapping(target = "username", ignore = true)
+      @Mapping(target = "postId", ignore = true)
+      @Mapping(target = "modifiedDate", ignore = true)
+      @Mapping(target = "id", ignore = true)
+      @Mapping(target = "createdDate", ignore = true)
+      void updateCommentFromRequest(CommentUpdateRequest request, @MappingTarget Comment comment);
 
 }

@@ -30,73 +30,73 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AuthenticationFilter implements GlobalFilter, Ordered {
 
-    ReactiveJwtDecoder jwtDecoder;
+      ReactiveJwtDecoder jwtDecoder;
 
-    @NonFinal
-    String[] publicEndpoints = {
-            "/actuator/**",
-            "/user/auth/register",
-            "/user/auth/login",
-            "/user/auth/forgot-password"
-    };
+      @NonFinal
+      String[] publicEndpoints = {
+              "/actuator/**",
+              "/user/auth/register",
+              "/user/auth/login",
+              "/user/auth/forgot-password"
+      };
 
-    @Value("${app.api-prefix}")
-    @NonFinal
-    String apiPrefix;
+      @Value("${app.api-prefix}")
+      @NonFinal
+      String apiPrefix;
 
-    private boolean isPublicEndpoint(ServerHttpRequest request) {
-        return Arrays.stream(publicEndpoints).anyMatch(
-                s -> request.getURI().getPath().startsWith(apiPrefix + s)
-        );
-    }
+      private boolean isPublicEndpoint(ServerHttpRequest request) {
+            return Arrays.stream(publicEndpoints).anyMatch(
+                    s -> request.getURI().getPath().startsWith(apiPrefix + s)
+            );
+      }
 
-    @Override
-    public int getOrder() {
-        return -1;
-    }
+      @Override
+      public int getOrder() {
+            return -1;
+      }
 
-    @Override
-    public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-        ServerHttpResponse response = exchange.getResponse();
-        ServerHttpRequest request = exchange.getRequest();
+      @Override
+      public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+            ServerHttpResponse response = exchange.getResponse();
+            ServerHttpRequest request = exchange.getRequest();
 
-        response.getHeaders().add(
-                "Strict-Transport-Security",
-                "max-age=31536000; includeSubDomains");
+            response.getHeaders().add(
+                    "Strict-Transport-Security",
+                    "max-age=31536000; includeSubDomains");
 
-        if (isPublicEndpoint(request)) {
-            return chain.filter(exchange);
-        }
+            if (isPublicEndpoint(request)) {
+                  return chain.filter(exchange);
+            }
 
-        List<String> authHeader = request.getHeaders().get(HttpHeaders.AUTHORIZATION);
-        if (CollectionUtils.isEmpty(authHeader)) {
-            return unauthenticated(response);
-        }
+            List<String> authHeader = request.getHeaders().get(HttpHeaders.AUTHORIZATION);
+            if (CollectionUtils.isEmpty(authHeader)) {
+                  return unauthenticated(response);
+            }
 
-        String token = authHeader.getFirst().replace("Bearer ", "");
+            String token = authHeader.getFirst().replace("Bearer ", "");
 
-        return jwtDecoder.decode(token)
-                .flatMap(jwt -> chain.filter(exchange))
-                .onErrorResume(throwable -> {
-                    log.error("Authentication error: {}", throwable.getMessage());
-                    if (throwable instanceof JwtException) {
-                        return unauthenticated(response);
-                    } else {
-                        return serviceUnavailable(response);
-                    }
-                });
-    }
+            return jwtDecoder.decode(token)
+                    .flatMap(jwt -> chain.filter(exchange))
+                    .onErrorResume(throwable -> {
+                          log.error("Authentication error: {}", throwable.getMessage());
+                          if (throwable instanceof JwtException) {
+                                return unauthenticated(response);
+                          } else {
+                                return serviceUnavailable(response);
+                          }
+                    });
+      }
 
-    private Mono<Void> unauthenticated(ServerHttpResponse response) {
-        response.setStatusCode(HttpStatus.UNAUTHORIZED);
-        response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
-        return response.writeWith(Mono.just(response.bufferFactory().wrap("{\"error\":\"Unauthorized\"}".getBytes())));
-    }
+      private Mono<Void> unauthenticated(ServerHttpResponse response) {
+            response.setStatusCode(HttpStatus.UNAUTHORIZED);
+            response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
+            return response.writeWith(Mono.just(response.bufferFactory().wrap("{\"error\":\"Unauthorized\"}".getBytes())));
+      }
 
-    private Mono<Void> serviceUnavailable(ServerHttpResponse response) {
-        response.setStatusCode(HttpStatus.SERVICE_UNAVAILABLE);
-        response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
-        return response.writeWith(Mono.just(response.bufferFactory().wrap("{\"error\":\"Service Unavailable\"}".getBytes())));
-    }
+      private Mono<Void> serviceUnavailable(ServerHttpResponse response) {
+            response.setStatusCode(HttpStatus.SERVICE_UNAVAILABLE);
+            response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
+            return response.writeWith(Mono.just(response.bufferFactory().wrap("{\"error\":\"Service Unavailable\"}".getBytes())));
+      }
 
 }

@@ -1,11 +1,7 @@
 package com.tien.notification.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 @Data
@@ -16,10 +12,10 @@ import lombok.experimental.FieldDefaults;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ApiResponse<T> {
 
-    @Builder.Default
-    private int code = 1000;
+      @Builder.Default
+      private int code = 1000;
 
-    private String message;
-    private T result;
+      private String message;
+      private T result;
 
 }

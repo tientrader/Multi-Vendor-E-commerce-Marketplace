@@ -12,11 +12,11 @@ import java.time.Instant;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CommentResponse {
 
-    String id;
-    String postId;
-    String username;
-    String content;
-    Instant createdDate;
-    Instant modifiedDate;
+      String id;
+      String postId;
+      String username;
+      String content;
+      Instant createdDate;
+      Instant modifiedDate;
 
 }

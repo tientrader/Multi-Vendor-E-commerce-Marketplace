@@ -8,15 +8,15 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 public class AuthenticationRequestInterceptor implements RequestInterceptor {
 
-    @Override
-    public void apply(RequestTemplate template) {
-        ServletRequestAttributes servletRequestAttributes =
-                (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+      @Override
+      public void apply(RequestTemplate template) {
+            ServletRequestAttributes servletRequestAttributes =
+                    (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
 
-          assert servletRequestAttributes != null;
-          var authHeader = servletRequestAttributes.getRequest().getHeader("Authorization");
+            assert servletRequestAttributes != null;
+            var authHeader = servletRequestAttributes.getRequest().getHeader("Authorization");
 
-        if (StringUtils.hasText(authHeader)) template.header("Authorization", authHeader);
-    }
+            if (StringUtils.hasText(authHeader)) template.header("Authorization", authHeader);
+      }
 
 }

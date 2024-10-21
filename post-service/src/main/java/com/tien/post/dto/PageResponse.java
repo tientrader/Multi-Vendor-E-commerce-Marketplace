@@ -11,7 +11,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class PageResponse <T> {
+public class PageResponse<T> {
 
       int currentPage;
       int totalPages;

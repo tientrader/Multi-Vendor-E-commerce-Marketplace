@@ -12,13 +12,13 @@ import java.time.Instant;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class PostResponse {
 
-    String id;
-    String content;
-    String username;
-    String created;
-    Instant createdDate;
-    Instant modifiedDate;
-    long likesCount;
-    long commentsCount;
+      String id;
+      String content;
+      String username;
+      String created;
+      Instant createdDate;
+      Instant modifiedDate;
+      long likesCount;
+      long commentsCount;
 
 }

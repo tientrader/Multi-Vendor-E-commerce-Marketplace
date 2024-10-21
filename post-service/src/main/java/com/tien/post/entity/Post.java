@@ -16,14 +16,14 @@ import java.time.Instant;
 @Document(value = "posts")
 public class Post {
 
-    @MongoId
-    String id;
+      @MongoId
+      String id;
 
-    String username;
-    String content;
-    Instant createdDate;
-    Instant modifiedDate;
-    long likesCount;
-    long commentsCount;
+      String username;
+      String content;
+      Instant createdDate;
+      Instant modifiedDate;
+      long likesCount;
+      long commentsCount;
 
 }

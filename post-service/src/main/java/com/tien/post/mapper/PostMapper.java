@@ -10,15 +10,15 @@ import org.mapstruct.MappingTarget;
 @Mapper(componentModel = "spring")
 public interface PostMapper {
 
-    @Mapping(target = "created", ignore = true)
-    PostResponse toPostResponse(Post post);
+      @Mapping(target = "created", ignore = true)
+      PostResponse toPostResponse(Post post);
 
-    @Mapping(target = "username", ignore = true)
-    @Mapping(target = "modifiedDate", ignore = true)
-    @Mapping(target = "likesCount", ignore = true)
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "createdDate", ignore = true)
-    @Mapping(target = "commentsCount", ignore = true)
-    void updatePost(@MappingTarget Post post, PostUpdateRequest postUpdateRequest);
+      @Mapping(target = "username", ignore = true)
+      @Mapping(target = "modifiedDate", ignore = true)
+      @Mapping(target = "likesCount", ignore = true)
+      @Mapping(target = "id", ignore = true)
+      @Mapping(target = "createdDate", ignore = true)
+      @Mapping(target = "commentsCount", ignore = true)
+      void updatePost(@MappingTarget Post post, PostUpdateRequest postUpdateRequest);
 
 }

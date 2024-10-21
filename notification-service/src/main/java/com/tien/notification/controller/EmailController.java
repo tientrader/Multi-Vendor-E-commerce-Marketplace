@@ -16,13 +16,13 @@ import org.springframework.web.bind.annotation.RestController;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class EmailController {
 
-    EmailService emailService;
+      EmailService emailService;
 
-    @PostMapping("/email/send")
-    public ApiResponse<EmailResponse> sendEmail(@RequestBody SendEmailRequest request){
-        return ApiResponse.<EmailResponse>builder()
-                .result(emailService.sendEmail(request))
-                .build();
-    }
+      @PostMapping("/email/send")
+      public ApiResponse<EmailResponse> sendEmail(@RequestBody SendEmailRequest request) {
+            return ApiResponse.<EmailResponse>builder()
+                    .result(emailService.sendEmail(request))
+                    .build();
+      }
 
 }

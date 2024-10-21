@@ -1,10 +1,6 @@
 package com.tien.notification.dto.request;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.util.List;
@@ -16,9 +12,9 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class EmailRequest {
 
-    Sender sender;
-    List<Recipient> to;
-    String subject;
-    String htmlContent;
+      Sender sender;
+      List<Recipient> to;
+      String subject;
+      String htmlContent;
 
 }
