@@ -43,8 +43,10 @@ public class PostServiceImpl implements PostService {
                   userClient.checkIfUserIsVIP(username);
             } catch (FeignException e) {
                   if (e.status() == 400 && e.getMessage().contains("USER_NOT_VIP")) {
+                        log.error("User {} is not VIP.", username);
                         throw new AppException(ErrorCode.USER_NOT_VIP);
                   }
+                  log.error("External service error while checking VIP status for user {}: {}", username, e.getMessage());
                   throw new AppException(ErrorCode.EXTERNAL_SERVICE_ERROR);
             }
 
@@ -85,9 +87,7 @@ public class PostServiceImpl implements PostService {
 
       @Override
       public PostResponse getPostById(String postId) {
-            Post post = postRepository.findById(postId)
-                    .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));
-
+            Post post = findPostById(postId);
             return postMapper.toPostResponse(post);
       }
 
@@ -95,12 +95,8 @@ public class PostServiceImpl implements PostService {
       public PostResponse updatePost(String postId, PostUpdateRequest request) {
             String username = authenticationService.getAuthenticatedUsername();
 
-            Post post = postRepository.findById(postId)
-                    .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));
-
-            if (!post.getUsername().equals(username)) {
-                  throw new AppException(ErrorCode.UNAUTHENTICATED);
-            }
+            Post post = findPostById(postId);
+            validateUserOwnership(post, username);
 
             postMapper.updatePost(post, request);
             post.setModifiedDate(Instant.now());
@@ -112,14 +108,25 @@ public class PostServiceImpl implements PostService {
       @Override
       public void deletePost(String postId) {
             String username = authenticationService.getAuthenticatedUsername();
-            Post post = postRepository.findById(postId)
-                    .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));
-
-            if (!post.getUsername().equals(username)) {
-                  throw new AppException(ErrorCode.UNAUTHENTICATED);
-            }
+            Post post = findPostById(postId);
+            validateUserOwnership(post, username);
 
             postRepository.delete(post);
+      }
+
+      private Post findPostById(String postId) {
+            return postRepository.findById(postId)
+                    .orElseThrow(() -> {
+                          log.error("Post with ID {} not found.", postId);
+                          return new AppException(ErrorCode.POST_NOT_FOUND);
+                    });
+      }
+
+      private void validateUserOwnership(Post post, String username) {
+            if (!post.getUsername().equals(username)) {
+                  log.error("User {} is not authorized to access the post owned by {}.", username, post.getUsername());
+                  throw new AppException(ErrorCode.UNAUTHENTICATED);
+            }
       }
 
 }

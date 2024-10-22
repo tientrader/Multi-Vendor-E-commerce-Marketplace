@@ -58,11 +58,15 @@ public class VIPUserServiceImpl implements VIPUserService {
                     .numberOfLicense(request.getNumberOfLicense())
                     .build();
 
-            ApiResponse<StripeSubscriptionResponse> subscriptionResponse = paymentClient.createSubscription(subscriptionRequest);
+            ApiResponse<StripeSubscriptionResponse> subscriptionResponse;
+            try {
+                  subscriptionResponse = paymentClient.createSubscription(subscriptionRequest);
+            } catch (Exception e) {
+                  log.error("Failed to create subscription for user {}: {}", username, e.getMessage());
+                  throw new AppException(ErrorCode.SUBSCRIPTION_CREATION_FAILED);
+            }
 
-            User user = userRepository.findByUsername(username)
-                    .orElse(vipUserMapper.vipUserRequestToUser(request));
-
+            User user = findOrCreateUser(request, username);
             LocalDate vipStartDate = LocalDate.now();
             user.setVipStartDate(vipStartDate);
 
@@ -70,6 +74,7 @@ public class VIPUserServiceImpl implements VIPUserService {
             user.setVipEndDate(vipEndDate);
             user.setStripeSubscriptionId(subscriptionResponse.getResult().getStripeSubscriptionId());
             user.setVipStatus(true);
+
             userRepository.save(user);
 
             return vipUserMapper.userToVipUserResponse(user);
@@ -78,16 +83,20 @@ public class VIPUserServiceImpl implements VIPUserService {
       @Override
       public VIPUserResponse cancelVIPUserSubscription(String username) {
             String currentUsername = getCurrentUsername();
-
-            User user = userRepository.findByUsername(currentUsername)
-                    .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+            User user = findUserByUsername(currentUsername);
 
             if (user.getStripeSubscriptionId() != null) {
-                  paymentClient.cancelSubscription(user.getStripeSubscriptionId());
+                  try {
+                        paymentClient.cancelSubscription(user.getStripeSubscriptionId());
+                  } catch (Exception e) {
+                        log.error("Failed to cancel subscription for user {}: {}", currentUsername, e.getMessage());
+                        throw new AppException(ErrorCode.SUBSCRIPTION_CANCELLATION_FAILED);
+                  }
                   user.setVipStatus(false);
                   user.setVipStartDate(null);
                   user.setVipEndDate(null);
                   user.setStripeSubscriptionId(null);
+
                   userRepository.save(user);
             }
 
@@ -96,10 +105,10 @@ public class VIPUserServiceImpl implements VIPUserService {
 
       @Override
       public VIPUserResponse checkIfUserIsVIP(String username) {
-            User user = userRepository.findByUsername(username)
-                    .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+            User user = findUserByUsername(username);
 
             if (!user.isVipStatus()) {
+                  log.error("User {} is not a VIP user.", username);
                   throw new AppException(ErrorCode.USER_NOT_VIP);
             }
 
@@ -111,6 +120,19 @@ public class VIPUserServiceImpl implements VIPUserService {
             return jwt.getClaim("preferred_username");
       }
 
+      private User findUserByUsername(String username) {
+            return userRepository.findByUsername(username)
+                    .orElseThrow(() -> {
+                          log.error("User with username {} not found", username);
+                          return new AppException(ErrorCode.USER_NOT_EXISTED);
+                    });
+      }
+
+      private User findOrCreateUser(VIPUserRequest request, String username) {
+            return userRepository.findByUsername(username)
+                    .orElse(vipUserMapper.vipUserRequestToUser(request));
+      }
+
       private LocalDate getVipEndDateBasedOnPriceId(String priceId, LocalDate vipStartDate) {
             if (priceId.equals(monthlyPriceId)) {
                   return vipStartDate.plusMonths(1);
@@ -119,6 +141,7 @@ public class VIPUserServiceImpl implements VIPUserService {
             } else if (priceId.equals(annualPriceId)) {
                   return vipStartDate.plusYears(1);
             } else {
+                  log.error("Invalid price ID provided: {}", priceId);
                   throw new AppException(ErrorCode.INVALID_PRICE_ID);
             }
       }

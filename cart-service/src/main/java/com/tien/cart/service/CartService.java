@@ -7,8 +7,11 @@ import com.tien.cart.dto.response.OrderResponse;
 public interface CartService {
 
       CartResponse upsertProductInCart(CartCreationRequest request);
+
       OrderResponse createOrderFromCart(String paymentMethod, String paymentToken);
+
       void deleteMyCart();
+
       CartResponse getMyCart();
 
 }

@@ -14,13 +14,11 @@ import com.tien.order.httpclient.PaymentClient;
 import com.tien.order.httpclient.ProductClient;
 import com.tien.order.mapper.OrderMapper;
 import com.tien.order.repository.OrderRepository;
-
 import com.tien.order.service.OrderService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -67,11 +65,13 @@ public class OrderServiceImpl implements OrderService {
                   if (paymentResponse.getResult() != null && paymentResponse.getResult().getSuccess()) {
                         order.setStatus("PAID");
                   } else {
+                        log.error("Payment failed for user {}: {}", username, paymentResponse.getMessage());
                         throw new AppException(ErrorCode.PAYMENT_FAIL);
                   }
             } else if ("COD".equalsIgnoreCase(request.getPaymentMethod())) {
                   order.setStatus("PENDING");
             } else {
+                  log.error("Invalid payment method: {}", request.getPaymentMethod());
                   throw new IllegalArgumentException("Invalid payment method: " + request.getPaymentMethod());
             }
 
@@ -92,9 +92,7 @@ public class OrderServiceImpl implements OrderService {
       @PreAuthorize("hasRole('ADMIN')")
       @Transactional
       public void deleteOrder(Long orderId) {
-            Order order = orderRepository.findById(orderId)
-                    .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
-            orderRepository.delete(order);
+            orderRepository.delete(findOrderById(orderId));
       }
 
       @Override
@@ -108,7 +106,7 @@ public class OrderServiceImpl implements OrderService {
       @Override
       public List<OrderResponse> getMyOrders() {
             String username = getCurrentUsername();
-            return orderRepository.findByUsername(username).stream()
+            return findOrdersByUsername(username).stream()
                     .map(orderMapper::toOrderResponse)
                     .collect(Collectors.toList());
       }
@@ -116,7 +114,7 @@ public class OrderServiceImpl implements OrderService {
       @Override
       @PreAuthorize("hasRole('ADMIN')")
       public List<OrderResponse> getOrdersByUsername(String username) {
-            return orderRepository.findByUsername(username).stream()
+            return findOrdersByUsername(username).stream()
                     .map(orderMapper::toOrderResponse)
                     .collect(Collectors.toList());
       }
@@ -124,10 +122,10 @@ public class OrderServiceImpl implements OrderService {
       @Override
       public OrderResponse getMyOrderByOrderId(Long orderId) {
             String username = getCurrentUsername();
-            Order order = orderRepository.findById(orderId)
-                    .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+            Order order = findOrderById(orderId);
 
             if (!order.getUsername().equals(username)) {
+                  log.error("User {} attempted to access another user's order: orderId={}", username, orderId);
                   throw new AppException(ErrorCode.ORDER_IS_NOT_YOURS);
             }
 
@@ -156,6 +154,8 @@ public class OrderServiceImpl implements OrderService {
                   ).getResult();
 
                   if (stockQuantity < item.getQuantity()) {
+                        log.error("Out of stock for productId={}, variantId={}, requestedQuantity={}, availableQuantity={}",
+                                item.getProductId(), item.getVariantId(), item.getQuantity(), stockQuantity);
                         throw new AppException(ErrorCode.OUT_OF_STOCK);
                   }
             });
@@ -167,6 +167,23 @@ public class OrderServiceImpl implements OrderService {
                     item.getVariantId(),
                     item.getQuantity()
             ));
+      }
+
+      private Order findOrderById(Long orderId) {
+            return orderRepository.findById(orderId)
+                    .orElseThrow(() -> {
+                          log.error("Order not found: orderId={}", orderId);
+                          return new AppException(ErrorCode.ORDER_NOT_FOUND);
+                    });
+      }
+
+      private List<Order> findOrdersByUsername(String username) {
+            List<Order> orders = orderRepository.findByUsername(username);
+            if (orders.isEmpty()) {
+                  log.error("No orders found for username={}", username);
+                  throw new AppException(ErrorCode.ORDER_NOT_FOUND);
+            }
+            return orders;
       }
 
 }

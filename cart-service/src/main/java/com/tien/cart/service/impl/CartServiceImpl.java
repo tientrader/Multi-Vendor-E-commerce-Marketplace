@@ -78,7 +78,13 @@ public class CartServiceImpl implements CartService {
             orderRequest.setPaymentMethod(paymentMethod);
             orderRequest.setPaymentToken(paymentToken);
 
-            ApiResponse<OrderResponse> orderResponse = orderClient.createOrder(orderRequest);
+            ApiResponse<OrderResponse> orderResponse;
+            try {
+                  orderResponse = orderClient.createOrder(orderRequest);
+            } catch (Exception e) {
+                  log.error("Error creating order for user {}: {}", username, e.getMessage(), e);
+                  throw new AppException(ErrorCode.ORDER_CREATION_FAILED);
+            }
 
             redisTemplate.delete(cartKey);
 
@@ -183,12 +189,14 @@ public class CartServiceImpl implements CartService {
 
       private void validateUsername(String username) {
             if (username == null) {
+                  log.error("Unauthorized access attempt: username is null");
                   throw new AppException(ErrorCode.UNAUTHORIZED);
             }
       }
 
       private void validateCart(Cart cart) {
             if (cart == null) {
+                  log.error("Cart not found");
                   throw new AppException(ErrorCode.CART_NOT_FOUND);
             }
       }
@@ -199,6 +207,7 @@ public class CartServiceImpl implements CartService {
                   String ownerUsername = shopClient.getOwnerUsernameByShopId(shopId).getResult();
 
                   if (ownerUsername != null && ownerUsername.equals(getCurrentUsername())) {
+                        log.error("User {} attempted to add their own product to the cart: productId={}", getCurrentUsername(), item.getProductId());
                         throw new AppException(ErrorCode.CANNOT_ADD_OWN_PRODUCT);
                   }
             }
@@ -211,6 +220,7 @@ public class CartServiceImpl implements CartService {
 
                   ExistsResponse existsResponse = productClient.existsProduct(productId, variantId);
                   if (!existsResponse.isExists()) {
+                        log.error("Product not found: productId={}, variantId={}", productId, variantId);
                         throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
                   }
             }
@@ -224,6 +234,7 @@ public class CartServiceImpl implements CartService {
                   ).getResult();
 
                   if (stockQuantity < item.getQuantity()) {
+                        log.error("Out of stock: productId={}, variantId={}, requestedQuantity={}, availableQuantity={}", item.getProductId(), item.getVariantId(), item.getQuantity(), stockQuantity);
                         throw new AppException(ErrorCode.OUT_OF_STOCK);
                   }
             });

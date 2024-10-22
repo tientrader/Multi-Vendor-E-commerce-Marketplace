@@ -13,12 +13,14 @@ import com.tien.shop.service.ShopService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -34,6 +36,7 @@ public class ShopServiceImpl implements ShopService {
             String username = getCurrentUsername();
 
             if (shopRepository.existsByOwnerUsername(username)) {
+                  log.error("User {} already has a shop", username);
                   throw new AppException(ErrorCode.ALREADY_HAVE_A_SHOP);
             }
 
@@ -55,10 +58,7 @@ public class ShopServiceImpl implements ShopService {
       @Transactional
       public ShopResponse updateShop(ShopUpdateRequest request) {
             String username = getCurrentUsername();
-
-            Shop shop = shopRepository.findByOwnerUsername(username)
-                    .orElseThrow(() -> new AppException(ErrorCode.SHOP_NOT_FOUND));
-
+            Shop shop = findShopByOwnerUsername(username);
             shopMapper.updateShop(shop, request);
             return shopMapper.toShopResponse(shopRepository.save(shop));
       }
@@ -66,33 +66,38 @@ public class ShopServiceImpl implements ShopService {
       @Override
       @Transactional
       public void deleteShop() {
-            String username = getCurrentUsername();
-
-            Shop shop = shopRepository.findByOwnerUsername(username)
-                    .orElseThrow(() -> new AppException(ErrorCode.SHOP_NOT_FOUND));
-
-            shopRepository.delete(shop);
+            shopRepository.delete(findShopByOwnerUsername(getCurrentUsername()));
       }
 
       @Override
       public ShopResponse getShopByOwnerUsername(String ownerUsername) {
-            Shop shop = shopRepository.findByOwnerUsername(ownerUsername)
-                    .orElseThrow(() -> new AppException(ErrorCode.SHOP_NOT_FOUND));
-
-            return shopMapper.toShopResponse(shop);
+            return shopMapper.toShopResponse(findShopByOwnerUsername(ownerUsername));
       }
 
       @Override
       public String getOwnerUsernameByShopId(String shopId) {
-            Shop shop = shopRepository.findById(shopId)
-                    .orElseThrow(() -> new AppException(ErrorCode.SHOP_NOT_FOUND));
-
-            return shop.getOwnerUsername();
+            return findShopById(shopId).getOwnerUsername();
       }
 
       private String getCurrentUsername() {
             Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             return jwt.getClaim("preferred_username");
+      }
+
+      private Shop findShopByOwnerUsername(String username) {
+            return shopRepository.findByOwnerUsername(username)
+                    .orElseThrow(() -> {
+                          log.error("Shop not found for user {}", username);
+                          return new AppException(ErrorCode.SHOP_NOT_FOUND);
+                    });
+      }
+
+      private Shop findShopById(String shopId) {
+            return shopRepository.findById(shopId)
+                    .orElseThrow(() -> {
+                          log.error("Shop not found for ID {}", shopId);
+                          return new AppException(ErrorCode.SHOP_NOT_FOUND);
+                    });
       }
 
 }

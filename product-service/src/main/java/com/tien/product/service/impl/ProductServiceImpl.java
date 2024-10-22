@@ -154,8 +154,7 @@ public class ProductServiceImpl implements ProductService {
 
       @Override
       public ProductResponse getProductById(String productId) {
-            return productMapper.toProductResponse(productRepository.findById(productId)
-                    .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND)));
+            return productMapper.toProductResponse(findProductById(productId));
       }
 
       @Override
@@ -165,45 +164,29 @@ public class ProductServiceImpl implements ProductService {
 
       @Override
       public double getProductPriceById(String productId, String variantId) {
-            Product product = productRepository.findById(productId)
-                    .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
-
-            ProductVariant variant = product.getVariants().stream()
-                    .filter(v -> v.getVariantId().equals(variantId))
-                    .findFirst()
-                    .orElseThrow(() -> new AppException(ErrorCode.VARIANT_NOT_FOUND));
-
+            Product product = findProductById(productId);
+            ProductVariant variant = findVariantById(product, variantId);
             return variant.getPrice();
       }
 
       @Override
       public int getProductStockById(String productId, String variantId) {
-            Product product = productRepository.findById(productId)
-                    .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
-
-            ProductVariant variant = product.getVariants().stream()
-                    .filter(v -> v.getVariantId().equals(variantId))
-                    .findFirst()
-                    .orElseThrow(() -> new AppException(ErrorCode.VARIANT_NOT_FOUND));
-
+            Product product = findProductById(productId);
+            ProductVariant variant = findVariantById(product, variantId);
             return variant.getStock();
       }
 
       @Override
       public ExistsResponse existsProduct(String productId, String variantId) {
-            Product product = productRepository.findById(productId)
-                    .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
-
+            Product product = findProductById(productId);
             boolean variantExists = product.getVariants().stream()
                     .anyMatch(variant -> variant.getVariantId().equals(variantId));
-
             return new ExistsResponse(variantExists);
       }
 
       @Override
       public String getShopIdByProductId(String productId) {
-            Product product = productRepository.findById(productId)
-                    .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+            Product product = findProductById(productId);
             return product.getShopId();
       }
 
@@ -214,23 +197,43 @@ public class ProductServiceImpl implements ProductService {
 
       private Product findProductById(String productId) {
             return productRepository.findById(productId)
-                    .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+                    .orElseThrow(() -> {
+                          log.error("Product not found with ID: {}", productId);
+                          return new AppException(ErrorCode.PRODUCT_NOT_FOUND);
+                    });
+      }
+
+      private ProductVariant findVariantById(Product product, String variantId) {
+            return product.getVariants().stream()
+                    .filter(v -> v.getVariantId().equals(variantId))
+                    .findFirst()
+                    .orElseThrow(() -> {
+                          log.error("Variant not found with ID: {} for product ID: {}", variantId, product.getId());
+                          return new AppException(ErrorCode.VARIANT_NOT_FOUND);
+                    });
       }
 
       private Category findCategoryById(String categoryId) {
             return categoryRepository.findById(categoryId)
-                    .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
+                    .orElseThrow(() -> {
+                          log.error("Category not found with ID: {}", categoryId);
+                          return new AppException(ErrorCode.CATEGORY_NOT_FOUND);
+                    });
       }
 
       private void checkCategoryOwnership(Category category, String shopId) {
             if (!category.getShopId().equals(shopId)) {
+                  log.error("Unauthorized access to category ID: {} by shop ID: {}", category.getId(), shopId);
                   throw new AppException(ErrorCode.UNAUTHORIZED);
             }
       }
 
       private ShopResponse getShopByOwnerUsername(String username) {
             return Optional.ofNullable(shopClient.getShopByOwnerUsername(username).getResult())
-                    .orElseThrow(() -> new AppException(ErrorCode.SHOP_NOT_FOUND));
+                    .orElseThrow(() -> {
+                          log.error("Shop not found for username: {}", username);
+                          return new AppException(ErrorCode.SHOP_NOT_FOUND);
+                    });
       }
 
 }

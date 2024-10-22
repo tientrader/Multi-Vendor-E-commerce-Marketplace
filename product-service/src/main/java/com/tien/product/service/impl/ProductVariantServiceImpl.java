@@ -51,6 +51,7 @@ public class ProductVariantServiceImpl implements ProductVariantService {
 
             int newStock = variant.getStock() - quantity;
             if (newStock < 0) {
+                  log.error("Stock for variant {} of product {} is insufficient. Requested: {}, Available: {}", variantId, productId, quantity, variant.getStock());
                   throw new AppException(ErrorCode.OUT_OF_STOCK);
             }
 
@@ -64,22 +65,26 @@ public class ProductVariantServiceImpl implements ProductVariantService {
       public void deleteProductVariant(String productId, String variantId) {
             Product product = findProductById(productId);
             ProductVariant variant = findProductVariant(product, variantId);
-
             product.getVariants().remove(variant);
-
             productRepository.save(product);
       }
 
       private Product findProductById(String productId) {
             return productRepository.findById(productId)
-                    .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+                    .orElseThrow(() -> {
+                          log.error("Product not found for ID: {}", productId);
+                          return new AppException(ErrorCode.PRODUCT_NOT_FOUND);
+                    });
       }
 
       private ProductVariant findProductVariant(Product product, String variantId) {
             return product.getVariants().stream()
                     .filter(v -> v.getVariantId().equals(variantId))
                     .findFirst()
-                    .orElseThrow(() -> new AppException(ErrorCode.VARIANT_NOT_FOUND));
+                    .orElseThrow(() -> {
+                          log.error("Variant not found for ID: {} in product {}", variantId, product.getId());
+                          return new AppException(ErrorCode.VARIANT_NOT_FOUND);
+                    });
       }
 
 }

@@ -92,6 +92,7 @@ public class StripeServiceImpl implements StripeService {
                   stripeChargeRepository.save(stripeCharge);
                   return stripeMapper.toStripeChargeResponse(stripeCharge);
             } catch (StripeException e) {
+                  log.error("Payment failed for user {}: {}", request.getUsername(), e.getMessage());
                   throw new AppException(ErrorCode.PAYMENT_FAILED);
             }
       }
@@ -146,6 +147,7 @@ public class StripeServiceImpl implements StripeService {
                           .build();
 
             } catch (StripeException e) {
+                  log.error("Subscription creation failed for user {}: {}", request.getUsername(), e.getMessage());
                   throw new AppException(ErrorCode.SUBSCRIPTION_CREATION_FAILED);
             }
       }
@@ -204,8 +206,10 @@ public class StripeServiceImpl implements StripeService {
 
                   return stripeMapper.toSessionResponse(paymentSession);
             } catch (StripeException e) {
+                  log.error("Payment session creation failed for user {}: {}", request.getUsername(), e.getMessage());
                   throw new AppException(ErrorCode.PAYMENT_SESSION_CREATION_FAILED);
             } catch (Exception e) {
+                  log.error("An unexpected error occurred while creating payment session for user {}: {}", request.getUsername(), e.getMessage());
                   throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
             }
       }
@@ -260,6 +264,7 @@ public class StripeServiceImpl implements StripeService {
                           .body("Your subscription session has been created successfully.")
                           .build());
             } catch (StripeException e) {
+                  log.error("Subscription session creation failed for user {}: {}", request.getUsername(), e.getMessage());
                   throw new AppException(ErrorCode.SUBSCRIPTION_SESSION_CREATION_FAILED);
             }
             return sessionResponse;
@@ -275,6 +280,7 @@ public class StripeServiceImpl implements StripeService {
                   response.setStripeSubscriptionId(canceledSubscription.getId());
                   response.setStatus(canceledSubscription.getStatus());
             } catch (StripeException e) {
+                  log.error("Failed to cancel subscription with ID {}: {}", subscriptionId, e.getMessage());
                   throw new AppException(ErrorCode.SUBSCRIPTION_CANCEL_FAILED);
             }
             return response;

@@ -80,6 +80,7 @@ public class UserServiceImpl implements UserService {
                                           .build()))
                                   .build());
             } catch (FeignException e) {
+                  log.error("Error occurred during user registration: {}", e.getMessage());
                   throw errorNormalizer.handleKeyCloakException(e);
             }
 
@@ -93,6 +94,7 @@ public class UserServiceImpl implements UserService {
                   try {
                         identityClient.sendVerificationEmail(token, userId);
                   } catch (FeignException e) {
+                        log.error("Error occurred while sending verification email: {}", e.getMessage());
                         throw errorNormalizer.handleKeyCloakException(e);
                   }
             });
@@ -122,6 +124,7 @@ public class UserServiceImpl implements UserService {
                   TokenExchangeResponse tokenResponse = identityClient.exchangeToken(tokenExchangeParam);
                   return userMapper.toUserLoginResponse(tokenResponse);
             } catch (FeignException e) {
+                  log.error("Error occurred during login for user {}: {}", request.getUsername(), e.getMessage());
                   throw errorNormalizer.handleKeyCloakException(e);
             }
       }
@@ -140,6 +143,7 @@ public class UserServiceImpl implements UserService {
                   TokenExchangeResponse tokenResponse = identityClient.exchangeToken(tokenExchangeParam);
                   return userMapper.toUserLoginResponse(tokenResponse);
             } catch (FeignException e) {
+                  log.error("Error occurred during token refresh: {}", e.getMessage());
                   throw errorNormalizer.handleKeyCloakException(e);
             }
       }
@@ -152,6 +156,7 @@ public class UserServiceImpl implements UserService {
             try {
                   identityClient.logoutUser("Bearer " + getAccessToken(), userId);
             } catch (FeignException e) {
+                  log.error("Error occurred during logout for user {}: {}", userId, e.getMessage());
                   throw errorNormalizer.handleKeyCloakException(e);
             }
       }
@@ -159,14 +164,14 @@ public class UserServiceImpl implements UserService {
       @Override
       @Transactional
       public void forgotPassword(ForgotPasswordRequest request) {
-            User user = userRepository.findByEmail(request.getEmail())
-                    .orElseThrow(() -> new AppException(ErrorCode.PROFILE_NOT_FOUND));
+            User user = findUserByEmail(request.getEmail());
 
             String userId = user.getUserId();
             CompletableFuture.runAsync(() -> {
                   try {
                         identityClient.sendResetPasswordEmail("Bearer " + getAccessToken(), userId);
                   } catch (FeignException e) {
+                        log.error("Error occurred while sending reset password email for user {}: {}", request.getEmail(), e.getMessage());
                         throw errorNormalizer.handleKeyCloakException(e);
                   }
             });
@@ -176,12 +181,12 @@ public class UserServiceImpl implements UserService {
       @Transactional
       @PreAuthorize("hasRole('ADMIN')")
       public UserResponse updateUser(String userId, UserUpdateRequest updateRequest) {
-            User user = userRepository.findByUserId(userId)
-                    .orElseThrow(() -> new AppException(ErrorCode.PROFILE_NOT_FOUND));
+            User user = findUserById(userId);
 
             try {
                   identityClient.updateUser("Bearer " + getAccessToken(), userId, updateRequest);
             } catch (FeignException e) {
+                  log.error("Error occurred while updating user {}: {}", userId, e.getMessage());
                   throw errorNormalizer.handleKeyCloakException(e);
             }
 
@@ -192,17 +197,16 @@ public class UserServiceImpl implements UserService {
       @Override
       @Transactional
       public UserResponse updateMyInfo(UserUpdateRequest updateRequest) {
-            String currentUserId = getCurrentUserId();
+            String userId = getCurrentUserId();
 
             try {
-                  identityClient.updateUser("Bearer " + getAccessToken(), currentUserId, updateRequest);
+                  identityClient.updateUser("Bearer " + getAccessToken(), userId, updateRequest);
             } catch (FeignException e) {
+                  log.error("Error occurred while updating current user {}: {}", userId, e.getMessage());
                   throw errorNormalizer.handleKeyCloakException(e);
             }
 
-            User user = userRepository.findByUserId(currentUserId)
-                    .orElseThrow(() -> new AppException(ErrorCode.PROFILE_NOT_FOUND));
-
+            User user = findUserById(userId);
             userMapper.updateUser(user, updateRequest);
             return userMapper.toUserResponse(userRepository.save(user));
       }
@@ -220,6 +224,7 @@ public class UserServiceImpl implements UserService {
                                   .value(request.getNewPassword())
                                   .build());
             } catch (FeignException e) {
+                  log.error("Error occurred during password reset for user {}: {}", userId, e.getMessage());
                   throw errorNormalizer.handleKeyCloakException(e);
             }
       }
@@ -228,26 +233,16 @@ public class UserServiceImpl implements UserService {
       @Transactional
       @PreAuthorize("hasRole('ADMIN')")
       public void deleteUser(String userId) {
-            if (!userRepository.existsByUserId(userId)) {
-                  throw new AppException(ErrorCode.PROFILE_NOT_FOUND);
-            }
+            findUserById(userId);
 
             try {
                   identityClient.deleteUser("Bearer " + getAccessToken(), userId);
             } catch (FeignException e) {
+                  log.error("Error occurred while deleting user {}: {}", userId, e.getMessage());
                   throw errorNormalizer.handleKeyCloakException(e);
             }
 
             userRepository.deleteByUserId(userId);
-      }
-
-      @Override
-      public UserResponse getMyInfo() {
-            String userId = getCurrentUserId();
-            User user = userRepository.findByUserId(userId)
-                    .orElseThrow(() -> new AppException(ErrorCode.PROFILE_NOT_FOUND));
-
-            return userMapper.toUserResponse(user);
       }
 
       @Override
@@ -265,25 +260,25 @@ public class UserServiceImpl implements UserService {
       }
 
       @Override
+      public UserResponse getMyInfo() {
+            return userMapper.toUserResponse(findUserById(getCurrentUserId()));
+      }
+
+      @Override
       @PreAuthorize("hasRole('ADMIN')")
       public UserResponse getUserByUserId(String userId) {
-            User user = userRepository.findByUserId(userId)
-                    .orElseThrow(() -> new AppException(ErrorCode.PROFILE_NOT_FOUND));
-
-            return userMapper.toUserResponse(user);
+            return userMapper.toUserResponse(findUserById(userId));
       }
 
       @Override
       public UserResponse getUserByProfileId(String profileId) {
-            User user = userRepository.findById(profileId)
-                    .orElseThrow(() -> new AppException(ErrorCode.PROFILE_NOT_FOUND));
-
-            return userMapper.toUserResponse(user);
+            return userMapper.toUserResponse(findUserByProfileId(profileId));
       }
 
       private String getCurrentUserId() {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             if (authentication == null || !authentication.isAuthenticated()) {
+                  log.error("Failed to retrieve current user ID: Authentication is null or not authenticated");
                   throw new AppException(ErrorCode.UNAUTHORIZED);
             }
             return authentication.getName();
@@ -293,7 +288,10 @@ public class UserServiceImpl implements UserService {
             return Optional.ofNullable(response.getHeaders().get("Location"))
                     .map(headers -> headers.getFirst().split("/"))
                     .map(splitStr -> splitStr[splitStr.length - 1])
-                    .orElseThrow(() -> new AppException(ErrorCode.PROFILE_NOT_FOUND));
+                    .orElseThrow(() -> {
+                          log.error("Failed to extract user ID from response headers");
+                          return new AppException(ErrorCode.USER_NOT_EXISTED);
+                    });
       }
 
       private String getAccessToken() {
@@ -303,6 +301,30 @@ public class UserServiceImpl implements UserService {
                     .client_secret(clientSecret)
                     .scope("openid")
                     .build()).getAccessToken();
+      }
+
+      private User findUserById(String userId) {
+            return userRepository.findByUserId(userId)
+                    .orElseThrow(() -> {
+                          log.error("User with ID {} not found", userId);
+                          return new AppException(ErrorCode.USER_NOT_EXISTED);
+                    });
+      }
+
+      private User findUserByProfileId(String profileId) {
+            return userRepository.findById(profileId)
+                    .orElseThrow(() -> {
+                          log.error("User with profileID {} not found", profileId);
+                          return new AppException(ErrorCode.PROFILE_NOT_FOUND);
+                    });
+      }
+
+      private User findUserByEmail(String email) {
+            return userRepository.findByEmail(email)
+                    .orElseThrow(() -> {
+                          log.error("User with email {} not found", email);
+                          return new AppException(ErrorCode.PROFILE_NOT_FOUND);
+                    });
       }
 
 }

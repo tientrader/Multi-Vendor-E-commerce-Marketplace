@@ -27,11 +27,11 @@ public interface UserService {
 
       void deleteUser(String userId);
 
-      UserResponse getMyInfo();
-
       Page<UserResponse> getUsers(int page, int size);
 
       List<UserResponse> getAllUsers();
+
+      UserResponse getMyInfo();
 
       UserResponse getUserByUserId(String userId);
 
