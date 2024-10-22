@@ -19,6 +19,7 @@ public class User {
       @GeneratedValue(strategy = GenerationType.UUID)
       String profileId;
 
+      @Column(name = "email", unique = true, columnDefinition = "VARCHAR(255) COLLATE utf8mb4_unicode_ci")
       String email;
 
       @Column(name = "phone_number", unique = true, columnDefinition = "VARCHAR(255) COLLATE utf8mb4_unicode_ci")

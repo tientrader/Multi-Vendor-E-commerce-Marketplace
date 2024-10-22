@@ -23,6 +23,8 @@ public interface UserMapper {
 
       UserResponse toUserResponse(User user);
 
+      @Mapping(target = "phoneNumber", ignore = true)
+      @Mapping(target = "email", ignore = true)
       @Mapping(target = "vipStatus", ignore = true)
       @Mapping(target = "vipStartDate", ignore = true)
       @Mapping(target = "vipEndDate", ignore = true)
