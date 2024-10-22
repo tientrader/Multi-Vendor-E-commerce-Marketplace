@@ -47,4 +47,12 @@ public class ShopController {
                     .build();
       }
 
+      @GetMapping("/{shopId}/owner")
+      public ApiResponse<String> getOwnerUsernameByShopId(@PathVariable("shopId") String shopId) {
+            String ownerUsername = shopService.getOwnerUsernameByShopId(shopId);
+            return ApiResponse.<String>builder()
+                    .result(ownerUsername)
+                    .build();
+      }
+
 }

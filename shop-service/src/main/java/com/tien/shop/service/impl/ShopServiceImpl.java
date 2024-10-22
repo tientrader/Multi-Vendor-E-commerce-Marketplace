@@ -82,6 +82,14 @@ public class ShopServiceImpl implements ShopService {
             return shopMapper.toShopResponse(shop);
       }
 
+      @Override
+      public String getOwnerUsernameByShopId(String shopId) {
+            Shop shop = shopRepository.findById(shopId)
+                    .orElseThrow(() -> new AppException(ErrorCode.SHOP_NOT_FOUND));
+
+            return shop.getOwnerUsername();
+      }
+
       private String getCurrentUsername() {
             Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             return jwt.getClaim("preferred_username");

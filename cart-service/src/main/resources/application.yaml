@@ -15,6 +15,7 @@ app:
   services:
     product: http://localhost:8082/product
     order: http://localhost:8084/order
+    shop: http://localhost:8081/shop
 
 springdoc:
   swagger-ui:

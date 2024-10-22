@@ -12,13 +12,23 @@ import java.util.List;
 public interface ProductService {
 
       ProductResponse createProduct(ProductCreationRequest request);
+
       ProductResponse updateProduct(String productId, ProductUpdateRequest request);
+
       void deleteProduct(String productId);
+
       Page<ProductResponse> getProducts(String shopId, String categoryId, int page, int size, String sortBy, String sortDirection, Double minPrice, Double maxPrice, ProductSort productSort);
+
       ProductResponse getProductById(String productId);
+
       List<ProductResponse> getAllProducts();
+
       double getProductPriceById(String productId, String variantId);
+
       int getProductStockById(String productId, String variantId);
+
       ExistsResponse existsProduct(String productId, String variantId);
+
+      String getShopIdByProductId(String productId);
 
 }

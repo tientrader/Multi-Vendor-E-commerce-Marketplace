@@ -11,4 +11,5 @@ public interface ShopService {
       void deleteShop();
       ShopResponse getShopByOwnerUsername(String ownerUsername);
 
+      String getOwnerUsernameByShopId(String shopId);
 }

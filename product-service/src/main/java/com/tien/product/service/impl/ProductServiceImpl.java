@@ -200,6 +200,13 @@ public class ProductServiceImpl implements ProductService {
             return new ExistsResponse(variantExists);
       }
 
+      @Override
+      public String getShopIdByProductId(String productId) {
+            Product product = productRepository.findById(productId)
+                    .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+            return product.getShopId();
+      }
+
       private String getCurrentUsername() {
             Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             return jwt.getClaim("preferred_username");

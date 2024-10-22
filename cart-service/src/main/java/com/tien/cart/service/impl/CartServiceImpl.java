@@ -9,6 +9,7 @@ import com.tien.cart.entity.CartItem;
 import com.tien.cart.exception.AppException;
 import com.tien.cart.exception.ErrorCode;
 import com.tien.cart.httpclient.OrderClient;
+import com.tien.cart.httpclient.ShopClient;
 import com.tien.cart.mapper.CartMapper;
 import com.tien.cart.dto.request.CartCreationRequest;
 import com.tien.cart.dto.response.ExistsResponse;
@@ -38,6 +39,7 @@ public class CartServiceImpl implements CartService {
       CartMapper cartMapper;
       ProductClient productClient;
       OrderClient orderClient;
+      ShopClient shopClient;
 
       private static final String CART_KEY_PREFIX = "cart:";
 
@@ -46,6 +48,8 @@ public class CartServiceImpl implements CartService {
             String username = getCurrentUsername();
             validateUsername(username);
             String cartKey = CART_KEY_PREFIX + username;
+
+            validateShopOwnership(request);
 
             Cart existingCart = (Cart) redisTemplate.opsForValue().get(cartKey);
             if (existingCart == null) {
@@ -186,6 +190,17 @@ public class CartServiceImpl implements CartService {
       private void validateCart(Cart cart) {
             if (cart == null) {
                   throw new AppException(ErrorCode.CART_NOT_FOUND);
+            }
+      }
+
+      private void validateShopOwnership(CartCreationRequest request) {
+            for (CartItemCreationRequest item : request.getItems()) {
+                  String shopId = productClient.getShopIdByProductId(item.getProductId()).getResult();
+                  String ownerUsername = shopClient.getOwnerUsernameByShopId(shopId).getResult();
+
+                  if (ownerUsername != null && ownerUsername.equals(getCurrentUsername())) {
+                        throw new AppException(ErrorCode.CANNOT_ADD_OWN_PRODUCT);
+                  }
             }
       }
 
