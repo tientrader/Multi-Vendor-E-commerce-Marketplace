@@ -42,7 +42,11 @@ resilience4j:
         baseConfig: default
       existsProduct:
         baseConfig: default
+      getShopIdByProductId:
+        baseConfig: default
       createOrder:
+        baseConfig: default
+      getOwnerUsernameByShopId:
         baseConfig: default
 
   retry:
@@ -57,7 +61,11 @@ resilience4j:
         baseConfig: default
       existsProduct:
         baseConfig: default
+      getShopIdByProductId:
+        baseConfig: default
       createOrder:
+        baseConfig: default
+      getOwnerUsernameByShopId:
         baseConfig: default
 
 management:
