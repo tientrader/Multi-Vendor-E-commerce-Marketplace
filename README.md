@@ -7,10 +7,10 @@ Additionally, **Social-Marketplace** includes a comprehensive suite of features 
 ---
 
 ## 📚 Table of Contents
-1. [Project Architecture](#-project-architecture)
+1. [Project Architecture](#project-architecture)
    - [Microservices Architecture](#microservices-architecture)
    - [Event-Driven Architecture](#event-driven-architecture)
-2. [Technologies Used](#-technologies-used)
+2. [Technologies Used](#technologies-used)
    - [Java & Spring Framework](#java--spring-framework)
    - [Databases](#databases)
    - [Identity and Access Management](#identity-and-access-management)
@@ -19,8 +19,8 @@ Additionally, **Social-Marketplace** includes a comprehensive suite of features 
    - [Monitoring and Logging](#monitoring-and-logging)
    - [Distributed Tracing](#distributed-tracing)
    - [Security and Performance](#security-and-performance)
-3. [Key Contributions](#-key-contributions)
-4. [Conclusion](#-conclusion)
+3. [Key Contributions](#key-contributions)
+4. [Conclusion](#conclusion)
 
 ---
 
