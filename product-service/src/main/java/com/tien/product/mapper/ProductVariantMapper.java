@@ -13,7 +13,6 @@ public interface ProductVariantMapper {
       @Mapping(target = "variantId", expression = "java(java.util.UUID.randomUUID().toString())")
       ProductVariant toProductVariant(ProductVariantRequest request);
 
-      @Mapping(target = "variantId", ignore = true)
       void updateProductVariant(@MappingTarget ProductVariant variant, ProductVariantUpdateRequest request);
 
 }

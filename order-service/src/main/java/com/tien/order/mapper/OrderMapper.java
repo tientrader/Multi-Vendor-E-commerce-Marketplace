@@ -7,14 +7,12 @@ import com.tien.order.entity.Order;
 import com.tien.order.entity.OrderItem;
 
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 
 import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface OrderMapper {
 
-      @Mapping(target = "orderId", ignore = true)
       Order toOrder(OrderCreationRequest request);
 
       OrderItemResponse toOrderItemResponse(OrderItem orderItem);

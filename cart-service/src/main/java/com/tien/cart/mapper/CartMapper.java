@@ -14,14 +14,11 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface CartMapper {
 
-      @Mapping(target = "total", ignore = true)
-      @Mapping(target = "id", ignore = true)
       Cart toCart(CartCreationRequest cartCreationRequest);
 
       @Mapping(source = "id", target = "cartId")
       CartResponse toCartResponse(Cart cart);
 
-      @Mapping(target = "status", ignore = true)
       OrderCreationRequest toOrderCreationRequest(Cart cart);
 
       List<OrderItemCreationRequest> mapCartItemsToOrderItems(List<CartItem> cartItems);
