@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 
@@ -47,6 +48,7 @@ public class VIPUserServiceImpl implements VIPUserService {
       String annualPriceId;
 
       @Override
+      @Transactional
       public VIPUserResponse createVIPUser(VIPUserRequest request) {
             String username = getCurrentUsername();
 
@@ -81,6 +83,7 @@ public class VIPUserServiceImpl implements VIPUserService {
       }
 
       @Override
+      @Transactional
       public VIPUserResponse cancelVIPUserSubscription(String username) {
             String currentUsername = getCurrentUsername();
             User user = findUserByUsername(currentUsername);
