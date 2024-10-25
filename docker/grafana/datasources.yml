@@ -10,24 +10,8 @@ datasources:
       httpMethod: POST
       exemplarTraceIdDestinations:
         - name: trace_id
-          datasourceUid: tempo
-  - name: Tempo
-    type: tempo
-    access: proxy
-    orgId: 1
-    url: http://tempo:3200
-    basicAuth: false
-    isDefault: true
-    version: 1
-    editable: false
-    apiVersion: 1
-    uid: tempo
-    jsonData:
-      httpMethod: GET
-      tracesToLogs:
-        datasourceUid: 'loki'
-      nodeGraph:
-        enabled: true
+          datasourceUid: prometheus
+
   - name: Loki
     type: loki
     uid: loki
@@ -41,7 +25,7 @@ datasources:
     apiVersion: 1
     jsonData:
       derivedFields:
-        -   datasourceUid: tempo
-            matcherRegex: \[.+,(.+?),
-            name: TraceID
-            url: $${__value.raw}
+        - datasourceUid: prometheus
+          matcherRegex: \[.+,(.+?),
+          name: TraceID
+          url: $${__value.raw}

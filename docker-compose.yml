@@ -97,19 +97,6 @@ services:
     networks:
       - tien-network
 
-  tempo:
-    image: grafana/tempo:2.2.2
-    container_name: tempo
-    command: [ "-config.file=/etc/tempo.yaml" ]
-    volumes:
-      - ./docker/tempo/tempo.yml:/etc/tempo.yaml:ro
-      - ./docker/tempo/tempo-data:/tmp/tempo
-    ports:
-      - "3110:3100"
-      - "9411:9411"
-    networks:
-      - tien-network
-
   grafana:
     image: grafana/grafana:10.1.0
     container_name: grafana
@@ -125,6 +112,14 @@ services:
     networks:
       - tien-network
 
+  zipkin:
+    image: openzipkin/zipkin
+    container_name: zipkin
+    ports:
+      - "9411:9411"
+    networks:
+      - tien-network
+
 volumes:
   kafka-data:
   mongodb-data:
@@ -133,7 +128,6 @@ volumes:
   prometheus-data:
   loki-data:
   grafana-data:
-  tempo-data:
   keycloak-data:
 
 networks:

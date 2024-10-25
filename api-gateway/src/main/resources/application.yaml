@@ -190,7 +190,7 @@ management:
       enabled: true
   tracing:
     exporter:
-      tempo:
-        url: http://localhost:3200
-    sampler:
+      zipkin:
+        url: http://localhost:9411/api/v2/spans
+    sampling:
       probability: 1.0
