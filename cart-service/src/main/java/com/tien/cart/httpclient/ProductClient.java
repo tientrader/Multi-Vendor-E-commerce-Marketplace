@@ -44,7 +44,7 @@ public interface ProductClient {
             throw new RuntimeException();
       }
 
-      default ExistsResponse existsProductFallback(String productId, String variantId, Throwable throwable) {
+      default ApiResponse<ExistsResponse> existsProductFallback(String productId, String variantId, Throwable throwable) {
             throw new RuntimeException();
       }
 

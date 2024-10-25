@@ -16,6 +16,7 @@ import com.tien.cart.dto.response.ExistsResponse;
 import com.tien.cart.dto.response.CartResponse;
 import com.tien.cart.httpclient.ProductClient;
 import com.tien.cart.service.CartService;
+import com.tien.cart.service.RedisService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -36,6 +37,7 @@ import java.util.UUID;
 public class CartServiceImpl implements CartService {
 
       RedisTemplate<String, Object> redisTemplate;
+      RedisService redisService;
       CartMapper cartMapper;
       ProductClient productClient;
       OrderClient orderClient;
@@ -58,7 +60,8 @@ public class CartServiceImpl implements CartService {
                   updateCartItems(existingCart, request);
             }
 
-            redisTemplate.opsForValue().set(cartKey, existingCart);
+            redisService.saveWithDefaultTTL(cartKey, existingCart);
+
             return cartMapper.toCartResponse(existingCart);
       }
 
