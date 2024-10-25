@@ -59,7 +59,7 @@ public class ProductServiceImpl implements ProductService {
             checkCategoryOwnership(category, shopResponse.getId());
 
             Product product = productMapper.toProduct(request);
-            product.setCategory(category);
+            product.setCategoryId(category.getId());
             product.setShopId(shopResponse.getId());
 
             List<ProductVariant> variants = request.getVariants().stream()
@@ -69,7 +69,7 @@ public class ProductServiceImpl implements ProductService {
 
             product = productRepository.save(product);
 
-            category.getProducts().add(product);
+            category.getProductIds().add(product.getId());
             categoryRepository.save(category);
 
             return productMapper.toProductResponse(product);
@@ -85,15 +85,15 @@ public class ProductServiceImpl implements ProductService {
             Category newCategory = findCategoryById(request.getCategoryId());
             checkCategoryOwnership(newCategory, shopResponse.getId());
 
-            Category oldCategory = product.getCategory();
-            oldCategory.getProducts().remove(product);
+            Category oldCategory = findCategoryById(product.getCategoryId());
+            oldCategory.getProductIds().remove(product.getId());
             categoryRepository.save(oldCategory);
 
             productMapper.updateProduct(product, request);
-            product.setCategory(newCategory);
+            product.setCategoryId(newCategory.getId());
             product = productRepository.save(product);
 
-            newCategory.getProducts().add(product);
+            newCategory.getProductIds().add(product.getId());
             categoryRepository.save(newCategory);
 
             return productMapper.toProductResponse(product);
@@ -106,10 +106,10 @@ public class ProductServiceImpl implements ProductService {
             ShopResponse shopResponse = getShopByOwnerUsername(username);
 
             Product product = findProductById(productId);
-            checkCategoryOwnership(product.getCategory(), shopResponse.getId());
+            checkCategoryOwnership(findCategoryById(product.getCategoryId()), shopResponse.getId());
 
-            Category category = product.getCategory();
-            category.getProducts().remove(product);
+            Category category = findCategoryById(product.getCategoryId());
+            category.getProductIds().remove(product.getId());
             categoryRepository.save(category);
 
             productRepository.deleteById(productId);

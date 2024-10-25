@@ -26,7 +26,7 @@ public class Product {
       String description;
       int soldQuantity;
       List<ProductVariant> variants;
-      Category category;
+      String categoryId;
 
       @CreatedDate
       LocalDateTime createdAt;

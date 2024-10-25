@@ -102,8 +102,10 @@ public class ProductController {
       }
 
       @GetMapping("/{productId}/exists/{variantId}")
-      public ExistsResponse existsProduct(@PathVariable String productId, @PathVariable String variantId) {
-            return productService.existsProduct(productId, variantId);
+      public ApiResponse<ExistsResponse> existsProduct(@PathVariable String productId, @PathVariable String variantId) {
+            return ApiResponse.<ExistsResponse>builder()
+                    .result(productService.existsProduct(productId, variantId))
+                    .build();
       }
 
 }

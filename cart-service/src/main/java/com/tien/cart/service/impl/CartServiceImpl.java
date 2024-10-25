@@ -218,7 +218,7 @@ public class CartServiceImpl implements CartService {
                   String productId = item.getProductId();
                   String variantId = item.getVariantId();
 
-                  ExistsResponse existsResponse = productClient.existsProduct(productId, variantId);
+                  ExistsResponse existsResponse = productClient.existsProduct(productId, variantId).getResult();
                   if (!existsResponse.isExists()) {
                         log.error("Product not found: productId={}, variantId={}", productId, variantId);
                         throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);

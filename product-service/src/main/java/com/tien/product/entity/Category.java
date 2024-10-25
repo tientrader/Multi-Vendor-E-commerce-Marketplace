@@ -3,7 +3,6 @@ package com.tien.product.entity;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.HashSet;
@@ -23,8 +22,6 @@ public class Category {
       String shopId;
       String name;
       String description;
-
-      @DBRef
-      Set<Product> products = new HashSet<>();
+      Set<String> productIds = new HashSet<>();
 
 }

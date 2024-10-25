@@ -29,7 +29,7 @@ public interface ProductClient {
       @CircuitBreaker(name = "existsProduct", fallbackMethod = "existsProductFallback")
       @Retry(name = "existsProduct")
       @GetMapping("/{productId}/exists/{variantId}")
-      ExistsResponse existsProduct(@PathVariable String productId, @PathVariable String variantId);
+      ApiResponse<ExistsResponse> existsProduct(@PathVariable String productId, @PathVariable String variantId);
 
       @CircuitBreaker(name = "getShopIdByProductId", fallbackMethod = "getShopIdByProductIdFallback")
       @Retry(name = "getShopIdByProductId")

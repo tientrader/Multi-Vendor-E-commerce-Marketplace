@@ -7,7 +7,6 @@ import com.tien.product.dto.response.ProductResponse;
 import com.tien.product.entity.Product;
 import com.tien.product.entity.ProductVariant;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
 import java.util.List;
@@ -17,7 +16,6 @@ public interface ProductMapper {
 
       Product toProduct(ProductCreationRequest request);
 
-      @Mapping(target = "categoryId", source = "category.id")
       ProductResponse toProductResponse(Product product);
 
       void updateProduct(@MappingTarget Product product, ProductUpdateRequest request);
