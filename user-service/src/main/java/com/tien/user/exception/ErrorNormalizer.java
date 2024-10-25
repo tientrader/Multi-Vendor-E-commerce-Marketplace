@@ -33,7 +33,7 @@ public class ErrorNormalizer {
       }
 
       public AppException handleKeyCloakException(FeignException exception) {
-            log.warn("Cannot complete request: Status {}, Content: {}", exception.status(), exception.contentUTF8());
+            log.warn("Cannot complete request: Status {}, Error: {}", exception.status(), exception.getMessage());
 
             if (exception.status() == 401) {
                   return new AppException(ErrorCode.INVALID_USERNAME_OR_PASSWORD);
