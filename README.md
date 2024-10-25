@@ -108,8 +108,8 @@ Additionally, **Social-Marketplace** includes a comprehensive suite of features 
 
 ### 7. Distributed Tracing
 
-- **Tempo:**
-  Tempo allows for tracking the flow of requests through the system, helping to identify bottlenecks and optimize performance.
+- **Zipkin:**
+  Zipkin allows for tracking the flow of requests through the system, helping to identify bottlenecks and optimize performance.
 
 ### 8. Security and Performance
 
@@ -135,7 +135,7 @@ Additionally, **Social-Marketplace** includes a comprehensive suite of features 
   Optimized system performance using Redis caching to enhance response times and reduce database load. Leveraged MongoDB for scalable NoSQL solutions and MySQL for data integrity. Designed a cost-effective and scalable image storage solution with AWS S3.
 
 - **Resilience and Monitoring:**
-  Enhanced system resilience through Resilience4j circuit breakers, retries, fallbacks, and rate limiting. Implemented real-time monitoring with Prometheus and Grafana, centralized logging with Loki, and distributed tracing with Tempo.
+  Enhanced system resilience through Resilience4j circuit breakers, retries, fallbacks, and rate limiting. Implemented real-time monitoring with Prometheus and Grafana, centralized logging with Loki, and distributed tracing with Zipkin.
 
 - **Payment Integration:**
   Developed a comprehensive payment system using Stripe, incorporating charge functionalities for efficient order payments and subscription features for premium upgrades, thereby providing users with additional benefits and seamless transaction experiences.
