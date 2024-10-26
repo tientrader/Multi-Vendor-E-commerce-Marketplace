@@ -161,6 +161,7 @@ resilience4j:
 
 logging:
   level:
+    root: INFO
     io.github.resilience4j: DEBUG
 
 management:

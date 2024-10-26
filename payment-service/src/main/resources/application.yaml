@@ -25,6 +25,10 @@ stripe:
   api:
     key: ${STRIPE_API_KEY}
 
+logging:
+  level:
+    root: INFO
+
 management:
   endpoints:
     web:

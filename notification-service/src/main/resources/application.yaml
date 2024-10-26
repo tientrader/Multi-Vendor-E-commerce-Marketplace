@@ -30,6 +30,10 @@ springdoc:
   api-docs:
     path: /v3/api-docs
 
+logging:
+  level:
+    root: INFO
+
 management:
   endpoints:
     web:

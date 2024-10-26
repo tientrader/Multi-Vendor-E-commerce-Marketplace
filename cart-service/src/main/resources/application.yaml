@@ -25,6 +25,10 @@ springdoc:
   api-docs:
     path: /v3/api-docs
 
+logging:
+  level:
+    root: INFO
+
 resilience4j:
   circuitbreaker:
     configs:
