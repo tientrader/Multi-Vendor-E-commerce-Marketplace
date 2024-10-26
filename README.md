@@ -126,19 +126,22 @@ Additionally, **Social-Marketplace** includes a comprehensive suite of features 
 ## 💡 Key Contributions
 
 - **Identity and Access Management:** 
-  Integrated Keycloak with Spring Security to implement SSO, user registration, social login, email verification, and password recovery. Rolled out role-based access control (RBAC) using JWT, enhancing security with OAuth 2.0 and OpenID Connect.
+  Integrated **Keycloak** with **Spring Security** to support Single Sign-On (**SSO**), user registration, social login, email verification, and password recovery features. Implemented role-based access control (**RBAC**) with **JWT**, along with login, logout, and token refresh functionalities. Enhanced overall security with **OAuth 2.0** and **OpenID Connect**.
 
 - **API Performance:**
-  Improved API Gateway performance by implementing non-blocking JWT decoding and efficient routing with Spring Cloud Gateway and Reactor. Utilized asynchronous programming with Kafka and CompletableFuture to reduce response times by approximately 95%, and applied Gzip compression to decrease payload sizes by around 90%.
+  Improved API Gateway performance by utilizing non-blocking JWT decoding and efficient routing with **Spring Cloud Gateway** and **Reactor**. Leveraged asynchronous programming with **Kafka** and **CompletableFuture** to achieve up to 95% reduction in response times, and applied **Gzip** compression, reducing payload sizes by approximately 90%.
 
-- **Data Management:**
-  Optimized system performance using Redis caching to enhance response times and reduce database load. Leveraged MongoDB for scalable NoSQL solutions and MySQL for data integrity. Designed a cost-effective and scalable image storage solution with AWS S3.
+- **Data Management and Optimization:**
+  Enhanced system efficiency with **Redis** caching to improve response times and decrease database load. Utilized **MongoDB** for flexible schema handling and efficient unstructured data processing, while leveraging **MySQL** for strong **ACID compliance** and reliable data retrieval. Designed a scalable and cost-effective file storage solution using **AWS S3**.
 
-- **Resilience and Monitoring:**
-  Enhanced system resilience through Resilience4j circuit breakers, retries, fallbacks, and rate limiting. Implemented real-time monitoring with Prometheus and Grafana, centralized logging with Loki, and distributed tracing with Zipkin.
+- **System Resilience and Monitoring:**
+  Increased system resilience by integrating **Resilience4j** with circuit breakers, retries, fallbacks, and rate limiting. Implemented real-time monitoring using **Prometheus** and **Grafana**, centralized logging with **Loki**, and distributed tracing with **Zipkin** for improved system visibility and diagnostics.
 
 - **Payment Integration:**
-  Developed a comprehensive payment system using Stripe, incorporating charge functionalities for efficient order payments and subscription features for premium upgrades, thereby providing users with additional benefits and seamless transaction experiences.
+  Developed a payment solution with **Stripe** to handle order payments and VIP subscription features, providing seamless transaction processing and enhancing user experience.
+
+- **API Documentation:**
+  Developed comprehensive API documentation with **OpenAPI** and **Swagger** to offer clear guidance on endpoints and available functionalities, ensuring easy integration for developers.
 
 ---
 
