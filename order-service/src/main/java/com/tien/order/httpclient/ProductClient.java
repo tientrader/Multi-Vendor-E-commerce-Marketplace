@@ -11,8 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@FeignClient(name = "product-service", url = "${app.services.product}",
-        configuration = {AuthenticationRequestInterceptor.class})
+@FeignClient(name = "product-service", path = "/product", configuration = {AuthenticationRequestInterceptor.class})
 public interface ProductClient {
 
       @CircuitBreaker(name = "getProductPriceById", fallbackMethod = "getProductPriceByIdFallback")

@@ -1,0 +1,252 @@
+server:
+  port: 8888
+  compression:
+    enabled: true
+    min-response-size: 1024
+    mime-types:
+      - text/html
+      - text/xml
+      - text/plain
+      - text/css
+      - text/javascript
+      - application/javascript
+      - application/json
+
+app:
+  api-prefix: /api/v1
+
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: user_service
+          uri: http://localhost:8080
+          predicates:
+            - Path=${app.api-prefix}/user/**
+          filters:
+            - StripPrefix=2
+            - name: CircuitBreaker
+              args:
+                name: userService
+                fallbackUri: forward:/fallback/user
+            - name: Retry
+              args:
+                name: default
+
+        - id: shop-service
+          uri: http://localhost:8081
+          predicates:
+            - Path=${app.api-prefix}/shop/**
+          filters:
+            - StripPrefix=2
+            - name: CircuitBreaker
+              args:
+                name: shopService
+                fallbackUri: forward:/fallback/shop
+            - name: Retry
+              args:
+                name: default
+
+        - id: product_service
+          uri: http://localhost:8082
+          predicates:
+            - Path=${app.api-prefix}/product/**
+          filters:
+            - StripPrefix=2
+            - name: CircuitBreaker
+              args:
+                name: productService
+                fallbackUri: forward:/fallback/product
+            - name: Retry
+              args:
+                name: default
+
+        - id: cart_service
+          uri: http://localhost:8083
+          predicates:
+            - Path=${app.api-prefix}/cart/**
+          filters:
+            - StripPrefix=2
+            - name: CircuitBreaker
+              args:
+                name: cartService
+                fallbackUri: forward:/fallback/cart
+            - name: Retry
+              args:
+                name: default
+
+        - id: order_service
+          uri: http://localhost:8084
+          predicates:
+            - Path=${app.api-prefix}/order/**
+          filters:
+            - StripPrefix=2
+            - name: CircuitBreaker
+              args:
+                name: orderService
+                fallbackUri: forward:/fallback/order
+            - name: Retry
+              args:
+                name: default
+
+        - id: post_service
+          uri: http://localhost:8085
+          predicates:
+            - Path=${app.api-prefix}/post/**
+          filters:
+            - StripPrefix=2
+            - name: CircuitBreaker
+              args:
+                name: postService
+                fallbackUri: forward:/fallback/post
+            - name: Retry
+              args:
+                name: default
+
+        - id: notification_service
+          uri: http://localhost:8086
+          predicates:
+            - Path=${app.api-prefix}/notification/**
+          filters:
+            - StripPrefix=2
+            - name: CircuitBreaker
+              args:
+                name: notificationService
+                fallbackUri: forward:/fallback/notification
+            - name: Retry
+              args:
+                name: default
+
+        - id: payment_service
+          uri: http://localhost:8087
+          predicates:
+            - Path=${app.api-prefix}/payment/**
+          filters:
+            - StripPrefix=2
+            - name: CircuitBreaker
+              args:
+                name: paymentService
+                fallbackUri: forward:/fallback/payment
+            - name: Retry
+              args:
+                name: default
+
+        - id: actuator
+          uri: http://localhost:8888
+          predicates:
+            - Path=/actuator/**
+          filters:
+            - StripPrefix=2
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        registerHealthIndicator: true
+        failureRateThreshold: 50
+        minimumNumberOfCalls: 5
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        waitDurationInOpenState: 5s
+        permittedNumberOfCallsInHalfOpenState: 3
+        slidingWindowSize: 10
+        slidingWindowType: COUNT_BASED
+        slow-call-rate-threshold: 50
+        slow-call-duration-threshold: 5s
+    instances:
+      userService:
+        baseConfig: default
+      productService:
+        baseConfig: default
+      cartService:
+        baseConfig: default
+      orderService:
+        baseConfig: default
+      shopService:
+        baseConfig: default
+      postService:
+        baseConfig: default
+      notificationService:
+        baseConfig: default
+      paymentService:
+        baseConfig: default
+  retry:
+    configs:
+      default:
+        maxRetryAttempts: 3
+        waitDuration: 2s
+    instances:
+      userService:
+        baseConfig: default
+      productService:
+        baseConfig: default
+      cartService:
+        baseConfig: default
+      orderService:
+        baseConfig: default
+      shopService:
+        baseConfig: default
+      postService:
+        baseConfig: default
+      notificationService:
+        baseConfig: default
+      paymentService:
+        baseConfig: default
+  timelimiter:
+    configs:
+      default:
+        timeout-duration: 3s
+        cancel-running-future: false
+      userService:
+        timeout-duration: 6s
+      productService:
+        timeout-duration: 3s
+      cartService:
+        timeout-duration: 5s
+      orderService:
+        timeout-duration: 4s
+      shopService:
+        timeout-duration: 3s
+      postService:
+        timeout-duration: 3s
+      notificationService:
+        timeout-duration: 3s
+      paymentService:
+        timeout-duration: 3s
+
+logging:
+  level:
+    root: INFO
+    io.github.resilience4j: DEBUG
+    com.netflix.discovery: OFF
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, metrics, info, prometheus
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    distribution:
+      percentiles-histogram:
+        http:
+          server:
+            requests: true
+  observations:
+    key-values:
+      application: api-gateway
+  endpoint:
+    prometheus:
+      enabled: true
+    health:
+      show-details: always
+  health:
+    circuitbreakers:
+      enabled: true
+  tracing:
+    exporter:
+      zipkin:
+        url: http://localhost:9411/api/v2/spans
+    sampling:
+      probability: 1.0

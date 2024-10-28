@@ -1,0 +1,100 @@
+server:
+  port: 8083
+  servlet:
+    context-path: /cart
+
+spring:
+  redis:
+    host: localhost
+    port: 6379
+    password: ${REDIS_PASSWORD}
+    default:
+      ttl: 15
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
+
+logging:
+  level:
+    root: INFO
+    com.netflix.discovery: OFF
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        registerHealthIndicator: true
+        failureRateThreshold: 50
+        minimumNumberOfCalls: 5
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        waitDurationInOpenState: 5s
+        permittedNumberOfCallsInHalfOpenState: 3
+        slidingWindowSize: 10
+        slidingWindowType: COUNT_BASED
+    instances:
+      getProductPriceById:
+        baseConfig: default
+      getProductStockById:
+        baseConfig: default
+      existsProduct:
+        baseConfig: default
+      getShopIdByProductId:
+        baseConfig: default
+      createOrder:
+        baseConfig: default
+      getOwnerUsernameByShopId:
+        baseConfig: default
+
+  retry:
+    configs:
+      default:
+        maxRetryAttempts: 3
+        waitDuration: 2s
+    instances:
+      getProductPriceById:
+        baseConfig: default
+      getProductStockById:
+        baseConfig: default
+      existsProduct:
+        baseConfig: default
+      getShopIdByProductId:
+        baseConfig: default
+      createOrder:
+        baseConfig: default
+      getOwnerUsernameByShopId:
+        baseConfig: default
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, metrics, info, prometheus
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    distribution:
+      percentiles-histogram:
+        http:
+          server:
+            requests: true
+  observations:
+    key-values:
+      application: cart-service
+  endpoint:
+    prometheus:
+      enabled: true
+    health:
+      show-details: always
+  health:
+    circuitbreakers:
+      enabled: true
+  tracing:
+    exporter:
+      zipkin:
+        url: http://localhost:9411/api/v2/spans
+    sampling:
+      probability: 1.0

@@ -7,8 +7,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-@FeignClient(name = "user-service", url = "${app.services.user}",
-        configuration = {AuthenticationRequestInterceptor.class})
+@FeignClient(name = "user-service", path = "/user", configuration = {AuthenticationRequestInterceptor.class})
 public interface UserClient {
 
       @GetMapping("/vip-user/check/{username}")

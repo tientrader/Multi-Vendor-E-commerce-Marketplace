@@ -1,0 +1,109 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /user
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/UserService
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${ISSUER_URI}
+  kafka:
+    bootstrap-servers: localhost:9094
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+idp:
+  url: http://localhost:8180
+  client-id: ${CLIENT_ID}
+  client-secret: ${CLIENT_SECRET}
+
+app:
+  vip:
+    price-ids:
+      monthly: ${VIP_1_MONTH}
+      semiannual: ${VIP_6_MONTHS}
+      annual: ${VIP_1_YEAR}
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
+
+logging:
+  level:
+    root: INFO
+    com.netflix.discovery: OFF
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        registerHealthIndicator: true
+        failureRateThreshold: 50
+        minimumNumberOfCalls: 5
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        waitDurationInOpenState: 5s
+        permittedNumberOfCallsInHalfOpenState: 3
+        slidingWindowSize: 10
+        slidingWindowType: COUNT_BASED
+    instances:
+      createSubscription:
+        baseConfig: default
+      cancelSubscription:
+        baseConfig: default
+
+  retry:
+    configs:
+      default:
+        maxRetryAttempts: 3
+        waitDuration: 4s
+    instances:
+      createSubscription:
+        baseConfig: default
+      cancelSubscription:
+        baseConfig: default
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, metrics, info, prometheus
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    distribution:
+      percentiles-histogram:
+        http:
+          server:
+            requests: true
+  observations:
+    key-values:
+      application: user-service
+  endpoint:
+    prometheus:
+      enabled: true
+    health:
+      show-details: always
+  health:
+    circuitbreakers:
+      enabled: true
+  tracing:
+    exporter:
+      zipkin:
+        url: http://localhost:9411/api/v2/spans
+    sampling:
+      probability: 1.0

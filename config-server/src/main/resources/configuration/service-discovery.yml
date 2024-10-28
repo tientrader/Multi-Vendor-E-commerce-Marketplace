@@ -1,0 +1,20 @@
+server:
+  port: 8761
+
+eureka:
+  client:
+    register-with-eureka: false
+    fetch-registry: false
+  instance:
+    hostname: localhost
+    preferIpAddress: true
+    nonSecurePort: 8761
+
+spring:
+  application:
+    name: service-discovery
+
+logging:
+  level:
+    root: INFO
+    com.netflix.discovery: OFF

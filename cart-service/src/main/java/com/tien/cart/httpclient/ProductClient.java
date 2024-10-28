@@ -10,8 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-@FeignClient(name = "product-service", url = "${app.services.product}",
-        configuration = {AuthenticationRequestInterceptor.class})
+@FeignClient(name = "product-service", path = "/product", configuration = {AuthenticationRequestInterceptor.class})
 public interface ProductClient {
 
       @CircuitBreaker(name = "getProductPriceById", fallbackMethod = "getProductPriceByIdFallback")

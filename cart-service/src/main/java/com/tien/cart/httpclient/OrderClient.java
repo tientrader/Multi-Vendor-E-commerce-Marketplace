@@ -11,8 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-@FeignClient(name = "order-service", url = "${app.services.order}",
-        configuration = {AuthenticationRequestInterceptor.class})
+@FeignClient(name = "order-service", path = "/order", configuration = {AuthenticationRequestInterceptor.class})
 public interface OrderClient {
 
       @CircuitBreaker(name = "createOrder", fallbackMethod = "createOrderFallback")
