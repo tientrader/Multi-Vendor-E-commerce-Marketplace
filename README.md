@@ -135,7 +135,7 @@ Additionally, **Social-Marketplace** includes a comprehensive suite of features 
   Enhanced system efficiency with **Redis** caching to improve response times and decrease database load. Utilized **MongoDB** for flexible schema handling and efficient unstructured data processing, while leveraging **MySQL** for strong **ACID compliance** and reliable data retrieval. Designed a scalable and cost-effective file storage solution using **AWS S3**.
 
 - **System Resilience and Monitoring:**
-  Increased system resilience by integrating **Resilience4j** with circuit breakers, retries, fallbacks, and rate limiting. Implemented real-time monitoring using **Prometheus** and **Grafana**, centralized logging with **Loki**, and distributed tracing with **Zipkin** for improved system visibility and diagnostics.
+  Increased system resilience by integrating **Resilience4j** with circuit breakers, retries, fallbacks, and time limiting. Implemented real-time monitoring using **Prometheus** and **Grafana**, centralized logging with **Loki**, and distributed tracing with **Zipkin** for improved system visibility and diagnostics.
 
 - **Payment Integration:**
   Developed a payment solution with **Stripe** to handle order payments and VIP subscription features, providing seamless transaction processing and enhancing user experience.
