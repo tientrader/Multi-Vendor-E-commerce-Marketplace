@@ -168,6 +168,7 @@ public class StripeServiceImpl implements StripeService {
             }
       }
 
+      // The createPaymentSession method is currently under development and is not yet in use.
       @Override
       public SessionResponse createPaymentSession(PaymentSessionRequest request) {
             com.tien.payment.entity.Session paymentSession = stripeMapper.toSession(request);
@@ -222,6 +223,7 @@ public class StripeServiceImpl implements StripeService {
             }
       }
 
+      // The createSubscriptionSession method is currently under development and is not yet in use.
       @Override
       public SessionResponse createSubscriptionSession(SubscriptionSessionRequest request) {
             SessionResponse sessionResponse = new SessionResponse();
