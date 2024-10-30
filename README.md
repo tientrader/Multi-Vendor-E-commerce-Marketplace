@@ -19,6 +19,8 @@ Additionally, **Social-Marketplace** includes a comprehensive suite of features 
    - [Monitoring and Logging](#6-monitoring-and-logging)
    - [Distributed Tracing](#7-distributed-tracing)
    - [Security and Performance](#8-security-and-performance)
+   - [Config Server](#9-config-server)
+   - [Service Discovery](#10-service-discovery)
 3. [Key Contributions](#-key-contributions)
 4. [Conclusion](#-conclusion)
 
@@ -96,7 +98,7 @@ Additionally, **Social-Marketplace** includes a comprehensive suite of features 
 ### 5. Payment Management
 
 - **Stripe:**
-  Stripe provides comprehensive payment processing APIs that support various payment methods and currencies. Its webhook integration enables real-time transaction tracking.
+  Stripe provides comprehensive payment processing APIs that support various payment methods and currencies. Its webhook integration enables real-time transaction tracking. This allows for instant **charges** upon purchase and facilitates **recurring subscriptions** for users, enhancing overall transaction efficiency and user experience.
 
 ### 6. Monitoring and Logging
 
@@ -121,30 +123,40 @@ Additionally, **Social-Marketplace** includes a comprehensive suite of features 
 - **Gzip Compression:**
   Gzip reduces the size of API response payloads, speeding up load times and minimizing bandwidth usage.
 
+### 9. Config Server
+
+- **Spring Cloud Config:**
+  Spring Cloud Config provides server and client-side support for externalized configuration in a distributed system. This allows for centralized management of configuration properties across all microservices, facilitating easier updates and consistency in configurations.
+
+### 10. Service Discovery
+
+- **Eureka Server:**
+  Eureka serves as a service registry that enables microservices to discover each other. This simplifies the management of service instances and their endpoints, allowing for dynamic scaling and fault tolerance by ensuring that service instances are registered and available for communication.
+
 ---
 
 ## 💡 Key Contributions
 
-- **Identity and Access Management:** 
-  Integrated **Keycloak** with **Spring Security** to support Single Sign-On (**SSO**), user registration, social login, email verification, and password recovery features. Implemented role-based access control (**RBAC**) with **JWT**, along with login, logout, and token refresh functionalities. Enhanced overall security with **OAuth 2.0** and **OpenID Connect**.
+- **Identity and Access Management:**  
+  Integrated **Keycloak** with **Spring Security** to enable Single Sign-On (**SSO**), user registration, social login, email verification, and password recovery features. Implemented role-based access control (**RBAC**) using **JWT**, alongside login, logout, and refresh token functionalities. Enhanced overall security with **OAuth 2.0** and **OpenID Connect**.
 
-- **API Performance:**
-  Improved API Gateway performance by utilizing non-blocking JWT decoding and efficient routing with **Spring Cloud Gateway** and **Reactor**. Leveraged asynchronous programming with **Kafka** and **CompletableFuture** to achieve up to 95% reduction in response times, and applied **Gzip** compression, reducing payload sizes by approximately 90%.
+- **Centralized Configuration and Service Discovery:**  
+  Implemented centralized configuration management using **Spring Cloud Config** and facilitated dynamic service discovery through **Eureka**.
 
-- **Data Management and Optimization:**
-  Enhanced system efficiency with **Redis** caching to improve response times and decrease database load. Utilized **MongoDB** for flexible schema handling and efficient unstructured data processing, while leveraging **MySQL** for strong **ACID compliance** and reliable data retrieval. Designed a scalable and cost-effective file storage solution using **AWS S3**.
+- **API Performance Optimization:**  
+  Improved the performance of the API Gateway by employing non-blocking JWT decoding and efficient routing with **Spring Cloud Gateway** and **Reactor**. Utilized asynchronous programming with **Kafka** and **CompletableFuture** to reduce response times by approximately 95%, while applying **Gzip** compression to decrease payload sizes by around 90%. Enabled efficient service-to-service communication using **OpenFeign**.
 
-- **System Resilience and Monitoring:**
-  Increased system resilience by integrating **Resilience4j** with circuit breakers, retries, fallbacks, and time limiting. Implemented real-time monitoring using **Prometheus** and **Grafana**, centralized logging with **Loki**, and distributed tracing with **Zipkin** for improved system visibility and diagnostics.
+- **Data Management and Optimization:**  
+  Optimized system performance with **Redis** caching to enhance response times. Utilized **MongoDB** for its flexible schema and efficient handling of unstructured data, while leveraging **MySQL** for strong **ACID compliance** and effective data retrieval. Designed a scalable file storage solution using **AWS S3**.
 
-- **Payment Integration:**
-  Developed a payment solution with **Stripe** to handle order payments and VIP subscription features, providing seamless transaction processing and enhancing user experience.
+- **Payment Integration:**  
+  Integrated **Stripe** for instant charges, seamless payment sessions, and recurring subscriptions, enhancing transaction efficiency and user experience.
 
-- **API Documentation:**
-  Developed comprehensive API documentation with **OpenAPI** and **Swagger** to offer clear guidance on endpoints and available functionalities, ensuring easy integration for developers.
+- **System Resilience and Monitoring:**  
+  Increased system resilience by integrating **Resilience4j** with circuit breakers, retries, fallbacks, and time limiting. Implemented real-time monitoring with **Prometheus** and **Grafana**, centralized logging with **Loki**, and tracing with **Zipkin** to ensure system visibility and performance diagnostics.
 
 ---
 
 ## 🏁 Conclusion
 
-**Social-Marketplace** stands as a testament to modern software architecture principles, emphasizing scalability, performance, and security. By leveraging a suite of powerful technologies, the platform not only meets current demands but is also poised for future growth and enhancement. Through continuous integration of cutting-edge features and a commitment to user experience, **Social-Marketplace** aims to redefine the online marketplace landscape.
+**Social-Marketplace** stands as a testament to modern software architecture principles, emphasizing scalability, performance, and security. By leveraging a suite of powerful technologies, the platform not only meets current marketplace demands but is also poised for future growth and innovation. This project demonstrates a commitment to delivering high-quality software solutions and enhancing user experiences in the digital marketplace landscape.
