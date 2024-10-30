@@ -80,7 +80,6 @@ services:
       - --config.file=/etc/prometheus/prometheus.yml
     volumes:
       - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      - prometheus-data:/prometheus
     ports:
       - "9090:9090"
     networks:
@@ -92,8 +91,6 @@ services:
     command: [ "-config.file=/etc/loki/local-config.yaml" ]
     ports:
       - "3100:3100"
-    volumes:
-      - loki-data:/loki
     networks:
       - tien-network
 
@@ -102,7 +99,6 @@ services:
     container_name: grafana
     volumes:
       - ./docker/grafana:/etc/grafana/provisioning/datasources:ro
-      - grafana-data:/var/lib/grafana
     environment:
       - GF_AUTH_ANONYMOUS_ENABLED=true
       - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
@@ -122,13 +118,10 @@ services:
 
 volumes:
   kafka-data:
+  keycloak-data:
   mongodb-data:
   mysql-data:
   redis-data:
-  prometheus-data:
-  loki-data:
-  grafana-data:
-  keycloak-data:
 
 networks:
   tien-network:
