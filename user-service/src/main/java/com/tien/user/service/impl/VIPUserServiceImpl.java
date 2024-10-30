@@ -15,9 +15,7 @@ import com.tien.user.service.VIPUserService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
@@ -35,18 +33,6 @@ public class VIPUserServiceImpl implements VIPUserService {
       PaymentClient paymentClient;
       VIPUserMapper vipUserMapper;
 
-      @Value("${app.vip.price-ids.monthly}")
-      @NonFinal
-      String monthlyPriceId;
-
-      @Value("${app.vip.price-ids.semiannual}")
-      @NonFinal
-      String semiannualPriceId;
-
-      @Value("${app.vip.price-ids.annual}")
-      @NonFinal
-      String annualPriceId;
-
       @Override
       @Transactional
       public VIPUserResponse createVIPUser(VIPUserRequest request) {
@@ -55,7 +41,7 @@ public class VIPUserServiceImpl implements VIPUserService {
             StripeSubscriptionRequest subscriptionRequest = StripeSubscriptionRequest.builder()
                     .stripeToken(request.getStripeToken())
                     .email(request.getEmail())
-                    .priceId(request.getPriceId())
+                    .packageType(request.getPackageType())
                     .username(username)
                     .numberOfLicense(request.getNumberOfLicense())
                     .build();
@@ -72,7 +58,7 @@ public class VIPUserServiceImpl implements VIPUserService {
             LocalDate vipStartDate = LocalDate.now();
             user.setVipStartDate(vipStartDate);
 
-            LocalDate vipEndDate = getVipEndDateBasedOnPriceId(request.getPriceId(), vipStartDate);
+            LocalDate vipEndDate = getVipEndDateBasedOnPackageType(subscriptionRequest.getPackageType(), vipStartDate);
             user.setVipEndDate(vipEndDate);
             user.setStripeSubscriptionId(subscriptionResponse.getResult().getStripeSubscriptionId());
             user.setVipStatus(true);
@@ -84,7 +70,7 @@ public class VIPUserServiceImpl implements VIPUserService {
 
       @Override
       @Transactional
-      public VIPUserResponse cancelVIPUserSubscription(String username) {
+      public void cancelVIPUserSubscription() {
             String currentUsername = getCurrentUsername();
             User user = findUserByUsername(currentUsername);
 
@@ -95,23 +81,16 @@ public class VIPUserServiceImpl implements VIPUserService {
                         log.error("Failed to cancel subscription for user {}: {}", currentUsername, e.getMessage());
                         throw new AppException(ErrorCode.SUBSCRIPTION_CANCELLATION_FAILED);
                   }
-                  user.setVipStatus(false);
-                  user.setVipStartDate(null);
-                  user.setVipEndDate(null);
-                  user.setStripeSubscriptionId(null);
-
                   userRepository.save(user);
             }
-
-            return vipUserMapper.userToVipUserResponse(user);
       }
 
       @Override
       public VIPUserResponse checkIfUserIsVIP(String username) {
             User user = findUserByUsername(username);
 
-            if (!user.isVipStatus()) {
-                  log.error("User {} is not a VIP user.", username);
+            if (!user.isVipStatus() || (user.getVipEndDate() != null && user.getVipEndDate().isBefore(LocalDate.now()))) {
+                  log.error("User {} is not a VIP user or has canceled their subscription.", username);
                   throw new AppException(ErrorCode.USER_NOT_VIP);
             }
 
@@ -136,17 +115,16 @@ public class VIPUserServiceImpl implements VIPUserService {
                     .orElse(vipUserMapper.vipUserRequestToUser(request));
       }
 
-      private LocalDate getVipEndDateBasedOnPriceId(String priceId, LocalDate vipStartDate) {
-            if (priceId.equals(monthlyPriceId)) {
-                  return vipStartDate.plusMonths(1);
-            } else if (priceId.equals(semiannualPriceId)) {
-                  return vipStartDate.plusMonths(6);
-            } else if (priceId.equals(annualPriceId)) {
-                  return vipStartDate.plusYears(1);
-            } else {
-                  log.error("Invalid price ID provided: {}", priceId);
-                  throw new AppException(ErrorCode.INVALID_PRICE_ID);
-            }
+      private LocalDate getVipEndDateBasedOnPackageType(String packageType, LocalDate vipStartDate) {
+            return switch (packageType) {
+                  case "MONTHLY" -> vipStartDate.plusMonths(1);
+                  case "SEMIANNUAL" -> vipStartDate.plusMonths(6);
+                  case "ANNUAL" -> vipStartDate.plusYears(1);
+                  default -> {
+                        log.error("Invalid package type provided: {}", packageType);
+                        throw new AppException(ErrorCode.INVALID_PACKAGE_TYPE);
+                  }
+            };
       }
 
 }

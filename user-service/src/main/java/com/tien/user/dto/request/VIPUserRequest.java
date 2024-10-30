@@ -13,7 +13,7 @@ public class VIPUserRequest {
       String username;
       String email;
       String stripeToken;
-      String priceId;
+      String packageType;
       long numberOfLicense;
 
 }

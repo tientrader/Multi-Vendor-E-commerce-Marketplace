@@ -12,5 +12,6 @@ public class SessionResponse {
 
       String sessionUrl;
       String sessionId;
+      String username;
 
 }

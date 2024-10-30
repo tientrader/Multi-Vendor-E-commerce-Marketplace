@@ -19,6 +19,13 @@ springdoc:
   api-docs:
     path: /v3/api-docs
 
+app:
+  vip:
+    price-ids:
+      monthly: ${VIP_1_MONTH}
+      semiannual: ${VIP_6_MONTHS}
+      annual: ${VIP_1_YEAR}
+
 stripe:
   api:
     key: ${STRIPE_API_KEY}

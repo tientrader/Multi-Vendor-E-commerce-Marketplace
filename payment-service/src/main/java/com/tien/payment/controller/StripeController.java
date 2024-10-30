@@ -50,9 +50,10 @@ public class StripeController {
       }
 
       @DeleteMapping("/subscription/{id}")
-      public ApiResponse<SubscriptionCancelRecord> cancelSubscription(@PathVariable String id) {
-            return ApiResponse.<SubscriptionCancelRecord>builder()
-                    .result(new SubscriptionCancelRecord(stripeService.cancelSubscription(id).getStatus()))
+      public ApiResponse<Void> cancelSubscription(@PathVariable String id) {
+            stripeService.cancelSubscription(id);
+            return ApiResponse.<Void>builder()
+                    .message("The subscription has been successfully canceled!")
                     .build();
       }
 

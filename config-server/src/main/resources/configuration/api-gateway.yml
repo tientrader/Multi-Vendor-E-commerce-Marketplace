@@ -19,8 +19,8 @@ spring:
   cloud:
     gateway:
       routes:
-        - id: user_service
-          uri: http://localhost:8080
+        - id: user-service
+          uri: lb://user-service
           predicates:
             - Path=${app.api-prefix}/user/**
           filters:
@@ -34,7 +34,7 @@ spring:
                 name: default
 
         - id: shop-service
-          uri: http://localhost:8081
+          uri: lb://shop-service
           predicates:
             - Path=${app.api-prefix}/shop/**
           filters:
@@ -47,8 +47,8 @@ spring:
               args:
                 name: default
 
-        - id: product_service
-          uri: http://localhost:8082
+        - id: product-service
+          uri: lb://product-service
           predicates:
             - Path=${app.api-prefix}/product/**
           filters:
@@ -61,8 +61,8 @@ spring:
               args:
                 name: default
 
-        - id: cart_service
-          uri: http://localhost:8083
+        - id: cart-service
+          uri: lb://cart-service
           predicates:
             - Path=${app.api-prefix}/cart/**
           filters:
@@ -75,8 +75,8 @@ spring:
               args:
                 name: default
 
-        - id: order_service
-          uri: http://localhost:8084
+        - id: order-service
+          uri: lb://order-service
           predicates:
             - Path=${app.api-prefix}/order/**
           filters:
@@ -89,8 +89,8 @@ spring:
               args:
                 name: default
 
-        - id: post_service
-          uri: http://localhost:8085
+        - id: post-service
+          uri: lb://post-service
           predicates:
             - Path=${app.api-prefix}/post/**
           filters:
@@ -103,8 +103,8 @@ spring:
               args:
                 name: default
 
-        - id: notification_service
-          uri: http://localhost:8086
+        - id: notification-service
+          uri: lb://notification-service
           predicates:
             - Path=${app.api-prefix}/notification/**
           filters:
@@ -117,8 +117,8 @@ spring:
               args:
                 name: default
 
-        - id: payment_service
-          uri: http://localhost:8087
+        - id: payment-service
+          uri: lb://payment-service
           predicates:
             - Path=${app.api-prefix}/payment/**
           filters:
@@ -201,9 +201,9 @@ resilience4j:
       productService:
         timeout-duration: 3s
       cartService:
-        timeout-duration: 5s
+        timeout-duration: 6s
       orderService:
-        timeout-duration: 4s
+        timeout-duration: 5s
       shopService:
         timeout-duration: 3s
       postService:
@@ -211,7 +211,7 @@ resilience4j:
       notificationService:
         timeout-duration: 3s
       paymentService:
-        timeout-duration: 3s
+        timeout-duration: 6s
 
 logging:
   level:

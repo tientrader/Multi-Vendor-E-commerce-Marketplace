@@ -20,7 +20,7 @@ public interface StripeService {
 
       SessionResponse createSubscriptionSession(SubscriptionSessionRequest request);
 
-      StripeSubscriptionResponse cancelSubscription(String subscriptionId);
+      void cancelSubscription(String subscriptionId);
 
       List<StripeSubscriptionResponse> retrieveAllSubscriptions();
 

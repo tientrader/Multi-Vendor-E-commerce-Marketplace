@@ -29,13 +29,6 @@ idp:
   client-id: ${CLIENT_ID}
   client-secret: ${CLIENT_SECRET}
 
-app:
-  vip:
-    price-ids:
-      monthly: ${VIP_1_MONTH}
-      semiannual: ${VIP_6_MONTHS}
-      annual: ${VIP_1_YEAR}
-
 springdoc:
   swagger-ui:
     path: /swagger-ui.html

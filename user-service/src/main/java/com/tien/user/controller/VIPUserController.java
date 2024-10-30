@@ -26,11 +26,11 @@ public class VIPUserController {
                     .build();
       }
 
-      @DeleteMapping("/cancel/{username}")
-      public ApiResponse<VIPUserResponse> cancelVIPUserSubscription(@PathVariable String username) {
-            VIPUserResponse response = vipUserService.cancelVIPUserSubscription(username);
-            return ApiResponse.<VIPUserResponse>builder()
-                    .result(response)
+      @DeleteMapping("/cancel")
+      public ApiResponse<Void> cancelVIPUserSubscription() {
+            vipUserService.cancelVIPUserSubscription();
+            return ApiResponse.<Void>builder()
+                    .message("The VIP subscription has been successfully canceled!")
                     .build();
       }
 

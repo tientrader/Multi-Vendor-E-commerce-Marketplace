@@ -4,7 +4,6 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
-import java.util.Map;
 
 @Data
 @Builder
@@ -13,10 +12,8 @@ import java.util.Map;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class PaymentSessionRequest {
 
-      String userId;
       String email;
       String username;
-      Map<String, String> data;
       BigDecimal amount;
       String productName;
       String currency;

@@ -12,7 +12,7 @@ public class StripeSubscriptionRequest {
 
       String stripeToken;
       String email;
-      String priceId;
+      String packageType;
       String username;
       long numberOfLicense;
 

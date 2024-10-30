@@ -31,6 +31,9 @@ import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -53,6 +56,18 @@ public class StripeServiceImpl implements StripeService {
       @NonFinal
       String stripeApiKey;
 
+      @Value("${app.vip.price-ids.monthly}")
+      @NonFinal
+      String monthlyPriceId;
+
+      @Value("${app.vip.price-ids.semiannual}")
+      @NonFinal
+      String semiannualPriceId;
+
+      @Value("${app.vip.price-ids.annual}")
+      @NonFinal
+      String annualPriceId;
+
       @PostConstruct
       public void init() {
             Stripe.apiKey = stripeApiKey;
@@ -61,16 +76,17 @@ public class StripeServiceImpl implements StripeService {
       @Override
       public StripeChargeResponse charge(StripeChargeRequest request) {
             StripeCharge stripeCharge = stripeMapper.toStripeCharge(request);
+            String currentUsername = getCurrentUsername();
 
             try {
                   Map<String, Object> chargeParams = new HashMap<>();
                   chargeParams.put("amount", (int) (request.getAmount() * 100));
                   chargeParams.put("currency", "USD");
-                  chargeParams.put("description", "Payment for order by " + request.getUsername());
+                  chargeParams.put("description", "Payment for order by " + currentUsername);
                   chargeParams.put("source", request.getStripeToken());
 
                   HashMap<String, Object> metadata = new HashMap<>();
-                  metadata.put("username", request.getUsername());
+                  metadata.put("username", currentUsername);
                   chargeParams.put("metadata", metadata);
 
                   Charge charge = Charge.create(chargeParams);
@@ -89,10 +105,11 @@ public class StripeServiceImpl implements StripeService {
                         stripeCharge.setSuccess(false);
                   }
 
+                  stripeCharge.setUsername(currentUsername);
                   stripeChargeRepository.save(stripeCharge);
                   return stripeMapper.toStripeChargeResponse(stripeCharge);
             } catch (StripeException e) {
-                  log.error("Payment failed for user {}: {}", request.getUsername(), e.getMessage());
+                  log.error("Payment failed for user {}: {}", currentUsername, e.getMessage());
                   throw new AppException(ErrorCode.PAYMENT_FAILED);
             }
       }
@@ -100,6 +117,7 @@ public class StripeServiceImpl implements StripeService {
       @Override
       public StripeSubscriptionResponse createSubscription(StripeSubscriptionRequest request) {
             StripeSubscription stripeSubscription = stripeMapper.toStripeSubscription(request);
+            String currentUsername = getCurrentUsername();
 
             try {
                   Map<String, Object> paymentMethodParams = new HashMap<>();
@@ -108,13 +126,20 @@ public class StripeServiceImpl implements StripeService {
                   PaymentMethod paymentMethod = PaymentMethod.create(paymentMethodParams);
 
                   Map<String, Object> customerMap = new HashMap<>();
-                  customerMap.put("name", request.getUsername());
+                  customerMap.put("name", currentUsername);
                   customerMap.put("email", request.getEmail());
                   customerMap.put("payment_method", paymentMethod.getId());
                   Customer customer = Customer.create(customerMap);
 
+                  String priceId = switch (request.getPackageType()) {
+                        case "MONTHLY" -> monthlyPriceId;
+                        case "SEMIANNUAL" -> semiannualPriceId;
+                        case "ANNUAL" -> annualPriceId;
+                        default -> throw new IllegalArgumentException("Invalid package type: " + request.getPackageType());
+                  };
+
                   List<Object> items = new ArrayList<>();
-                  items.add(Map.of("price", request.getPriceId(), "quantity", request.getNumberOfLicense()));
+                  items.add(Map.of("price", priceId, "quantity", request.getNumberOfLicense()));
                   Subscription subscription = Subscription.create(Map.of(
                           "customer", customer.getId(),
                           "default_payment_method", paymentMethod.getId(),
@@ -124,30 +149,21 @@ public class StripeServiceImpl implements StripeService {
                   stripeSubscription.setStripeCustomerId(customer.getId());
                   stripeSubscription.setStripeSubscriptionId(subscription.getId());
                   stripeSubscription.setStripePaymentMethodId(paymentMethod.getId());
-                  stripeSubscription.setUsername(request.getUsername());
-                  stripeSubscription.setPriceId(request.getPriceId());
+                  stripeSubscription.setUsername(currentUsername);
+                  stripeSubscription.setPriceId(priceId);
                   stripeSubscription.setNumberOfLicense(request.getNumberOfLicense());
                   stripeSubscriptionRepository.save(stripeSubscription);
 
-                  kafkaTemplate.send("payment_successful", NotificationEvent.builder()
-                          .channel("email")
-                          .recipient(request.getEmail())
-                          .subject("Subscription Created")
-                          .body("Your subscription has been created successfully.")
-                          .build());
-
                   return StripeSubscriptionResponse.builder()
                           .id(subscription.getId())
-                          .username(request.getUsername())
+                          .username(currentUsername)
                           .stripeCustomerId(customer.getId())
                           .stripeSubscriptionId(subscription.getId())
                           .stripePaymentMethodId(paymentMethod.getId())
-                          .status("active")
-                          .message("Your subscription has been created successfully.")
                           .build();
 
             } catch (StripeException e) {
-                  log.error("Subscription creation failed for user {}: {}", request.getUsername(), e.getMessage());
+                  log.error("Subscription creation failed for user {}: {}", currentUsername, e.getMessage());
                   throw new AppException(ErrorCode.SUBSCRIPTION_CREATION_FAILED);
             }
       }
@@ -158,10 +174,10 @@ public class StripeServiceImpl implements StripeService {
             try {
                   BigDecimal amount = request.getAmount();
                   String productName = request.getProductName();
-
                   String currency = "USD";
 
-                  Customer customer = findOrCreateCustomer(request.getEmail(), request.getUsername());
+                  String username = getCurrentUsername();
+                  Customer customer = findOrCreateCustomer(request.getEmail(), username);
                   String clientUrl = "https://localhost:4200";
 
                   SessionCreateParams.Builder sessionCreateParamsBuilder = SessionCreateParams.builder()
@@ -175,8 +191,7 @@ public class StripeServiceImpl implements StripeService {
                                   .setQuantity(1L)
                                   .setPriceData(SessionCreateParams.LineItem.PriceData.builder()
                                           .setProductData(SessionCreateParams.LineItem.PriceData.ProductData.builder()
-                                                  .putMetadata("cart_id", "123")
-                                                  .putMetadata("user_id", request.getUserId())
+                                                  .putMetadata("username", username)
                                                   .setName(productName)
                                                   .build())
                                           .setCurrency(currency)
@@ -186,8 +201,7 @@ public class StripeServiceImpl implements StripeService {
 
                   SessionCreateParams.PaymentIntentData paymentIntentData =
                           SessionCreateParams.PaymentIntentData.builder()
-                                  .putMetadata("cart_id", "123")
-                                  .putMetadata("user_id", request.getUserId())
+                                  .putMetadata("username", username)
                                   .build();
                   sessionCreateParamsBuilder.setPaymentIntentData(paymentIntentData);
 
@@ -195,14 +209,8 @@ public class StripeServiceImpl implements StripeService {
 
                   paymentSession.setSessionUrl(stripeSession.getUrl());
                   paymentSession.setSessionId(stripeSession.getId());
+                  paymentSession.setUsername(username);
                   sessionRepository.save(paymentSession);
-
-                  kafkaTemplate.send("payment_successful", NotificationEvent.builder()
-                          .channel("email")
-                          .recipient(request.getEmail())
-                          .subject("Payment Session Created")
-                          .body("Your payment session has been created successfully.")
-                          .build());
 
                   return stripeMapper.toSessionResponse(paymentSession);
             } catch (StripeException e) {
@@ -218,75 +226,66 @@ public class StripeServiceImpl implements StripeService {
       public SessionResponse createSubscriptionSession(SubscriptionSessionRequest request) {
             SessionResponse sessionResponse = new SessionResponse();
             try {
-                  Customer customer = findOrCreateCustomer(request.getEmail(), request.getUsername());
+                  String username = getCurrentUsername();
+                  Customer customer = findOrCreateCustomer(request.getEmail(), username);
                   String clientUrl = "https://localhost:4200";
 
-                  SessionCreateParams.Builder sessionCreateParamsBuilder = SessionCreateParams.builder()
+                  String priceId = switch (request.getPackageType()) {
+                        case "MONTHLY" -> monthlyPriceId;
+                        case "SEMIANNUAL" -> semiannualPriceId;
+                        case "ANNUAL" -> annualPriceId;
+                        default -> throw new IllegalArgumentException("Invalid package type: " + request.getPackageType());
+                  };
+
+                  SessionCreateParams sessionCreateParams = SessionCreateParams.builder()
                           .setMode(SessionCreateParams.Mode.SUBSCRIPTION)
                           .setCustomer(customer.getId())
-                          .setSuccessUrl(clientUrl + "/success-subscription?session_id={CHECKOUT_SESSION_ID}")
+                          .setSuccessUrl(clientUrl + "/success?session_id={CHECKOUT_SESSION_ID}")
                           .setCancelUrl(clientUrl + "/failure")
-                          .setSubscriptionData(SessionCreateParams.SubscriptionData.builder()
-                                  .setTrialPeriodDays(30L)
-                                  .build());
-
-                  String aPackage = String.valueOf(request.getData().get("PACKAGE"));
-                  sessionCreateParamsBuilder.addLineItem(
-                          SessionCreateParams.LineItem.builder()
+                          .addLineItem(SessionCreateParams.LineItem.builder()
                                   .setQuantity(1L)
-                                  .setPriceData(SessionCreateParams.LineItem.PriceData.builder()
-                                          .setProductData(SessionCreateParams.LineItem.PriceData.ProductData.builder()
-                                                  .putMetadata("package", aPackage)
-                                                  .putMetadata("user_id", request.getUserId())
-                                                  .setName(aPackage)
-                                                  .build())
-                                          .setCurrency("USD")
-                                          .setUnitAmountDecimal(BigDecimal.valueOf(
-                                                  Objects.equals(aPackage, "YEAR") ? 99.99 * 100 : 9.99 * 100))
-                                          .setRecurring(SessionCreateParams.LineItem.PriceData.Recurring.builder()
-                                                  .setInterval(Objects.equals(aPackage, "YEAR") ?
-                                                          SessionCreateParams.LineItem.PriceData.Recurring.Interval.YEAR :
-                                                          SessionCreateParams.LineItem.PriceData.Recurring.Interval.MONTH)
-                                                  .build())
-                                          .build())
-                                  .build()
-                  );
+                                  .setPrice(priceId)
+                                  .build())
+                          .build();
 
-                  com.stripe.model.checkout.Session stripeSession = com.stripe.model.checkout.Session.create(sessionCreateParamsBuilder.build());
-
-                  sessionResponse.setSessionUrl(stripeSession.getUrl());
+                  com.stripe.model.checkout.Session stripeSession = com.stripe.model.checkout.Session.create(sessionCreateParams);
                   sessionResponse.setSessionId(stripeSession.getId());
+                  sessionResponse.setSessionUrl(stripeSession.getUrl());
+                  sessionResponse.setUsername(username);
 
-                  kafkaTemplate.send("payment_successful", NotificationEvent.builder()
-                          .channel("email")
-                          .recipient(request.getEmail())
-                          .subject("Subscription Session Created")
-                          .body("Your subscription session has been created successfully.")
-                          .build());
+                  return sessionResponse;
             } catch (StripeException e) {
                   log.error("Subscription session creation failed for user {}: {}", request.getUsername(), e.getMessage());
                   throw new AppException(ErrorCode.SUBSCRIPTION_SESSION_CREATION_FAILED);
+            } catch (Exception e) {
+                  log.error("An unexpected error occurred while creating subscription session for user {}: {}", request.getUsername(), e.getMessage());
+                  throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
             }
-            return sessionResponse;
       }
 
       @Override
-      public StripeSubscriptionResponse cancelSubscription(String subscriptionId) {
+      public void cancelSubscription(String subscriptionId) {
+            String currentUsername = getCurrentUsername();
+
+            StripeSubscription stripeSubscription = stripeSubscriptionRepository.findByStripeSubscriptionId(subscriptionId);
+            if (stripeSubscription == null || !stripeSubscription.getUsername().equals(currentUsername)) {
+                  throw new AppException(ErrorCode.UNAUTHORIZED);
+            }
+
             StripeSubscriptionResponse response = new StripeSubscriptionResponse();
             try {
                   Subscription subscription = Subscription.retrieve(subscriptionId);
                   Subscription canceledSubscription = subscription.cancel();
 
                   response.setStripeSubscriptionId(canceledSubscription.getId());
-                  response.setStatus(canceledSubscription.getStatus());
             } catch (StripeException e) {
                   log.error("Failed to cancel subscription with ID {}: {}", subscriptionId, e.getMessage());
                   throw new AppException(ErrorCode.SUBSCRIPTION_CANCEL_FAILED);
             }
-            return response;
       }
 
       @Override
+      @PreAuthorize("hasRole('ADMIN')")
       public List<StripeSubscriptionResponse> retrieveAllSubscriptions() {
             List<StripeSubscription> subscriptions = stripeSubscriptionRepository.findAll();
             return subscriptions.stream()
@@ -313,6 +312,11 @@ public class StripeServiceImpl implements StripeService {
                   customer = search.getData().getFirst();
             }
             return customer;
+      }
+
+      private String getCurrentUsername() {
+            Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            return jwt.getClaim("preferred_username");
       }
 
 }

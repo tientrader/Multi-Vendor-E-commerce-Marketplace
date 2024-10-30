@@ -15,7 +15,5 @@ public class StripeSubscriptionResponse {
       String stripeCustomerId;
       String stripeSubscriptionId;
       String stripePaymentMethodId;
-      String status;
-      String message;
 
 }
