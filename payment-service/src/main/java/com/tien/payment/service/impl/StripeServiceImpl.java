@@ -78,12 +78,14 @@ public class StripeServiceImpl implements StripeService {
             StripeCharge stripeCharge = stripeMapper.toStripeCharge(request);
             String currentUsername = getCurrentUsername();
 
+            String stripeToken = request.getStripeToken() != null ? request.getStripeToken() : "tok_visa";
+
             try {
                   Map<String, Object> chargeParams = new HashMap<>();
                   chargeParams.put("amount", (int) (request.getAmount() * 100));
                   chargeParams.put("currency", "USD");
                   chargeParams.put("description", "Payment for order by " + currentUsername);
-                  chargeParams.put("source", request.getStripeToken());
+                  chargeParams.put("source", stripeToken);
 
                   HashMap<String, Object> metadata = new HashMap<>();
                   metadata.put("username", currentUsername);
@@ -118,6 +120,7 @@ public class StripeServiceImpl implements StripeService {
       public StripeSubscriptionResponse createSubscription(StripeSubscriptionRequest request) {
             StripeSubscription stripeSubscription = stripeMapper.toStripeSubscription(request);
             String currentUsername = getCurrentUsername();
+
             String stripeToken = request.getStripeToken() != null ? request.getStripeToken() : "tok_visa";
             long numberOfLicense = request.getNumberOfLicense() > 0 ? request.getNumberOfLicense() : 1;
 
