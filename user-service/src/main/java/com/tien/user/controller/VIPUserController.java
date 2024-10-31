@@ -26,6 +26,22 @@ public class VIPUserController {
                     .build();
       }
 
+      @PostMapping("/createWithSession")
+      public ApiResponse<VIPUserResponse> createVIPUserWithSession(@RequestBody @Valid VIPUserRequest request) {
+            VIPUserResponse response = vipUserService.createVIPUserWithSession(request);
+            return ApiResponse.<VIPUserResponse>builder()
+                    .result(response)
+                    .build();
+      }
+
+      @PutMapping("/update-end-date/{username}")
+      public ApiResponse<Void> updateVipEndDate(@PathVariable String username, @RequestParam String packageType) {
+            vipUserService.updateVipEndDate(username, packageType);
+            return ApiResponse.<Void>builder()
+                    .message("VIP end date updated successfully for user: " + username)
+                    .build();
+      }
+
       @DeleteMapping("/cancel")
       public ApiResponse<Void> cancelVIPUserSubscription() {
             vipUserService.cancelVIPUserSubscription();

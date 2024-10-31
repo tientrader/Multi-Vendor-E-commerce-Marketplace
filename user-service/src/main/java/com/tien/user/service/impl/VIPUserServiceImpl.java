@@ -2,7 +2,9 @@ package com.tien.user.service.impl;
 
 import com.tien.user.dto.ApiResponse;
 import com.tien.user.dto.request.StripeSubscriptionRequest;
+import com.tien.user.dto.request.SubscriptionSessionRequest;
 import com.tien.user.dto.request.VIPUserRequest;
+import com.tien.user.dto.response.SessionResponse;
 import com.tien.user.dto.response.StripeSubscriptionResponse;
 import com.tien.user.dto.response.VIPUserResponse;
 import com.tien.user.entity.User;
@@ -66,6 +68,48 @@ public class VIPUserServiceImpl implements VIPUserService {
             userRepository.save(user);
 
             return vipUserMapper.userToVipUserResponse(user);
+      }
+
+      @Override
+      @Transactional
+      public VIPUserResponse createVIPUserWithSession(VIPUserRequest request) {
+            String username = getCurrentUsername();
+
+            SubscriptionSessionRequest sessionRequest = SubscriptionSessionRequest.builder()
+                    .email(request.getEmail())
+                    .username(username)
+                    .packageType(request.getPackageType())
+                    .build();
+
+            ApiResponse<SessionResponse> sessionResponse;
+            try {
+                  sessionResponse = paymentClient.createSubscriptionSession(sessionRequest);
+            } catch (Exception e) {
+                  log.error("Failed to create subscription session for user {}: {}", username, e.getMessage());
+                  throw new AppException(ErrorCode.SUBSCRIPTION_SESSION_CREATION_FAILED);
+            }
+
+            User user = findOrCreateUser(request, username);
+            String sessionUrl = sessionResponse.getResult().getSessionUrl();
+
+            VIPUserResponse vipUserResponse = vipUserMapper.userToVipUserResponse(user);
+            vipUserResponse.setSessionUrl(sessionUrl);
+
+            return vipUserResponse;
+      }
+
+      @Override
+      @Transactional
+      public void updateVipEndDate(String username, String packageType) {
+            User user = findUserByUsername(username);
+            LocalDate vipStartDate = LocalDate.now();
+            LocalDate vipEndDate = getVipEndDateBasedOnPackageType(packageType, vipStartDate);
+
+            user.setVipStartDate(vipStartDate);
+            user.setVipEndDate(vipEndDate);
+            user.setVipStatus(true);
+
+            userRepository.save(user);
       }
 
       @Override

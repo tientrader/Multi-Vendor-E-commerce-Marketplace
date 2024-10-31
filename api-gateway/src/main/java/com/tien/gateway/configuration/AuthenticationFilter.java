@@ -37,7 +37,8 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
               "/actuator/**",
               "/user/auth/register",
               "/user/auth/login",
-              "/user/auth/forgot-password"
+              "/user/auth/forgot-password",
+              "/user/webhook/stripe"
       };
 
       @Value("${app.api-prefix}")
