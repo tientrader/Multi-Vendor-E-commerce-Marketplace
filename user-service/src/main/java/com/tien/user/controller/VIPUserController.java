@@ -37,8 +37,8 @@ public class VIPUserController {
       }
 
       @PutMapping("/update-end-date/{username}")
-      public ApiResponse<Void> updateVipEndDate(@PathVariable String username, @RequestParam String packageType) {
-            vipUserService.updateVipEndDate(username, packageType);
+      public ApiResponse<Void> updateVipEndDate(@PathVariable String username, @RequestParam String packageType, @RequestParam String subscriptionId) {
+            vipUserService.updateVipEndDate(username, packageType, subscriptionId);
             return ApiResponse.<Void>builder()
                     .message("VIP end date updated successfully for user: " + username)
                     .build();

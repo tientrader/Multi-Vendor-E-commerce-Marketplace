@@ -31,11 +31,12 @@ public class StripeWebhookServiceImpl implements StripeWebhookService {
                         Session session = (Session) event.getData().getObject();
                         String username = session.getMetadata().get("username");
                         String packageType = session.getMetadata().get("packageType");
+                        String subscriptionId = session.getSubscription();
 
-                        if (username != null && packageType != null) {
-                              vipUserService.updateVipEndDate(username, packageType);
+                        if (username != null && packageType != null && subscriptionId != null) {
+                              vipUserService.updateVipEndDate(username, packageType, subscriptionId);
                         } else {
-                              log.warn("Missing username or packageType");
+                              log.warn("Missing username, packageType, or subscriptionId");
                         }
                   } else {
                         log.warn("Unhandled event type: {}", event.getType());

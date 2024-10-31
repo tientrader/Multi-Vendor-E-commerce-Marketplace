@@ -102,7 +102,7 @@ public class VIPUserServiceImpl implements VIPUserService {
 
       @Override
       @Transactional
-      public void updateVipEndDate(String username, String packageType) {
+      public void updateVipEndDate(String username, String packageType, String subscriptionId) {
             User user = findUserByUsername(username);
             LocalDate vipStartDate = LocalDate.now();
             LocalDate vipEndDate = getVipEndDateBasedOnPackageType(packageType, vipStartDate);
@@ -110,6 +110,7 @@ public class VIPUserServiceImpl implements VIPUserService {
             user.setVipStartDate(vipStartDate);
             user.setVipEndDate(vipEndDate);
             user.setVipStatus(true);
+            user.setStripeSubscriptionId(subscriptionId);
 
             userRepository.save(user);
       }

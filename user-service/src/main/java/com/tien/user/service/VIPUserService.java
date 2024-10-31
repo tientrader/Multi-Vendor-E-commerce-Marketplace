@@ -11,7 +11,7 @@ public interface VIPUserService {
 
       VIPUserResponseWithSession createVIPUserWithSession(VIPUserRequestWithSession request);
 
-      void updateVipEndDate(String username, String packageType);
+      void updateVipEndDate(String username, String packageType, String subscriptionId);
 
       void cancelVIPUserSubscription();
 

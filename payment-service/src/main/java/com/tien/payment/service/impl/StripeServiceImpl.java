@@ -275,13 +275,6 @@ public class StripeServiceImpl implements StripeService {
 
       @Override
       public void cancelSubscription(String subscriptionId) {
-            String currentUsername = getCurrentUsername();
-
-            StripeSubscription stripeSubscription = stripeSubscriptionRepository.findByStripeSubscriptionId(subscriptionId);
-            if (stripeSubscription == null || !stripeSubscription.getUsername().equals(currentUsername)) {
-                  throw new AppException(ErrorCode.UNAUTHORIZED);
-            }
-
             StripeSubscriptionResponse response = new StripeSubscriptionResponse();
             try {
                   Subscription subscription = Subscription.retrieve(subscriptionId);
