@@ -2,7 +2,9 @@ package com.tien.user.controller;
 
 import com.tien.user.dto.ApiResponse;
 import com.tien.user.dto.request.VIPUserRequest;
+import com.tien.user.dto.request.VIPUserRequestWithSession;
 import com.tien.user.dto.response.VIPUserResponse;
+import com.tien.user.dto.response.VIPUserResponseWithSession;
 import com.tien.user.service.VIPUserService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -27,9 +29,9 @@ public class VIPUserController {
       }
 
       @PostMapping("/createWithSession")
-      public ApiResponse<VIPUserResponse> createVIPUserWithSession(@RequestBody @Valid VIPUserRequest request) {
-            VIPUserResponse response = vipUserService.createVIPUserWithSession(request);
-            return ApiResponse.<VIPUserResponse>builder()
+      public ApiResponse<VIPUserResponseWithSession> createVIPUserWithSession(@RequestBody @Valid VIPUserRequestWithSession request) {
+            VIPUserResponseWithSession response = vipUserService.createVIPUserWithSession(request);
+            return ApiResponse.<VIPUserResponseWithSession>builder()
                     .result(response)
                     .build();
       }

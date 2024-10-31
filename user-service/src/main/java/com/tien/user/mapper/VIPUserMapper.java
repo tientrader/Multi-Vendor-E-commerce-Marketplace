@@ -1,7 +1,9 @@
 package com.tien.user.mapper;
 
 import com.tien.user.dto.request.VIPUserRequest;
+import com.tien.user.dto.request.VIPUserRequestWithSession;
 import com.tien.user.dto.response.VIPUserResponse;
+import com.tien.user.dto.response.VIPUserResponseWithSession;
 import com.tien.user.entity.User;
 import org.mapstruct.Mapper;
 
@@ -11,5 +13,9 @@ public interface VIPUserMapper {
       User vipUserRequestToUser(VIPUserRequest request);
 
       VIPUserResponse userToVipUserResponse(User user);
+
+      User vipUserRequestWithSessionToUser(VIPUserRequestWithSession request);
+
+      VIPUserResponseWithSession userToVipUserResponseWithSession(User user);
 
 }
