@@ -4,6 +4,8 @@ import com.tien.user.configuration.AuthenticationRequestInterceptor;
 import com.tien.user.dto.ApiResponse;
 import com.tien.user.dto.request.StripeSubscriptionRequest;
 import com.tien.user.dto.request.SubscriptionCancelRecord;
+import com.tien.user.dto.request.SubscriptionSessionRequest;
+import com.tien.user.dto.response.SessionResponse;
 import com.tien.user.dto.response.StripeSubscriptionResponse;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
@@ -23,11 +25,20 @@ public interface PaymentClient {
       @DeleteMapping("/stripe/subscription/{id}")
       ApiResponse<SubscriptionCancelRecord> cancelSubscription(@PathVariable("id") String id);
 
+      @CircuitBreaker(name = "createSubscriptionSession", fallbackMethod = "createSubscriptionSessionFallback")
+      @Retry(name = "createSubscriptionSession")
+      @PostMapping("/stripe/session/subscription")
+      ApiResponse<SessionResponse> createSubscriptionSession(@RequestBody SubscriptionSessionRequest request);
+
       default ApiResponse<StripeSubscriptionResponse> createSubscriptionFallback(StripeSubscriptionRequest request, Throwable throwable) {
             throw new RuntimeException();
       }
 
       default ApiResponse<SubscriptionCancelRecord> cancelSubscriptionFallback(String id, Throwable throwable) {
+            throw new RuntimeException();
+      }
+
+      default ApiResponse<SessionResponse> createSubscriptionSessionFallback(SubscriptionSessionRequest request, Throwable throwable) {
             throw new RuntimeException();
       }
 
