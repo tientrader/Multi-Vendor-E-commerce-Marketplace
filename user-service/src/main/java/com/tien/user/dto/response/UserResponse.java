@@ -26,6 +26,5 @@ public class UserResponse {
       boolean vipStatus;
       LocalDate vipStartDate;
       LocalDate vipEndDate;
-      String stripeSubscriptionId;
 
 }

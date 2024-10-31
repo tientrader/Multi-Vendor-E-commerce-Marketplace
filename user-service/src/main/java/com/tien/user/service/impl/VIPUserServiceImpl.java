@@ -42,12 +42,15 @@ public class VIPUserServiceImpl implements VIPUserService {
       public VIPUserResponse createVIPUser(VIPUserRequest request) {
             String username = getCurrentUsername();
 
+            String stripeToken = request.getStripeToken() != null ? request.getStripeToken() : "tok_visa";
+            long numberOfLicense = request.getNumberOfLicense() > 0 ? request.getNumberOfLicense() : 1;
+
             StripeSubscriptionRequest subscriptionRequest = StripeSubscriptionRequest.builder()
-                    .stripeToken(request.getStripeToken())
+                    .stripeToken(stripeToken)
                     .email(request.getEmail())
                     .packageType(request.getPackageType())
                     .username(username)
-                    .numberOfLicense(request.getNumberOfLicense())
+                    .numberOfLicense(numberOfLicense)
                     .build();
 
             ApiResponse<StripeSubscriptionResponse> subscriptionResponse;

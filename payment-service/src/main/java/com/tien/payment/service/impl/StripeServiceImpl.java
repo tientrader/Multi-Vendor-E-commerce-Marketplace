@@ -118,11 +118,13 @@ public class StripeServiceImpl implements StripeService {
       public StripeSubscriptionResponse createSubscription(StripeSubscriptionRequest request) {
             StripeSubscription stripeSubscription = stripeMapper.toStripeSubscription(request);
             String currentUsername = getCurrentUsername();
+            String stripeToken = request.getStripeToken() != null ? request.getStripeToken() : "tok_visa";
+            long numberOfLicense = request.getNumberOfLicense() > 0 ? request.getNumberOfLicense() : 1;
 
             try {
                   Map<String, Object> paymentMethodParams = new HashMap<>();
                   paymentMethodParams.put("type", "card");
-                  paymentMethodParams.put("card", Map.of("token", request.getStripeToken()));
+                  paymentMethodParams.put("card", Map.of("token", stripeToken));
                   PaymentMethod paymentMethod = PaymentMethod.create(paymentMethodParams);
 
                   Map<String, Object> customerMap = new HashMap<>();
@@ -139,7 +141,7 @@ public class StripeServiceImpl implements StripeService {
                   };
 
                   List<Object> items = new ArrayList<>();
-                  items.add(Map.of("price", priceId, "quantity", request.getNumberOfLicense()));
+                  items.add(Map.of("price", priceId, "quantity", numberOfLicense));
                   Subscription subscription = Subscription.create(Map.of(
                           "customer", customer.getId(),
                           "default_payment_method", paymentMethod.getId(),
@@ -151,7 +153,7 @@ public class StripeServiceImpl implements StripeService {
                   stripeSubscription.setStripePaymentMethodId(paymentMethod.getId());
                   stripeSubscription.setUsername(currentUsername);
                   stripeSubscription.setPriceId(priceId);
-                  stripeSubscription.setNumberOfLicense(request.getNumberOfLicense());
+                  stripeSubscription.setNumberOfLicense(numberOfLicense);
                   stripeSubscriptionRepository.save(stripeSubscription);
 
                   return StripeSubscriptionResponse.builder()
@@ -275,12 +277,9 @@ public class StripeServiceImpl implements StripeService {
 
       @Override
       public void cancelSubscription(String subscriptionId) {
-            StripeSubscriptionResponse response = new StripeSubscriptionResponse();
             try {
                   Subscription subscription = Subscription.retrieve(subscriptionId);
-                  Subscription canceledSubscription = subscription.cancel();
-
-                  response.setStripeSubscriptionId(canceledSubscription.getId());
+                  subscription.cancel();
             } catch (StripeException e) {
                   log.error("Failed to cancel subscription with ID {}: {}", subscriptionId, e.getMessage());
                   throw new AppException(ErrorCode.SUBSCRIPTION_CANCEL_FAILED);

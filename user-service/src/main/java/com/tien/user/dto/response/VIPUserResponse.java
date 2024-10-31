@@ -12,12 +12,10 @@ import java.time.LocalDate;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class VIPUserResponse {
 
-      String stripeSubscriptionId;
       String username;
       String email;
       boolean vipStatus;
       LocalDate vipStartDate;
       LocalDate vipEndDate;
-      String sessionUrl;
 
 }
