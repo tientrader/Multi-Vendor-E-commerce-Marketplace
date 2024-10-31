@@ -251,6 +251,14 @@ public class StripeServiceImpl implements StripeService {
                           .build();
 
                   com.stripe.model.checkout.Session stripeSession = com.stripe.model.checkout.Session.create(sessionCreateParams);
+
+                  com.tien.payment.entity.Session session = com.tien.payment.entity.Session.builder()
+                          .sessionId(stripeSession.getId())
+                          .sessionUrl(stripeSession.getUrl())
+                          .username(username)
+                          .build();
+                  sessionRepository.save(session);
+
                   sessionResponse.setSessionId(stripeSession.getId());
                   sessionResponse.setSessionUrl(stripeSession.getUrl());
                   sessionResponse.setUsername(username);
