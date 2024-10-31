@@ -29,6 +29,10 @@ idp:
   client-id: ${CLIENT_ID}
   client-secret: ${CLIENT_SECRET}
 
+stripe:
+  endpoint:
+    secret: ${STRIPE_ENDPOINT_SECRET}
+
 springdoc:
   swagger-ui:
     path: /swagger-ui.html
