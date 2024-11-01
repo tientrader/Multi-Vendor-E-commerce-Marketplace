@@ -7,7 +7,7 @@ import com.tien.user.dto.response.VIPUserResponseWithSession;
 
 public interface VIPUserService {
 
-      VIPUserResponse createVIPUser(VIPUserRequest request);
+      void createVIPUser(VIPUserRequest request);
 
       VIPUserResponseWithSession createVIPUserWithSession(VIPUserRequestWithSession request);
 

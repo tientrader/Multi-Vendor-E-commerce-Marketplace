@@ -21,10 +21,10 @@ public class VIPUserController {
       VIPUserService vipUserService;
 
       @PostMapping("/create")
-      public ApiResponse<VIPUserResponse> createVIPUser(@RequestBody @Valid VIPUserRequest request) {
-            VIPUserResponse response = vipUserService.createVIPUser(request);
-            return ApiResponse.<VIPUserResponse>builder()
-                    .result(response)
+      public ApiResponse<Void> createVIPUser(@RequestBody @Valid VIPUserRequest request) {
+            vipUserService.createVIPUser(request);
+            return ApiResponse.<Void>builder()
+                    .message("VIP user created successfully.")
                     .build();
       }
 

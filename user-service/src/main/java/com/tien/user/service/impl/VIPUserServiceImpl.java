@@ -6,7 +6,6 @@ import com.tien.user.dto.request.SubscriptionSessionRequest;
 import com.tien.user.dto.request.VIPUserRequest;
 import com.tien.user.dto.request.VIPUserRequestWithSession;
 import com.tien.user.dto.response.SessionResponse;
-import com.tien.user.dto.response.StripeSubscriptionResponse;
 import com.tien.user.dto.response.VIPUserResponse;
 import com.tien.user.dto.response.VIPUserResponseWithSession;
 import com.tien.user.entity.User;
@@ -39,7 +38,7 @@ public class VIPUserServiceImpl implements VIPUserService {
 
       @Override
       @Transactional
-      public VIPUserResponse createVIPUser(VIPUserRequest request) {
+      public void createVIPUser(VIPUserRequest request) {
             String username = getCurrentUsername();
 
             String stripeToken = request.getStripeToken() != null ? request.getStripeToken() : "tok_visa";
@@ -53,26 +52,14 @@ public class VIPUserServiceImpl implements VIPUserService {
                     .numberOfLicense(numberOfLicense)
                     .build();
 
-            ApiResponse<StripeSubscriptionResponse> subscriptionResponse;
             try {
-                  subscriptionResponse = paymentClient.createSubscription(subscriptionRequest);
+                  paymentClient.createSubscription(subscriptionRequest);
             } catch (Exception e) {
                   log.error("Failed to create subscription for user {}: {}", username, e.getMessage());
                   throw new AppException(ErrorCode.SUBSCRIPTION_CREATION_FAILED);
             }
 
-            User user = findOrCreateUser(request, username);
-            LocalDate vipStartDate = LocalDate.now();
-            user.setVipStartDate(vipStartDate);
-
-            LocalDate vipEndDate = getVipEndDateBasedOnPackageType(subscriptionRequest.getPackageType(), vipStartDate);
-            user.setVipEndDate(vipEndDate);
-            user.setStripeSubscriptionId(subscriptionResponse.getResult().getStripeSubscriptionId());
-            user.setVipStatus(true);
-
-            userRepository.save(user);
-
-            return vipUserMapper.userToVipUserResponse(user);
+            findOrCreateUser(request, username);
       }
 
       @Override
@@ -152,24 +139,6 @@ public class VIPUserServiceImpl implements VIPUserService {
             return jwt.getClaim("preferred_username");
       }
 
-      private User findUserByUsername(String username) {
-            return userRepository.findByUsername(username)
-                    .orElseThrow(() -> {
-                          log.error("User with username {} not found", username);
-                          return new AppException(ErrorCode.USER_NOT_EXISTED);
-                    });
-      }
-
-      private User findOrCreateUser(VIPUserRequest request, String username) {
-            return userRepository.findByUsername(username)
-                    .orElse(vipUserMapper.vipUserRequestToUser(request));
-      }
-
-      private User findOrCreateUser(VIPUserRequestWithSession request, String username) {
-            return userRepository.findByUsername(username)
-                    .orElse(vipUserMapper.vipUserRequestWithSessionToUser(request));
-      }
-
       private LocalDate getVipEndDateBasedOnPackageType(String packageType, LocalDate vipStartDate) {
             return switch (packageType) {
                   case "MONTHLY" -> vipStartDate.plusMonths(1);
@@ -180,6 +149,24 @@ public class VIPUserServiceImpl implements VIPUserService {
                         throw new AppException(ErrorCode.INVALID_PACKAGE_TYPE);
                   }
             };
+      }
+
+      private User findUserByUsername(String username) {
+            return userRepository.findByUsername(username)
+                    .orElseThrow(() -> {
+                          log.error("User with username {} not found", username);
+                          return new AppException(ErrorCode.USER_NOT_EXISTED);
+                    });
+      }
+
+      private void findOrCreateUser(VIPUserRequest request, String username) {
+            userRepository.findByUsername(username);
+            vipUserMapper.vipUserRequestToUser(request);
+      }
+
+      private User findOrCreateUser(VIPUserRequestWithSession request, String username) {
+            return userRepository.findByUsername(username)
+                    .orElse(vipUserMapper.vipUserRequestWithSessionToUser(request));
       }
 
 }

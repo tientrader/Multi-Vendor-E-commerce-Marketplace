@@ -145,11 +145,17 @@ public class StripeServiceImpl implements StripeService {
 
                   List<Object> items = new ArrayList<>();
                   items.add(Map.of("price", priceId, "quantity", numberOfLicense));
-                  Subscription subscription = Subscription.create(Map.of(
-                          "customer", customer.getId(),
-                          "default_payment_method", paymentMethod.getId(),
-                          "items", items
+
+                  Map<String, Object> subscriptionParams = new HashMap<>();
+                  subscriptionParams.put("customer", customer.getId());
+                  subscriptionParams.put("default_payment_method", paymentMethod.getId());
+                  subscriptionParams.put("items", items);
+                  subscriptionParams.put("metadata", Map.of(
+                          "username", currentUsername,
+                          "packageType", request.getPackageType()
                   ));
+
+                  Subscription subscription = Subscription.create(subscriptionParams);
 
                   stripeSubscription.setStripeCustomerId(customer.getId());
                   stripeSubscription.setStripeSubscriptionId(subscription.getId());
@@ -163,8 +169,6 @@ public class StripeServiceImpl implements StripeService {
                           .id(subscription.getId())
                           .username(currentUsername)
                           .stripeCustomerId(customer.getId())
-                          .stripeSubscriptionId(subscription.getId())
-                          .stripePaymentMethodId(paymentMethod.getId())
                           .build();
 
             } catch (StripeException e) {

@@ -13,7 +13,5 @@ public class StripeSubscriptionResponse {
       String id;
       String username;
       String stripeCustomerId;
-      String stripeSubscriptionId;
-      String stripePaymentMethodId;
 
 }
