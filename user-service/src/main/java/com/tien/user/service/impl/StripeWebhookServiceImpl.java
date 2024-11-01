@@ -4,9 +4,14 @@ import com.stripe.exception.SignatureVerificationException;
 import com.stripe.model.Event;
 import com.stripe.model.checkout.Session;
 import com.stripe.net.Webhook;
+import com.tien.user.exception.AppException;
+import com.tien.user.exception.ErrorCode;
 import com.tien.user.service.StripeWebhookService;
 import com.tien.user.service.VIPUserService;
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -14,37 +19,41 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class StripeWebhookServiceImpl implements StripeWebhookService {
 
-      private final VIPUserService vipUserService;
+      VIPUserService vipUserService;
 
       @Value("${stripe.endpoint.secret}")
-      private String endpointSecret;
+      @NonFinal
+      String endpointSecret;
 
       @Override
       public void handleStripeEvent(String payload, String sigHeader) {
             try {
                   Event event = Webhook.constructEvent(payload, sigHeader, endpointSecret);
-                  log.info("Event type: {}", event.getType());
 
-                  if ("checkout.session.completed".equals(event.getType())) {
-                        Session session = (Session) event.getData().getObject();
-                        String username = session.getMetadata().get("username");
-                        String packageType = session.getMetadata().get("packageType");
-                        String subscriptionId = session.getSubscription();
+                  switch (event.getType()) {
+                        case "checkout.session.completed" -> {
+                              Session session = (Session) event.getData().getObject();
+                              String username = session.getMetadata().get("username");
+                              String packageType = session.getMetadata().get("packageType");
+                              String subscriptionId = session.getSubscription();
 
-                        if (username != null && packageType != null && subscriptionId != null) {
                               vipUserService.updateVipEndDate(username, packageType, subscriptionId);
-                        } else {
-                              log.warn("Missing username, packageType, or subscriptionId");
                         }
-                  } else {
-                        log.warn("Unhandled event type: {}", event.getType());
+                        case "customer.subscription.created" -> {
+                              com.stripe.model.Subscription subscription = (com.stripe.model.Subscription) event.getData().getObject();
+                              String subscriptionId = subscription.getId();
+                              String username = subscription.getMetadata().get("username");
+                              String packageType = subscription.getMetadata().get("packageType");
+
+                              vipUserService.updateVipEndDate(username, packageType, subscriptionId);
+                        }
                   }
             } catch (SignatureVerificationException e) {
                   log.error("Invalid signature: {}", e.getMessage());
-            } catch (Exception e) {
-                  log.error("Error processing event: {}", e.getMessage());
+                  throw new AppException(ErrorCode.INVALID_STRIPE_SIGNATURE);
             }
       }
 
