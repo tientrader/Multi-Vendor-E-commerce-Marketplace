@@ -1,4 +1,4 @@
-package com.tien.event.dto;
+package com.tien.user.event;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
