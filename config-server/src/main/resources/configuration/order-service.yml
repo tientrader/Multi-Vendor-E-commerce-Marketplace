@@ -18,6 +18,8 @@ spring:
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      retries: 3
+      acks: all
 
 springdoc:
   swagger-ui:
@@ -27,7 +29,7 @@ springdoc:
 
 logging:
   level:
-    root: INFO
+    root: WARN
     com.netflix.discovery: OFF
 
 resilience4j:

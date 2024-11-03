@@ -30,7 +30,7 @@ springdoc:
 
 logging:
   level:
-    root: INFO
+    root: WARN
     com.netflix.discovery: OFF
 
 management:

@@ -23,6 +23,8 @@ spring:
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      retries: 3
+      acks: all
 
 idp:
   url: http://localhost:8180
@@ -41,7 +43,7 @@ springdoc:
 
 logging:
   level:
-    root: INFO
+    root: WARN
     com.netflix.discovery: OFF
 
 resilience4j:

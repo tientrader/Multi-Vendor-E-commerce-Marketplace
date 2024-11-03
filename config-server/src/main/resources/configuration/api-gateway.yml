@@ -215,8 +215,8 @@ resilience4j:
 
 logging:
   level:
-    root: INFO
-    io.github.resilience4j: DEBUG
+    root: WARN
+    io.github.resilience4j: WARN
     com.netflix.discovery: OFF
 
 management:
