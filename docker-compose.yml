@@ -14,8 +14,6 @@ services:
       - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092,EXTERNAL://localhost:9094
       - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT
       - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
-    volumes:
-      - kafka-data:/bitnami/kafka
     networks:
       - tien-network
 
@@ -117,7 +115,6 @@ services:
       - tien-network
 
 volumes:
-  kafka-data:
   keycloak-data:
   mongodb-data:
   mysql-data:
