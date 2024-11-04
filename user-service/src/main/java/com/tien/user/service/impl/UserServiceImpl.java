@@ -92,7 +92,7 @@ public class UserServiceImpl implements UserService {
 
             CompletableFuture.runAsync(() -> {
                   try {
-                        identityClient.sendVerificationEmail(token, userId);
+                        identityClient.sendVerificationEmail("Bearer " + token, userId);
                   } catch (FeignException e) {
                         log.error("Error occurred while sending verification email: {}", e.getMessage());
                         throw errorNormalizer.handleKeyCloakException(e);
