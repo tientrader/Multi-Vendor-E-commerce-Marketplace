@@ -33,7 +33,7 @@ public class EmailServiceImpl implements EmailService {
             EmailRequest emailRequest = EmailRequest.builder()
                     .sender(Sender.builder()
                             .name("Truong Nhat Tien")
-                            .email("truongnhattien.business@gmail.com")
+                            .email("ntien.se03@gmail.com")
                             .build())
                     .to(List.of(request.getTo()))
                     .subject(request.getSubject())
