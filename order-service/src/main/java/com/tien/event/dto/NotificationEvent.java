@@ -1,4 +1,4 @@
-package com.tien.payment.event;
+package com.tien.event.dto;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;

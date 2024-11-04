@@ -1,6 +1,6 @@
 package com.tien.user.service.impl;
 
-import com.tien.user.event.NotificationEvent;
+import com.tien.event.dto.NotificationEvent;
 import com.tien.user.dto.identity.Credential;
 import com.tien.user.dto.identity.TokenExchangeParam;
 import com.tien.user.dto.identity.TokenExchangeResponse;

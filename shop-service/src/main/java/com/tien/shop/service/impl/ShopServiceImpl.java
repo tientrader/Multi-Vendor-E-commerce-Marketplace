@@ -1,6 +1,6 @@
 package com.tien.shop.service.impl;
 
-import com.tien.shop.event.NotificationEvent;
+import com.tien.event.dto.NotificationEvent;
 import com.tien.shop.dto.request.ShopCreationRequest;
 import com.tien.shop.dto.request.ShopUpdateRequest;
 import com.tien.shop.dto.response.ShopResponse;

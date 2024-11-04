@@ -1,6 +1,6 @@
 package com.tien.notification.controller;
 
-import com.tien.notification.event.NotificationEvent;
+import com.tien.event.dto.NotificationEvent;
 import com.tien.notification.dto.request.Recipient;
 import com.tien.notification.dto.request.SendEmailRequest;
 import com.tien.notification.service.EmailService;

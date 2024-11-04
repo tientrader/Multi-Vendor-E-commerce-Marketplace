@@ -6,7 +6,7 @@ import com.stripe.model.*;
 import com.stripe.param.CustomerCreateParams;
 import com.stripe.param.CustomerSearchParams;
 import com.stripe.param.checkout.SessionCreateParams;
-import com.tien.payment.event.NotificationEvent;
+import com.tien.event.dto.NotificationEvent;
 import com.tien.payment.dto.request.PaymentSessionRequest;
 import com.tien.payment.dto.request.StripeChargeRequest;
 import com.tien.payment.dto.request.StripeSubscriptionRequest;
