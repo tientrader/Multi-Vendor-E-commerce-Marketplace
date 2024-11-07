@@ -1,8 +1,10 @@
 package com.tien.product.service.impl;
 
+import com.tien.product.dto.ApiResponse;
 import com.tien.product.dto.request.ProductCreationRequest;
 import com.tien.product.dto.request.ProductUpdateRequest;
 import com.tien.product.dto.response.ExistsResponse;
+import com.tien.product.dto.response.FileResponse;
 import com.tien.product.dto.response.ProductResponse;
 import com.tien.product.dto.response.ShopResponse;
 import com.tien.product.entity.Category;
@@ -11,6 +13,7 @@ import com.tien.product.entity.ProductVariant;
 import com.tien.product.enums.ProductSort;
 import com.tien.product.exception.AppException;
 import com.tien.product.exception.ErrorCode;
+import com.tien.product.httpclient.FileClient;
 import com.tien.product.httpclient.ShopClient;
 import com.tien.product.mapper.ProductMapper;
 import com.tien.product.mapper.ProductVariantMapper;
@@ -32,9 +35,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -47,11 +52,12 @@ public class ProductServiceImpl implements ProductService {
       ProductVariantMapper productVariantMapper;
       CategoryRepository categoryRepository;
       ShopClient shopClient;
+      FileClient fileClient;
       MongoTemplate mongoTemplate;
 
       @Override
       @Transactional
-      public ProductResponse createProduct(ProductCreationRequest request) {
+      public ProductResponse createProduct(ProductCreationRequest request, List<MultipartFile> productImages) {
             String username = getCurrentUsername();
             ShopResponse shopResponse = getShopByOwnerUsername(username);
             Category category = findCategoryById(request.getCategoryId());
@@ -60,6 +66,14 @@ public class ProductServiceImpl implements ProductService {
             Product product = productMapper.toProduct(request);
             product.setCategoryId(category.getId());
             product.setShopId(shopResponse.getId());
+
+            ApiResponse<List<FileResponse>> fileResponseApi = fileClient.uploadMultipleFiles(productImages);
+            List<FileResponse> fileResponses = fileResponseApi.getResult();
+
+            List<String> imageUrls = fileResponses.stream()
+                    .map(FileResponse::getUrl)
+                    .collect(Collectors.toList());
+            product.setImageUrls(imageUrls);
 
             List<ProductVariant> variants = request.getVariants().stream()
                     .map(productVariantMapper::toProductVariant)

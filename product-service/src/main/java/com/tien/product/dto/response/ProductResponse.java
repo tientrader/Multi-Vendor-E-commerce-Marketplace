@@ -20,6 +20,7 @@ public class ProductResponse {
       int soldQuantity;
       List<ProductVariantResponse> variants;
       String categoryId;
+      List<String> imageUrls;
       LocalDateTime createdAt;
       LocalDateTime updatedAt;
 

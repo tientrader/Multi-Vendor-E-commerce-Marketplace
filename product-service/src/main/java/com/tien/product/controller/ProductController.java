@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -24,9 +25,10 @@ public class ProductController {
       ProductService productService;
 
       @PostMapping("/create")
-      public ApiResponse<ProductResponse> createProduct(@RequestBody @Valid ProductCreationRequest request) {
+      public ApiResponse<ProductResponse> createProduct(@RequestPart("request") @Valid ProductCreationRequest request,
+                                                        @RequestPart("productImages") List<MultipartFile> productImages) {
             return ApiResponse.<ProductResponse>builder()
-                    .result(productService.createProduct(request))
+                    .result(productService.createProduct(request, productImages))
                     .build();
       }
 

@@ -27,6 +27,7 @@ public class Product {
       int soldQuantity;
       List<ProductVariant> variants;
       String categoryId;
+      List<String> imageUrls;
 
       @CreatedDate
       LocalDateTime createdAt;

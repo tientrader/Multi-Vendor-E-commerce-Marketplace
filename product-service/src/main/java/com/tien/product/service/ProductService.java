@@ -6,12 +6,13 @@ import com.tien.product.dto.response.ExistsResponse;
 import com.tien.product.dto.response.ProductResponse;
 import com.tien.product.enums.ProductSort;
 import org.springframework.data.domain.Page;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
 public interface ProductService {
 
-      ProductResponse createProduct(ProductCreationRequest request);
+      ProductResponse createProduct(ProductCreationRequest request, List<MultipartFile> productImages);
 
       ProductResponse updateProduct(String productId, ProductUpdateRequest request);
 
