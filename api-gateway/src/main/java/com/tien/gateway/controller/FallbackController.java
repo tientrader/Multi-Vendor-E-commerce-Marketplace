@@ -48,4 +48,10 @@ public class FallbackController {
       public Mono<String> paymentFallback() {
             return Mono.just("Payment service is currently unavailable. Please try again later.");
       }
+
+      @GetMapping("/file")
+      public Mono<String> fileFallback() {
+            return Mono.just("File service is currently unavailable. Please try again later.");
+      }
+
 }

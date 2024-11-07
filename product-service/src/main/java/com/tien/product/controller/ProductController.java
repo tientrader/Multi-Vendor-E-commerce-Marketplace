@@ -32,7 +32,7 @@ public class ProductController {
 
       @PutMapping("/{productId}")
       public ApiResponse<ProductResponse> updateProduct(@PathVariable String productId,
-                                                 @RequestBody @Valid ProductUpdateRequest request) {
+                                                        @RequestBody @Valid ProductUpdateRequest request) {
             return ApiResponse.<ProductResponse>builder()
                     .result(productService.updateProduct(productId, request))
                     .build();
@@ -74,7 +74,8 @@ public class ProductController {
       }
 
       @GetMapping("/{productId}/stock/{variantId}")
-      public ApiResponse<Integer> getProductStockById(@PathVariable String productId, @PathVariable String variantId) {
+      public ApiResponse<Integer> getProductStockById(@PathVariable String productId,
+                                                      @PathVariable String variantId) {
             return ApiResponse.<Integer>builder()
                     .result(productService.getProductStockById(productId, variantId))
                     .build();
@@ -88,7 +89,8 @@ public class ProductController {
       }
 
       @GetMapping("/{productId}/price/{variantId}")
-      public ApiResponse<Double> getProductPriceById(@PathVariable String productId, @PathVariable String variantId) {
+      public ApiResponse<Double> getProductPriceById(@PathVariable String productId,
+                                                     @PathVariable String variantId) {
             return ApiResponse.<Double>builder()
                     .result(productService.getProductPriceById(productId, variantId))
                     .build();
@@ -102,7 +104,8 @@ public class ProductController {
       }
 
       @GetMapping("/{productId}/exists/{variantId}")
-      public ApiResponse<ExistsResponse> existsProduct(@PathVariable String productId, @PathVariable String variantId) {
+      public ApiResponse<ExistsResponse> existsProduct(@PathVariable String productId,
+                                                       @PathVariable String variantId) {
             return ApiResponse.<ExistsResponse>builder()
                     .result(productService.existsProduct(productId, variantId))
                     .build();

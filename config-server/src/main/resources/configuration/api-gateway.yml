@@ -16,6 +16,10 @@ app:
   api-prefix: /api/v1
 
 spring:
+  servlet:
+    multipart:
+      max-file-size: 1MB
+      max-request-size: 5MB
   cloud:
     gateway:
       routes:
@@ -131,6 +135,20 @@ spring:
               args:
                 name: default
 
+        - id: file-service
+          uri: lb://file-service
+          predicates:
+            - Path=${app.api-prefix}/file/**
+          filters:
+            - StripPrefix=2
+            - name: CircuitBreaker
+              args:
+                name: fileService
+                fallbackUri: forward:/fallback/file
+            - name: Retry
+              args:
+                name: default
+
         - id: actuator
           uri: http://localhost:8888
           predicates:
@@ -169,6 +187,8 @@ resilience4j:
         baseConfig: default
       paymentService:
         baseConfig: default
+      fileService:
+        baseConfig: default
   retry:
     configs:
       default:
@@ -191,6 +211,8 @@ resilience4j:
         baseConfig: default
       paymentService:
         baseConfig: default
+      fileService:
+        baseConfig: default
   timelimiter:
     configs:
       default:
@@ -212,6 +234,8 @@ resilience4j:
         timeout-duration: 3s
       paymentService:
         timeout-duration: 6s
+      fileService:
+        timeout-duration: 10s
 
 logging:
   level:
