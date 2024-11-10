@@ -24,7 +24,7 @@ cloud:
 
 logging:
   level:
-    root: WARN
+    root: INFO
     com.netflix.discovery: OFF
 
 springdoc:
