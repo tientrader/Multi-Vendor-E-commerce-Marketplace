@@ -57,14 +57,7 @@ public class PostServiceImpl implements PostService {
                   throw new AppException(ErrorCode.EXTERNAL_SERVICE_ERROR);
             }
 
-            List<String> imageUrls = List.of();
-            if (postImages != null && !postImages.isEmpty()) {
-                  ApiResponse<List<FileResponse>> fileResponseApi = fileClient.uploadMultipleFiles(postImages);
-                  List<FileResponse> fileResponses = fileResponseApi.getResult();
-                  imageUrls = fileResponses.stream()
-                          .map(FileResponse::getUrl)
-                          .collect(Collectors.toList());
-            }
+            List<String> imageUrls = handleImageUpload(postImages);
 
             Post post = Post.builder()
                     .content(request.getContent())
@@ -76,6 +69,34 @@ public class PostServiceImpl implements PostService {
 
             post = postRepository.save(post);
             return postMapper.toPostResponse(post);
+      }
+
+      @Override
+      public PostResponse updatePost(String postId, PostUpdateRequest request, List<MultipartFile> postImages) {
+            String username = authenticationService.getAuthenticatedUsername();
+
+            Post post = findPostById(postId);
+            validateUserOwnership(post, username);
+
+            postMapper.updatePost(post, request);
+            post.setModifiedDate(Instant.now());
+
+            List<String> imageUrls = handleImageUpload(postImages);
+            if (!imageUrls.isEmpty()) {
+                  post.setImageUrls(imageUrls);
+            }
+
+            postRepository.save(post);
+            return postMapper.toPostResponse(post);
+      }
+
+      @Override
+      public void deletePost(String postId) {
+            String username = authenticationService.getAuthenticatedUsername();
+            Post post = findPostById(postId);
+            validateUserOwnership(post, username);
+
+            postRepository.delete(post);
       }
 
       @Override
@@ -103,44 +124,21 @@ public class PostServiceImpl implements PostService {
       }
 
       @Override
-      public PostResponse updatePost(String postId, PostUpdateRequest request, List<MultipartFile> postImages) {
-            String username = authenticationService.getAuthenticatedUsername();
-
-            postImages = postImages != null ? postImages : List.of();
-
-            Post post = findPostById(postId);
-            validateUserOwnership(post, username);
-
-            postMapper.updatePost(post, request);
-            post.setModifiedDate(Instant.now());
-
-            if (!postImages.isEmpty()) {
-                  ApiResponse<List<FileResponse>> fileResponseApi = fileClient.uploadMultipleFiles(postImages);
-                  List<FileResponse> fileResponses = fileResponseApi.getResult();
-
-                  List<String> imageUrls = fileResponses.stream()
-                          .map(FileResponse::getUrl)
-                          .collect(Collectors.toList());
-                  post.setImageUrls(imageUrls);
-            }
-
-            postRepository.save(post);
-
-            return postMapper.toPostResponse(post);
-      }
-
-      @Override
-      public void deletePost(String postId) {
-            String username = authenticationService.getAuthenticatedUsername();
-            Post post = findPostById(postId);
-            validateUserOwnership(post, username);
-
-            postRepository.delete(post);
-      }
-
-      @Override
       public PostResponse getPostById(String postId) {
             return postMapper.toPostResponse(findPostById(postId));
+      }
+
+      private List<String> handleImageUpload(List<MultipartFile> postImages) {
+            if (postImages == null || postImages.isEmpty()) {
+                  return List.of();
+            }
+
+            ApiResponse<List<FileResponse>> fileResponseApi = fileClient.uploadMultipleFiles(postImages);
+            List<FileResponse> fileResponses = fileResponseApi.getResult();
+
+            return fileResponses.stream()
+                    .map(FileResponse::getUrl)
+                    .collect(Collectors.toList());
       }
 
       private Post findPostById(String postId) {
