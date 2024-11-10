@@ -11,3 +11,7 @@ spring:
       server:
         native:
           search-locations: classpath:/configuration
+
+logging:
+  level:
+    root: WARN

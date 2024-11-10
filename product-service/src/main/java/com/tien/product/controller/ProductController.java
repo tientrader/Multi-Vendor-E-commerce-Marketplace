@@ -26,7 +26,7 @@ public class ProductController {
 
       @PostMapping("/create")
       public ApiResponse<ProductResponse> createProduct(@RequestPart("request") @Valid ProductCreationRequest request,
-                                                        @RequestPart("productImages") List<MultipartFile> productImages) {
+                                                        @RequestPart(value = "productImages", required = false) List<MultipartFile> productImages) {
             return ApiResponse.<ProductResponse>builder()
                     .result(productService.createProduct(request, productImages))
                     .build();
@@ -34,9 +34,10 @@ public class ProductController {
 
       @PutMapping("/{productId}")
       public ApiResponse<ProductResponse> updateProduct(@PathVariable String productId,
-                                                        @RequestBody @Valid ProductUpdateRequest request) {
+                                                        @RequestPart("request") @Valid ProductUpdateRequest request,
+                                                        @RequestPart(value = "productImages", required = false) List<MultipartFile> productImages) {
             return ApiResponse.<ProductResponse>builder()
-                    .result(productService.updateProduct(productId, request))
+                    .result(productService.updateProduct(productId, request, productImages))
                     .build();
       }
 

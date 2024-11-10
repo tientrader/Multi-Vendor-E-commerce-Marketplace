@@ -14,7 +14,7 @@ public interface ProductService {
 
       ProductResponse createProduct(ProductCreationRequest request, List<MultipartFile> productImages);
 
-      ProductResponse updateProduct(String productId, ProductUpdateRequest request);
+      ProductResponse updateProduct(String productId, ProductUpdateRequest request, List<MultipartFile> productImages);
 
       void deleteProduct(String productId);
 

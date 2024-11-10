@@ -58,6 +58,10 @@ public class ProductServiceImpl implements ProductService {
       @Override
       @Transactional
       public ProductResponse createProduct(ProductCreationRequest request, List<MultipartFile> productImages) {
+            if (productImages == null || productImages.isEmpty()) {
+                  throw new AppException(ErrorCode.IMAGE_REQUIRED);
+            }
+
             String username = getCurrentUsername();
             ShopResponse shopResponse = getShopByOwnerUsername(username);
             Category category = findCategoryById(request.getCategoryId());
@@ -90,7 +94,7 @@ public class ProductServiceImpl implements ProductService {
 
       @Override
       @Transactional
-      public ProductResponse updateProduct(String productId, ProductUpdateRequest request) {
+      public ProductResponse updateProduct(String productId, ProductUpdateRequest request, List<MultipartFile> productImages) {
             String username = getCurrentUsername();
             ShopResponse shopResponse = getShopByOwnerUsername(username);
 
@@ -104,6 +108,17 @@ public class ProductServiceImpl implements ProductService {
 
             productMapper.updateProduct(product, request);
             product.setCategoryId(newCategory.getId());
+
+            if (productImages != null && !productImages.isEmpty()) {
+                  ApiResponse<List<FileResponse>> fileResponseApi = fileClient.uploadMultipleFiles(productImages);
+                  List<FileResponse> fileResponses = fileResponseApi.getResult();
+
+                  List<String> imageUrls = fileResponses.stream()
+                          .map(FileResponse::getUrl)
+                          .collect(Collectors.toList());
+                  product.setImageUrls(imageUrls);
+            }
+
             product = productRepository.save(product);
 
             newCategory.getProductIds().add(product.getId());
