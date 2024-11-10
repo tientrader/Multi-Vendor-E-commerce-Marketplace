@@ -91,9 +91,12 @@ Beyond simply connecting buyers and sellers, **Multi-Vendor E-commerce Marketpla
 ### 5. Identity and Access Management
 
 - **Keycloak:**
-  - **Single Sign-On (SSO):** Users can log in once to access multiple services, with support for OAuth 2.0 and OpenID Connect.
-  - **User Management:** Simplifies registration, email verification, and password recovery processes.
-  - **Role-Based Access Control (RBAC):** Ensures that only authorized users can access specific features, enhancing security for sensitive operations.
+  - **Single Sign-On (SSO):** Users can log in once to access multiple services, with support for OAuth 2.0 and OpenID Connect, providing seamless authentication across the platform.
+  - **Social Login:** Allows users to log in via their social accounts (e.g., Google, Facebook), simplifying the authentication process and improving user experience.
+  - **User Management:** Streamlines user registration, email verification, password recovery, and overall account management, ensuring a smooth user experience.
+  - **Role-Based Access Control (RBAC):** Ensures that only authorized users can access specific features and resources, enhancing security and protecting sensitive operations.
+  - **Email Verification:** Verifies users' email addresses during registration to ensure account authenticity and prevent fraudulent sign-ups.
+  - **Logout:** Provides secure logout functionality by invalidating sessions and tokens, protecting against unauthorized access.
 
 - **JWT (JSON Web Tokens):**
   JWT secures API communications with authentication tokens, mitigating CSRF attacks and enhancing data security.
