@@ -6,6 +6,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.MongoId;
 
 import java.time.Instant;
+import java.util.List;
 
 @Getter
 @Setter
@@ -21,9 +22,10 @@ public class Post {
 
       String username;
       String content;
-      Instant createdDate;
-      Instant modifiedDate;
+      List<String> imageUrls;
       long likesCount;
       long commentsCount;
+      Instant createdDate;
+      Instant modifiedDate;
 
 }

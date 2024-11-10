@@ -4,6 +4,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.Instant;
+import java.util.List;
 
 @Data
 @Builder
@@ -14,11 +15,12 @@ public class PostResponse {
 
       String id;
       String content;
+      List<String> imageUrls;
       String username;
       String created;
-      Instant createdDate;
-      Instant modifiedDate;
       long likesCount;
       long commentsCount;
+      Instant createdDate;
+      Instant modifiedDate;
 
 }

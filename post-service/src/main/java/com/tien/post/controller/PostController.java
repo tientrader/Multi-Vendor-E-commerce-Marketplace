@@ -6,10 +6,14 @@ import com.tien.post.dto.request.PostCreationRequest;
 import com.tien.post.dto.request.PostUpdateRequest;
 import com.tien.post.dto.response.PostResponse;
 import com.tien.post.service.PostService;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/posts")
@@ -20,14 +24,16 @@ public class PostController {
       PostService postService;
 
       @PostMapping("/create")
-      public ApiResponse<PostResponse> createPost(@RequestBody PostCreationRequest request) {
+      public ApiResponse<PostResponse> createPost(@RequestPart("request") @Valid PostCreationRequest request,
+                                                  @RequestPart("postImages") List<MultipartFile> postImages) {
             return ApiResponse.<PostResponse>builder()
-                    .result(postService.createPost(request))
+                    .result(postService.createPost(request, postImages))
                     .build();
       }
 
       @PutMapping("/{postId}")
-      public ApiResponse<PostResponse> updatePost(@PathVariable String postId, @RequestBody PostUpdateRequest request) {
+      public ApiResponse<PostResponse> updatePost(@PathVariable String postId,
+                                                  @RequestBody PostUpdateRequest request) {
             return ApiResponse.<PostResponse>builder()
                     .result(postService.updatePost(postId, request))
                     .build();

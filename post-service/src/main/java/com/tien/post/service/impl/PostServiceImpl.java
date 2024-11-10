@@ -1,9 +1,12 @@
 package com.tien.post.service.impl;
 
+import com.tien.post.dto.ApiResponse;
 import com.tien.post.dto.PageResponse;
+import com.tien.post.dto.response.FileResponse;
 import com.tien.post.entity.Post;
 import com.tien.post.exception.AppException;
 import com.tien.post.exception.ErrorCode;
+import com.tien.post.httpclient.FileClient;
 import com.tien.post.httpclient.UserClient;
 import com.tien.post.mapper.PostMapper;
 import com.tien.post.dto.request.PostCreationRequest;
@@ -20,8 +23,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.Instant;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -30,13 +36,14 @@ import java.time.Instant;
 public class PostServiceImpl implements PostService {
 
       UserClient userClient;
+      FileClient fileClient;
       DateTimeFormatterImpl dateTimeFormatter;
       PostRepository postRepository;
       PostMapper postMapper;
       AuthenticationServiceImpl authenticationService;
 
       @Override
-      public PostResponse createPost(PostCreationRequest request) {
+      public PostResponse createPost(PostCreationRequest request, List<MultipartFile> postImages) {
             String username = authenticationService.getAuthenticatedUsername();
 
             try {
@@ -56,6 +63,15 @@ public class PostServiceImpl implements PostService {
                     .createdDate(Instant.now())
                     .modifiedDate(Instant.now())
                     .build();
+
+            ApiResponse<List<FileResponse>> fileResponseApi = fileClient.uploadMultipleFiles(postImages);
+            List<FileResponse> fileResponses = fileResponseApi.getResult();
+
+            List<String> imageUrls = fileResponses.stream()
+                    .map(FileResponse::getUrl)
+                    .collect(Collectors.toList());
+            post.setImageUrls(imageUrls);
+
             post = postRepository.save(post);
 
             return postMapper.toPostResponse(post);
@@ -86,12 +102,6 @@ public class PostServiceImpl implements PostService {
       }
 
       @Override
-      public PostResponse getPostById(String postId) {
-            Post post = findPostById(postId);
-            return postMapper.toPostResponse(post);
-      }
-
-      @Override
       public PostResponse updatePost(String postId, PostUpdateRequest request) {
             String username = authenticationService.getAuthenticatedUsername();
 
@@ -112,6 +122,11 @@ public class PostServiceImpl implements PostService {
             validateUserOwnership(post, username);
 
             postRepository.delete(post);
+      }
+
+      @Override
+      public PostResponse getPostById(String postId) {
+            return postMapper.toPostResponse(findPostById(postId));
       }
 
       private Post findPostById(String postId) {
