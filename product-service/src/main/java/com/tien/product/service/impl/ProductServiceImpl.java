@@ -31,6 +31,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
@@ -54,11 +56,13 @@ public class ProductServiceImpl implements ProductService {
       ShopClient shopClient;
       FileClient fileClient;
       MongoTemplate mongoTemplate;
+      RedisTemplate<String, Object> redisTemplate;
 
       @Override
       @Transactional
       public ProductResponse createProduct(ProductCreationRequest request, List<MultipartFile> productImages) {
             if (productImages == null || productImages.isEmpty()) {
+                  log.error("Product images are required but none were provided.");
                   throw new AppException(ErrorCode.IMAGE_REQUIRED);
             }
 
@@ -83,6 +87,7 @@ public class ProductServiceImpl implements ProductService {
 
             category.getProductIds().add(product.getId());
             categoryRepository.save(category);
+            redisTemplate.opsForValue().set("product:" + product.getId(), product);
 
             return productMapper.toProductResponse(product);
       }
@@ -113,6 +118,7 @@ public class ProductServiceImpl implements ProductService {
 
             newCategory.getProductIds().add(product.getId());
             categoryRepository.save(newCategory);
+            redisTemplate.opsForValue().set("product:" + product.getId(), product);
 
             return productMapper.toProductResponse(product);
       }
@@ -131,6 +137,7 @@ public class ProductServiceImpl implements ProductService {
             categoryRepository.save(category);
 
             productRepository.deleteById(productId);
+            redisTemplate.delete("product:" + productId);
       }
 
       @Override
@@ -176,6 +183,7 @@ public class ProductServiceImpl implements ProductService {
       }
 
       @Override
+      @PreAuthorize("hasRole('ADMIN')")
       public List<ProductResponse> getAllProducts() {
             return productMapper.toProductResponses(productRepository.findAll());
       }
@@ -227,11 +235,13 @@ public class ProductServiceImpl implements ProductService {
       }
 
       private Product findProductById(String productId) {
-            return productRepository.findById(productId)
-                    .orElseThrow(() -> {
-                          log.error("Product not found with ID: {}", productId);
-                          return new AppException(ErrorCode.PRODUCT_NOT_FOUND);
-                    });
+            Product product = (Product) redisTemplate.opsForValue().get("product:" + productId);
+            if (product == null) {
+                  product = productRepository.findById(productId)
+                          .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+                  redisTemplate.opsForValue().set("product:" + productId, product);
+            }
+            return product;
       }
 
       private ProductVariant findVariantById(Product product, String variantId) {
