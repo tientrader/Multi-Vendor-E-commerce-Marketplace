@@ -71,12 +71,7 @@ public class ProductServiceImpl implements ProductService {
             product.setCategoryId(category.getId());
             product.setShopId(shopResponse.getId());
 
-            ApiResponse<List<FileResponse>> fileResponseApi = fileClient.uploadMultipleFiles(productImages);
-            List<FileResponse> fileResponses = fileResponseApi.getResult();
-
-            List<String> imageUrls = fileResponses.stream()
-                    .map(FileResponse::getUrl)
-                    .collect(Collectors.toList());
+            List<String> imageUrls = handleImageUpload(productImages);
             product.setImageUrls(imageUrls);
 
             List<ProductVariant> variants = request.getVariants().stream()
@@ -110,12 +105,7 @@ public class ProductServiceImpl implements ProductService {
             product.setCategoryId(newCategory.getId());
 
             if (productImages != null && !productImages.isEmpty()) {
-                  ApiResponse<List<FileResponse>> fileResponseApi = fileClient.uploadMultipleFiles(productImages);
-                  List<FileResponse> fileResponses = fileResponseApi.getResult();
-
-                  List<String> imageUrls = fileResponses.stream()
-                          .map(FileResponse::getUrl)
-                          .collect(Collectors.toList());
+                  List<String> imageUrls = handleImageUpload(productImages);
                   product.setImageUrls(imageUrls);
             }
 
@@ -221,6 +211,19 @@ public class ProductServiceImpl implements ProductService {
       private String getCurrentUsername() {
             Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             return jwt.getClaim("preferred_username");
+      }
+
+      private List<String> handleImageUpload(List<MultipartFile> productImages) {
+            if (productImages == null || productImages.isEmpty()) {
+                  return List.of();
+            }
+
+            ApiResponse<List<FileResponse>> fileResponseApi = fileClient.uploadMultipleFiles(productImages);
+            List<FileResponse> fileResponses = fileResponseApi.getResult();
+
+            return fileResponses.stream()
+                    .map(FileResponse::getUrl)
+                    .collect(Collectors.toList());
       }
 
       private Product findProductById(String productId) {

@@ -216,7 +216,7 @@ resilience4j:
   timelimiter:
     configs:
       default:
-        timeout-duration: 3s
+        timeout-duration: 4s
         cancel-running-future: false
       userService:
         timeout-duration: 6s
@@ -227,11 +227,11 @@ resilience4j:
       orderService:
         timeout-duration: 5s
       shopService:
-        timeout-duration: 3s
+        timeout-duration: 4s
       postService:
         timeout-duration: 7s
       notificationService:
-        timeout-duration: 3s
+        timeout-duration: 4s
       paymentService:
         timeout-duration: 6s
       fileService:
