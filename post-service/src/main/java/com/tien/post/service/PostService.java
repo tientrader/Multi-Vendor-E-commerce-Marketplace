@@ -12,7 +12,7 @@ public interface PostService {
 
       PostResponse createPost(PostCreationRequest request, List<MultipartFile> postImages);
 
-      PostResponse updatePost(String postId, PostUpdateRequest request);
+      PostResponse updatePost(String postId, PostUpdateRequest request, List<MultipartFile> newImages);
 
       void deletePost(String postId);
 

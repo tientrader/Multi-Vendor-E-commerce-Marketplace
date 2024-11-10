@@ -25,7 +25,7 @@ public class PostController {
 
       @PostMapping("/create")
       public ApiResponse<PostResponse> createPost(@RequestPart("request") @Valid PostCreationRequest request,
-                                                  @RequestPart("postImages") List<MultipartFile> postImages) {
+                                                  @RequestPart(value = "postImages", required = false) List<MultipartFile> postImages) {
             return ApiResponse.<PostResponse>builder()
                     .result(postService.createPost(request, postImages))
                     .build();
@@ -33,9 +33,10 @@ public class PostController {
 
       @PutMapping("/{postId}")
       public ApiResponse<PostResponse> updatePost(@PathVariable String postId,
-                                                  @RequestBody PostUpdateRequest request) {
+                                                  @RequestPart("request") @Valid PostUpdateRequest request,
+                                                  @RequestPart(value = "postImages", required = false) List<MultipartFile> postImages) {
             return ApiResponse.<PostResponse>builder()
-                    .result(postService.updatePost(postId, request))
+                    .result(postService.updatePost(postId, request, postImages))
                     .build();
       }
 

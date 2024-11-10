@@ -57,23 +57,24 @@ public class PostServiceImpl implements PostService {
                   throw new AppException(ErrorCode.EXTERNAL_SERVICE_ERROR);
             }
 
+            List<String> imageUrls = List.of();
+            if (postImages != null && !postImages.isEmpty()) {
+                  ApiResponse<List<FileResponse>> fileResponseApi = fileClient.uploadMultipleFiles(postImages);
+                  List<FileResponse> fileResponses = fileResponseApi.getResult();
+                  imageUrls = fileResponses.stream()
+                          .map(FileResponse::getUrl)
+                          .collect(Collectors.toList());
+            }
+
             Post post = Post.builder()
                     .content(request.getContent())
                     .username(username)
                     .createdDate(Instant.now())
                     .modifiedDate(Instant.now())
+                    .imageUrls(imageUrls)
                     .build();
 
-            ApiResponse<List<FileResponse>> fileResponseApi = fileClient.uploadMultipleFiles(postImages);
-            List<FileResponse> fileResponses = fileResponseApi.getResult();
-
-            List<String> imageUrls = fileResponses.stream()
-                    .map(FileResponse::getUrl)
-                    .collect(Collectors.toList());
-            post.setImageUrls(imageUrls);
-
             post = postRepository.save(post);
-
             return postMapper.toPostResponse(post);
       }
 
@@ -102,14 +103,27 @@ public class PostServiceImpl implements PostService {
       }
 
       @Override
-      public PostResponse updatePost(String postId, PostUpdateRequest request) {
+      public PostResponse updatePost(String postId, PostUpdateRequest request, List<MultipartFile> postImages) {
             String username = authenticationService.getAuthenticatedUsername();
+
+            postImages = postImages != null ? postImages : List.of();
 
             Post post = findPostById(postId);
             validateUserOwnership(post, username);
 
             postMapper.updatePost(post, request);
             post.setModifiedDate(Instant.now());
+
+            if (!postImages.isEmpty()) {
+                  ApiResponse<List<FileResponse>> fileResponseApi = fileClient.uploadMultipleFiles(postImages);
+                  List<FileResponse> fileResponses = fileResponseApi.getResult();
+
+                  List<String> imageUrls = fileResponses.stream()
+                          .map(FileResponse::getUrl)
+                          .collect(Collectors.toList());
+                  post.setImageUrls(imageUrls);
+            }
+
             postRepository.save(post);
 
             return postMapper.toPostResponse(post);
