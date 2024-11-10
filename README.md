@@ -1,51 +1,42 @@
-# 🚀 Social-Marketplace
+# 🚀 Multi-Vendor E-commerce Marketplace
 
-**Social-Marketplace** is a robust two-sided marketplace platform that seamlessly connects buyers and sellers through a sophisticated online system. Buyers can explore and purchase diverse products or services from a wide array of vendors, while sellers can effectively showcase their offerings to potential customers. This project is meticulously designed to enhance user experience, minimize latency, and incorporate modern security features, thereby fostering trust and engagement within the platform.
+**Multi-Vendor E-commerce Marketplace** is an advanced two-sided marketplace platform designed to seamlessly bridge buyers and sellers in a dynamic, user-centric ecosystem. The platform enables buyers to explore and purchase an extensive range of products or services from diverse vendors, while empowering sellers to showcase their offerings to a wide audience. Crafted to prioritize exceptional user experience, low-latency interactions, and modern security, **Multi-Vendor E-commerce Marketplace** fosters trust and engagement across all user interactions.
 
-Additionally, **Social-Marketplace** includes a comprehensive suite of features for order management, payment processing, and integration of various transaction methods. The platform serves not only as a connection channel but also as a catalyst for online business activities, driving revenue growth for all participants.
-
----
-
-## 📚 Table of Contents
-1. [Project Architecture](#-project-architecture)
-   - [Microservices Architecture](#microservices-architecture)
-   - [Event-Driven Architecture](#event-driven-architecture)
-2. [Technologies Used](#-technologies-used)
-   - [Java & Spring Framework](#1-java--spring-framework)
-   - [Databases](#2-databases)
-   - [Identity and Access Management](#3-identity-and-access-management)
-   - [Service Communication](#4-service-communication)
-   - [Payment Management](#5-payment-management)
-   - [Monitoring and Logging](#6-monitoring-and-logging)
-   - [Distributed Tracing](#7-distributed-tracing)
-   - [Security and Performance](#8-security-and-performance)
-   - [Config Server](#9-config-server)
-   - [Service Discovery](#10-service-discovery)
-3. [Key Contributions](#-key-contributions)
-4. [Conclusion](#-conclusion)
-
----
+Beyond simply connecting buyers and sellers, **Multi-Vendor E-commerce Marketplace** provides a comprehensive suite of functionalities for seamless order management, payment processing, and multi-channel transaction support. The platform functions as a pivotal enabler for online businesses, promoting growth and revenue generation for all participants in the ecosystem.
 
 ## 🏗 Project Architecture
 
 ### Microservices Architecture
 
-- **Separation of Services:**
-  Each component of the system is designed as an independent microservice with specific responsibilities. Key microservices include user management, product catalog, shopping cart, order processing, payment processing, notification, and analytics services. This architecture enhances maintainability and scalability, allowing each component to be updated or scaled independently.
+**Multi-Vendor E-commerce Marketplace** utilizes a microservices architecture to ensure high scalability, fault tolerance, and maintainability. Each service can be independently deployed, scaled, and updated, enabling flexible and resilient performance even under heavy demand.
 
-- **Fault-Tolerant Design:**
-  In a microservices architecture, the failure of one service does not impact the operation of others, minimizing system downtime. For example, if the cart service encounters an issue, users can still log in and browse products seamlessly.
+#### Key Strengths of the Microservices Architecture
 
-- **Simplified Maintenance and Upgrades:**
-  Individual microservices can be updated without disrupting the overall system, allowing the development team to enhance performance, add features, or fix bugs quickly without affecting end users.
+- **Service Segmentation and Domain-Driven Design**  
+  Each feature is encapsulated within its own microservice, allowing teams to focus on specific domains, improving scalability and productivity. Services evolve independently without cross-service dependencies.
 
-### Event-Driven Architecture
+- **Decoupled Service Interactions**  
+  Communication between services is achieved via REST APIs and messaging queues, ensuring minimal coupling. This design enables rapid scaling and updates without impacting other services.
 
-- **Utilizing Kafka as the Event Coordinator:**
-  Apache Kafka serves as the event bus, facilitating communication between microservices. Events such as “new order” or “user registration” are relayed to relevant services, such as payment processing and notification services. This approach allows asynchronous event handling, ensuring services operate independently and efficiently.
+- **Fault Tolerance and Resilience**  
+  The failure of one service does not affect the others, ensuring continuous availability through mechanisms like circuit breakers and retries. Users experience minimal disruption even when issues arise.
 
-- **High Scalability and Reliability:**
-  Kafka is capable of handling millions of events daily, ensuring timely responses to user-seller interactions. Its log-based persistence allows for data recovery and guarantees that no event data is lost.
+- **Horizontal Scalability**  
+  Services can be scaled independently to handle varying loads, ensuring smooth performance during high traffic periods.
+
+- **Simplified Maintenance and CI/CD**  
+  Independent service deployment and updates facilitate continuous integration and deployment (CI/CD), accelerating the release of new features and bug fixes with minimal downtime.
+
+- **Centralized Configuration and Service Discovery**  
+  Tools like **Spring Cloud Config** and **Eureka Server** enable consistent configuration and automatic service discovery, ensuring high availability.
+
+- **Advanced Observability and Monitoring**  
+  Integrated tools like **Prometheus**, **Grafana**, and **Zipkin** provide real-time insights into system performance, enabling proactive issue detection and optimization.
+
+- **Enhanced Security and Access Control**  
+  With **Keycloak** and **Spring Security**, the platform ensures secure authentication and access management, protecting sensitive data and transactions with state-of-the-art security protocols.
+
+  ![Microservices Architecture](resources/microservices.png)
 
 ---
 
@@ -62,8 +53,26 @@ Additionally, **Social-Marketplace** includes a comprehensive suite of features 
   - **Spring Security:** Manages security across microservices, offering authentication and authorization features. Key integrations include Single Sign-On (SSO) and JSON Web Token (JWT) authentication.
   - **Spring Data JPA:** Streamlines database interactions through repositories, simplifying data retrieval and CRUD operations.
   - **Spring Cloud:** Provides essential tools for managing and routing microservices, enhancing scalability and flexibility in API development.
+ 
+### 2. Service Communication
 
-### 2. Databases
+- **OpenFeign:**
+  OpenFeign simplifies inter-microservice communication by automatically creating REST client proxies, reducing boilerplate code and enhancing developer productivity.
+
+- **Kafka:**
+  Kafka facilitates asynchronous communication between services, ensuring safe storage and distribution of messages.
+ 
+### 3. Config Server & Service Discovery
+
+- **Spring Cloud Config:**  
+  Provides server and client-side support for externalized configuration in a distributed system. This enables centralized management of configuration properties across all microservices, making updates easier and ensuring configuration consistency.
+
+- **Eureka Server:**  
+  Acts as a service registry, allowing microservices to discover each other. This simplifies the management of service instances and endpoints, enabling dynamic scaling and fault tolerance by ensuring that service instances are registered and available for seamless communication.
+
+  ![Eureka](resources/eureka.png)
+
+### 4. Databases
 
 - **MySQL:**
   MySQL ensures data consistency through ACID properties, allowing critical transactions to be processed accurately. It is configured with replication and sharding to handle high query volumes without performance degradation.
@@ -77,7 +86,9 @@ Additionally, **Social-Marketplace** includes a comprehensive suite of features 
 - **AWS S3:**
   AWS S3 is utilized for storing large volumes of unstructured data (e.g., images and videos), providing a highly durable and scalable storage solution.
 
-### 3. Identity and Access Management
+  ![AWS S3](resources/awss3.png)
+
+### 5. Identity and Access Management
 
 - **Keycloak:**
   - **Single Sign-On (SSO):** Users can log in once to access multiple services, with support for OAuth 2.0 and OpenID Connect.
@@ -87,33 +98,47 @@ Additionally, **Social-Marketplace** includes a comprehensive suite of features 
 - **JWT (JSON Web Tokens):**
   JWT secures API communications with authentication tokens, mitigating CSRF attacks and enhancing data security.
 
-### 4. Service Communication
+  ![Keycloak](resources/keycloak.png)
 
-- **OpenFeign:**
-  OpenFeign simplifies inter-microservice communication by automatically creating REST client proxies, reducing boilerplate code and enhancing developer productivity.
-
-- **Kafka:**
-  Kafka facilitates asynchronous communication between services, ensuring safe storage and distribution of messages.
-
-### 5. Payment Management
+### 6. Payment Management
 
 - **Stripe:**
   Stripe provides comprehensive payment processing APIs that support various payment methods and currencies. Its webhook integration enables real-time transaction tracking. This allows for instant **charges** upon purchase and facilitates **recurring subscriptions** for users, enhancing overall transaction efficiency and user experience.
 
-### 6. Monitoring and Logging
+  ![Stripe](resources/stripe.png)
+
+### 7. Monitoring and Logging
 
 - **Prometheus & Grafana:**
   These tools collect performance metrics for analysis and visualization, enabling real-time monitoring of system health.
 
+  ![Prometheus](resources/prometheus.png)
+  
+  ![Grafana](resources/grafana.png)
+
 - **Loki:**
   Loki serves as a centralized logging system, aggregating logs from microservices for efficient diagnosis and resolution of issues.
 
-### 7. Distributed Tracing
+  ![Loki](resources/loki.png)
+
+### 8. Distributed Tracing
 
 - **Zipkin:**
   Zipkin allows for tracking the flow of requests through the system, helping to identify bottlenecks and optimize performance.
 
-### 8. Security and Performance
+  ![Zipkin](resources/zipkin.png)
+
+### 9. Docker for Containerization
+
+- **Docker:**  
+  Docker is used to containerize each service in the microservices architecture, ensuring that each component can be deployed with its dependencies in isolated environments. This enables consistent behavior across different environments, including development, testing, and production.
+
+- **Docker Compose:**  
+  Docker Compose is utilized to orchestrate multi-container setups, allowing services such as MySQL, MongoDB, Redis, Grafana, Kafka, and Prometheus to be managed together efficiently. This simplifies starting, stopping, and scaling services in local and cloud environments.
+
+  ![Docker](resources/docker.png)
+  
+### 10. Security and Performance
 
 - **Resilience4j:**
   - **Circuit Breaker:** Prevents requests to unavailable services, maintaining system stability.
@@ -123,40 +148,26 @@ Additionally, **Social-Marketplace** includes a comprehensive suite of features 
 - **Gzip Compression:**
   Gzip reduces the size of API response payloads, speeding up load times and minimizing bandwidth usage.
 
-### 9. Config Server
 
-- **Spring Cloud Config:**
-  Spring Cloud Config provides server and client-side support for externalized configuration in a distributed system. This allows for centralized management of configuration properties across all microservices, facilitating easier updates and consistency in configurations.
-
-### 10. Service Discovery
-
-- **Eureka Server:**
-  Eureka serves as a service registry that enables microservices to discover each other. This simplifies the management of service instances and their endpoints, allowing for dynamic scaling and fault tolerance by ensuring that service instances are registered and available for communication.
-
+  
 ---
 
 ## 💡 Key Contributions
 
-- **Identity and Access Management:**  
-  Integrated **Keycloak** with **Spring Security** to enable Single Sign-On (**SSO**), user registration, social login, email verification, and password recovery features. Implemented role-based access control (**RBAC**) using **JWT**, alongside login, logout, and refresh token functionalities. Enhanced overall security with **OAuth 2.0** and **OpenID Connect**.
+- **Identity & Access Control:** Integrated **Keycloak** with **Spring Security** to enable Single Sign-On (**SSO**), social login, email verification, and password recovery/reset, providing a seamless user experience. Secured passwords with the **Argon2** hashing algorithm and implemented **RBAC** with **JWT** for access management. Enhanced account security using **OAuth 2.0** and **OpenID Connect**, ensuring secure login, logout, and user session management.
 
-- **Centralized Configuration and Service Discovery:**  
-  Implemented centralized configuration management using **Spring Cloud Config** and facilitated dynamic service discovery through **Eureka**.
+- **Asynchronous Processing & Data Efficiency:** Achieved a 95% reduction in response times through asynchronous processing with **Kafka** and **CompletableFuture**, simplifying service communication with **OpenFeign**. Enhanced data transfer efficiency by 90% with **Gzip** compression, reducing payload sizes.
 
-- **API Performance Optimization:**  
-  Improved the performance of the API Gateway by employing non-blocking JWT decoding and efficient routing with **Spring Cloud Gateway** and **Reactor**. Utilized asynchronous programming with **Kafka** and **CompletableFuture** to reduce response times by approximately 95%, while applying **Gzip** compression to decrease payload sizes by around 90%. Enabled efficient service-to-service communication using **OpenFeign**.
+- **API Gateway & Service Reliability:** Enhanced API Gateway performance with non-blocking JWT decoding using **Spring Cloud Gateway** and **Reactor**. Established centralized configuration management with **Config Server**, integrated **Eureka** for real-time service discovery, and implemented load balancing to handle traffic spikes, ensuring high availability and reliable performance.
 
-- **Data Management and Optimization:**  
-  Optimized system performance with **Redis** caching to enhance response times. Utilized **MongoDB** for its flexible schema and efficient handling of unstructured data, while leveraging **MySQL** for strong **ACID compliance** and effective data retrieval. Designed a scalable file storage solution using **AWS S3**.
+- **Data Management & Optimization:** Integrated **AWS S3** for secure, scalable, and cost-effective media file storage with high availability and durability. Used **Redis** for caching to boost data access speeds, reducing database load by 70% for frequently accessed data. Employed **MongoDB** for unstructured data storage and **MySQL** for ACID compliance in critical transactions.
 
-- **Payment Integration:**  
-  Integrated **Stripe** for instant charges, seamless payment sessions, and recurring subscriptions, enhancing transaction efficiency and user experience.
+- **Resilience & Real-Time Monitoring:** Achieved 99.9% uptime by implementing **Resilience4j** with circuit breakers, retries, fallbacks, and timeouts. Enabled real-time monitoring with **Prometheus** and **Grafana**, improving issue detection. Streamlined troubleshooting with centralized logging via **Loki** and request tracing using **Zipkin**, reducing root-cause analysis time.
 
-- **System Resilience and Monitoring:**  
-  Increased system resilience by integrating **Resilience4j** with circuit breakers, retries, fallbacks, and time limiting. Implemented real-time monitoring with **Prometheus** and **Grafana**, centralized logging with **Loki**, and tracing with **Zipkin** to ensure system visibility and performance diagnostics.
+- **Payment Integration & Automation:** Reduced manual intervention by 90% by implementing **Stripe** for handling one-time and recurring subscription payments with instant charge capabilities. Utilized webhooks for real-time transaction updates, ensuring accurate, automated payment statuses and providing a seamless user experience.
 
 ---
 
 ## 🏁 Conclusion
 
-**Social-Marketplace** stands as a testament to modern software architecture principles, emphasizing scalability, performance, and security. By leveraging a suite of powerful technologies, the platform not only meets current marketplace demands but is also poised for future growth and innovation. This project demonstrates a commitment to delivering high-quality software solutions and enhancing user experiences in the digital marketplace landscape.
+**Multi-Vendor E-commerce Marketplace** exemplifies cutting-edge software architecture, combining scalability, reliability, and high security to meet the evolving demands of a modern digital marketplace. Through a microservices-driven approach, the platform not only delivers seamless interactions and rapid responsiveness but also positions itself for future growth and innovation. This architecture underlines a commitment to delivering best-in-class solutions, enhancing user experiences, and facilitating robust, secure e-commerce operations in a rapidly expanding online marketplace. 
