@@ -32,7 +32,6 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
 
       ReactiveJwtDecoder jwtDecoder;
 
-      @NonFinal
       String[] publicEndpoints = {
               "/actuator/**",
               "/user/auth/register",
@@ -44,12 +43,6 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
       @Value("${app.api-prefix}")
       @NonFinal
       String apiPrefix;
-
-      private boolean isPublicEndpoint(ServerHttpRequest request) {
-            return Arrays.stream(publicEndpoints).anyMatch(
-                    s -> request.getURI().getPath().startsWith(apiPrefix + s)
-            );
-      }
 
       @Override
       public int getOrder() {
@@ -86,6 +79,12 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
                                 return serviceUnavailable(response);
                           }
                     });
+      }
+
+      private boolean isPublicEndpoint(ServerHttpRequest request) {
+            return Arrays.stream(publicEndpoints).anyMatch(
+                    s -> request.getURI().getPath().startsWith(apiPrefix + s)
+            );
       }
 
       private Mono<Void> unauthenticated(ServerHttpResponse response) {
