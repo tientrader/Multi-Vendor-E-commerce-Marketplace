@@ -160,7 +160,7 @@ Beyond simply connecting buyers and sellers, **Multi-Vendor E-commerce Marketpla
 
 - **Data Management & Optimization:** Integrated **AWS S3** for secure, scalable, and cost-effective media file storage with high availability and durability. Used **Redis** for caching to boost data access speeds, reducing database load by 70% for frequently accessed data. Employed **MongoDB** for unstructured data storage and **MySQL** for ACID compliance in critical transactions.
 
-- **Resilience & Real-Time Monitoring:** Achieved 99.9% uptime by implementing **Resilience4j** with circuit breakers, retries, fallbacks, and timeouts. Enabled real-time monitoring with **Prometheus** and **Grafana**, improving issue detection. Streamlined troubleshooting with centralized logging via **Loki** and request tracing using **Zipkin**, reducing root-cause analysis time.
+- **Resilience & Real-Time Monitoring:** Achieved 99.9% uptime by implementing **Resilience4j** with circuit breakers, retries, fallbacks, and timeouts. Enabled **real-time monitoring** with **Prometheus** and **Grafana**, improving issue detection. Streamlined troubleshooting with centralized logging via **Loki** and request tracing using **Zipkin**, reducing root-cause analysis time.
 
 - **Payment Integration & Automation:** Reduced manual intervention by 90% by implementing **Stripe** for handling one-time and recurring subscription payments with instant charge capabilities. Utilized webhooks for real-time transaction updates, ensuring accurate, automated payment statuses and providing a seamless user experience.
 
