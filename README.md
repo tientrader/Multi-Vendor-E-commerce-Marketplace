@@ -75,13 +75,13 @@ Beyond simply connecting buyers and sellers, **Multi-Vendor E-commerce Marketpla
 ### 4. Databases
 
 - **MySQL:**
-  MySQL ensures data consistency through ACID properties, allowing critical transactions to be processed accurately. It is configured with replication and sharding to handle high query volumes without performance degradation.
+  MySQL ensures data consistency through ACID properties, allowing critical transactions to be processed accurately.
 
 - **MongoDB:**
   MongoDB is employed for unstructured data storage, such as product information and user reviews, providing a flexible and scalable NoSQL solution.
 
 - **Redis:**
-  Redis acts as a caching solution to alleviate load on MySQL and MongoDB, accelerating data access and reducing the number of database queries. It supports publisher-subscriber patterns for real-time inter-service communication.
+  Redis acts as a caching solution to alleviate load on MySQL and MongoDB, accelerating data access and reducing the number of database queries.
 
 - **AWS S3:**
   AWS S3 is utilized for storing large volumes of unstructured data (e.g., images and videos), providing a highly durable and scalable storage solution.
@@ -93,13 +93,11 @@ Beyond simply connecting buyers and sellers, **Multi-Vendor E-commerce Marketpla
 - **Keycloak:**
   - **Single Sign-On (SSO):** Users can log in once to access multiple services, with support for OAuth 2.0 and OpenID Connect, providing seamless authentication across the platform.
   - **Social Login:** Allows users to log in via their social accounts (e.g., Google, Facebook), simplifying the authentication process and improving user experience.
-  - **User Management:** Streamlines user registration, email verification, password recovery, and overall account management, ensuring a smooth user experience.
-  - **Role-Based Access Control (RBAC):** Ensures that only authorized users can access specific features and resources, enhancing security and protecting sensitive operations.
+  - **User Management:** Streamlines the processes of user registration, login, logout, email verification, password recovery, and overall account management, ensuring a seamless user experience.
   - **Email Verification:** Verifies users' email addresses during registration to ensure account authenticity and prevent fraudulent sign-ups.
-  - **Logout:** Provides secure logout functionality by invalidating sessions and tokens, protecting against unauthorized access.
-
-- **JWT (JSON Web Tokens):**
-  JWT secures API communications with authentication tokens, mitigating CSRF attacks and enhancing data security.
+  - **Argon2 Password Hashing:** Utilizes the Argon2 hashing algorithm for password storage, providing robust security against brute-force attacks and improving the overall resilience of user account security.
+  - **Role-Based Access Control (RBAC):** Ensures that only authorized users can access specific features and resources, enhancing security and protecting sensitive operations.
+  - **JSON Web Tokens (JWT):** JWT secures API communications with authentication tokens, mitigating CSRF attacks and enhancing data security.
 
   ![Keycloak](resources/keycloak.png)
 
@@ -141,17 +139,12 @@ Beyond simply connecting buyers and sellers, **Multi-Vendor E-commerce Marketpla
 
   ![Docker](resources/docker.png)
   
-### 10. Security and Performance
+### 10. Resilience
 
 - **Resilience4j:**
   - **Circuit Breaker:** Prevents requests to unavailable services, maintaining system stability.
   - **Retry Mechanism:** Automatically retries failed requests, enhancing reliability.
-  - **Rate Limiter:** Controls the rate of requests to prevent system overload and ensure fair resource allocation.
-
-- **Gzip Compression:**
-  Gzip reduces the size of API response payloads, speeding up load times and minimizing bandwidth usage.
-
-
+  - **Time Limiter:** Sets a maximum allowable time for requests, ensuring quick failure responses if a service is slow or unresponsive, thereby enhancing overall system responsiveness.
   
 ---
 
@@ -165,7 +158,7 @@ Beyond simply connecting buyers and sellers, **Multi-Vendor E-commerce Marketpla
 
 - **Data Management & Optimization:** Integrated **AWS S3** for secure, scalable, and cost-effective media file storage with high availability and durability. Used **Redis** for caching to boost data access speeds, reducing database load by 70% for frequently accessed data. Employed **MongoDB** for unstructured data storage and **MySQL** for ACID compliance in critical transactions.
 
-- **Resilience & Real-Time Monitoring:** Achieved 99.9% uptime by implementing **Resilience4j** with circuit breakers, retries, fallbacks, and timeouts. Enabled real-time monitoring with **Prometheus** and **Grafana**, improving issue detection. Streamlined troubleshooting with centralized logging via **Loki** and request tracing using **Zipkin**, reducing root-cause analysis time.
+- **Resilience & Real-Time Monitoring:** Achieved 99.9% uptime by implementing **Resilience4j** with circuit breakers, retries, fallbacks, and timeouts. Enabled **real-time monitoring** with **Prometheus** and **Grafana**, improving issue detection. Streamlined troubleshooting with centralized logging via **Loki** and request tracing using **Zipkin**, reducing root-cause analysis time.
 
 - **Payment Integration & Automation:** Reduced manual intervention by 90% by implementing **Stripe** for handling one-time and recurring subscription payments with instant charge capabilities. Utilized webhooks for real-time transaction updates, ensuring accurate, automated payment statuses and providing a seamless user experience.
 
