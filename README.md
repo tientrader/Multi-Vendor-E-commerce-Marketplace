@@ -100,6 +100,7 @@ Beyond simply connecting buyers and sellers, **Multi-Vendor E-commerce Marketpla
   - **JSON Web Tokens (JWT):** JWT secures API communications with authentication tokens, mitigating CSRF attacks and enhancing data security.
 
   ![Keycloak](resources/keycloak.png)
+  ![Keycloak](resources/login.png)
 
 ### 6. Payment Management
 
