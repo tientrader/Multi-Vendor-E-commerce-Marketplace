@@ -75,7 +75,7 @@ Beyond simply connecting buyers and sellers, **Multi-Vendor E-commerce Marketpla
 ### 4. Databases
 
 - **MySQL:**
-  MySQL ensures data consistency through ACID properties, allowing critical transactions to be processed accurately. It is configured with replication and sharding to handle high query volumes without performance degradation.
+  MySQL ensures data consistency through ACID properties, allowing critical transactions to be processed accurately.
 
 - **MongoDB:**
   MongoDB is employed for unstructured data storage, such as product information and user reviews, providing a flexible and scalable NoSQL solution.
@@ -93,13 +93,11 @@ Beyond simply connecting buyers and sellers, **Multi-Vendor E-commerce Marketpla
 - **Keycloak:**
   - **Single Sign-On (SSO):** Users can log in once to access multiple services, with support for OAuth 2.0 and OpenID Connect, providing seamless authentication across the platform.
   - **Social Login:** Allows users to log in via their social accounts (e.g., Google, Facebook), simplifying the authentication process and improving user experience.
-  - **User Management:** Streamlines user registration, email verification, password recovery, and overall account management, ensuring a smooth user experience.
-  - **Role-Based Access Control (RBAC):** Ensures that only authorized users can access specific features and resources, enhancing security and protecting sensitive operations.
+  - **User Management:** Streamlines the processes of user registration, login, logout, email verification, password recovery, and overall account management, ensuring a seamless user experience.
   - **Email Verification:** Verifies users' email addresses during registration to ensure account authenticity and prevent fraudulent sign-ups.
-  - **Logout:** Provides secure logout functionality by invalidating sessions and tokens, protecting against unauthorized access.
-
-- **JWT (JSON Web Tokens):**
-  JWT secures API communications with authentication tokens, mitigating CSRF attacks and enhancing data security.
+  - **Argon2 Password Hashing:** Utilizes the Argon2 hashing algorithm for password storage, providing robust security against brute-force attacks and improving the overall resilience of user account security.
+  - **Role-Based Access Control (RBAC):** Ensures that only authorized users can access specific features and resources, enhancing security and protecting sensitive operations.
+  - **JSON Web Tokens (JWT):** JWT secures API communications with authentication tokens, mitigating CSRF attacks and enhancing data security.
 
   ![Keycloak](resources/keycloak.png)
 
