@@ -141,17 +141,12 @@ Beyond simply connecting buyers and sellers, **Multi-Vendor E-commerce Marketpla
 
   ![Docker](resources/docker.png)
   
-### 10. Security and Performance
+### 10. Resilience
 
 - **Resilience4j:**
   - **Circuit Breaker:** Prevents requests to unavailable services, maintaining system stability.
   - **Retry Mechanism:** Automatically retries failed requests, enhancing reliability.
-  - **Rate Limiter:** Controls the rate of requests to prevent system overload and ensure fair resource allocation.
-
-- **Gzip Compression:**
-  Gzip reduces the size of API response payloads, speeding up load times and minimizing bandwidth usage.
-
-
+  - **Time Limiter:** Sets a maximum allowable time for requests, ensuring quick failure responses if a service is slow or unresponsive, thereby enhancing overall system responsiveness.
   
 ---
 
