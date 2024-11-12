@@ -81,7 +81,7 @@ Beyond simply connecting buyers and sellers, **Multi-Vendor E-commerce Marketpla
   MongoDB is employed for unstructured data storage, such as product information and user reviews, providing a flexible and scalable NoSQL solution.
 
 - **Redis:**
-  Redis acts as a caching solution to alleviate load on MySQL and MongoDB, accelerating data access and reducing the number of database queries. It supports publisher-subscriber patterns for real-time inter-service communication.
+  Redis acts as a caching solution to alleviate load on MySQL and MongoDB, accelerating data access and reducing the number of database queries.
 
 - **AWS S3:**
   AWS S3 is utilized for storing large volumes of unstructured data (e.g., images and videos), providing a highly durable and scalable storage solution.
