@@ -151,17 +151,17 @@ Beyond simply connecting buyers and sellers, **Multi-Vendor E-commerce Marketpla
 
 ## 💡 Key Contributions
 
-- **Identity & Access Control:** Integrated **Keycloak** with **Spring Security** to enable Single Sign-On (**SSO**), social login, email verification, and password recovery/reset, providing a seamless user experience. Secured passwords with the **Argon2** hashing algorithm and implemented **RBAC** with **JWT** for access management. Enhanced account security using **OAuth 2.0** and **OpenID Connect**, ensuring secure login, logout, and user session management.
+- **Identity & Access Control:** Integrated **Keycloak** with **Spring Security** to enable Single Sign-On (**SSO**), social login (**Google, Facebook, GitHub**), email verification, and password recovery/reset, providing a seamless user experience. Secured passwords with the **Argon2** hashing algorithm and implemented **RBAC** with **JWT** for access management. Enhanced account security using **OAuth 2.0** and **OpenID Connect**, ensuring secure login, logout, and user session management.
 
 - **Asynchronous Processing & Data Efficiency:** Achieved a 95% reduction in response times through asynchronous processing with **Kafka** and **CompletableFuture**, simplifying service communication with **OpenFeign**. Enhanced data transfer efficiency by 90% with **Gzip** compression, reducing payload sizes.
 
-- **API Gateway & Service Reliability:** Enhanced API Gateway performance with non-blocking JWT decoding using **Spring Cloud Gateway** and **Reactor**. Established centralized configuration management with **Config Server**, integrated **Eureka** for real-time service discovery, and implemented load balancing to handle traffic spikes, ensuring high availability and reliable performance.
+- **API Gateway & Service Reliability:** Optimized **API Gateway** performance by implementing non-blocking JWT decoding and authentication filtering using **Reactive Programming** with **Spring Cloud Gateway**. Established centralized configuration management with **Config Server**, integrated **Eureka** for real-time service discovery, and used load balancing for traffic distribution, ensuring high availability and reliable performance.
 
 - **Data Management & Optimization:** Integrated **AWS S3** for secure, scalable, and cost-effective media file storage with high availability and durability. Used **Redis** for caching to boost data access speeds, reducing database load by 70% for frequently accessed data. Employed **MongoDB** for unstructured data storage and **MySQL** for ACID compliance in critical transactions.
 
-- **Resilience & Real-Time Monitoring:** Achieved 99.9% uptime by implementing **Resilience4j** with circuit breakers, retries, fallbacks, and timeouts. Enabled **real-time monitoring** with **Prometheus** and **Grafana**, improving issue detection. Streamlined troubleshooting with centralized logging via **Loki** and request tracing using **Zipkin**, reducing root-cause analysis time.
+- **Resilience & Real-Time Monitoring:** Achieved 99.9% uptime by implementing **Resilience4j** with circuit breakers, retries, fallbacks, and timeouts. Enabled real-time monitoring with **Prometheus** and **Grafana**, improving issue detection. Streamlined troubleshooting with centralized logging via **Loki** and request tracing using **Zipkin**, reducing root-cause analysis time.
 
-- **Payment Integration & Automation:** Reduced manual intervention by 90% by implementing **Stripe** for handling one-time and recurring subscription payments with instant charge capabilities. Utilized webhooks for real-time transaction updates, ensuring accurate, automated payment statuses and providing a seamless user experience.
+- **Payment Integration & Automation:** Reduced manual intervention by 90% by implementing **Stripe** to handle one-time and recurring subscription payments, with instant charge capabilities. Utilized webhooks for real-time transaction updates, ensuring accurate, automated payment statuses and providing a seamless user experience.
 
 ---
 
