@@ -28,6 +28,13 @@ public class UserController {
                     .build();
       }
 
+      @PostMapping("/auth/social-login")
+      public ApiResponse<TokenResponse> socialLogin(@RequestParam String code) {
+            return ApiResponse.<TokenResponse>builder()
+                    .result(userService.socialLogin(code))
+                    .build();
+      }
+
       @PostMapping("/auth/login")
       public ApiResponse<TokenResponse> login(@RequestBody @Valid UserLoginRequest request) {
             return ApiResponse.<TokenResponse>builder()

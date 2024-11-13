@@ -3,6 +3,7 @@ package com.tien.user.httpclient;
 import com.tien.user.dto.identity.*;
 import com.tien.user.dto.request.UserUpdateRequest;
 import feign.QueryMap;
+import org.keycloak.representations.UserInfo;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -47,5 +48,8 @@ public interface IdentityClient {
       @PostMapping(value = "/admin/realms/tienproapp/users/{id}/logout")
       void logoutUser(@RequestHeader("authorization") String token,
                       @PathVariable("id") String userId);
+
+      @GetMapping(value = "/realms/tienproapp/protocol/openid-connect/userinfo")
+      UserInfo getUserInfo(@RequestHeader("Authorization") String accessToken);
 
 }

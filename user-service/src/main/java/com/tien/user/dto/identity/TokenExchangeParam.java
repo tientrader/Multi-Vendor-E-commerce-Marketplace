@@ -15,6 +15,8 @@ public class TokenExchangeParam {
       String client_secret;
       String refresh_token;
       String scope;
+      String code;
+      String redirect_uri;
       String username;
       String password;
 

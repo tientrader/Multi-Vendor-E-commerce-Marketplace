@@ -22,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
+import org.keycloak.representations.UserInfo;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -56,6 +57,10 @@ public class UserServiceImpl implements UserService {
       @Value("${idp.client-secret}")
       @NonFinal
       String clientSecret;
+
+      @Value("${idp.redirect-uri}")
+      @NonFinal
+      String redirectUri;
 
       @Override
       @Transactional
@@ -107,6 +112,39 @@ public class UserServiceImpl implements UserService {
                     .build());
 
             return userMapper.toUserResponse(user);
+      }
+
+      @Override
+      @Transactional
+      public TokenResponse socialLogin(String code) {
+            TokenExchangeParam tokenExchangeParam = TokenExchangeParam.builder()
+                    .grant_type("authorization_code")
+                    .client_id(clientId)
+                    .client_secret(clientSecret)
+                    .code(code)
+                    .redirect_uri(redirectUri)
+                    .build();
+
+            TokenExchangeResponse tokenResponse;
+            try {
+                  tokenResponse = identityClient.exchangeToken(tokenExchangeParam);
+            } catch (FeignException e) {
+                  log.error("Error during token exchange with Keycloak: {}", e.getMessage());
+                  throw errorNormalizer.handleKeyCloakException(e);
+            }
+
+            UserInfo userInfo = identityClient.getUserInfo("Bearer " + tokenResponse.getAccessToken());
+
+            userRepository.findByEmail(userInfo.getEmail())
+                    .orElseGet(() -> userRepository.save(User.builder()
+                            .username(userInfo.getEmail())
+                            .firstName(userInfo.getGivenName())
+                            .lastName(userInfo.getFamilyName())
+                            .email(userInfo.getEmail())
+                            .userId(userInfo.getSub())
+                            .build()));
+
+            return userMapper.toUserLoginResponse(tokenResponse);
       }
 
       @Override

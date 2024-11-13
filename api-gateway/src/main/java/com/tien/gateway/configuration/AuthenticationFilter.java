@@ -35,6 +35,7 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
       String[] publicEndpoints = {
               "/actuator/**",
               "/user/auth/register",
+              "/user/auth/social-login",
               "/user/auth/login",
               "/user/auth/forgot-password",
               "/user/webhook/stripe"
