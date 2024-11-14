@@ -221,7 +221,7 @@ resilience4j:
       userService:
         timeout-duration: 6s
       productService:
-        timeout-duration: 7s
+        timeout-duration: 8s
       cartService:
         timeout-duration: 6s
       orderService:

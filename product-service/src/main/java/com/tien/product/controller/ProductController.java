@@ -76,6 +76,13 @@ public class ProductController {
                     .build();
       }
 
+      @GetMapping("/shop/{shopId}")
+      public ApiResponse<List<ProductResponse>> getProductsByShopId(@PathVariable String shopId) {
+            return ApiResponse.<List<ProductResponse>>builder()
+                    .result(productService.getProductsByShopId(shopId))
+                    .build();
+      }
+
       @GetMapping("/{productId}/stock/{variantId}")
       public ApiResponse<Integer> getProductStockById(@PathVariable String productId,
                                                       @PathVariable String variantId) {

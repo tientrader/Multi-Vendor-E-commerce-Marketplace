@@ -12,6 +12,8 @@ public interface ShopService {
 
       void deleteShop();
 
+      double calculateRevenueForShop(String shopId);
+
       ShopResponse getShopByOwnerUsername(String ownerUsername);
 
       String getOwnerUsernameByShopId(String shopId);

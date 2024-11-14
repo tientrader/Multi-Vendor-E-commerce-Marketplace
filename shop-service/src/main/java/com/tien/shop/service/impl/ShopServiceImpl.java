@@ -3,10 +3,13 @@ package com.tien.shop.service.impl;
 import com.tien.event.dto.NotificationEvent;
 import com.tien.shop.dto.request.ShopCreationRequest;
 import com.tien.shop.dto.request.ShopUpdateRequest;
+import com.tien.shop.dto.response.ProductResponse;
+import com.tien.shop.dto.response.ProductVariantResponse;
 import com.tien.shop.dto.response.ShopResponse;
 import com.tien.shop.entity.Shop;
 import com.tien.shop.exception.AppException;
 import com.tien.shop.exception.ErrorCode;
+import com.tien.shop.httpclient.ProductClient;
 import com.tien.shop.mapper.ShopMapper;
 import com.tien.shop.repository.ShopRepository;
 import com.tien.shop.service.ShopService;
@@ -20,6 +23,8 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -27,6 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ShopServiceImpl implements ShopService {
 
       ShopRepository shopRepository;
+      ProductClient productClient;
       KafkaTemplate<String, Object> kafkaTemplate;
       ShopMapper shopMapper;
 
@@ -67,6 +73,24 @@ public class ShopServiceImpl implements ShopService {
       @Transactional
       public void deleteShop() {
             shopRepository.delete(findShopByOwnerUsername(getCurrentUsername()));
+      }
+
+      @Override
+      public double calculateRevenueForShop(String shopId) {
+            List<ProductResponse> products = productClient.getProductsByShopId(shopId).getResult();
+            double totalRevenue = 0.0;
+
+            for (ProductResponse product : products) {
+                  double productRevenue = 0.0;
+                  for (ProductVariantResponse variant : product.getVariants()) {
+                        int soldQuantity = variant.getSoldQuantity();
+                        double price = variant.getPrice();
+                        productRevenue += price * soldQuantity;
+                  }
+                  totalRevenue += productRevenue;
+            }
+
+            return totalRevenue;
       }
 
       @Override

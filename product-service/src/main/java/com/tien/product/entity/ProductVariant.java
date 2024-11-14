@@ -16,6 +16,7 @@ public class ProductVariant {
       String variantId;
       double price;
       int stock;
+      int soldQuantity;
       Map<String, Object> attributes;
 
 }

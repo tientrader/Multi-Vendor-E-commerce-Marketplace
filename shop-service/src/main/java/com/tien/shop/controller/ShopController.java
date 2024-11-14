@@ -40,6 +40,13 @@ public class ShopController {
                     .build();
       }
 
+      @GetMapping("/{shopId}/revenue")
+      public ApiResponse<Double> getRevenueByShopId(@PathVariable("shopId") String shopId) {
+            return ApiResponse.<Double>builder()
+                    .result(shopService.calculateRevenueForShop(shopId))
+                    .build();
+      }
+
       @GetMapping("/owner/{username}")
       public ApiResponse<ShopResponse> getShopByOwnerUsername(@PathVariable("username") String username) {
             return ApiResponse.<ShopResponse>builder()

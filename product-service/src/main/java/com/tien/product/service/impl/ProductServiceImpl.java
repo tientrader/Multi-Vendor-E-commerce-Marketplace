@@ -183,6 +183,11 @@ public class ProductServiceImpl implements ProductService {
       }
 
       @Override
+      public List<ProductResponse> getProductsByShopId(String shopId) {
+            return productMapper.toProductResponses(productRepository.findByShopId(shopId));
+      }
+
+      @Override
       @PreAuthorize("hasRole('ADMIN')")
       public List<ProductResponse> getAllProducts() {
             return productMapper.toProductResponses(productRepository.findAll());

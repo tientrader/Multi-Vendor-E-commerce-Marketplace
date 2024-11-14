@@ -26,7 +26,6 @@ public class Product {
       String shopId;
       String name;
       String description;
-      int soldQuantity;
       List<ProductVariant> variants;
       String categoryId;
       List<String> imageUrls;
