@@ -36,7 +36,7 @@ Beyond simply connecting buyers and sellers, **Multi-Vendor E-commerce Marketpla
 - **Enhanced Security and Access Control**  
   With **Keycloak** and **Spring Security**, the platform ensures secure authentication and access management, protecting sensitive data and transactions with state-of-the-art security protocols.
 
-  ![Microservices Architecture](resources/microservices.png)
+  ![Microservices Architecture](resources/microservices.webp)
 
 ---
 
