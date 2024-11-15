@@ -64,7 +64,7 @@ services:
       - "6379:6379"
     environment:
       - REDIS_PASSWORD=
-    command: [ "redis-server", "--requirepass", "password" ]
+    command: [ "redis-server", "--requirepass", "redis-password" ]
     volumes:
       - redis-data:/data
     networks:
