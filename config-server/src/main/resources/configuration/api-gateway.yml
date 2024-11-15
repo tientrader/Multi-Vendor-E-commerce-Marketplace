@@ -233,7 +233,7 @@ resilience4j:
       notificationService:
         timeout-duration: 4s
       paymentService:
-        timeout-duration: 6s
+        timeout-duration: 8s
       fileService:
         timeout-duration: 10s
 

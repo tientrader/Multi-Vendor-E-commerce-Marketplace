@@ -19,20 +19,29 @@ public class User {
       @GeneratedValue(strategy = GenerationType.UUID)
       String profileId;
 
-      @Column(name = "email", unique = true, columnDefinition = "VARCHAR(255) COLLATE utf8mb4_unicode_ci")
+      @Column(name = "email", nullable = false, unique = true, columnDefinition = "VARCHAR(255) COLLATE utf8mb4_unicode_ci")
       String email;
 
       @Column(name = "phone_number", unique = true, columnDefinition = "VARCHAR(255) COLLATE utf8mb4_unicode_ci")
       String phoneNumber;
 
-      @Column(name = "username", unique = true, columnDefinition = "VARCHAR(255) COLLATE utf8mb4_unicode_ci")
+      @Column(name = "username", nullable = false, unique = true, columnDefinition = "VARCHAR(255) COLLATE utf8mb4_unicode_ci")
       String username;
 
+      @Column(nullable = false)
       String userId;
+
+      @Column(nullable = false)
       String firstName;
+
+      @Column(nullable = false)
       String lastName;
+
       LocalDate dob;
+
+      @Column(nullable = false)
       boolean vipStatus;
+
       LocalDate vipStartDate;
       LocalDate vipEndDate;
       String stripeSubscriptionId;

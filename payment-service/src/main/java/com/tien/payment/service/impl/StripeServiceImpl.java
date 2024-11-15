@@ -166,7 +166,6 @@ public class StripeServiceImpl implements StripeService {
                   stripeSubscriptionRepository.save(stripeSubscription);
 
                   return StripeSubscriptionResponse.builder()
-                          .id(subscription.getId())
                           .username(currentUsername)
                           .stripeCustomerId(customer.getId())
                           .build();

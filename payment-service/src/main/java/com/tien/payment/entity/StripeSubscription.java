@@ -1,9 +1,6 @@
 package com.tien.payment.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -20,11 +17,22 @@ public class StripeSubscription {
       @GeneratedValue(strategy = GenerationType.UUID)
       String id;
 
+      @Column(nullable = false)
       String stripeCustomerId;
+
+      @Column(nullable = false)
       String stripeSubscriptionId;
+
+      @Column(nullable = false)
       String stripePaymentMethodId;
+
+      @Column(nullable = false)
       String username;
+
+      @Column(nullable = false)
       String priceId;
+
+      @Column(nullable = false)
       long numberOfLicense;
 
 }

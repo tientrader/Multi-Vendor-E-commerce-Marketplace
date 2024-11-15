@@ -1,9 +1,6 @@
 package com.tien.payment.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -20,7 +17,10 @@ public class Session {
       @GeneratedValue(strategy = GenerationType.UUID)
       String sessionId;
 
+      @Column(nullable = false, length = 400)
       String sessionUrl;
+
+      @Column(nullable = false)
       String username;
 
 }
