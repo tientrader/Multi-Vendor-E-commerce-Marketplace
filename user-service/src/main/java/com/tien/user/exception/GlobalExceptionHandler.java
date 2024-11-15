@@ -9,6 +9,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
@@ -49,6 +50,12 @@ public class GlobalExceptionHandler {
       ResponseEntity<ApiResponse<Object>> handleMaxUploadSizeExceededException(MaxUploadSizeExceededException exception) {
             log.error("File upload exceeds maximum size limit: {}", exception.getMessage());
             return buildResponse(ErrorCode.FILE_SIZE_EXCEEDED, ErrorCode.FILE_SIZE_EXCEEDED.getMessage());
+      }
+
+      @ExceptionHandler(MissingServletRequestParameterException.class)
+      ResponseEntity<ApiResponse<Object>> handleMissingServletRequestParameterException(MissingServletRequestParameterException exception) {
+            log.error("Missing required request parameter: {}", exception.getMessage());
+            return buildResponse(ErrorCode.MISSING_REQUIRED_PARAMETER, ErrorCode.MISSING_REQUIRED_PARAMETER.getMessage());
       }
 
       @ExceptionHandler(DataIntegrityViolationException.class)
@@ -95,6 +102,7 @@ public class GlobalExceptionHandler {
 
             String message = errorCode.get().getMessage();
 
+            log.error("Validation failed with error: {} - {}", enumKey, message);
             return buildResponse(errorCode.get(), message);
       }
 

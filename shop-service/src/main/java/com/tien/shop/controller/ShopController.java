@@ -3,6 +3,7 @@ package com.tien.shop.controller;
 import com.tien.shop.dto.ApiResponse;
 import com.tien.shop.dto.request.ShopCreationRequest;
 import com.tien.shop.dto.request.ShopUpdateRequest;
+import com.tien.shop.dto.response.SalesReportResponse;
 import com.tien.shop.dto.response.ShopResponse;
 import com.tien.shop.service.ShopService;
 import jakarta.validation.Valid;
@@ -40,10 +41,20 @@ public class ShopController {
                     .build();
       }
 
-      @GetMapping("/{shopId}/revenue")
-      public ApiResponse<Double> getRevenueByShopId(@PathVariable("shopId") String shopId) {
-            return ApiResponse.<Double>builder()
-                    .result(shopService.calculateRevenueForShop(shopId))
+      @GetMapping("/{shopId}/sales-report")
+      public ApiResponse<SalesReportResponse> generateSalesReport(@PathVariable("shopId") String shopId,
+                                                                  @RequestParam("startDate") String startDate,
+                                                                  @RequestParam("endDate") String endDate) {
+            return ApiResponse.<SalesReportResponse>builder()
+                    .result(shopService.generateSalesReport(shopId, startDate, endDate))
+                    .build();
+      }
+
+      @GetMapping("/user-sales-report")
+      public ApiResponse<SalesReportResponse> getUserSalesReport(@RequestParam("startDate") String startDate,
+                                                                  @RequestParam("endDate") String endDate) {
+            return ApiResponse.<SalesReportResponse>builder()
+                    .result(shopService.getUserSalesReport(startDate, endDate))
                     .build();
       }
 

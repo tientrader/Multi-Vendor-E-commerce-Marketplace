@@ -3,9 +3,7 @@ package com.tien.shop.service.impl;
 import com.tien.event.dto.NotificationEvent;
 import com.tien.shop.dto.request.ShopCreationRequest;
 import com.tien.shop.dto.request.ShopUpdateRequest;
-import com.tien.shop.dto.response.ProductResponse;
-import com.tien.shop.dto.response.ProductVariantResponse;
-import com.tien.shop.dto.response.ShopResponse;
+import com.tien.shop.dto.response.*;
 import com.tien.shop.entity.Shop;
 import com.tien.shop.exception.AppException;
 import com.tien.shop.exception.ErrorCode;
@@ -18,12 +16,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -76,21 +76,18 @@ public class ShopServiceImpl implements ShopService {
       }
 
       @Override
-      public double calculateRevenueForShop(String shopId) {
+      @PreAuthorize("hasRole('ADMIN')")
+      public SalesReportResponse generateSalesReport(String shopId, String startDate, String endDate) {
             List<ProductResponse> products = productClient.getProductsByShopId(shopId).getResult();
-            double totalRevenue = 0.0;
+            return generateSalesData(products, startDate, endDate);
+      }
 
-            for (ProductResponse product : products) {
-                  double productRevenue = 0.0;
-                  for (ProductVariantResponse variant : product.getVariants()) {
-                        int soldQuantity = variant.getSoldQuantity();
-                        double price = variant.getPrice();
-                        productRevenue += price * soldQuantity;
-                  }
-                  totalRevenue += productRevenue;
-            }
-
-            return totalRevenue;
+      @Override
+      public SalesReportResponse getUserSalesReport(String startDate, String endDate) {
+            String username = getCurrentUsername();
+            Shop shop = findShopByOwnerUsername(username);
+            List<ProductResponse> products = productClient.getProductsByShopId(shop.getId()).getResult();
+            return generateSalesData(products, startDate, endDate);
       }
 
       @Override
@@ -122,6 +119,59 @@ public class ShopServiceImpl implements ShopService {
                           log.error("Shop not found for ID {}", shopId);
                           return new AppException(ErrorCode.SHOP_NOT_FOUND);
                     });
+      }
+
+      private SalesReportResponse generateSalesData(List<ProductResponse> products, String startDate, String endDate) {
+            double totalRevenue = 0.0;
+            int totalItemsSold = 0;
+            Map<String, Integer> productSalesCount = new HashMap<>();
+
+            String topSellingProduct = "";
+            int highestSoldQuantity = 0;
+            double highestRevenueProductRevenue = 0.0;
+            String highestRevenueProduct = "";
+
+            for (ProductResponse product : products) {
+                  double productRevenue = 0.0;
+                  int productTotalSold = 0;
+
+                  for (ProductVariantResponse variant : product.getVariants()) {
+                        int soldQuantity = variant.getSoldQuantity();
+                        double price = variant.getPrice();
+                        productRevenue += price * soldQuantity;
+                        productTotalSold += soldQuantity;
+                  }
+
+                  totalRevenue += productRevenue;
+                  totalItemsSold += productTotalSold;
+                  productSalesCount.put(product.getName(), productTotalSold);
+
+                  if (productTotalSold > highestSoldQuantity) {
+                        highestSoldQuantity = productTotalSold;
+                        topSellingProduct = product.getName();
+                  }
+
+                  if (productRevenue > highestRevenueProductRevenue) {
+                        highestRevenueProductRevenue = productRevenue;
+                        highestRevenueProduct = product.getName();
+                  }
+            }
+
+            List<Map.Entry<String, Integer>> sortedProductSales = productSalesCount.entrySet()
+                    .stream()
+                    .sorted((entry1, entry2) -> entry2.getValue().compareTo(entry1.getValue()))
+                    .collect(Collectors.toList());
+
+            return new SalesReportResponse(
+                    totalRevenue,
+                    totalItemsSold,
+                    sortedProductSales,
+                    topSellingProduct,
+                    highestRevenueProductRevenue,
+                    highestRevenueProduct,
+                    startDate,
+                    endDate
+            );
       }
 
 }

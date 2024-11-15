@@ -2,6 +2,7 @@ package com.tien.shop.service;
 
 import com.tien.shop.dto.request.ShopCreationRequest;
 import com.tien.shop.dto.request.ShopUpdateRequest;
+import com.tien.shop.dto.response.SalesReportResponse;
 import com.tien.shop.dto.response.ShopResponse;
 
 public interface ShopService {
@@ -12,7 +13,9 @@ public interface ShopService {
 
       void deleteShop();
 
-      double calculateRevenueForShop(String shopId);
+      SalesReportResponse generateSalesReport(String shopId, String startDate, String endDate);
+
+      SalesReportResponse getUserSalesReport(String startDate, String endDate);
 
       ShopResponse getShopByOwnerUsername(String ownerUsername);
 
