@@ -5,12 +5,15 @@ import feign.FeignException;
 import jakarta.validation.ConstraintViolation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -40,6 +43,32 @@ public class GlobalExceptionHandler {
       ResponseEntity<ApiResponse<Object>> handleFeignException(FeignException exception) {
             log.error("Feign exception occurred: {}", exception.getMessage());
             return buildResponse(ErrorCode.EXTERNAL_SERVICE_ERROR, ErrorCode.EXTERNAL_SERVICE_ERROR.getMessage());
+      }
+
+      @ExceptionHandler(MaxUploadSizeExceededException.class)
+      ResponseEntity<ApiResponse<Object>> handleMaxUploadSizeExceededException(MaxUploadSizeExceededException exception) {
+            log.error("File upload exceeds maximum size limit: {}", exception.getMessage());
+            return buildResponse(ErrorCode.FILE_SIZE_EXCEEDED, ErrorCode.FILE_SIZE_EXCEEDED.getMessage());
+      }
+
+      @ExceptionHandler(DataIntegrityViolationException.class)
+      ResponseEntity<ApiResponse<Object>> handleDataIntegrityViolationException(DataIntegrityViolationException exception) {
+            String message = exception.getMessage();
+
+            Map<String, ErrorCode> errorCodeMap = Map.of(
+                    "Duplicate entry", ErrorCode.DUPLICATE_ENTRY,
+                    "foreign key constraint fails", ErrorCode.FOREIGN_KEY_VIOLATION
+            );
+
+            for (Map.Entry<String, ErrorCode> entry : errorCodeMap.entrySet()) {
+                  if (message.contains(entry.getKey())) {
+                        log.error("{}: {}", entry.getValue().getMessage(), message);
+                        return buildResponse(entry.getValue(), entry.getValue().getMessage());
+                  }
+            }
+
+            log.error("Data integrity violation occurred: {}", message);
+            return buildResponse(ErrorCode.DATA_INTEGRITY_VIOLATION, ErrorCode.DATA_INTEGRITY_VIOLATION.getMessage());
       }
 
       @ExceptionHandler(MethodArgumentNotValidException.class)
