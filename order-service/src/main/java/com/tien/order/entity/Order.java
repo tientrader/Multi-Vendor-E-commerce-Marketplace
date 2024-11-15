@@ -24,6 +24,7 @@ public class Order {
       @Column(nullable = false)
       String username;
 
+      @Column(nullable = false)
       String email;
 
       @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
@@ -36,6 +37,7 @@ public class Order {
       @Column(nullable = false)
       String status;
 
+      @Column(nullable = false)
       String paymentMethod;
 
 }
