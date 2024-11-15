@@ -98,15 +98,16 @@ public class OrderServiceImpl implements OrderService {
       @Override
       @PreAuthorize("hasRole('ADMIN')")
       public List<OrderResponse> getAllOrders() {
-            return orderRepository.findAll().stream()
+            return orderRepository.findAll()
+                    .stream()
                     .map(orderMapper::toOrderResponse)
                     .collect(Collectors.toList());
       }
 
       @Override
       public List<OrderResponse> getMyOrders() {
-            String username = getCurrentUsername();
-            return findOrdersByUsername(username).stream()
+            return findOrdersByUsername(getCurrentUsername())
+                    .stream()
                     .map(orderMapper::toOrderResponse)
                     .collect(Collectors.toList());
       }
@@ -114,7 +115,8 @@ public class OrderServiceImpl implements OrderService {
       @Override
       @PreAuthorize("hasRole('ADMIN')")
       public List<OrderResponse> getOrdersByUsername(String username) {
-            return findOrdersByUsername(username).stream()
+            return findOrdersByUsername(username)
+                    .stream()
                     .map(orderMapper::toOrderResponse)
                     .collect(Collectors.toList());
       }
