@@ -103,7 +103,6 @@ public class ShopServiceImpl implements ShopService {
             double totalRevenue = 0.0;
             int totalItemsSold = 0;
             Map<String, Integer> productSalesCount = new HashMap<>();
-
             String topSellingProduct = "";
             int highestSoldQuantity = 0;
             double highestRevenueProductRevenue = 0.0;
