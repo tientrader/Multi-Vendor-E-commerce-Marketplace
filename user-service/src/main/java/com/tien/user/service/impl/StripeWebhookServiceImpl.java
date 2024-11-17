@@ -41,8 +41,6 @@ public class StripeWebhookServiceImpl implements StripeWebhookService {
                         String packageType = subscription.getMetadata().get("packageType");
 
                         vipUserService.updateVipEndDate(username, packageType, subscriptionId);
-
-                        log.info("Successfully processed subscription created event for username: {}", username);
                   }
             } catch (SignatureVerificationException e) {
                   log.error("Invalid signature: {}", e.getMessage());

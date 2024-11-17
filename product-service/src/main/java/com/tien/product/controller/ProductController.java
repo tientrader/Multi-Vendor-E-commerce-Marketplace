@@ -60,12 +60,9 @@ public class ProductController {
               @RequestParam(required = false) Double minPrice,
               @RequestParam(required = false) Double maxPrice,
               @RequestParam(defaultValue = "name") String sortBy) {
-
-            Page<ProductResponse> productsPage = productService.getProducts(
-                    shopId, categoryId, page, size, sortBy, sortDirection, minPrice, maxPrice, productSort);
-
             return ApiResponse.<Page<ProductResponse>>builder()
-                    .result(productsPage)
+                    .result(productService.getProducts(
+                            shopId, categoryId, page, size, sortBy, sortDirection, minPrice, maxPrice, productSort))
                     .build();
       }
 

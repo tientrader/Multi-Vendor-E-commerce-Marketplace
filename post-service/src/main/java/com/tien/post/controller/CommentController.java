@@ -21,7 +21,8 @@ public class CommentController {
       CommentService commentService;
 
       @PostMapping("/{postId}")
-      public ApiResponse<CommentResponse> createComment(@PathVariable String postId, @RequestBody CommentCreationRequest request) {
+      public ApiResponse<CommentResponse> createComment(@PathVariable String postId,
+                                                        @RequestBody CommentCreationRequest request) {
             request.setPostId(postId);
             return ApiResponse.<CommentResponse>builder()
                     .result(commentService.createComment(postId, request))
@@ -29,7 +30,8 @@ public class CommentController {
       }
 
       @PutMapping("/{commentId}")
-      public ApiResponse<Void> updateComment(@PathVariable String commentId, @RequestBody CommentUpdateRequest request) {
+      public ApiResponse<Void> updateComment(@PathVariable String commentId,
+                                             @RequestBody CommentUpdateRequest request) {
             commentService.updateComment(commentId, request);
             return ApiResponse.<Void>builder()
                     .message("Comment updated successfully")

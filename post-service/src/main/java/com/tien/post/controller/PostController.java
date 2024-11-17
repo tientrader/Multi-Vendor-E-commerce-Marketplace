@@ -24,17 +24,19 @@ public class PostController {
       PostService postService;
 
       @PostMapping("/create")
-      public ApiResponse<PostResponse> createPost(@RequestPart("request") @Valid PostCreationRequest request,
-                                                  @RequestPart(value = "postImages", required = false) List<MultipartFile> postImages) {
+      public ApiResponse<PostResponse> createPost(
+              @RequestPart("request") @Valid PostCreationRequest request,
+              @RequestPart(value = "postImages", required = false) List<MultipartFile> postImages) {
             return ApiResponse.<PostResponse>builder()
                     .result(postService.createPost(request, postImages))
                     .build();
       }
 
       @PutMapping("/{postId}")
-      public ApiResponse<PostResponse> updatePost(@PathVariable String postId,
-                                                  @RequestPart("request") @Valid PostUpdateRequest request,
-                                                  @RequestPart(value = "postImages", required = false) List<MultipartFile> postImages) {
+      public ApiResponse<PostResponse> updatePost(
+              @PathVariable String postId,
+              @RequestPart("request") @Valid PostUpdateRequest request,
+              @RequestPart(value = "postImages", required = false) List<MultipartFile> postImages) {
             return ApiResponse.<PostResponse>builder()
                     .result(postService.updatePost(postId, request, postImages))
                     .build();

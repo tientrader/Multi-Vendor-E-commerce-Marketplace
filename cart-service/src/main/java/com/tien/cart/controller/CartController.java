@@ -20,9 +20,8 @@ public class CartController {
 
       @PostMapping("/create")
       public ApiResponse<CartResponse> upsertProductInCart(@Valid @RequestBody CartCreationRequest cartRequest) {
-            CartResponse cartResponse = cartService.upsertProductInCart(cartRequest);
             return ApiResponse.<CartResponse>builder()
-                    .result(cartResponse)
+                    .result(cartService.upsertProductInCart(cartRequest))
                     .build();
       }
 
@@ -45,9 +44,8 @@ public class CartController {
 
       @GetMapping
       public ApiResponse<CartResponse> getMyCart() {
-            CartResponse cartResponse = cartService.getMyCart();
             return ApiResponse.<CartResponse>builder()
-                    .result(cartResponse)
+                    .result(cartService.getMyCart())
                     .build();
       }
 
