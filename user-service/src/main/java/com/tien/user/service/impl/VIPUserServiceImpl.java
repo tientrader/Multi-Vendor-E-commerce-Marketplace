@@ -118,8 +118,9 @@ public class VIPUserServiceImpl implements VIPUserService {
                         log.error("Failed to cancel subscription for user {}: {}", currentUsername, e.getMessage());
                         throw new AppException(ErrorCode.SUBSCRIPTION_CANCELLATION_FAILED);
                   }
-                  userRepository.save(user);
             }
+
+            userRepository.save(user);
       }
 
       @Override

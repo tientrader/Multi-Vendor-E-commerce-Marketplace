@@ -203,8 +203,8 @@ public class UserServiceImpl implements UserService {
       @Transactional
       public void forgotPassword(ForgotPasswordRequest request) {
             User user = findUserByEmail(request.getEmail());
-
             String userId = user.getUserId();
+
             CompletableFuture.runAsync(() -> {
                   try {
                         identityClient.sendResetPasswordEmail("Bearer " + getAccessToken(), userId);
@@ -236,6 +236,7 @@ public class UserServiceImpl implements UserService {
       @Transactional
       public UserResponse updateMyInfo(UserUpdateRequest updateRequest) {
             String userId = getCurrentUserId();
+            User user = findUserById(userId);
 
             try {
                   identityClient.updateUser("Bearer " + getAccessToken(), userId, updateRequest);
@@ -244,7 +245,6 @@ public class UserServiceImpl implements UserService {
                   throw errorNormalizer.handleKeyCloakException(e);
             }
 
-            User user = findUserById(userId);
             userMapper.updateUser(user, updateRequest);
             return userMapper.toUserResponse(userRepository.save(user));
       }
@@ -292,7 +292,8 @@ public class UserServiceImpl implements UserService {
       @Override
       @PreAuthorize("hasRole('ADMIN')")
       public List<UserResponse> getAllUsers() {
-            return userRepository.findAll().stream()
+            return userRepository.findAll()
+                    .stream()
                     .map(userMapper::toUserResponse)
                     .toList();
       }

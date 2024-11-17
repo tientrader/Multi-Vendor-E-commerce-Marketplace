@@ -41,8 +41,7 @@ public class ErrorNormalizer {
 
             try {
                   String content = exception.contentUTF8();
-                  Map<String, String> responseMap = objectMapper.readValue(content, new TypeReference<>() {
-                  });
+                  Map<String, String> responseMap = objectMapper.readValue(content, new TypeReference<>() {});
 
                   String errorMessage = responseMap.get("errorMessage");
                   String errorDescription = responseMap.get("error_description");
