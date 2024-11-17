@@ -63,8 +63,7 @@ public class ShopServiceImpl implements ShopService {
       @Override
       @Transactional
       public ShopResponse updateShop(ShopUpdateRequest request) {
-            String username = getCurrentUsername();
-            Shop shop = findShopByOwnerUsername(username);
+            Shop shop = findShopByOwnerUsername(getCurrentUsername());
             shopMapper.updateShop(shop, request);
             return shopMapper.toShopResponse(shopRepository.save(shop));
       }
@@ -98,27 +97,6 @@ public class ShopServiceImpl implements ShopService {
       @Override
       public String getOwnerUsernameByShopId(String shopId) {
             return findShopById(shopId).getOwnerUsername();
-      }
-
-      private String getCurrentUsername() {
-            Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            return jwt.getClaim("preferred_username");
-      }
-
-      private Shop findShopByOwnerUsername(String username) {
-            return shopRepository.findByOwnerUsername(username)
-                    .orElseThrow(() -> {
-                          log.error("Shop not found for user {}", username);
-                          return new AppException(ErrorCode.SHOP_NOT_FOUND);
-                    });
-      }
-
-      private Shop findShopById(String shopId) {
-            return shopRepository.findById(shopId)
-                    .orElseThrow(() -> {
-                          log.error("Shop not found for ID {}", shopId);
-                          return new AppException(ErrorCode.SHOP_NOT_FOUND);
-                    });
       }
 
       private SalesReportResponse generateSalesData(List<ProductResponse> products, String startDate, String endDate) {
@@ -172,6 +150,27 @@ public class ShopServiceImpl implements ShopService {
                     startDate,
                     endDate
             );
+      }
+
+      private String getCurrentUsername() {
+            Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            return jwt.getClaim("preferred_username");
+      }
+
+      private Shop findShopByOwnerUsername(String username) {
+            return shopRepository.findByOwnerUsername(username)
+                    .orElseThrow(() -> {
+                          log.error("Shop not found for user {}", username);
+                          return new AppException(ErrorCode.SHOP_NOT_FOUND);
+                    });
+      }
+
+      private Shop findShopById(String shopId) {
+            return shopRepository.findById(shopId)
+                    .orElseThrow(() -> {
+                          log.error("Shop not found for ID {}", shopId);
+                          return new AppException(ErrorCode.SHOP_NOT_FOUND);
+                    });
       }
 
 }
