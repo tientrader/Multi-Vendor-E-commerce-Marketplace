@@ -2,7 +2,7 @@ package com.tien.user.service.impl;
 
 import com.stripe.exception.SignatureVerificationException;
 import com.stripe.model.Event;
-import com.stripe.model.checkout.Session;
+import com.stripe.model.Subscription;
 import com.stripe.net.Webhook;
 import com.tien.user.exception.AppException;
 import com.tien.user.exception.ErrorCode;
@@ -33,23 +33,16 @@ public class StripeWebhookServiceImpl implements StripeWebhookService {
             try {
                   Event event = Webhook.constructEvent(payload, sigHeader, endpointSecret);
 
-                  switch (event.getType()) {
-                        case "checkout.session.completed" -> {
-                              Session session = (Session) event.getData().getObject();
-                              String username = session.getMetadata().get("username");
-                              String packageType = session.getMetadata().get("packageType");
-                              String subscriptionId = session.getSubscription();
+                  if ("customer.subscription.created".equals(event.getType())) {
+                        Subscription subscription = (Subscription) event.getData().getObject();
 
-                              vipUserService.updateVipEndDate(username, packageType, subscriptionId);
-                        }
-                        case "customer.subscription.created" -> {
-                              com.stripe.model.Subscription subscription = (com.stripe.model.Subscription) event.getData().getObject();
-                              String subscriptionId = subscription.getId();
-                              String username = subscription.getMetadata().get("username");
-                              String packageType = subscription.getMetadata().get("packageType");
+                        String subscriptionId = subscription.getId();
+                        String username = subscription.getMetadata().get("username");
+                        String packageType = subscription.getMetadata().get("packageType");
 
-                              vipUserService.updateVipEndDate(username, packageType, subscriptionId);
-                        }
+                        vipUserService.updateVipEndDate(username, packageType, subscriptionId);
+
+                        log.info("Successfully processed subscription created event for username: {}", username);
                   }
             } catch (SignatureVerificationException e) {
                   log.error("Invalid signature: {}", e.getMessage());

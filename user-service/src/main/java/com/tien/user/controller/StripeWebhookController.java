@@ -18,7 +18,8 @@ public class StripeWebhookController {
       StripeWebhookService stripeWebhookService;
 
       @PostMapping("/stripe")
-      public ApiResponse<String> handleStripeEvent(@RequestBody String payload, @RequestHeader("Stripe-Signature") String sigHeader) {
+      public ApiResponse<String> handleStripeEvent(@RequestBody String payload,
+                                                   @RequestHeader("Stripe-Signature") String sigHeader) {
             stripeWebhookService.handleStripeEvent(payload, sigHeader);
             return ApiResponse.<String>builder()
                     .result("Event processed")
