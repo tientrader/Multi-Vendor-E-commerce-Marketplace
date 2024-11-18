@@ -54,4 +54,9 @@ public class FallbackController {
             return Mono.just("File service is currently unavailable. Please try again later.");
       }
 
+      @GetMapping("/review")
+      public Mono<String> reviewFallback() {
+            return Mono.just("Review service is currently unavailable. Please try again later.");
+      }
+
 }

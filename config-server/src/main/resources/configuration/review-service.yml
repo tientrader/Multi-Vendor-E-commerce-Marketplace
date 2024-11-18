@@ -1,0 +1,56 @@
+server:
+  port: 8089
+  servlet:
+    context-path: /review
+
+spring:
+  servlet:
+    multipart:
+      max-file-size: 1MB
+      max-request-size: 5MB
+  data:
+    mongodb:
+      uri: mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@localhost:27017/review-service?authSource=admin
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+  api-docs:
+    path: /v3/api-docs
+
+logging:
+  level:
+    root: INFO
+    com.netflix.discovery: OFF
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, metrics, info, prometheus
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    distribution:
+      percentiles-histogram:
+        http:
+          server:
+            requests: true
+  observations:
+    key-values:
+      application: review-service
+  endpoint:
+    prometheus:
+      enabled: true
+    health:
+      show-details: always
+  health:
+    circuitbreakers:
+      enabled: true
+  tracing:
+    exporter:
+      zipkin:
+        url: http://localhost:9411/api/v2/spans
+    sampling:
+      probability: 1.0

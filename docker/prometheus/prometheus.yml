@@ -51,3 +51,13 @@ scrape_configs:
     metrics_path: '/payment/actuator/prometheus'
     static_configs:
       - targets: ['host.docker.internal:8087']
+
+  - job_name: 'file-service'
+    metrics_path: '/file/actuator/prometheus'
+    static_configs:
+      - targets: [ 'host.docker.internal:8088' ]
+
+  - job_name: 'review-service'
+    metrics_path: '/review/actuator/prometheus'
+    static_configs:
+      - targets: [ 'host.docker.internal:8089' ]

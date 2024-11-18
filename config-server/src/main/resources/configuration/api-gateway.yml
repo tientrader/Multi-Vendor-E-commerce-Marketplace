@@ -149,6 +149,20 @@ spring:
               args:
                 name: default
 
+        - id: review-service
+          uri: lb://review-service
+          predicates:
+            - Path=${app.api-prefix}/review/**
+          filters:
+            - StripPrefix=2
+            - name: CircuitBreaker
+              args:
+                name: reviewService
+                fallbackUri: forward:/fallback/review
+            - name: Retry
+              args:
+                name: default
+
         - id: actuator
           uri: http://localhost:8888
           predicates:
@@ -189,6 +203,8 @@ resilience4j:
         baseConfig: default
       fileService:
         baseConfig: default
+      reviewService:
+        baseConfig: default
   retry:
     configs:
       default:
@@ -213,6 +229,8 @@ resilience4j:
         baseConfig: default
       fileService:
         baseConfig: default
+      reviewService:
+        baseConfig: default
   timelimiter:
     configs:
       default:
@@ -236,6 +254,8 @@ resilience4j:
         timeout-duration: 8s
       fileService:
         timeout-duration: 10s
+      reviewService:
+        timeout-duration: 8s
 
 logging:
   level:
