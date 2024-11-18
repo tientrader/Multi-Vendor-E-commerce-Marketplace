@@ -59,13 +59,11 @@ public class PostServiceImpl implements PostService {
 
             List<String> imageUrls = handleImageUpload(postImages);
 
-            Post post = Post.builder()
-                    .content(request.getContent())
-                    .username(username)
-                    .createdDate(Instant.now())
-                    .modifiedDate(Instant.now())
-                    .imageUrls(imageUrls)
-                    .build();
+            Post post = postMapper.toPost(request);
+            post.setUsername(username);
+            post.setCreatedDate(Instant.now());
+            post.setModifiedDate(Instant.now());
+            post.setImageUrls(imageUrls);
 
             post = postRepository.save(post);
             return postMapper.toPostResponse(post);

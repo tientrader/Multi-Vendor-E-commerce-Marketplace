@@ -1,5 +1,6 @@
 package com.tien.post.mapper;
 
+import com.tien.post.dto.request.PostCreationRequest;
 import com.tien.post.entity.Post;
 import com.tien.post.dto.request.PostUpdateRequest;
 import com.tien.post.dto.response.PostResponse;
@@ -8,6 +9,8 @@ import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
 public interface PostMapper {
+
+      Post toPost(PostCreationRequest request);
 
       PostResponse toPostResponse(Post post);
 
