@@ -34,7 +34,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -98,8 +97,6 @@ public class UserServiceImpl implements UserService {
 
             User user = userMapper.toUser(request);
             user.setUserId(userId);
-            user.setCreatedAt(LocalDateTime.now());
-            user.setUpdatedAt(LocalDateTime.now());
             user = userRepository.save(user);
 
             CompletableFuture.runAsync(() -> {
@@ -227,7 +224,6 @@ public class UserServiceImpl implements UserService {
       @PreAuthorize("hasRole('ADMIN')")
       public UserResponse updateUser(String userId, UserUpdateRequest updateRequest) {
             User user = findUserById(userId);
-            user.setUpdatedAt(LocalDateTime.now());
 
             try {
                   identityClient.updateUser("Bearer " + getAccessToken(), userId, updateRequest);
@@ -245,7 +241,6 @@ public class UserServiceImpl implements UserService {
       public UserResponse updateMyInfo(UserUpdateRequest updateRequest) {
             String userId = getCurrentUserId();
             User user = findUserById(userId);
-            user.setUpdatedAt(LocalDateTime.now());
 
             try {
                   identityClient.updateUser("Bearer " + getAccessToken(), userId, updateRequest);
