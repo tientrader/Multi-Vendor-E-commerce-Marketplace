@@ -39,4 +39,6 @@ public interface UserService {
 
       UserResponse getUserByProfileId(String profileId);
 
+      UserResponse getUserByUsername(String username);
+
 }

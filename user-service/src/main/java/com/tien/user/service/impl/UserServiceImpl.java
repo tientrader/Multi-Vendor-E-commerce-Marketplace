@@ -34,6 +34,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -68,6 +69,10 @@ public class UserServiceImpl implements UserService {
             String token = getAccessToken();
             ResponseEntity<?> creationResponse;
 
+            if (userRepository.existsByPhoneNumber(request.getPhoneNumber())) {
+                  throw new AppException(ErrorCode.PHONE_NUMBER_EXISTED);
+            }
+
             try {
                   creationResponse = identityClient.createUser(
                           "Bearer " + token,
@@ -93,6 +98,8 @@ public class UserServiceImpl implements UserService {
 
             User user = userMapper.toUser(request);
             user.setUserId(userId);
+            user.setCreatedAt(LocalDateTime.now());
+            user.setUpdatedAt(LocalDateTime.now());
             user = userRepository.save(user);
 
             CompletableFuture.runAsync(() -> {
@@ -220,6 +227,7 @@ public class UserServiceImpl implements UserService {
       @PreAuthorize("hasRole('ADMIN')")
       public UserResponse updateUser(String userId, UserUpdateRequest updateRequest) {
             User user = findUserById(userId);
+            user.setUpdatedAt(LocalDateTime.now());
 
             try {
                   identityClient.updateUser("Bearer " + getAccessToken(), userId, updateRequest);
@@ -237,6 +245,7 @@ public class UserServiceImpl implements UserService {
       public UserResponse updateMyInfo(UserUpdateRequest updateRequest) {
             String userId = getCurrentUserId();
             User user = findUserById(userId);
+            user.setUpdatedAt(LocalDateTime.now());
 
             try {
                   identityClient.updateUser("Bearer " + getAccessToken(), userId, updateRequest);
@@ -314,6 +323,11 @@ public class UserServiceImpl implements UserService {
             return userMapper.toUserResponse(findUserByProfileId(profileId));
       }
 
+      @Override
+      public UserResponse getUserByUsername(String username) {
+            return userMapper.toUserResponse(findUserByUsername(username));
+      }
+
       private String getCurrentUserId() {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             if (authentication == null || !authentication.isAuthenticated()) {
@@ -362,6 +376,14 @@ public class UserServiceImpl implements UserService {
             return userRepository.findByEmail(email)
                     .orElseThrow(() -> {
                           log.error("User with email {} not found", email);
+                          return new AppException(ErrorCode.PROFILE_NOT_FOUND);
+                    });
+      }
+
+      private User findUserByUsername(String username) {
+            return userRepository.findByUsername(username)
+                    .orElseThrow(() -> {
+                          log.error("User with username {} not found", username);
                           return new AppException(ErrorCode.PROFILE_NOT_FOUND);
                     });
       }

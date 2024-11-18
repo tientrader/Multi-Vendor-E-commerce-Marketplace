@@ -2,9 +2,9 @@ package com.tien.user.dto.response;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
 @Builder
@@ -19,12 +19,11 @@ public class UserResponse {
       String username;
       String firstName;
       String lastName;
-
-      @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
       LocalDate dob;
-
       boolean vipStatus;
       LocalDate vipStartDate;
       LocalDate vipEndDate;
+      LocalDateTime createdAt;
+      LocalDateTime updatedAt;
 
 }

@@ -3,8 +3,11 @@ package com.tien.user.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -13,6 +16,11 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
+@EntityListeners(AuditingEntityListener.class)
+@Table(name = "user", indexes = {
+        @Index(name = "idx_email", columnList = "email"),
+        @Index(name = "idx_username", columnList = "username")
+})
 public class User {
 
       @Id
@@ -37,6 +45,7 @@ public class User {
       @Column(nullable = false)
       String lastName;
 
+      @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
       LocalDate dob;
 
       @Column(nullable = false)
@@ -45,5 +54,8 @@ public class User {
       LocalDate vipStartDate;
       LocalDate vipEndDate;
       String stripeSubscriptionId;
+
+      LocalDateTime createdAt;
+      LocalDateTime updatedAt;
 
 }
