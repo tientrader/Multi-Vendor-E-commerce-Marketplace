@@ -182,8 +182,6 @@ resilience4j:
         permittedNumberOfCallsInHalfOpenState: 3
         slidingWindowSize: 10
         slidingWindowType: COUNT_BASED
-        slow-call-rate-threshold: 50
-        slow-call-duration-threshold: 5s
     instances:
       userService:
         baseConfig: default
@@ -231,31 +229,6 @@ resilience4j:
         baseConfig: default
       reviewService:
         baseConfig: default
-  timelimiter:
-    configs:
-      default:
-        timeout-duration: 4s
-        cancel-running-future: false
-      userService:
-        timeout-duration: 6s
-      productService:
-        timeout-duration: 8s
-      cartService:
-        timeout-duration: 6s
-      orderService:
-        timeout-duration: 5s
-      shopService:
-        timeout-duration: 4s
-      postService:
-        timeout-duration: 7s
-      notificationService:
-        timeout-duration: 4s
-      paymentService:
-        timeout-duration: 8s
-      fileService:
-        timeout-duration: 10s
-      reviewService:
-        timeout-duration: 8s
 
 logging:
   level:
