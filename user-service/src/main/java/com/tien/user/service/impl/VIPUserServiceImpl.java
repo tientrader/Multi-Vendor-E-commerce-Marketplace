@@ -111,15 +111,19 @@ public class VIPUserServiceImpl implements VIPUserService {
             String currentUsername = getCurrentUsername();
             User user = findUserByUsername(currentUsername);
 
-            if (user.getStripeSubscriptionId() != null) {
-                  try {
-                        paymentClient.cancelSubscription(user.getStripeSubscriptionId());
-                  } catch (Exception e) {
-                        log.error("Failed to cancel subscription for user {}: {}", currentUsername, e.getMessage());
-                        throw new AppException(ErrorCode.SUBSCRIPTION_CANCELLATION_FAILED);
-                  }
+            if (user.getStripeSubscriptionId() == null) {
+                  log.warn("User {} does not have a subscription to cancel.", currentUsername);
+                  throw new AppException(ErrorCode.NO_ACTIVE_SUBSCRIPTION);
             }
 
+            try {
+                  paymentClient.cancelSubscription(user.getStripeSubscriptionId());
+            } catch (Exception e) {
+                  log.error("Failed to cancel subscription for user {}: {}", currentUsername, e.getMessage());
+                  throw new AppException(ErrorCode.SUBSCRIPTION_CANCELLATION_FAILED);
+            }
+
+            user.setStripeSubscriptionId(null);
             userRepository.save(user);
       }
 

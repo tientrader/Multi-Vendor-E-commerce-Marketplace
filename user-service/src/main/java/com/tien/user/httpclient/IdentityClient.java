@@ -23,7 +23,7 @@ public interface IdentityClient {
 
       @PutMapping(value = "/admin/realms/tienproapp/users/{id}",
               consumes = MediaType.APPLICATION_JSON_VALUE)
-      ResponseEntity<?> updateUser(@RequestHeader("authorization") String token,
+      void updateUser(@RequestHeader("authorization") String token,
                                    @PathVariable("id") String userId,
                                    @RequestBody UserUpdateRequest param);
 
