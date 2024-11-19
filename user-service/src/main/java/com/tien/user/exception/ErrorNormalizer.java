@@ -28,6 +28,7 @@ public class ErrorNormalizer {
             map.put("User name is missing", ErrorCode.USERNAME_IS_MISSING);
             map.put("Password policy not met", ErrorCode.INVALID_PASSWORD);
             map.put("Session doesn't have required client", ErrorCode.UNAUTHENTICATED);
+            map.put("Session not active", ErrorCode.SESSION_NOT_ACTIVE);
 
             return map;
       }

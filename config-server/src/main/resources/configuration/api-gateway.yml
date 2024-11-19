@@ -229,6 +229,31 @@ resilience4j:
         baseConfig: default
       reviewService:
         baseConfig: default
+  timelimiter:
+    configs:
+      default:
+        timeout-duration: 10s
+        cancel-running-future: true
+      userService:
+        timeout-duration: 10s
+      productService:
+        timeout-duration: 12s
+      cartService:
+        timeout-duration: 10s
+      orderService:
+        timeout-duration: 10s
+      shopService:
+        timeout-duration: 10s
+      postService:
+        timeout-duration: 12s
+      notificationService:
+        timeout-duration: 10s
+      paymentService:
+        timeout-duration: 10s
+      fileService:
+        timeout-duration: 12s
+      reviewService:
+        timeout-duration: 12s
 
 logging:
   level:
