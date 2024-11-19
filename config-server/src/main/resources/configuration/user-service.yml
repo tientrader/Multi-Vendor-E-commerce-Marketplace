@@ -71,7 +71,7 @@ resilience4j:
     configs:
       default:
         maxRetryAttempts: 3
-        waitDuration: 4s
+        waitDuration: 2s
     instances:
       createSubscription:
         baseConfig: default
