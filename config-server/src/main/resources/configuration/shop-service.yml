@@ -26,6 +26,31 @@ logging:
     root: INFO
     com.netflix.discovery: OFF
 
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        registerHealthIndicator: true
+        failureRateThreshold: 50
+        minimumNumberOfCalls: 5
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        waitDurationInOpenState: 5s
+        permittedNumberOfCallsInHalfOpenState: 3
+        slidingWindowSize: 10
+        slidingWindowType: COUNT_BASED
+    instances:
+      getProductsByShopId:
+        baseConfig: default
+
+  retry:
+    configs:
+      default:
+        maxRetryAttempts: 3
+        waitDuration: 2s
+    instances:
+      getProductsByShopId:
+        baseConfig: default
+
 management:
   endpoints:
     web:

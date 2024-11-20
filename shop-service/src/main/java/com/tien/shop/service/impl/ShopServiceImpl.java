@@ -100,6 +100,18 @@ public class ShopServiceImpl implements ShopService {
       }
 
       private SalesReportResponse generateSalesData(List<ProductResponse> products, String startDate, String endDate) {
+            if (products == null || products.isEmpty()) {
+                  return new SalesReportResponse(
+                          0.0,
+                          0,
+                          Collections.emptyList(),
+                          "No Product",
+                          0.0,
+                          "No Product",
+                          startDate, endDate
+                  );
+            }
+
             double totalRevenue = 0.0;
             int totalItemsSold = 0;
             Map<String, Integer> productSalesCount = new HashMap<>();
