@@ -13,31 +13,19 @@ import org.springframework.web.bind.annotation.*;
 @FeignClient(name = "payment-service", path = "/payment", configuration = {AuthenticationRequestInterceptor.class})
 public interface PaymentClient {
 
-      @CircuitBreaker(name = "createSubscription", fallbackMethod = "createSubscriptionFallback")
+      @CircuitBreaker(name = "createSubscription")
       @Retry(name = "createSubscription")
       @PostMapping("/stripe/customer/subscription")
       void createSubscription(@RequestBody StripeSubscriptionRequest request);
 
-      @CircuitBreaker(name = "cancelSubscription", fallbackMethod = "cancelSubscriptionFallback")
+      @CircuitBreaker(name = "cancelSubscription")
       @Retry(name = "cancelSubscription")
       @DeleteMapping("/stripe/subscription/{id}")
       void cancelSubscription(@PathVariable("id") String id);
 
-      @CircuitBreaker(name = "createSubscriptionSession", fallbackMethod = "createSubscriptionSessionFallback")
+      @CircuitBreaker(name = "createSubscriptionSession")
       @Retry(name = "createSubscriptionSession")
       @PostMapping("/stripe/session/subscription")
       ApiResponse<SessionResponse> createSubscriptionSession(@RequestBody SubscriptionSessionRequest request);
-
-      default void createSubscriptionFallback(StripeSubscriptionRequest request, Throwable throwable) {
-            throw new RuntimeException();
-      }
-
-      default void cancelSubscriptionFallback(String id, Throwable throwable) {
-            throw new RuntimeException();
-      }
-
-      default ApiResponse<SessionResponse> createSubscriptionSessionFallback(SubscriptionSessionRequest request, Throwable throwable) {
-            throw new RuntimeException();
-      }
 
 }
