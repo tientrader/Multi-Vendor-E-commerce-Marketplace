@@ -1,5 +1,6 @@
 package com.tien.product.service.impl;
 
+import com.tien.product.dto.ApiResponse;
 import com.tien.product.dto.response.CategoryResponse;
 import com.tien.product.dto.response.ShopResponse;
 import com.tien.product.entity.Category;
@@ -11,6 +12,7 @@ import com.tien.product.dto.request.CategoryCreationRequest;
 import com.tien.product.dto.request.CategoryUpdateRequest;
 import com.tien.product.exception.AppException;
 import com.tien.product.service.CategoryService;
+import feign.FeignException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -92,11 +94,18 @@ public class CategoryServiceImpl implements CategoryService {
       }
 
       private ShopResponse getShopByOwnerUsername(String username) {
-            return Optional.ofNullable(shopClient.getShopByOwnerUsername(username).getResult())
-                    .orElseThrow(() -> {
-                          log.error("Shop not found for user {}", username);
-                          return new AppException(ErrorCode.SHOP_NOT_FOUND);
-                    });
+            try {
+                  ApiResponse<ShopResponse> response = shopClient.getShopByOwnerUsername(username);
+
+                  return Optional.ofNullable(response.getResult())
+                          .orElseThrow(() -> {
+                                log.error("Shop not found for username: {}", username);
+                                return new AppException(ErrorCode.SHOP_NOT_FOUND);
+                          });
+            } catch (FeignException e) {
+                  log.error("Error calling shop service for username {}: {}", username, e.getMessage(), e);
+                  throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
+            }
       }
 
       private Category findCategoryById(String categoryId) {

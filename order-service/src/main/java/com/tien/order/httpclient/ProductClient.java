@@ -14,35 +14,23 @@ import org.springframework.web.bind.annotation.RequestParam;
 @FeignClient(name = "product-service", path = "/product", configuration = {AuthenticationRequestInterceptor.class})
 public interface ProductClient {
 
-      @CircuitBreaker(name = "getProductPriceById", fallbackMethod = "getProductPriceByIdFallback")
+      @CircuitBreaker(name = "getProductPriceById")
       @Retry(name = "getProductPriceById")
       @GetMapping(value = "/{productId}/price/{variantId}", produces = MediaType.APPLICATION_JSON_VALUE)
       ApiResponse<Double> getProductPriceById(@PathVariable("productId") String productId,
                                               @PathVariable("variantId") String variantId);
 
-      @CircuitBreaker(name = "getProductStockById", fallbackMethod = "getProductStockByIdFallback")
+      @CircuitBreaker(name = "getProductStockById")
       @Retry(name = "getProductStockById")
       @GetMapping(value = "/{productId}/stock/{variantId}", produces = MediaType.APPLICATION_JSON_VALUE)
       ApiResponse<Integer> getProductStockById(@PathVariable("productId") String productId,
                                                @PathVariable("variantId") String variantId);
 
-      @CircuitBreaker(name = "updateStockAndSoldQuantity", fallbackMethod = "updateStockAndSoldQuantityFallback")
+      @CircuitBreaker(name = "updateStockAndSoldQuantity")
       @Retry(name = "updateStockAndSoldQuantity")
       @PutMapping("/variants/{productId}/update-stock-sold")
-      ApiResponse<Void> updateStockAndSoldQuantity(@PathVariable String productId,
+      void updateStockAndSoldQuantity(@PathVariable String productId,
                                                    @RequestParam String variantId,
                                                    @RequestParam int quantity);
-
-      default ApiResponse<Double> getProductPriceByIdFallback(String productId, String variantId, Throwable throwable) {
-            throw new RuntimeException();
-      }
-
-      default ApiResponse<Integer> getProductStockByIdFallback(String productId, String variantId, Throwable throwable) {
-            throw new RuntimeException();
-      }
-
-      default ApiResponse<Void> updateStockAndSoldQuantityFallback(String productId, String variantId, int quantity, Throwable throwable) {
-            throw new RuntimeException();
-      }
 
 }

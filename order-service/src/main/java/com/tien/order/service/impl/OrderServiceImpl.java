@@ -15,6 +15,7 @@ import com.tien.order.httpclient.ProductClient;
 import com.tien.order.mapper.OrderMapper;
 import com.tien.order.repository.OrderRepository;
 import com.tien.order.service.OrderService;
+import feign.FeignException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -60,7 +61,13 @@ public class OrderServiceImpl implements OrderService {
                   stripeChargeRequest.setStripeToken(request.getPaymentToken());
                   stripeChargeRequest.setEmail(request.getEmail());
 
-                  ApiResponse<StripeChargeResponse> paymentResponse = paymentClient.charge(stripeChargeRequest);
+                  ApiResponse<StripeChargeResponse> paymentResponse;
+                  try {
+                        paymentResponse = paymentClient.charge(stripeChargeRequest);
+                  } catch (FeignException e) {
+                        log.error("Error charging payment for user {}: {}", username, e.getMessage(), e);
+                        throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
+                  }
 
                   if (paymentResponse.getResult() != null && paymentResponse.getResult().getSuccess()) {
                         order.setStatus("PAID");
@@ -141,34 +148,42 @@ public class OrderServiceImpl implements OrderService {
 
       private double calculateOrderTotal(List<OrderItemCreationRequest> items) {
             return items.stream()
-                    .mapToDouble(item ->
-                            productClient.getProductPriceById(item.getProductId(), item.getVariantId())
-                                    .getResult() * item.getQuantity()
-                    )
+                    .mapToDouble(item -> {
+                          try {
+                                return productClient.getProductPriceById(item.getProductId(), item.getVariantId()).getResult() * item.getQuantity();
+                          } catch (FeignException e) {
+                                log.error("Error fetching price for productId={}, variantId={}: {}", item.getProductId(), item.getVariantId(), e.getMessage());
+                                throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
+                          }
+                    })
                     .sum();
       }
 
       private void validateStockAvailability(List<OrderItemCreationRequest> items) {
             items.forEach(item -> {
-                  int stockQuantity = productClient.getProductStockById(
-                          item.getProductId(),
-                          item.getVariantId()
-                  ).getResult();
-
-                  if (stockQuantity < item.getQuantity()) {
-                        log.error("Out of stock for productId={}, variantId={}, requestedQuantity={}, availableQuantity={}",
-                                item.getProductId(), item.getVariantId(), item.getQuantity(), stockQuantity);
-                        throw new AppException(ErrorCode.OUT_OF_STOCK);
+                  try {
+                        int stockQuantity = productClient.getProductStockById(item.getProductId(), item.getVariantId()).getResult();
+                        if (stockQuantity < item.getQuantity()) {
+                              log.error("Out of stock for productId={}, variantId={}, requestedQuantity={}, availableQuantity={}",
+                                      item.getProductId(), item.getVariantId(), item.getQuantity(), stockQuantity);
+                              throw new AppException(ErrorCode.OUT_OF_STOCK);
+                        }
+                  } catch (FeignException e) {
+                        log.error("Error fetching stock for productId={}, variantId={}: {}", item.getProductId(), item.getVariantId(), e.getMessage());
+                        throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
                   }
             });
       }
 
       private void updateStockAndSoldQuantity(List<OrderItemCreationRequest> items) {
-            items.forEach(item -> productClient.updateStockAndSoldQuantity(
-                    item.getProductId(),
-                    item.getVariantId(),
-                    item.getQuantity()
-            ));
+            items.forEach(item -> {
+                  try {
+                        productClient.updateStockAndSoldQuantity(item.getProductId(), item.getVariantId(), item.getQuantity());
+                  } catch (FeignException e) {
+                        log.error("Error updating stock for productId={}, variantId={}: {}", item.getProductId(), item.getVariantId(), e.getMessage());
+                        throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
+                  }
+            });
       }
 
       private Order findOrderById(Long orderId) {

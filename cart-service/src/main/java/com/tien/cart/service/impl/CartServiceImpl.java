@@ -17,6 +17,7 @@ import com.tien.cart.dto.response.CartResponse;
 import com.tien.cart.httpclient.ProductClient;
 import com.tien.cart.service.CartService;
 import com.tien.cart.service.RedisService;
+import feign.FeignException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -61,7 +62,6 @@ public class CartServiceImpl implements CartService {
             }
 
             redisService.saveWithDefaultTTL(cartKey, existingCart);
-
             return cartMapper.toCartResponse(existingCart);
       }
 
@@ -84,13 +84,13 @@ public class CartServiceImpl implements CartService {
             ApiResponse<OrderResponse> orderResponse;
             try {
                   orderResponse = orderClient.createOrder(orderRequest);
-            } catch (Exception e) {
-                  log.error("Error creating order for user {}: {}", username, e.getMessage(), e);
-                  throw new AppException(ErrorCode.ORDER_CREATION_FAILED);
+            } catch (FeignException e) {
+                  log.error("FeignException occurred while creating order for user {}: {}",
+                          username, e.getMessage(), e);
+                  throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
             }
 
             redisTemplate.delete(cartKey);
-
             return orderResponse.getResult();
       }
 
@@ -136,16 +136,6 @@ public class CartServiceImpl implements CartService {
             return cart;
       }
 
-      private double calculateTotalPriceForCartItems(List<CartItemCreationRequest> cartItems) {
-            validateProducts(cartItems);
-
-            return cartItems.stream()
-                    .mapToDouble(cartItem -> {
-                          Double price = productClient.getProductPriceById(cartItem.getProductId(), cartItem.getVariantId()).getResult();
-                          return (price != null ? price : 0.0) * cartItem.getQuantity();
-                    }).sum();
-      }
-
       private void updateCartItems(Cart existingCart, CartCreationRequest cartCreationRequest) {
             List<CartItem> updatedItems = existingCart.getItems();
 
@@ -182,14 +172,6 @@ public class CartServiceImpl implements CartService {
             existingCart.setTotal(calculateTotalPriceForExistingCart(updatedItems));
       }
 
-      private double calculateTotalPriceForExistingCart(List<CartItem> cartItems) {
-            return cartItems.stream()
-                    .mapToDouble(cartItem -> {
-                          Double price = productClient.getProductPriceById(cartItem.getProductId(), cartItem.getVariantId()).getResult();
-                          return (price != null ? price : 0.0) * cartItem.getQuantity();
-                    }).sum();
-      }
-
       private void validateUsername(String username) {
             if (username == null) {
                   log.error("Unauthorized access attempt: username is null");
@@ -204,41 +186,81 @@ public class CartServiceImpl implements CartService {
             }
       }
 
+      private double calculateTotalPriceForCartItems(List<CartItemCreationRequest> cartItems) {
+            validateProducts(cartItems);
+
+            return cartItems.stream()
+                    .mapToDouble(cartItem -> {
+                          try {
+                                Double price = productClient.getProductPriceById(cartItem.getProductId(), cartItem.getVariantId()).getResult();
+                                return (price != null ? price : 0.0) * cartItem.getQuantity();
+                          } catch (FeignException e) {
+                                log.error("FeignException occurred while fetching price for productId={}, variantId={}: {}",
+                                        cartItem.getProductId(), cartItem.getVariantId(), e.getMessage());
+                                throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
+                          }
+                    }).sum();
+      }
+
+      private double calculateTotalPriceForExistingCart(List<CartItem> cartItems) {
+            return cartItems.stream()
+                    .mapToDouble(cartItem -> {
+                          try {
+                                Double price = productClient.getProductPriceById(cartItem.getProductId(), cartItem.getVariantId()).getResult();
+                                return (price != null ? price : 0.0) * cartItem.getQuantity();
+                          } catch (FeignException e) {
+                                log.error("(ExistingCart) FeignException occurred while fetching price for productId={}, variantId={}: {}",
+                                        cartItem.getProductId(), cartItem.getVariantId(), e.getMessage());
+                                throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
+                          }
+                    }).sum();
+      }
+
       private void validateShopOwnership(CartCreationRequest request) {
             for (CartItemCreationRequest item : request.getItems()) {
-                  String shopId = productClient.getShopIdByProductId(item.getProductId()).getResult();
-                  String ownerUsername = shopClient.getOwnerUsernameByShopId(shopId).getResult();
+                  try {
+                        String shopId = productClient.getShopIdByProductId(item.getProductId()).getResult();
+                        String ownerUsername = shopClient.getOwnerUsernameByShopId(shopId).getResult();
 
-                  if (ownerUsername != null && ownerUsername.equals(getCurrentUsername())) {
-                        log.error("User {} attempted to add their own product to the cart: productId={}", getCurrentUsername(), item.getProductId());
-                        throw new AppException(ErrorCode.CANNOT_ADD_OWN_PRODUCT);
+                        if (ownerUsername != null && ownerUsername.equals(getCurrentUsername())) {
+                              log.error("User {} attempted to add their own product to the cart: productId={}", getCurrentUsername(), item.getProductId());
+                              throw new AppException(ErrorCode.CANNOT_ADD_OWN_PRODUCT);
+                        }
+                  } catch (FeignException e) {
+                        log.error("FeignException occurred while checking shop ownership for productId={}: {}", item.getProductId(), e.getMessage());
+                        throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
                   }
             }
       }
 
       private void validateProducts(List<CartItemCreationRequest> cartItems) {
             for (CartItemCreationRequest item : cartItems) {
-                  String productId = item.getProductId();
-                  String variantId = item.getVariantId();
-
-                  ExistsResponse existsResponse = productClient.existsProduct(productId, variantId).getResult();
-                  if (!existsResponse.isExists()) {
-                        log.error("Product not found: productId={}, variantId={}", productId, variantId);
-                        throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
+                  try {
+                        ExistsResponse existsResponse = productClient.existsProduct(item.getProductId(), item.getVariantId()).getResult();
+                        if (!existsResponse.isExists()) {
+                              log.error("Product not found: productId={}, variantId={}", item.getProductId(), item.getVariantId());
+                              throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
+                        }
+                  } catch (FeignException e) {
+                        log.error("FeignException occurred while checking product existence for productId={}, variantId={}: {}",
+                                item.getProductId(), item.getVariantId(), e.getMessage());
+                        throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
                   }
             }
       }
 
       private void validateStockAvailability(List<CartItem> items) {
             items.forEach(item -> {
-                  int stockQuantity = productClient.getProductStockById(
-                          item.getProductId(),
-                          item.getVariantId()
-                  ).getResult();
-
-                  if (stockQuantity < item.getQuantity()) {
-                        log.error("Out of stock: productId={}, variantId={}, requestedQuantity={}, availableQuantity={}", item.getProductId(), item.getVariantId(), item.getQuantity(), stockQuantity);
-                        throw new AppException(ErrorCode.OUT_OF_STOCK);
+                  try {
+                        int stockQuantity = productClient.getProductStockById(item.getProductId(), item.getVariantId()).getResult();
+                        if (stockQuantity < item.getQuantity()) {
+                              log.error("Out of stock: productId={}, variantId={}, requestedQuantity={}, availableQuantity={}", item.getProductId(), item.getVariantId(), item.getQuantity(), stockQuantity);
+                              throw new AppException(ErrorCode.OUT_OF_STOCK);
+                        }
+                  } catch (FeignException e) {
+                        log.error("FeignException occurred while checking stock for productId={}, variantId={}: {}",
+                                item.getProductId(), item.getVariantId(), e.getMessage());
+                        throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
                   }
             });
       }

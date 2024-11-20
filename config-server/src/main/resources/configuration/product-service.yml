@@ -42,6 +42,8 @@ resilience4j:
     instances:
       getShopByOwnerUsername:
         baseConfig: default
+      uploadMultipleFiles:
+        baseConfig: default
 
   retry:
     configs:
@@ -50,6 +52,8 @@ resilience4j:
         waitDuration: 2s
     instances:
       getShopByOwnerUsername:
+        baseConfig: default
+      uploadMultipleFiles:
         baseConfig: default
 
 management:

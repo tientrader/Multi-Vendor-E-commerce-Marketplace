@@ -13,11 +13,13 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -42,7 +44,8 @@ public class EmailServiceImpl implements EmailService {
             try {
                   return emailClient.sendEmail(apiKey, emailRequest);
             } catch (FeignException e) {
-                  throw new AppException(ErrorCode.CANNOT_SEND_EMAIL);
+                  log.error("Error sending email to {}: {}", request.getTo(), e.getMessage(), e);
+                  throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
             }
       }
 

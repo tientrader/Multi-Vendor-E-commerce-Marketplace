@@ -13,13 +13,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 @FeignClient(name = "payment-service", path = "/payment", configuration = {AuthenticationRequestInterceptor.class})
 public interface PaymentClient {
 
-      @CircuitBreaker(name = "chargePayment", fallbackMethod = "chargeFallback")
+      @CircuitBreaker(name = "chargePayment")
       @Retry(name = "chargePayment")
       @PostMapping("/stripe/charge")
       ApiResponse<StripeChargeResponse> charge(@RequestBody StripeChargeRequest request);
-
-      default ApiResponse<StripeChargeResponse> chargeFallback(StripeChargeRequest request, Throwable throwable) {
-            throw new RuntimeException();
-      }
 
 }

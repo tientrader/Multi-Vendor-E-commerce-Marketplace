@@ -2,6 +2,8 @@ package com.tien.notification.httpclient;
 
 import com.tien.notification.dto.request.EmailRequest;
 import com.tien.notification.dto.response.EmailResponse;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -11,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestHeader;
 @FeignClient(name = "email-client", url = "${notification.email.brevo-url}")
 public interface EmailClient {
 
+      @CircuitBreaker(name = "sendEmail")
+      @Retry(name = "sendEmail")
       @PostMapping(value = "/v3/smtp/email", produces = MediaType.APPLICATION_JSON_VALUE)
       EmailResponse sendEmail(@RequestHeader("api-key") String apiKey, @RequestBody EmailRequest body);
 

@@ -15,7 +15,7 @@ public interface ShopService {
 
       SalesReportResponse generateSalesReport(String shopId, String startDate, String endDate);
 
-      SalesReportResponse getUserSalesReport(String startDate, String endDate);
+      SalesReportResponse getMySalesReport(String startDate, String endDate);
 
       ShopResponse getShopByOwnerUsername(String ownerUsername);
 

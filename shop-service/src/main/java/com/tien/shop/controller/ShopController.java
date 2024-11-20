@@ -50,11 +50,11 @@ public class ShopController {
                     .build();
       }
 
-      @GetMapping("/user-sales-report")
-      public ApiResponse<SalesReportResponse> getUserSalesReport(@RequestParam("startDate") String startDate,
+      @GetMapping("/my-sales-report")
+      public ApiResponse<SalesReportResponse> getMySalesReport(@RequestParam("startDate") String startDate,
                                                                   @RequestParam("endDate") String endDate) {
             return ApiResponse.<SalesReportResponse>builder()
-                    .result(shopService.getUserSalesReport(startDate, endDate))
+                    .result(shopService.getMySalesReport(startDate, endDate))
                     .build();
       }
 

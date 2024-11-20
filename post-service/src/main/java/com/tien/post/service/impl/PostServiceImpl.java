@@ -54,7 +54,7 @@ public class PostServiceImpl implements PostService {
                         throw new AppException(ErrorCode.USER_NOT_VIP);
                   }
                   log.error("External service error while checking VIP status for user {}: {}", username, e.getMessage());
-                  throw new AppException(ErrorCode.EXTERNAL_SERVICE_ERROR);
+                  throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
             }
 
             List<String> imageUrls = handleImageUpload(postImages);
@@ -131,7 +131,19 @@ public class PostServiceImpl implements PostService {
                   return List.of();
             }
 
-            ApiResponse<List<FileResponse>> fileResponseApi = fileClient.uploadMultipleFiles(postImages);
+            ApiResponse<List<FileResponse>> fileResponseApi;
+            try {
+                  fileResponseApi = fileClient.uploadMultipleFiles(postImages);
+
+                  if (fileResponseApi == null || fileResponseApi.getResult() == null) {
+                        log.error("File upload returned no results");
+                        throw new AppException(ErrorCode.FILE_UPLOAD_FAILED);
+                  }
+            } catch (FeignException e) {
+                  log.error("Error uploading files: {}", e.getMessage(), e);
+                  throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
+            }
+
             List<FileResponse> fileResponses = fileResponseApi.getResult();
 
             return fileResponses.stream()

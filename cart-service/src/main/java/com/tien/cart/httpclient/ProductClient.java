@@ -13,42 +13,26 @@ import org.springframework.web.bind.annotation.PathVariable;
 @FeignClient(name = "product-service", path = "/product", configuration = {AuthenticationRequestInterceptor.class})
 public interface ProductClient {
 
-      @CircuitBreaker(name = "getProductPriceById", fallbackMethod = "getProductPriceByIdFallback")
+      @CircuitBreaker(name = "getProductPriceById")
       @Retry(name = "getProductPriceById")
       @GetMapping(value = "/{productId}/price/{variantId}", produces = MediaType.APPLICATION_JSON_VALUE)
       ApiResponse<Double> getProductPriceById(@PathVariable("productId") String productId,
                                               @PathVariable("variantId") String variantId);
 
-      @CircuitBreaker(name = "getProductStockById", fallbackMethod = "getProductStockByIdFallback")
+      @CircuitBreaker(name = "getProductStockById")
       @Retry(name = "getProductStockById")
       @GetMapping(value = "/{productId}/stock/{variantId}", produces = MediaType.APPLICATION_JSON_VALUE)
       ApiResponse<Integer> getProductStockById(@PathVariable("productId") String productId,
                                                @PathVariable("variantId") String variantId);
 
-      @CircuitBreaker(name = "existsProduct", fallbackMethod = "existsProductFallback")
+      @CircuitBreaker(name = "existsProduct")
       @Retry(name = "existsProduct")
       @GetMapping("/{productId}/exists/{variantId}")
       ApiResponse<ExistsResponse> existsProduct(@PathVariable String productId, @PathVariable String variantId);
 
-      @CircuitBreaker(name = "getShopIdByProductId", fallbackMethod = "getShopIdByProductIdFallback")
+      @CircuitBreaker(name = "getShopIdByProductId")
       @Retry(name = "getShopIdByProductId")
       @GetMapping(value = "/{productId}/shopId", produces = MediaType.APPLICATION_JSON_VALUE)
       ApiResponse<String> getShopIdByProductId(@PathVariable("productId") String productId);
-
-      default ApiResponse<Double> getProductPriceByIdFallback(String productId, String variantId, Throwable throwable) {
-            throw new RuntimeException();
-      }
-
-      default ApiResponse<Integer> getProductStockByIdFallback(String productId, String variantId, Throwable throwable) {
-            throw new RuntimeException();
-      }
-
-      default ApiResponse<ExistsResponse> existsProductFallback(String productId, String variantId, Throwable throwable) {
-            throw new RuntimeException();
-      }
-
-      default ApiResponse<String> getShopIdByProductIdFallback(String productId, Throwable throwable) {
-            throw new RuntimeException();
-      }
 
 }

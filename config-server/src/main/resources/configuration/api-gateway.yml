@@ -239,15 +239,15 @@ resilience4j:
       productService:
         timeout-duration: 12s
       cartService:
-        timeout-duration: 10s
+        timeout-duration: 8s
       orderService:
-        timeout-duration: 10s
+        timeout-duration: 8s
       shopService:
-        timeout-duration: 10s
+        timeout-duration: 8s
       postService:
         timeout-duration: 12s
       notificationService:
-        timeout-duration: 10s
+        timeout-duration: 8s
       paymentService:
         timeout-duration: 10s
       fileService:

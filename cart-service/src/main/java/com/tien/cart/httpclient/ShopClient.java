@@ -12,13 +12,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 @FeignClient(name = "shop-service", path = "/shop", configuration = {AuthenticationRequestInterceptor.class})
 public interface ShopClient {
 
-      @CircuitBreaker(name = "getOwnerUsernameByShopId", fallbackMethod = "getOwnerUsernameByShopIdFallback")
+      @CircuitBreaker(name = "getOwnerUsernameByShopId")
       @Retry(name = "getOwnerUsernameByShopId")
       @GetMapping(value = "/{shopId}/owner", produces = MediaType.APPLICATION_JSON_VALUE)
       ApiResponse<String> getOwnerUsernameByShopId(@PathVariable("shopId") String shopId);
-
-      default ApiResponse<String> getOwnerUsernameByShopIdFallback(String shopId, Throwable throwable) {
-            throw new RuntimeException();
-      }
 
 }

@@ -20,6 +20,7 @@ import com.tien.product.mapper.ProductVariantMapper;
 import com.tien.product.repository.CategoryRepository;
 import com.tien.product.repository.ProductRepository;
 import com.tien.product.service.ProductService;
+import feign.FeignException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -87,6 +88,7 @@ public class ProductServiceImpl implements ProductService {
 
             category.getProductIds().add(product.getId());
             categoryRepository.save(category);
+
             redisTemplate.opsForValue().set("product:" + product.getId(), product);
 
             return productMapper.toProductResponse(product);
@@ -118,6 +120,7 @@ public class ProductServiceImpl implements ProductService {
 
             newCategory.getProductIds().add(product.getId());
             categoryRepository.save(newCategory);
+
             redisTemplate.opsForValue().set("product:" + product.getId(), product);
 
             return productMapper.toProductResponse(product);
@@ -231,7 +234,19 @@ public class ProductServiceImpl implements ProductService {
                   return List.of();
             }
 
-            ApiResponse<List<FileResponse>> fileResponseApi = fileClient.uploadMultipleFiles(productImages);
+            ApiResponse<List<FileResponse>> fileResponseApi;
+            try {
+                  fileResponseApi = fileClient.uploadMultipleFiles(productImages);
+
+                  if (fileResponseApi == null || fileResponseApi.getResult() == null) {
+                        log.error("File upload returned no results");
+                        throw new AppException(ErrorCode.FILE_UPLOAD_FAILED);
+                  }
+            } catch (FeignException e) {
+                  log.error("Error uploading files: {}", e.getMessage(), e);
+                  throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
+            }
+
             List<FileResponse> fileResponses = fileResponseApi.getResult();
 
             return fileResponses.stream()
@@ -275,11 +290,18 @@ public class ProductServiceImpl implements ProductService {
       }
 
       private ShopResponse getShopByOwnerUsername(String username) {
-            return Optional.ofNullable(shopClient.getShopByOwnerUsername(username).getResult())
-                    .orElseThrow(() -> {
-                          log.error("Shop not found for username: {}", username);
-                          return new AppException(ErrorCode.SHOP_NOT_FOUND);
-                    });
+            try {
+                  ApiResponse<ShopResponse> response = shopClient.getShopByOwnerUsername(username);
+
+                  return Optional.ofNullable(response.getResult())
+                          .orElseThrow(() -> {
+                                log.error("Shop not found for username: {}", username);
+                                return new AppException(ErrorCode.SHOP_NOT_FOUND);
+                          });
+            } catch (FeignException e) {
+                  log.error("Error calling shop service for username {}: {}", username, e.getMessage(), e);
+                  throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
+            }
       }
 
 }

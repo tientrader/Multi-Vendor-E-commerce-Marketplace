@@ -31,6 +31,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -57,7 +58,8 @@ public class ReviewServiceImpl implements ReviewService {
             try {
                   var existsResponse = productClient.existsProduct(request.getProductId(), request.getVariantId());
                   if (!existsResponse.getResult().isExists()) {
-                        log.error("Product with ID {} and variant {} does not exist.", request.getProductId(), request.getVariantId());
+                        log.error("Product with ID {} and variant {} does not exist.",
+                                request.getProductId(), request.getVariantId());
                         throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
                   }
             } catch (FeignException e) {
@@ -66,7 +68,7 @@ public class ReviewServiceImpl implements ReviewService {
                         throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
                   } else {
                         log.error("Error checking product existence: {}", e.getMessage());
-                        throw new AppException(ErrorCode.EXTERNAL_SERVICE_ERROR);
+                        throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
                   }
             }
 
@@ -77,10 +79,12 @@ public class ReviewServiceImpl implements ReviewService {
 
                   boolean hasPurchased = orders.stream()
                           .flatMap(order -> order.getItems().stream())
-                          .anyMatch(item -> item.getProductId().equals(request.getProductId()) && item.getVariantId().equals(request.getVariantId()));
+                          .anyMatch(item -> item.getProductId().equals(request.getProductId()) &&
+                                  item.getVariantId().equals(request.getVariantId()));
 
                   if (!hasPurchased) {
-                        log.error("User {} has not purchased the product {} with variant {}", username, request.getProductId(), request.getVariantId());
+                        log.error("User {} has not purchased the product {} with variant {}",
+                                username, request.getProductId(), request.getVariantId());
                         throw new AppException(ErrorCode.UNAUTHORIZED);
                   }
             } catch (FeignException e) {
@@ -89,7 +93,7 @@ public class ReviewServiceImpl implements ReviewService {
                         throw new AppException(ErrorCode.USER_NOT_PURCHASED_PRODUCT);
                   } else {
                         log.error("Error fetching user orders: {}", e.getMessage());
-                        throw new AppException(ErrorCode.EXTERNAL_SERVICE_ERROR);
+                        throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
                   }
             }
 
@@ -130,7 +134,7 @@ public class ReviewServiceImpl implements ReviewService {
                   }
             } catch (FeignException e) {
                   log.error("Error fetching product information for product ID {}: {}", productId, e.getMessage());
-                  throw new AppException(ErrorCode.EXTERNAL_SERVICE_ERROR);
+                  throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
             }
 
             review.setShopResponse(response);
@@ -245,15 +249,24 @@ public class ReviewServiceImpl implements ReviewService {
                   return List.of();
             }
 
+            ApiResponse<List<FileResponse>> fileResponseApi;
             try {
-                  ApiResponse<List<FileResponse>> response = fileClient.uploadMultipleFiles(images);
-                  return response.getResult().stream()
-                          .map(FileResponse::getUrl)
-                          .toList();
+                  fileResponseApi = fileClient.uploadMultipleFiles(images);
+
+                  if (fileResponseApi == null || fileResponseApi.getResult() == null) {
+                        log.error("File upload returned no results");
+                        throw new AppException(ErrorCode.FILE_UPLOAD_FAILED);
+                  }
             } catch (FeignException e) {
-                  log.error("Error uploading images: {}", e.getMessage());
-                  throw new AppException(ErrorCode.EXTERNAL_SERVICE_ERROR);
+                  log.error("Error uploading files: {}", e.getMessage(), e);
+                  throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
             }
+
+            List<FileResponse> fileResponses = fileResponseApi.getResult();
+
+            return fileResponses.stream()
+                    .map(FileResponse::getUrl)
+                    .collect(Collectors.toList());
       }
 
 }

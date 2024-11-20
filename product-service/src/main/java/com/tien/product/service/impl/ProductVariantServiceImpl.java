@@ -13,6 +13,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +25,7 @@ public class ProductVariantServiceImpl implements ProductVariantService {
 
       ProductRepository productRepository;
       ProductVariantMapper productVariantMapper;
+      RedisTemplate<String, Object> redisTemplate;
 
       @Override
       @Transactional
@@ -31,6 +33,8 @@ public class ProductVariantServiceImpl implements ProductVariantService {
             Product product = findProductById(productId);
             ProductVariant newVariant = productVariantMapper.toProductVariant(request);
             product.getVariants().add(newVariant);
+
+            redisTemplate.opsForValue().set("product:" + productId, product);
             productRepository.save(product);
       }
 
@@ -40,6 +44,8 @@ public class ProductVariantServiceImpl implements ProductVariantService {
             Product product = findProductById(productId);
             ProductVariant variant = findProductVariant(product, variantId);
             productVariantMapper.updateProductVariant(variant, request);
+
+            redisTemplate.opsForValue().set("product:" + productId, product);
             productRepository.save(product);
       }
 
@@ -57,6 +63,7 @@ public class ProductVariantServiceImpl implements ProductVariantService {
             variant.setStock(newStock);
             variant.setSoldQuantity(variant.getSoldQuantity() + quantity);
 
+            redisTemplate.opsForValue().set("product:" + productId, product);
             productRepository.save(product);
       }
 
@@ -66,6 +73,8 @@ public class ProductVariantServiceImpl implements ProductVariantService {
             Product product = findProductById(productId);
             ProductVariant variant = findProductVariant(product, variantId);
             product.getVariants().remove(variant);
+
+            redisTemplate.opsForValue().set("product:" + productId, product);
             productRepository.save(product);
       }
 

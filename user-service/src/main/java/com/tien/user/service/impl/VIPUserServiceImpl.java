@@ -15,6 +15,7 @@ import com.tien.user.httpclient.PaymentClient;
 import com.tien.user.mapper.VIPUserMapper;
 import com.tien.user.repository.UserRepository;
 import com.tien.user.service.VIPUserService;
+import feign.FeignException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -54,9 +55,9 @@ public class VIPUserServiceImpl implements VIPUserService {
 
             try {
                   paymentClient.createSubscription(subscriptionRequest);
-            } catch (Exception e) {
+            } catch (FeignException e) {
                   log.error("Failed to create subscription for user {}: {}", username, e.getMessage());
-                  throw new AppException(ErrorCode.SUBSCRIPTION_CREATION_FAILED);
+                  throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
             }
 
             findOrCreateUser(request, username);
@@ -76,9 +77,9 @@ public class VIPUserServiceImpl implements VIPUserService {
             ApiResponse<SessionResponse> sessionResponse;
             try {
                   sessionResponse = paymentClient.createSubscriptionSession(sessionRequest);
-            } catch (Exception e) {
+            } catch (FeignException e) {
                   log.error("Failed to create subscription session for user {}: {}", username, e.getMessage());
-                  throw new AppException(ErrorCode.SUBSCRIPTION_SESSION_CREATION_FAILED);
+                  throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
             }
 
             User user = findOrCreateUser(request, username);
@@ -118,9 +119,9 @@ public class VIPUserServiceImpl implements VIPUserService {
 
             try {
                   paymentClient.cancelSubscription(user.getStripeSubscriptionId());
-            } catch (Exception e) {
+            } catch (FeignException e) {
                   log.error("Failed to cancel subscription for user {}: {}", currentUsername, e.getMessage());
-                  throw new AppException(ErrorCode.SUBSCRIPTION_CANCELLATION_FAILED);
+                  throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
             }
 
             user.setStripeSubscriptionId(null);

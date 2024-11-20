@@ -14,13 +14,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 @FeignClient(name = "order-service", path = "/order", configuration = {AuthenticationRequestInterceptor.class})
 public interface OrderClient {
 
-      @CircuitBreaker(name = "createOrder", fallbackMethod = "createOrderFallback")
+      @CircuitBreaker(name = "createOrder")
       @Retry(name = "createOrder")
       @PostMapping(value = "/create", produces = MediaType.APPLICATION_JSON_VALUE)
       ApiResponse<OrderResponse> createOrder(@RequestBody OrderCreationRequest request);
-
-      default ApiResponse<OrderResponse> createOrderFallback(OrderCreationRequest request, Throwable throwable) {
-            throw new RuntimeException();
-      }
 
 }

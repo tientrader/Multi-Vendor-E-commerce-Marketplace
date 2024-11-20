@@ -11,6 +11,7 @@ import com.tien.shop.httpclient.ProductClient;
 import com.tien.shop.mapper.ShopMapper;
 import com.tien.shop.repository.ShopRepository;
 import com.tien.shop.service.ShopService;
+import feign.FeignException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -77,15 +78,30 @@ public class ShopServiceImpl implements ShopService {
       @Override
       @PreAuthorize("hasRole('ADMIN')")
       public SalesReportResponse generateSalesReport(String shopId, String startDate, String endDate) {
-            List<ProductResponse> products = productClient.getProductsByShopId(shopId).getResult();
+            List<ProductResponse> products;
+            try {
+                  products = productClient.getProductsByShopId(shopId).getResult();
+            } catch (FeignException e) {
+                  log.error("Error fetching products for shopId {}: {}", shopId, e.getMessage());
+                  throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
+            }
+
             return generateSalesData(products, startDate, endDate);
       }
 
       @Override
-      public SalesReportResponse getUserSalesReport(String startDate, String endDate) {
+      public SalesReportResponse getMySalesReport(String startDate, String endDate) {
             String username = getCurrentUsername();
             Shop shop = findShopByOwnerUsername(username);
-            List<ProductResponse> products = productClient.getProductsByShopId(shop.getId()).getResult();
+
+            List<ProductResponse> products;
+            try {
+                  products = productClient.getProductsByShopId(shop.getId()).getResult();
+            } catch (FeignException e) {
+                  log.error("(User) Error fetching products for shopId {}: {}", shop.getId(), e.getMessage());
+                  throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
+            }
+
             return generateSalesData(products, startDate, endDate);
       }
 
