@@ -7,8 +7,7 @@ import lombok.experimental.FieldDefaults;
 
 import java.util.Map;
 
-@Getter
-@Setter
+@Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
