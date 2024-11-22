@@ -34,6 +34,12 @@ resilience4j:
     instances:
       isProductExist:
         baseConfig: default
+      getShopIdByProductId:
+        baseConfig: default
+      getMyCart:
+        baseConfig: default
+      updateCartTotal:
+        baseConfig: default
       checkIfShopExists:
         baseConfig: default
 
@@ -44,6 +50,12 @@ resilience4j:
         waitDuration: 2s
     instances:
       isProductExist:
+        baseConfig: default
+      getShopIdByProductId:
+        baseConfig: default
+      getMyCart:
+        baseConfig: default
+      updateCartTotal:
         baseConfig: default
       checkIfShopExists:
         baseConfig: default

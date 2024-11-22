@@ -47,6 +47,8 @@ resilience4j:
         baseConfig: default
       getOwnerUsernameByShopId:
         baseConfig: default
+      applyPromotionCode:
+        baseConfig: default
 
   retry:
     configs:
@@ -65,6 +67,8 @@ resilience4j:
       createOrder:
         baseConfig: default
       getOwnerUsernameByShopId:
+        baseConfig: default
+      applyPromotionCode:
         baseConfig: default
 
 management:

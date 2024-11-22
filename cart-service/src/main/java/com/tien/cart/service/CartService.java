@@ -8,7 +8,11 @@ public interface CartService {
 
       CartResponse upsertProductInCart(CartCreationRequest request);
 
+      void applyPromotionCodeToCart(String promoCode);
+
       OrderResponse createOrderFromCart(String paymentMethod, String paymentToken);
+
+      void updateCartTotal(String username, double total);
 
       void deleteMyCart();
 

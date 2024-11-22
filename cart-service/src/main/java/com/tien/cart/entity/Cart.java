@@ -22,5 +22,6 @@ public class Cart {
       String email;
       List<CartItem> items = new ArrayList<>();
       double total;
+      boolean isDiscountApplied;
 
 }

@@ -1,4 +1,4 @@
-package com.tien.cart.dto.response;
+package com.tien.promotion.dto.response;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -13,6 +13,5 @@ public class CartItemResponse {
       String productId;
       String variantId;
       Integer quantity;
-      double totalPrice;
 
 }

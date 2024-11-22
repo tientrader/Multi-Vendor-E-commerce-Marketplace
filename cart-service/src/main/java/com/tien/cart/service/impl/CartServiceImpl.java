@@ -3,12 +3,14 @@ package com.tien.cart.service.impl;
 import com.tien.cart.dto.ApiResponse;
 import com.tien.cart.dto.request.CartItemCreationRequest;
 import com.tien.cart.dto.request.OrderCreationRequest;
+import com.tien.cart.dto.response.CartItemResponse;
 import com.tien.cart.dto.response.OrderResponse;
 import com.tien.cart.entity.Cart;
 import com.tien.cart.entity.CartItem;
 import com.tien.cart.exception.AppException;
 import com.tien.cart.exception.ErrorCode;
 import com.tien.cart.httpclient.OrderClient;
+import com.tien.cart.httpclient.PromotionClient;
 import com.tien.cart.httpclient.ShopClient;
 import com.tien.cart.mapper.CartMapper;
 import com.tien.cart.dto.request.CartCreationRequest;
@@ -43,8 +45,10 @@ public class CartServiceImpl implements CartService {
       ProductClient productClient;
       OrderClient orderClient;
       ShopClient shopClient;
+      PromotionClient promotionClient;
 
       private static final String CART_KEY_PREFIX = "cart:";
+      private static final String PROMO_APPLIED_KEY_PREFIX = "promoApplied:";
 
       @Override
       public CartResponse upsertProductInCart(CartCreationRequest request) {
@@ -61,8 +65,51 @@ public class CartServiceImpl implements CartService {
                   updateCartItems(existingCart, request);
             }
 
+            List<CartItemResponse> itemResponses = existingCart.getItems()
+                    .stream()
+                    .map(cartItem -> {
+                          double itemTotalPrice = calculateItemTotalPrice(cartItem);
+                          CartItemResponse response = cartMapper.toCartItemResponse(cartItem);
+                          response.setTotalPrice(itemTotalPrice);
+                          cartItem.setTotalPrice(itemTotalPrice);
+                          return response;
+                    })
+                    .toList();
+
+            CartResponse cartResponse = cartMapper.toCartResponse(existingCart);
+            cartResponse.setItems(itemResponses);
+
+            double total = itemResponses.stream()
+                    .mapToDouble(CartItemResponse::getTotalPrice)
+                    .sum();
+            cartResponse.setTotal(total);
+
             redisService.saveWithDefaultTTL(cartKey, existingCart);
-            return cartMapper.toCartResponse(existingCart);
+            return cartResponse;
+      }
+
+      @Override
+      public void applyPromotionCodeToCart(String promoCode) {
+            String username = getCurrentUsername();
+            validateUsername(username);
+
+            String cartKey = CART_KEY_PREFIX + username;
+            Cart cart = (Cart) redisTemplate.opsForValue().get(cartKey);
+            validateCart(cart);
+
+            if (Objects.requireNonNull(cart).getItems() == null || cart.getItems().isEmpty()) {
+                  log.error("Cart is empty, cannot apply promotion code");
+                  throw new AppException(ErrorCode.CART_NOT_FOUND);
+            }
+
+            redisTemplate.opsForValue().set(PROMO_APPLIED_KEY_PREFIX + username, true);
+
+            try {
+                  promotionClient.applyPromotionCode(promoCode);
+            } catch (FeignException e) {
+                  log.error("Failed to apply promotion code: {}. Status: {}", promoCode, e.status());
+                  throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
+            }
       }
 
       @Override
@@ -92,6 +139,33 @@ public class CartServiceImpl implements CartService {
 
             redisTemplate.delete(cartKey);
             return orderResponse.getResult();
+      }
+
+      @Override
+      public void updateCartTotal(String username, double total) {
+            Boolean promoApplied = (Boolean) redisTemplate.opsForValue().get(PROMO_APPLIED_KEY_PREFIX + username);
+
+            if (promoApplied == null || !promoApplied) {
+                  log.error("User {} attempted to directly update cart total without applying promotion", username);
+                  throw new AppException(ErrorCode.INVALID_OPERATION);
+            }
+
+            String cartKey = CART_KEY_PREFIX + username;
+            Cart cart = (Cart) redisTemplate.opsForValue().get(cartKey);
+
+            if (cart == null) {
+                  throw new AppException(ErrorCode.CART_NOT_FOUND);
+            }
+
+            if (cart.isDiscountApplied()) {
+                  log.error("Discount already applied for cart of user {}", username);
+                  throw new AppException(ErrorCode.DISCOUNT_ALREADY_APPLIED);
+            }
+
+            cart.setTotal(total);
+            cart.setDiscountApplied(true);
+
+            redisService.saveWithDefaultTTL(cartKey, cart);
       }
 
       @Override
@@ -183,6 +257,17 @@ public class CartServiceImpl implements CartService {
             if (cart == null) {
                   log.error("Cart not found");
                   throw new AppException(ErrorCode.CART_NOT_FOUND);
+            }
+      }
+
+      private double calculateItemTotalPrice(CartItem cartItem) {
+            try {
+                  Double price = productClient.getProductPriceById(cartItem.getProductId(), cartItem.getVariantId()).getResult();
+                  return (price != null ? price : 0.0) * cartItem.getQuantity();
+            } catch (FeignException e) {
+                  log.error("(TotalPrice) FeignException occurred while fetching price for productId={}, variantId={}: {}",
+                          cartItem.getProductId(), cartItem.getVariantId(), e.getMessage());
+                  throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
             }
       }
 

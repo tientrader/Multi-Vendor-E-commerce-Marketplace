@@ -59,4 +59,9 @@ public class FallbackController {
             return Mono.just("Review service is currently unavailable. Please try again later.");
       }
 
+      @GetMapping("/promotion")
+      public Mono<String> promotionFallback() {
+            return Mono.just("Promotion service is currently unavailable. Please try again later.");
+      }
+
 }

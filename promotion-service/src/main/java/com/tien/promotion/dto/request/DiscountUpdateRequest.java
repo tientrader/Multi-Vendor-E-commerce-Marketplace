@@ -1,4 +1,4 @@
-package com.tien.cart.entity;
+package com.tien.promotion.dto.request;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -8,11 +8,10 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CartItem {
+public class DiscountUpdateRequest {
 
-      String productId;
-      String variantId;
-      Integer quantity;
-      double totalPrice;
+      Double amount;
+      Double percentage;
+      Double maxDiscountValue;
 
 }

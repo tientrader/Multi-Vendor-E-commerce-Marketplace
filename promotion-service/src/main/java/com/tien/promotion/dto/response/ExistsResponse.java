@@ -1,4 +1,4 @@
-package com.tien.cart.entity;
+package com.tien.promotion.dto.response;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -8,11 +8,8 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CartItem {
+public class ExistsResponse {
 
-      String productId;
-      String variantId;
-      Integer quantity;
-      double totalPrice;
+      boolean exists;
 
 }
