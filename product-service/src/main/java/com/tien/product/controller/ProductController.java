@@ -118,4 +118,11 @@ public class ProductController {
                     .build();
       }
 
+      @GetMapping("/{productId}/exists")
+      public ApiResponse<Boolean> isProductExist(@PathVariable String productId) {
+            return ApiResponse.<Boolean>builder()
+                    .result(productService.isProductExist(productId))
+                    .build();
+      }
+
 }

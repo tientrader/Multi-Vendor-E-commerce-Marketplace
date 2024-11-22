@@ -34,4 +34,6 @@ public interface ProductService {
 
       String getShopIdByProductId(String productId);
 
+      boolean isProductExist(String productId);
+
 }

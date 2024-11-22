@@ -229,6 +229,14 @@ public class ProductServiceImpl implements ProductService {
             return jwt.getClaim("preferred_username");
       }
 
+      @Override
+      public boolean isProductExist(String productId) {
+            Product product = (Product) redisTemplate.opsForValue().get("product:" + productId);
+            if (product != null) return true;
+
+            return productRepository.existsById(productId);
+      }
+
       private List<String> handleImageUpload(List<MultipartFile> productImages) {
             if (productImages == null || productImages.isEmpty()) {
                   return List.of();

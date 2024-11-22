@@ -115,6 +115,11 @@ public class ShopServiceImpl implements ShopService {
             return findShopById(shopId).getOwnerUsername();
       }
 
+      @Override
+      public boolean checkIfShopExists(String shopId) {
+            return shopRepository.existsById(shopId);
+      }
+
       private SalesReportResponse generateSalesData(List<ProductResponse> products, String startDate, String endDate) {
             if (products == null || products.isEmpty()) {
                   return new SalesReportResponse(

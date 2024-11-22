@@ -73,4 +73,11 @@ public class ShopController {
                     .build();
       }
 
+      @GetMapping("/{shopId}/exists")
+      public ApiResponse<Boolean> checkIfShopExists(@PathVariable("shopId") String shopId) {
+            return ApiResponse.<Boolean>builder()
+                    .result(shopService.checkIfShopExists(shopId))
+                    .build();
+      }
+
 }

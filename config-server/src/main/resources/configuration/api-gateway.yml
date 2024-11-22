@@ -163,6 +163,20 @@ spring:
               args:
                 name: default
 
+        - id: promotion-service
+          uri: lb://promotion-service
+          predicates:
+            - Path=${app.api-prefix}/promotion/**
+          filters:
+            - StripPrefix=2
+            - name: CircuitBreaker
+              args:
+                name: promotionService
+                fallbackUri: forward:/fallback/promotion
+            - name: Retry
+              args:
+                name: default
+
         - id: actuator
           uri: http://localhost:8888
           predicates:
@@ -203,6 +217,8 @@ resilience4j:
         baseConfig: default
       reviewService:
         baseConfig: default
+      promotionService:
+        baseConfig: default
   retry:
     configs:
       default:
@@ -229,6 +245,8 @@ resilience4j:
         baseConfig: default
       reviewService:
         baseConfig: default
+      promotionService:
+        baseConfig: default
   timelimiter:
     configs:
       default:
@@ -253,6 +271,8 @@ resilience4j:
       fileService:
         timeout-duration: 12s
       reviewService:
+        timeout-duration: 12s
+      promotionService:
         timeout-duration: 12s
 
 logging:

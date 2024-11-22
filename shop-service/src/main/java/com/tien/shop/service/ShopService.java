@@ -21,4 +21,6 @@ public interface ShopService {
 
       String getOwnerUsernameByShopId(String shopId);
 
+      boolean checkIfShopExists(String shopId);
+
 }
