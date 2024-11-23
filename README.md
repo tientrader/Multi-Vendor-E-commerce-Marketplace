@@ -77,12 +77,18 @@ Beyond simply connecting buyers and sellers, **Multi-Vendor E-commerce Marketpla
 - **MySQL:**
   MySQL ensures data consistency through ACID properties, allowing critical transactions to be processed accurately.
 
+  ![MySQL](resources/mysql.png)
+  
 - **MongoDB:**
   MongoDB is employed for unstructured data storage, such as product information and user reviews, providing a flexible and scalable NoSQL solution.
 
+  ![MongoDB](resources/mongodb.png)
+  
 - **Redis:**
   Redis acts as a caching solution to alleviate load on MySQL and MongoDB, accelerating data access and reducing the number of database queries.
 
+  ![Redis](resources/redis.png)
+  
 - **AWS S3:**
   AWS S3 is utilized for storing large volumes of unstructured data (e.g., images and videos), providing a highly durable and scalable storage solution.
 
