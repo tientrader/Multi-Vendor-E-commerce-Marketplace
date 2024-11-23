@@ -113,6 +113,30 @@ public class PromotionServiceImpl implements PromotionService {
                   throw new AppException(ErrorCode.CART_NOT_FOUND);
             }
 
+            double eligibleCartTotal = 0;
+            for (CartItemResponse item : cartResponse.getItems()) {
+                  String productId = item.getProductId();
+                  String shopId;
+                  try {
+                        shopId = productClient.getShopIdByProductId(productId).getResult();
+                  } catch (FeignException e) {
+                        log.error("(eligibleCartTotal) Failed to fetch shop ID for productId {}: {}", productId, e.getMessage());
+                        throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
+                  }
+
+                  boolean isApplicableForShop = promotion.getConditions().getApplicableShops().contains(shopId);
+                  boolean isApplicableForProduct = promotion.getConditions().getApplicableProducts().contains(productId);
+
+                  if (isApplicableForShop && isApplicableForProduct) {
+                        eligibleCartTotal += item.getTotalPrice() * item.getQuantity();
+                  }
+            }
+
+            if (eligibleCartTotal < promotion.getConditions().getMinOrderValue()) {
+                  log.error("Eligible order value is less than the minimum required for promoCode {}", promoCode);
+                  throw new AppException(ErrorCode.ORDER_VALUE_TOO_LOW);
+            }
+
             double totalDiscount = 0;
 
             for (CartItemResponse item : cartResponse.getItems()) {
@@ -121,7 +145,7 @@ public class PromotionServiceImpl implements PromotionService {
                   try {
                         shopId = productClient.getShopIdByProductId(productId).getResult();
                   } catch (FeignException e) {
-                        log.error("Failed to fetch shop ID for productId {}: {}", productId, e.getMessage());
+                        log.error("(totalDiscount) Failed to fetch shop ID for productId {}: {}", productId, e.getMessage());
                         throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
                   }
 

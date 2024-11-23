@@ -63,6 +63,11 @@ public class CartServiceImpl implements CartService {
                   existingCart = createNewCart(request, username);
             } else {
                   updateCartItems(existingCart, request);
+                  Boolean promoApplied = (Boolean) redisTemplate.opsForValue().get(PROMO_APPLIED_KEY_PREFIX + username);
+                  if (promoApplied != null && promoApplied) {
+                        redisTemplate.delete(PROMO_APPLIED_KEY_PREFIX + username);
+                        existingCart.setDiscountApplied(false);
+                  }
             }
 
             List<CartItemResponse> itemResponses = existingCart.getItems()
@@ -107,6 +112,10 @@ public class CartServiceImpl implements CartService {
             try {
                   promotionClient.applyPromotionCode(promoCode);
             } catch (FeignException e) {
+                  if (e.status() == 400 && e.contentUTF8().contains(ErrorCode.ORDER_VALUE_TOO_LOW.name())) {
+                        log.error("PromotionService: Order value too low for promoCode {}", promoCode);
+                        throw new AppException(ErrorCode.ORDER_VALUE_TOO_LOW);
+                  }
                   log.error("Failed to apply promotion code: {}. Status: {}", promoCode, e.status());
                   throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
             }
