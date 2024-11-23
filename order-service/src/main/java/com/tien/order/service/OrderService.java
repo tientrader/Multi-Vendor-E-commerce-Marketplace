@@ -9,6 +9,8 @@ public interface OrderService {
 
       OrderResponse createOrder(OrderCreationRequest request);
 
+      OrderResponse buyNow(OrderCreationRequest request);
+
       void deleteOrder(Long orderId);
 
       List<OrderResponse> getAllOrders();

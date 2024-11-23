@@ -26,6 +26,13 @@ public class OrderController {
                     .build();
       }
 
+      @PostMapping("/buy-now")
+      public ApiResponse<OrderResponse> buyNow(@Valid @RequestBody OrderCreationRequest orderCreationRequest) {
+            return ApiResponse.<OrderResponse>builder()
+                    .result(orderService.buyNow(orderCreationRequest))
+                    .build();
+      }
+
       @DeleteMapping("/{orderId}")
       public ApiResponse<Void> deleteOrder(@PathVariable Long orderId) {
             orderService.deleteOrder(orderId);

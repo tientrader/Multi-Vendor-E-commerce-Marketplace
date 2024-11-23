@@ -72,6 +72,64 @@ public class OrderServiceImpl implements OrderService {
                   if (paymentResponse.getResult() != null && paymentResponse.getResult().getSuccess()) {
                         order.setStatus("PAID");
                   } else {
+                        log.error("(createOrder) Payment failed for user {}: {}", username, paymentResponse.getMessage());
+                        throw new AppException(ErrorCode.PAYMENT_FAIL);
+                  }
+            } else if ("COD".equalsIgnoreCase(request.getPaymentMethod())) {
+                  order.setStatus("PENDING");
+            } else {
+                  log.error("(createOrder) Invalid payment method: {}", request.getPaymentMethod());
+                  throw new IllegalArgumentException("Invalid payment method: " + request.getPaymentMethod());
+            }
+
+            updateStockAndSoldQuantity(request.getItems());
+            orderRepository.save(order);
+
+            kafkaTemplate.send("order-created-successful", NotificationEvent.builder()
+                    .channel("EMAIL")
+                    .recipient(request.getEmail())
+                    .subject("Order created successfully")
+                    .body("Thank you for your purchase, " + username)
+                    .build());
+
+            return orderMapper.toOrderResponse(order);
+      }
+
+      @Override
+      @Transactional
+      public OrderResponse buyNow(OrderCreationRequest request) {
+            String username = getCurrentUsername();
+
+            if (request.getItems().size() > 1) {
+                  log.error("Buy Now can only handle a single product: request={}", request);
+                  throw new AppException(ErrorCode.MORE_THAN_ONE_PRODUCT);
+            }
+
+            validateStockAvailability(request.getItems());
+
+            Order order = orderMapper.toOrder(request);
+            order.setUsername(username);
+            order.setTotal(calculateOrderTotal(request.getItems()));
+            order.setStatus("PENDING");
+
+            if ("CARD".equalsIgnoreCase(request.getPaymentMethod())) {
+                  StripeChargeRequest stripeChargeRequest = new StripeChargeRequest();
+                  stripeChargeRequest.setUsername(username);
+                  stripeChargeRequest.setAmount(order.getTotal());
+                  stripeChargeRequest.setStripeToken(request.getPaymentToken());
+                  stripeChargeRequest.setEmail(request.getEmail());
+
+                  ApiResponse<StripeChargeResponse> paymentResponse;
+                  try {
+                        paymentResponse = paymentClient.charge(stripeChargeRequest);
+                  } catch (FeignException e) {
+                        log.error("Error charging payment for user {}: {}", username, e.getMessage(), e);
+                        throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
+                  }
+
+                  if (paymentResponse.getResult() != null && paymentResponse.getResult().getSuccess()) {
+                        order.setStatus("PAID");
+                  } else {
                         log.error("Payment failed for user {}: {}", username, paymentResponse.getMessage());
                         throw new AppException(ErrorCode.PAYMENT_FAIL);
                   }
