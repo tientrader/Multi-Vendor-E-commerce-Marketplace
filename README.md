@@ -123,6 +123,8 @@ The platform leverages microservices to ensure scalability, resilience, and main
 
   Stripe provides comprehensive payment processing APIs that support various payment methods and currencies. Its webhook integration enables real-time transaction tracking. This allows for instant **charges** upon purchase and facilitates **recurring subscriptions** for users, enhancing overall transaction efficiency and user experience.
 
+  ![Stripe](resources/stripecart.png)
+  ![Stripe](resources/stripeqrcode.png)
   ![Stripe](resources/stripe.png)
 
 ### 7. Monitoring and Logging
