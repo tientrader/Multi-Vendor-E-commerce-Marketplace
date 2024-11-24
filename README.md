@@ -2,6 +2,8 @@
 
 **Multi-Vendor E-commerce Marketplace** is a robust platform connecting buyers and sellers in a seamless, user-centric ecosystem. It offers features for easy product discovery, order management, secure payment processing, and multi-channel transaction support. Designed for exceptional user experience and scalability, it ensures secure and reliable interactions for all participants.
 
+❗️ The system is designed to handle and process nearly all business scenarios, adhering to best practices for data integrity and security, ensuring that the platform remains reliable and protected against potential issues.
+
 ## 🏗 Architecture Overview
 
 ### Microservices Architecture
