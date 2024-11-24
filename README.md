@@ -42,10 +42,12 @@ The platform leverages microservices to ensure scalability, resilience, and main
 
 ### 1. Java & Spring Framework
 
-- **Java:**
+- <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/java/java-original.svg" alt="Java" width="30" height="30"/> **Java:**
+
   Java is the primary language for building microservices, leveraging its multithreading capabilities and high performance. It provides a robust environment for scalable and maintainable solutions, particularly for services handling high transaction volumes like payments and orders.
 
-- **Spring Framework:**
+- <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/spring/spring-original.svg" alt="Spring" width="30" height="30"/> **Spring Framework:**
+
   - **Spring Boot:** Enables rapid microservice development with minimal configuration, significantly reducing boilerplate code.
   - **Spring WebFlux:** Facilitates the creation of asynchronous APIs through reactive programming, ensuring system responsiveness under high loads.
   - **Spring Security:** Manages security across microservices, offering authentication and authorization features. Key integrations include Single Sign-On (SSO) and JSON Web Token (JWT) authentication.
@@ -54,47 +56,54 @@ The platform leverages microservices to ensure scalability, resilience, and main
  
 ### 2. Service Communication
 
-- **OpenFeign:**
-  OpenFeign simplifies inter-microservice communication by automatically creating REST client proxies, reducing boilerplate code and enhancing developer productivity.
+- <img src="https://i.imgur.com/eTXiKPb.png" width="30" height="30" /> **Kafka:**
 
-- **Kafka:**
-  Kafka facilitates asynchronous communication between services, ensuring safe storage and distribution of messages.
+  Kafka facilitates asynchronous communication between services, ensuring safe storage and distribution of messages. It allows services to communicate efficiently in an event-driven architecture, decoupling services and improving scalability.
+  
+- **OpenFeign:**
+
+  OpenFeign simplifies inter-microservice communication by automatically creating REST client proxies, reducing boilerplate code and enhancing developer productivity.
  
 ### 3. Config Server & Service Discovery
 
-- **Spring Cloud Config:**  
+- **Spring Cloud Config:**
   Provides server and client-side support for externalized configuration in a distributed system. This enables centralized management of configuration properties across all microservices, making updates easier and ensuring configuration consistency.
 
-- **Eureka Server:**  
+- **Eureka Server:**
   Acts as a service registry, allowing microservices to discover each other. This simplifies the management of service instances and endpoints, enabling dynamic scaling and fault tolerance by ensuring that service instances are registered and available for seamless communication.
 
   ![Eureka](resources/eureka.png)
 
-### 4. Databases
+### 4. Databases Management
 
-- **MySQL:**
-  MySQL ensures data consistency through ACID properties, allowing critical transactions to be processed accurately.
+- <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/mysql/mysql-original.svg" alt="MySQL" width="30" height="30"/> **MySQL:**
+
+  MySQL ensures data consistency through ACID properties, allowing critical transactions to be processed accurately.  
 
   ![MySQL](resources/mysql.png)
-  
-- **MongoDB:**
-  MongoDB is employed for unstructured data storage, such as product information and user reviews, providing a flexible and scalable NoSQL solution.
+
+- <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/mongodb/mongodb-original.svg" alt="MongoDB" width="30" height="30"/> **MongoDB:**
+
+  MongoDB is employed for unstructured data storage, such as product information and user reviews, providing a flexible and scalable NoSQL solution.  
 
   ![MongoDB](resources/mongodb.png)
-  
-- **Redis:**
-  Redis acts as a caching solution to alleviate load on MySQL and MongoDB, accelerating data access and reducing the number of database queries.
+
+- <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/redis/redis-original.svg" alt="Redis" width="30" height="30"/> **Redis:**
+
+  Redis acts as a caching solution to alleviate load on MySQL and MongoDB, accelerating data access and reducing the number of database queries.  
 
   ![Redis](resources/redis.png)
-  
-- **AWS S3:**
-  AWS S3 is utilized for storing large volumes of unstructured data (e.g., images and videos), providing a highly durable and scalable storage solution.
+
+- <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/amazonwebservices/amazonwebservices-original-wordmark.svg" alt="AWS S3" width="30" height="30"/> **AWS S3:**
+
+  AWS S3 is utilized for storing large volumes of unstructured data (e.g., images and videos), providing a highly durable and scalable storage solution.  
 
   ![AWS S3](resources/awss3.png)
 
 ### 5. Identity and Access Management
 
-- **Keycloak:**
+- <img src="https://i.imgur.com/0ue3f00.png" width="30" height="30" /> **Keycloak:**
+
   - **Single Sign-On (SSO):** Users can log in once to access multiple services, with support for OAuth 2.0 and OpenID Connect, providing seamless authentication across the platform.
   - **Social Login:** Allows users to log in via their social accounts (e.g., Google, Facebook, Github), simplifying the authentication process and improving user experience.
   - **User Management:** Streamlines the processes of user registration, login, logout, email verification, password recovery, and overall account management, ensuring a seamless user experience.
@@ -104,49 +113,55 @@ The platform leverages microservices to ensure scalability, resilience, and main
   - **JSON Web Tokens (JWT):** JWT secures API communications with authentication tokens, mitigating CSRF attacks and enhancing data security.
 
   ![Keycloak](resources/keycloak.png)
-  ![Keycloak](resources/login.png)
+  ![Login Flow](resources/login.png)
 
 ### 6. Payment Management
 
-- **Stripe:**
+- <img src="https://i.imgur.com/oJqyUK5.png" width="30" height="30" /> **Stripe:**
+
   Stripe provides comprehensive payment processing APIs that support various payment methods and currencies. Its webhook integration enables real-time transaction tracking. This allows for instant **charges** upon purchase and facilitates **recurring subscriptions** for users, enhancing overall transaction efficiency and user experience.
 
   ![Stripe](resources/stripe.png)
 
 ### 7. Monitoring and Logging
 
-- **Prometheus & Grafana:**
+- <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/prometheus/prometheus-original.svg" alt="Prometheus" width="30" height="30"/><img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/grafana/grafana-original.svg" alt="Grafana" width="30" height="30"/> **Prometheus & Grafana:**
+
   These tools collect performance metrics for analysis and visualization, enabling real-time monitoring of system health.
 
   ![Prometheus](resources/prometheus.png)
   
   ![Grafana](resources/grafana.png)
 
-- **Loki:**
-  Loki serves as a centralized logging system, aggregating logs from microservices for efficient diagnosis and resolution of issues.
+- <img src="https://i.imgur.com/RMo3imI.png" width="30" height="30" /> **Loki:**
 
+  Loki serves as a centralized logging system, aggregating logs from microservices for efficient diagnosis and resolution of issues.
+  
   ![Loki](resources/loki.png)
 
 ### 8. Distributed Tracing
 
-- **Zipkin:**
+- <img src="https://i.imgur.com/dEAIPRs.png" width="30" height="30" /> **Zipkin:**
+
   Zipkin allows for tracking the flow of requests through the system, helping to identify bottlenecks and optimize performance.
 
   ![Zipkin](resources/zipkin.png)
 
-### 9. Docker for Containerization
+### 9. Containerization
 
-- **Docker:**  
+- <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/docker/docker-original.svg" alt="Docker" width="30" height="30"/> **Docker:**
+
   Docker is used to containerize each service in the microservices architecture, ensuring that each component can be deployed with its dependencies in isolated environments. This enables consistent behavior across different environments, including development, testing, and production.
 
-- **Docker Compose:**  
+- **Docker Compose:**
   Docker Compose is utilized to orchestrate multi-container setups, allowing services such as MySQL, MongoDB, Redis, Grafana, Kafka, and Prometheus to be managed together efficiently. This simplifies starting, stopping, and scaling services in local and cloud environments.
 
   ![Docker](resources/docker.png)
   
 ### 10. Resilience
 
-- **Resilience4j:**
+- <img src="https://i.imgur.com/OlDIdd2.png" width="30" height="30" /> **Resilience4j:**
+
   - **Circuit Breaker:** Prevents requests to unavailable services, maintaining system stability.
   - **Retry Mechanism:** Automatically retries failed requests, enhancing reliability.
   - **Time Limiter:** Sets a maximum allowable time for requests, ensuring quick failure responses if a service is slow or unresponsive, thereby enhancing overall system responsiveness.
