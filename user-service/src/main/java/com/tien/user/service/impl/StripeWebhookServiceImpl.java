@@ -2,6 +2,7 @@ package com.tien.user.service.impl;
 
 import com.stripe.exception.SignatureVerificationException;
 import com.stripe.model.Event;
+import com.stripe.model.Subscription;
 import com.stripe.model.checkout.Session;
 import com.stripe.net.Webhook;
 import com.tien.user.exception.AppException;
@@ -42,7 +43,7 @@ public class StripeWebhookServiceImpl implements StripeWebhookService {
                               vipUserService.updateVipEndDate(username, packageType, subscriptionId);
                         }
                         case "customer.subscription.created" -> {
-                              com.stripe.model.Subscription subscription = (com.stripe.model.Subscription) event.getData().getObject();
+                              Subscription subscription = (Subscription) event.getData().getObject();
                               String subscriptionId = subscription.getId();
                               String username = subscription.getMetadata().get("username");
                               String packageType = subscription.getMetadata().get("packageType");
