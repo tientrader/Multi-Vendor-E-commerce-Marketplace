@@ -16,8 +16,8 @@ public class SecurityConfig {
 
       private static final String[] PUBLIC_ENDPOINTS = {
               "/auth/forgot-password",
-              "/auth/social-login",
-              "/auth/login",
+              "/auth/login-code",
+              "/auth/login-password",
               "/auth/register",
               "/actuator/**",
               "/swagger-ui.html",

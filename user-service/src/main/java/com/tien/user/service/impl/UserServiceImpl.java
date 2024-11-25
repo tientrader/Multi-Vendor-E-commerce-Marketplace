@@ -34,6 +34,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -120,7 +121,7 @@ public class UserServiceImpl implements UserService {
 
       @Override
       @Transactional
-      public TokenResponse socialLogin(String code) {
+      public TokenResponse login(String code) {
             TokenExchangeParam tokenExchangeParam = TokenExchangeParam.builder()
                     .grant_type("authorization_code")
                     .client_id(clientId)
@@ -141,11 +142,13 @@ public class UserServiceImpl implements UserService {
 
             userRepository.findByEmail(userInfo.getEmail())
                     .orElseGet(() -> userRepository.save(User.builder()
-                            .username(userInfo.getEmail())
+                            .username(userInfo.getPreferredUsername())
                             .firstName(userInfo.getGivenName())
                             .lastName(userInfo.getFamilyName())
                             .email(userInfo.getEmail())
                             .userId(userInfo.getSub())
+                            .phoneNumber(userInfo.getPhoneNumber())
+                            .dob(LocalDate.parse(userInfo.getBirthdate()))
                             .build()));
 
             return userMapper.toUserLoginResponse(tokenResponse);

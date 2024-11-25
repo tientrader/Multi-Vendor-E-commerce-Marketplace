@@ -11,7 +11,7 @@ public interface UserService {
 
       UserResponse register(RegistrationRequest request);
 
-      TokenResponse socialLogin(String code);
+      TokenResponse login(String code);
 
       TokenResponse login(UserLoginRequest request);
 
