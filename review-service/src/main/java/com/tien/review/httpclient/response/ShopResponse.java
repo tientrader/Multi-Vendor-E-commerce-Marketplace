@@ -1,4 +1,4 @@
-package com.tien.review.dto.response;
+package com.tien.review.httpclient.response;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -8,10 +8,11 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class OrderItemResponse {
+public class ShopResponse {
 
-      String productId;
-      String variantId;
-      int quantity;
+      String id;
+      String name;
+      String email;
+      String ownerUsername;
 
 }

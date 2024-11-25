@@ -2,8 +2,8 @@ package com.tien.review.httpclient;
 
 import com.tien.review.configuration.AuthenticationRequestInterceptor;
 import com.tien.review.dto.ApiResponse;
-import com.tien.review.dto.response.ExistsResponse;
-import com.tien.review.dto.response.ProductResponse;
+import com.tien.review.httpclient.response.ExistsResponse;
+import com.tien.review.httpclient.response.ProductResponse;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
 import org.springframework.cloud.openfeign.FeignClient;
