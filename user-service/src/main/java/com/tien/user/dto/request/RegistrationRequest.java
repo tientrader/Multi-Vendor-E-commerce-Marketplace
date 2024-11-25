@@ -22,21 +22,21 @@ public class RegistrationRequest {
       String password;
 
       @Email(message = "INVALID_EMAIL")
-      @NotBlank(message = "EMAIL_IS_REQUIRED")
+      @NotNull(message = "EMAIL_IS_REQUIRED")
       String email;
 
-      @NotNull(message = "PHONE_NUMBER_NULL")
+      @NotNull(message = "PHONE_NUMBER_IS_REQUIRED")
       @Pattern(regexp = "^\\+?[0-9]{1,3}[0-9]{9,14}$", message = "INVALID_PHONE_NUMBER")
       String phoneNumber;
 
-      @NotNull(message = "FIRSTNAME_NULL")
+      @NotNull(message = "FIRSTNAME_IS_REQUIRED")
       String firstName;
 
-      @NotNull(message = "LASTNAME_NULL")
+      @NotNull(message = "LASTNAME_IS_REQUIRED")
       String lastName;
 
       @DobConstraint(min = 10, message = "INVALID_DOB")
-      @NotNull(message = "DOB_NULL")
+      @NotNull(message = "DOB_IS_REQUIRED")
       @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
       LocalDate dob;
 

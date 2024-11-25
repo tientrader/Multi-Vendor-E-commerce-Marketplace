@@ -1,7 +1,7 @@
 package com.tien.user.dto.request;
 
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -13,7 +13,7 @@ import lombok.experimental.FieldDefaults;
 public class ForgotPasswordRequest {
 
       @Email(message = "INVALID_EMAIL")
-      @NotBlank(message = "EMAIL_IS_REQUIRED")
+      @NotNull(message = "EMAIL_IS_REQUIRED")
       String email;
 
 }

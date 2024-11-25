@@ -1,6 +1,6 @@
 package com.tien.user.dto.request;
 
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -11,7 +11,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class RefreshTokenRequest {
 
-      @NotBlank(message = "Refresh token cannot be blank")
+      @NotNull(message = "REFRESH_TOKEN_IS_REQUIRED")
       String refreshToken;
 
 }

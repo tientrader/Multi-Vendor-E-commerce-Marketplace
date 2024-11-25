@@ -1,11 +1,11 @@
 package com.tien.user.service.impl;
 
 import com.tien.user.dto.ApiResponse;
-import com.tien.user.dto.request.StripeSubscriptionRequest;
-import com.tien.user.dto.request.SubscriptionSessionRequest;
+import com.tien.user.httpclient.request.StripeSubscriptionRequest;
+import com.tien.user.httpclient.request.SubscriptionSessionRequest;
 import com.tien.user.dto.request.VIPUserRequest;
 import com.tien.user.dto.request.VIPUserRequestWithSession;
-import com.tien.user.dto.response.SessionResponse;
+import com.tien.user.httpclient.response.SessionResponse;
 import com.tien.user.dto.response.VIPUserResponse;
 import com.tien.user.dto.response.VIPUserResponseWithSession;
 import com.tien.user.entity.User;

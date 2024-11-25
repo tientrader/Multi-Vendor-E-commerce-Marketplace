@@ -1,5 +1,7 @@
 package com.tien.user.dto.request;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -11,7 +13,12 @@ import lombok.experimental.FieldDefaults;
 public class VIPUserRequestWithSession {
 
       String username;
+
+      @Email(message = "INVALID_EMAIL")
+      @NotNull(message = "EMAIL_IS_REQUIRED")
       String email;
+
+      @NotNull(message = "PACKAGE_TYPE_IS_REQUIRED")
       String packageType;
 
 }

@@ -1,4 +1,4 @@
-package com.tien.user.dto.request;
+package com.tien.user.httpclient.request;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -8,12 +8,10 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class StripeSubscriptionRequest {
+public class SubscriptionSessionRequest {
 
-      String stripeToken;
       String email;
-      String packageType;
       String username;
-      long numberOfLicense;
+      String packageType;
 
 }

@@ -11,10 +11,10 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserUpdateRequest {
 
-      @NotNull(message = "FIRSTNAME_NULL")
+      @NotNull(message = "FIRSTNAME_IS_REQUIRED")
       String firstName;
 
-      @NotNull(message = "LASTNAME_NULL")
+      @NotNull(message = "LASTNAME_IS_REQUIRED")
       String lastName;
 
 }

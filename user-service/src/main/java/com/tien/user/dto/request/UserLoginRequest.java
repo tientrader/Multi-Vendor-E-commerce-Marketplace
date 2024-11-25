@@ -14,7 +14,7 @@ public class UserLoginRequest {
       @Size(min = 4, message = "INVALID_USERNAME")
       String username;
 
-      @Size(min = 6, message = "INVALID_PASSWORD")
+      @Size(min = 8, message = "INVALID_PASSWORD")
       String password;
 
 }
