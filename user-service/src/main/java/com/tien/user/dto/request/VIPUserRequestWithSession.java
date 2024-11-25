@@ -12,8 +12,6 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class VIPUserRequestWithSession {
 
-      String username;
-
       @Email(message = "INVALID_EMAIL")
       @NotNull(message = "EMAIL_IS_REQUIRED")
       String email;
