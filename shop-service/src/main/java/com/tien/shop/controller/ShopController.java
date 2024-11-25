@@ -20,7 +20,7 @@ public class ShopController {
       ShopService shopService;
 
       @PostMapping("/create")
-      public ApiResponse<ShopResponse> createShop(@Valid @RequestBody ShopCreationRequest request) {
+      public ApiResponse<ShopResponse> createShop(@RequestBody @Valid ShopCreationRequest request) {
             return ApiResponse.<ShopResponse>builder()
                     .result(shopService.createShop(request))
                     .build();
@@ -52,7 +52,7 @@ public class ShopController {
 
       @GetMapping("/my-sales-report")
       public ApiResponse<SalesReportResponse> getMySalesReport(@RequestParam("startDate") String startDate,
-                                                                  @RequestParam("endDate") String endDate) {
+                                                               @RequestParam("endDate") String endDate) {
             return ApiResponse.<SalesReportResponse>builder()
                     .result(shopService.getMySalesReport(startDate, endDate))
                     .build();

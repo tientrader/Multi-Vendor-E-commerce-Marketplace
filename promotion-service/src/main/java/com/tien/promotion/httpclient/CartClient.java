@@ -2,7 +2,7 @@ package com.tien.promotion.httpclient;
 
 import com.tien.promotion.configuration.AuthenticationRequestInterceptor;
 import com.tien.promotion.dto.ApiResponse;
-import com.tien.promotion.dto.response.CartResponse;
+import com.tien.promotion.httpclient.response.CartResponse;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
 import org.springframework.cloud.openfeign.FeignClient;

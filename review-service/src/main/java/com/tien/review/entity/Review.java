@@ -2,7 +2,6 @@ package com.tien.review.entity;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -27,18 +26,14 @@ public class Review {
       @Id
       String id;
 
-      @NotNull
       @Indexed
       String username;
 
-      @NotNull
       @Indexed
       String productId;
 
-      @NotNull
       String variantId;
 
-      @NotNull
       @Min(1)
       @Max(5)
       int rating;

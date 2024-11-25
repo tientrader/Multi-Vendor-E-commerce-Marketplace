@@ -1,4 +1,4 @@
-package com.tien.promotion.dto.response;
+package com.tien.promotion.httpclient.response;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;

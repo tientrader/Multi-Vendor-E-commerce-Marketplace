@@ -5,6 +5,7 @@ import com.tien.promotion.dto.request.PromotionCreationRequest;
 import com.tien.promotion.dto.request.PromotionUpdateRequest;
 import com.tien.promotion.dto.response.PromotionResponse;
 import com.tien.promotion.service.PromotionService;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -20,7 +21,7 @@ public class PromotionController {
       PromotionService promotionService;
 
       @PostMapping("/create")
-      public ApiResponse<PromotionResponse> createPromotion(@RequestBody PromotionCreationRequest request) {
+      public ApiResponse<PromotionResponse> createPromotion(@RequestBody @Valid PromotionCreationRequest request) {
             return ApiResponse.<PromotionResponse>builder()
                     .result(promotionService.createPromotion(request))
                     .build();
@@ -35,7 +36,7 @@ public class PromotionController {
       }
 
       @PutMapping("/{id}")
-      public ApiResponse<PromotionResponse> updatePromotion(@PathVariable String id, @RequestBody PromotionUpdateRequest request) {
+      public ApiResponse<PromotionResponse> updatePromotion(@PathVariable String id, @RequestBody @Valid PromotionUpdateRequest request) {
             return ApiResponse.<PromotionResponse>builder()
                     .result(promotionService.updatePromotion(id, request))
                     .build();
