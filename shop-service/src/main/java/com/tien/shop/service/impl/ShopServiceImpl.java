@@ -8,6 +8,8 @@ import com.tien.shop.entity.Shop;
 import com.tien.shop.exception.AppException;
 import com.tien.shop.exception.ErrorCode;
 import com.tien.shop.httpclient.ProductClient;
+import com.tien.shop.httpclient.response.ProductResponse;
+import com.tien.shop.httpclient.response.ProductVariantResponse;
 import com.tien.shop.mapper.ShopMapper;
 import com.tien.shop.repository.ShopRepository;
 import com.tien.shop.service.ShopService;
