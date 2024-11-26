@@ -35,7 +35,7 @@ public class RegistrationRequest {
       @NotNull(message = "LASTNAME_IS_REQUIRED")
       String lastName;
 
-      @DobConstraint(min = 10, message = "INVALID_DOB")
+      @DobConstraint(min = 0, message = "INVALID_DOB")
       @NotNull(message = "DOB_IS_REQUIRED")
       @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
       LocalDate dob;
