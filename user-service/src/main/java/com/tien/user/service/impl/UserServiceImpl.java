@@ -163,6 +163,7 @@ public class UserServiceImpl implements UserService {
                     .client_secret(clientSecret)
                     .username(request.getUsername())
                     .password(request.getPassword())
+                    .otp(request.getOtp())
                     .build();
 
             try {

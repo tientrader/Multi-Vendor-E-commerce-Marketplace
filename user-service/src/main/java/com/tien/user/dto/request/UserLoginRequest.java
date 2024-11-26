@@ -17,4 +17,7 @@ public class UserLoginRequest {
       @Size(min = 8, message = "INVALID_PASSWORD")
       String password;
 
+      @Size(min = 6, message = "INVALID_OTP")
+      String otp;
+
 }

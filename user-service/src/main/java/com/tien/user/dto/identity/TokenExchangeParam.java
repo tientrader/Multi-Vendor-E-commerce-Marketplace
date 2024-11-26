@@ -19,5 +19,6 @@ public class TokenExchangeParam {
       String redirect_uri;
       String username;
       String password;
+      String otp;
 
 }

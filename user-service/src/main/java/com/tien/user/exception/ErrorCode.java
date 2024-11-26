@@ -53,6 +53,7 @@ public enum ErrorCode {
       NO_ACTIVE_SUBSCRIPTION(2026, "No active subscription found. Please subscribe to continue.", HttpStatus.UNAUTHORIZED),
       REFRESH_TOKEN_IS_REQUIRED(2027, "Refresh token is required. Please provide a valid refresh token.", HttpStatus.BAD_REQUEST),
       PACKAGE_TYPE_IS_REQUIRED(2028, "Package type is required. Please provide a valid package type.", HttpStatus.BAD_REQUEST),
+      INVALID_OTP(2029, "The OTP provided is invalid. Please check and try again.", HttpStatus.BAD_REQUEST),
       ;
 
       int code;
