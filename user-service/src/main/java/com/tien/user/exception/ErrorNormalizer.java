@@ -37,7 +37,7 @@ public class ErrorNormalizer {
             log.warn("Cannot complete request: Status {}, Error: {}", exception.status(), exception.getMessage());
 
             if (exception.status() == 401) {
-                  return new AppException(ErrorCode.INVALID_USERNAME_OR_PASSWORD);
+                  return new AppException(ErrorCode.INVALID_USERNAME_OR_PASSWORD_OR_OTP);
             }
 
             try {

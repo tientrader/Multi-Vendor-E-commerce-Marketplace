@@ -38,7 +38,7 @@ public enum ErrorCode {
       INVALID_EMAIL(2011, "The email address is invalid. Please enter a valid email.", HttpStatus.BAD_REQUEST),
       EMAIL_IS_REQUIRED(2012, "Email is required. Please provide an email address.", HttpStatus.BAD_REQUEST),
       LOGIN_FAILED(2013, "Login failed. Please check your credentials and try again.", HttpStatus.BAD_REQUEST),
-      INVALID_USERNAME_OR_PASSWORD(2014, "Invalid username or password. Please check your login credentials.", HttpStatus.BAD_REQUEST),
+      INVALID_USERNAME_OR_PASSWORD_OR_OTP(2014, "Invalid username, password or OTP. Please check your login credentials.", HttpStatus.BAD_REQUEST),
       INVALID_PRICE_ID(2015, "The provided price ID is invalid. Please check the price details.", HttpStatus.BAD_REQUEST),
       USER_NOT_VIP(2016, "The user is not a VIP. Access restricted to VIP users only.", HttpStatus.BAD_REQUEST),
       PHONE_NUMBER_IS_REQUIRED(2017, "Phone number is required. Please provide your phone number.", HttpStatus.BAD_REQUEST),
