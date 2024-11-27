@@ -1,6 +1,8 @@
 package com.tien.user.dto.request;
 
 import com.tien.user.validator.DobConstraint;
+import com.tien.user.validator.PasswordConstraint;
+import com.tien.user.validator.PhoneNumberConstraint;
 import jakarta.validation.constraints.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -18,7 +20,7 @@ public class RegistrationRequest {
       @Size(min = 4, message = "INVALID_USERNAME")
       String username;
 
-      @Size(min = 8, message = "INVALID_PASSWORD")
+      @PasswordConstraint
       String password;
 
       @Email(message = "INVALID_EMAIL")
@@ -26,7 +28,7 @@ public class RegistrationRequest {
       String email;
 
       @NotNull(message = "PHONE_NUMBER_IS_REQUIRED")
-      @Pattern(regexp = "^\\+?[0-9]{1,3}[0-9]{9,14}$", message = "INVALID_PHONE_NUMBER")
+      @PhoneNumberConstraint
       String phoneNumber;
 
       @NotNull(message = "FIRSTNAME_IS_REQUIRED")
@@ -35,7 +37,7 @@ public class RegistrationRequest {
       @NotNull(message = "LASTNAME_IS_REQUIRED")
       String lastName;
 
-      @DobConstraint(min = 0, message = "INVALID_DOB")
+      @DobConstraint(min = 0)
       @NotNull(message = "DOB_IS_REQUIRED")
       @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
       LocalDate dob;

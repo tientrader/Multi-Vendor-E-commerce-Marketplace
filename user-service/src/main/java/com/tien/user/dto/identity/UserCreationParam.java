@@ -4,6 +4,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.util.List;
+import java.util.Map;
 
 @Data
 @Builder
@@ -19,5 +20,6 @@ public class UserCreationParam {
       String firstName;
       String lastName;
       List<Credential> credentials;
+      Map<String, List<String>> attributes;
 
 }

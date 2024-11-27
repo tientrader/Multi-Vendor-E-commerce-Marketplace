@@ -32,7 +32,7 @@ public enum ErrorCode {
       PROFILE_NOT_FOUND(2005, "Profile not found. Please ensure the user exists.", HttpStatus.NOT_FOUND),
       USER_NOT_EXISTED(2006, "User does not exist. Please check the username and try again.", HttpStatus.NOT_FOUND),
       DOB_IS_REQUIRED(2007, "Date of birth is required. Please provide your date of birth.", HttpStatus.BAD_REQUEST),
-      INVALID_DOB(2008, "Your age must be at least 10 years old.", HttpStatus.BAD_REQUEST),
+      INVALID_DOB(2008, "Please enter a valid date of birth", HttpStatus.BAD_REQUEST),
       FIRSTNAME_IS_REQUIRED(2009, "First name is required. Please provide your first name.", HttpStatus.BAD_REQUEST),
       LASTNAME_IS_REQUIRED(2010, "Last name is required. Please provide your last name.", HttpStatus.BAD_REQUEST),
       INVALID_EMAIL(2011, "The email address is invalid. Please enter a valid email.", HttpStatus.BAD_REQUEST),
@@ -54,6 +54,7 @@ public enum ErrorCode {
       REFRESH_TOKEN_IS_REQUIRED(2027, "Refresh token is required. Please provide a valid refresh token.", HttpStatus.BAD_REQUEST),
       PACKAGE_TYPE_IS_REQUIRED(2028, "Package type is required. Please provide a valid package type.", HttpStatus.BAD_REQUEST),
       INVALID_OTP(2029, "The OTP provided is invalid. Please check and try again.", HttpStatus.BAD_REQUEST),
+      PASSWORD_POLICY_VIOLATION(2030, "Password must meet the required policy: min length 8, at least one uppercase letter, one number, and one special character.", HttpStatus.BAD_REQUEST),
       ;
 
       int code;

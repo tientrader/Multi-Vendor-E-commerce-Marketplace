@@ -36,6 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -88,6 +89,10 @@ public class UserServiceImpl implements UserService {
                                           .temporary(false)
                                           .value(request.getPassword())
                                           .build()))
+                                  .attributes(Map.of(
+                                          "phoneNumber", List.of(request.getPhoneNumber()),
+                                          "birthdate", List.of(request.getDob().toString())
+                                  ))
                                   .build());
             } catch (FeignException e) {
                   log.error("Error occurred during user registration: {}", e.getMessage());
@@ -141,15 +146,28 @@ public class UserServiceImpl implements UserService {
             UserInfo userInfo = identityClient.getUserInfo("Bearer " + tokenResponse.getAccessToken());
 
             userRepository.findByEmail(userInfo.getEmail())
-                    .orElseGet(() -> userRepository.save(User.builder()
-                            .username(userInfo.getPreferredUsername())
-                            .firstName(userInfo.getGivenName())
-                            .lastName(userInfo.getFamilyName())
-                            .email(userInfo.getEmail())
-                            .userId(userInfo.getSub())
-                            .phoneNumber(userInfo.getPhoneNumber())
-                            .dob(LocalDate.parse(userInfo.getBirthdate()))
-                            .build()));
+                    .orElseGet(() -> {
+                          User newUser = User.builder()
+                                  .username(userInfo.getPreferredUsername())
+                                  .firstName(userInfo.getGivenName())
+                                  .lastName(userInfo.getFamilyName())
+                                  .email(userInfo.getEmail())
+                                  .userId(userInfo.getSub())
+                                  .phoneNumber(userInfo.getPhoneNumber())
+                                  .dob(LocalDate.parse(userInfo.getBirthdate()))
+                                  .build();
+
+                          userRepository.save(newUser);
+
+                          kafkaTemplate.send("register-successful", NotificationEvent.builder()
+                                  .channel("EMAIL")
+                                  .recipient(newUser.getEmail())
+                                  .subject("Welcome to TienProApp")
+                                  .body("Hello, " + newUser.getUsername())
+                                  .build());
+
+                          return newUser;
+                    });
 
             return userMapper.toUserLoginResponse(tokenResponse);
       }
