@@ -30,7 +30,7 @@ public enum ErrorCode {
       PROMOTION_NOT_FOUND(2003, "The promotion could not be found. Please verify the promotion details.", HttpStatus.NOT_FOUND),
       PROMOTION_EXPIRED(2004, "The promotion has expired. Please check the promotion dates and try again.", HttpStatus.BAD_REQUEST),
       PROMOTION_USAGE_LIMIT_REACHED(2005, "The promotion usage limit has been reached. No more uses are allowed.", HttpStatus.BAD_REQUEST),
-      CART_NOT_FOUND(2006, "The shopping cart could not be found. Please verify your cart and try again.", HttpStatus.BAD_REQUEST),
+      CART_NOT_FOUND(2006, "The shopping cart could not be found. Please verify your cart and try again.", HttpStatus.NOT_FOUND),
       PRODUCT_NOT_ELIGIBLE_FOR_PROMO(2007, "The product is not eligible for the promotion. Please check the eligibility criteria.", HttpStatus.BAD_REQUEST),
       NO_ELIGIBLE_PRODUCTS(2008, "There are no eligible products for the promotion. Please verify the products in your cart.", HttpStatus.BAD_REQUEST),
       ORDER_VALUE_TOO_LOW(2009, "The order value is too low. Please ensure the order meets the minimum value required for the promotion.", HttpStatus.BAD_REQUEST),

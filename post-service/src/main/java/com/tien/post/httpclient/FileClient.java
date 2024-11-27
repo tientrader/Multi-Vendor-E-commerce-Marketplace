@@ -2,7 +2,7 @@ package com.tien.post.httpclient;
 
 import com.tien.post.configuration.AuthenticationRequestInterceptor;
 import com.tien.post.dto.ApiResponse;
-import com.tien.post.dto.response.FileResponse;
+import com.tien.post.httpclient.response.FileResponse;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
 import org.springframework.cloud.openfeign.FeignClient;

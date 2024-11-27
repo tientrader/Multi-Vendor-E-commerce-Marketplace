@@ -2,7 +2,7 @@ package com.tien.post.service.impl;
 
 import com.tien.post.dto.ApiResponse;
 import com.tien.post.dto.PageResponse;
-import com.tien.post.dto.response.FileResponse;
+import com.tien.post.httpclient.response.FileResponse;
 import com.tien.post.entity.Post;
 import com.tien.post.exception.AppException;
 import com.tien.post.exception.ErrorCode;

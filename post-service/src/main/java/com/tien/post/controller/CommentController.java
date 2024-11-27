@@ -5,6 +5,7 @@ import com.tien.post.dto.request.CommentCreationRequest;
 import com.tien.post.dto.request.CommentUpdateRequest;
 import com.tien.post.dto.response.CommentResponse;
 import com.tien.post.service.CommentService;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -22,8 +23,7 @@ public class CommentController {
 
       @PostMapping("/{postId}")
       public ApiResponse<CommentResponse> createComment(@PathVariable String postId,
-                                                        @RequestBody CommentCreationRequest request) {
-            request.setPostId(postId);
+                                                        @RequestBody @Valid CommentCreationRequest request) {
             return ApiResponse.<CommentResponse>builder()
                     .result(commentService.createComment(postId, request))
                     .build();
@@ -31,7 +31,7 @@ public class CommentController {
 
       @PutMapping("/{commentId}")
       public ApiResponse<Void> updateComment(@PathVariable String commentId,
-                                             @RequestBody CommentUpdateRequest request) {
+                                             @RequestBody @Valid CommentUpdateRequest request) {
             commentService.updateComment(commentId, request);
             return ApiResponse.<Void>builder()
                     .message("Comment updated successfully")
