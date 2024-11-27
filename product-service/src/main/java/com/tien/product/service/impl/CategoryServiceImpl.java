@@ -2,7 +2,7 @@ package com.tien.product.service.impl;
 
 import com.tien.product.dto.ApiResponse;
 import com.tien.product.dto.response.CategoryResponse;
-import com.tien.product.dto.response.ShopResponse;
+import com.tien.product.httpclient.response.ShopResponse;
 import com.tien.product.entity.Category;
 import com.tien.product.exception.ErrorCode;
 import com.tien.product.httpclient.ShopClient;

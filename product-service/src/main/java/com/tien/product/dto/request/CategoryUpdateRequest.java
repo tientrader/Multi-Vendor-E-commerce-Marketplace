@@ -1,6 +1,6 @@
 package com.tien.product.dto.request;
 
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -11,7 +11,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CategoryUpdateRequest {
 
-      @NotBlank(message = "CATEGORY_NAME_IS_REQUIRED")
+      @NotNull(message = "CATEGORY_NAME_IS_REQUIRED")
       String name;
 
       String description;
