@@ -179,19 +179,20 @@ public class StripeServiceImpl implements StripeService {
       @Override
       public SessionResponse createPaymentSession(PaymentSessionRequest request) {
             com.tien.payment.entity.Session paymentSession = stripeMapper.toSession(request);
+            String username = getCurrentUsername();
+
             try {
                   BigDecimal amount = request.getAmount();
                   String productName = request.getProductName();
                   String currency = "USD";
 
-                  String username = getCurrentUsername();
                   Customer customer = findOrCreateCustomer(request.getEmail(), username);
-                  String clientUrl = "https://localhost:4200";
+                  String clientUrl = "https://localhost:3000";
 
                   SessionCreateParams.Builder sessionCreateParamsBuilder = SessionCreateParams.builder()
                           .setMode(SessionCreateParams.Mode.PAYMENT)
                           .setCustomer(customer.getId())
-                          .setSuccessUrl(clientUrl + "/success?session_id={CHECKOUT_SESSION_ID}")
+                          .setSuccessUrl(clientUrl + "/success")
                           .setCancelUrl(clientUrl + "/failure");
 
                   sessionCreateParamsBuilder.addLineItem(
@@ -222,21 +223,22 @@ public class StripeServiceImpl implements StripeService {
 
                   return stripeMapper.toSessionResponse(paymentSession);
             } catch (StripeException e) {
-                  log.error("Payment session creation failed for user {}: {}", request.getUsername(), e.getMessage());
+                  log.error("Payment session creation failed for user {}: {}", username, e.getMessage());
                   throw new AppException(ErrorCode.PAYMENT_SESSION_CREATION_FAILED);
             } catch (Exception e) {
-                  log.error("An unexpected error occurred while creating payment session for user {}: {}", request.getUsername(), e.getMessage());
+                  log.error("An unexpected error occurred while creating payment session for user {}: {}", username, e.getMessage());
                   throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
             }
       }
 
       @Override
       public SessionResponse createSubscriptionSession(SubscriptionSessionRequest request) {
+            String username = getCurrentUsername();
             SessionResponse sessionResponse = new SessionResponse();
+
             try {
-                  String username = getCurrentUsername();
                   Customer customer = findOrCreateCustomer(request.getEmail(), username);
-                  String clientUrl = "https://localhost:4200";
+                  String clientUrl = "https://localhost:3000";
 
                   String priceId = switch (request.getPackageType()) {
                         case "MONTHLY" -> monthlyPriceId;
@@ -248,7 +250,7 @@ public class StripeServiceImpl implements StripeService {
                   SessionCreateParams sessionCreateParams = SessionCreateParams.builder()
                           .setMode(SessionCreateParams.Mode.SUBSCRIPTION)
                           .setCustomer(customer.getId())
-                          .setSuccessUrl(clientUrl + "/success?session_id={CHECKOUT_SESSION_ID}")
+                          .setSuccessUrl(clientUrl + "/success")
                           .setCancelUrl(clientUrl + "/failure")
                           .putMetadata("username", username)
                           .putMetadata("packageType", request.getPackageType())
@@ -273,10 +275,10 @@ public class StripeServiceImpl implements StripeService {
 
                   return sessionResponse;
             } catch (StripeException e) {
-                  log.error("Subscription session creation failed for user {}: {}", request.getUsername(), e.getMessage());
+                  log.error("Subscription session creation failed for user {}: {}", username, e.getMessage());
                   throw new AppException(ErrorCode.SUBSCRIPTION_SESSION_CREATION_FAILED);
             } catch (Exception e) {
-                  log.error("An unexpected error occurred while creating subscription session for user {}: {}", request.getUsername(), e.getMessage());
+                  log.error("An unexpected error occurred while creating subscription session for user {}: {}", username, e.getMessage());
                   throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
             }
       }

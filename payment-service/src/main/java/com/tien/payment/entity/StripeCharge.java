@@ -18,9 +18,6 @@ public class StripeCharge {
       String id;
 
       @Column(nullable = false)
-      String stripeToken;
-
-      @Column(nullable = false)
       String username;
 
       @Column(nullable = false)

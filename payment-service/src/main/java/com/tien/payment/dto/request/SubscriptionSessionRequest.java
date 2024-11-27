@@ -1,5 +1,7 @@
 package com.tien.payment.dto.request;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -10,8 +12,11 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class SubscriptionSessionRequest {
 
+      @NotNull(message = "EMAIL_IS_REQUIRED")
+      @Email(message = "INVALID_EMAIL")
       String email;
-      String username;
+
+      @NotNull(message = "PACKAGE_TYPE_IS_REQUIRED")
       String packageType;
 
 }
