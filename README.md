@@ -8,7 +8,7 @@
 
 ### Microservices Architecture
 
-The platform leverages microservices to ensure scalability, resilience, and maintainability, enabling independent updates and deployments for each service.
+The platform uses microservices for scalability, resilience, and independent service updates.
 
 #### Highlights:
 
@@ -42,7 +42,7 @@ The platform leverages microservices to ensure scalability, resilience, and main
 
 ## 🛠 Technologies Used
 
-### 1. Java & Spring Framework
+### Java & Spring Framework
 
 - <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/java/java-original.svg" alt="Java" width="30" height="30"/> **Java:**
 
@@ -55,28 +55,23 @@ The platform leverages microservices to ensure scalability, resilience, and main
   - **Spring Security:** Manages security across microservices, offering authentication and authorization features. Key integrations include Single Sign-On (SSO) and JSON Web Token (JWT) authentication.
   - **Spring Data JPA:** Streamlines database interactions through repositories, simplifying data retrieval and CRUD operations.
   - **Spring Cloud:** Provides essential tools for managing and routing microservices, enhancing scalability and flexibility in API development.
- 
-### 2. Service Communication
 
-- <img src="https://i.imgur.com/eTXiKPb.png" width="30" height="30" /> **Kafka:**
+### Identity and Access Management
 
-  Kafka facilitates asynchronous communication between services, ensuring safe storage and distribution of messages. It allows services to communicate efficiently in an event-driven architecture, decoupling services and improving scalability.
-  
-- **OpenFeign:**
+- <img src="https://i.imgur.com/0ue3f00.png" width="30" height="30" /> **Keycloak:**
 
-  OpenFeign simplifies inter-microservice communication by automatically creating REST client proxies, reducing boilerplate code and enhancing developer productivity.
- 
-### 3. Config Server & Service Discovery
+  - **Single Sign-On (SSO):** Users can log in once to access multiple services, with support for OAuth 2.0 and OpenID Connect, providing seamless authentication across the platform.
+  - **Social Login:** Allows users to log in via their social accounts (e.g., Google, Facebook, Github), simplifying the authentication process and improving user experience.
+  - **User Management:** Streamlines the processes of user registration, login, logout, email verification, password recovery, and overall account management, ensuring a seamless user experience.
+  - **Email Verification:** Verifies users' email addresses during registration to ensure account authenticity and prevent fraudulent sign-ups.
+  - **Argon2 Password Hashing:** Utilizes the Argon2 hashing algorithm for password storage, providing robust security against brute-force attacks and improving the overall resilience of user account security.
+  - **Role-Based Access Control (RBAC):** Ensures that only authorized users can access specific features and resources, enhancing security and protecting sensitive operations.
+  - **JSON Web Tokens (JWT):** JWT secures API communications with authentication tokens, mitigating CSRF attacks and enhancing data security.
 
-- **Spring Cloud Config:**
-  Provides server and client-side support for externalized configuration in a distributed system. This enables centralized management of configuration properties across all microservices, making updates easier and ensuring configuration consistency.
+  ![Keycloak](resources/keycloak.png)
+  ![Login Flow](resources/login.png)
 
-- **Eureka Server:**
-  Acts as a service registry, allowing microservices to discover each other. This simplifies the management of service instances and endpoints, enabling dynamic scaling and fault tolerance by ensuring that service instances are registered and available for seamless communication.
-
-  ![Eureka](resources/eureka.png)
-
-### 4. Databases Management
+### Databases Management
 
 - <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/mysql/mysql-original.svg" alt="MySQL" width="30" height="30"/> **MySQL:**
 
@@ -101,23 +96,8 @@ The platform leverages microservices to ensure scalability, resilience, and main
   AWS S3 is utilized for storing large volumes of unstructured data (e.g., images and videos), providing a highly durable and scalable storage solution.  
 
   ![AWS S3](resources/awss3.png)
-
-### 5. Identity and Access Management
-
-- <img src="https://i.imgur.com/0ue3f00.png" width="30" height="30" /> **Keycloak:**
-
-  - **Single Sign-On (SSO):** Users can log in once to access multiple services, with support for OAuth 2.0 and OpenID Connect, providing seamless authentication across the platform.
-  - **Social Login:** Allows users to log in via their social accounts (e.g., Google, Facebook, Github), simplifying the authentication process and improving user experience.
-  - **User Management:** Streamlines the processes of user registration, login, logout, email verification, password recovery, and overall account management, ensuring a seamless user experience.
-  - **Email Verification:** Verifies users' email addresses during registration to ensure account authenticity and prevent fraudulent sign-ups.
-  - **Argon2 Password Hashing:** Utilizes the Argon2 hashing algorithm for password storage, providing robust security against brute-force attacks and improving the overall resilience of user account security.
-  - **Role-Based Access Control (RBAC):** Ensures that only authorized users can access specific features and resources, enhancing security and protecting sensitive operations.
-  - **JSON Web Tokens (JWT):** JWT secures API communications with authentication tokens, mitigating CSRF attacks and enhancing data security.
-
-  ![Keycloak](resources/keycloak.png)
-  ![Login Flow](resources/login.png)
-
-### 6. Payment Management
+  
+### Payment Management
 
 - <img src="https://i.imgur.com/oJqyUK5.png" width="30" height="30" /> **Stripe:**
 
@@ -127,7 +107,27 @@ The platform leverages microservices to ensure scalability, resilience, and main
   ![Stripe](resources/stripeqrcode.png)
   ![Stripe](resources/stripe.png)
 
-### 7. Monitoring and Logging
+### Service Communication
+
+- <img src="https://i.imgur.com/eTXiKPb.png" width="30" height="30" /> **Kafka:**
+
+  Kafka facilitates asynchronous communication between services, ensuring safe storage and distribution of messages. It allows services to communicate efficiently in an event-driven architecture, decoupling services and improving scalability.
+  
+- **OpenFeign:**
+
+  OpenFeign simplifies inter-microservice communication by automatically creating REST client proxies, reducing boilerplate code and enhancing developer productivity.
+ 
+### Config Server & Service Discovery
+
+- **Spring Cloud Config:**
+  Provides server and client-side support for externalized configuration in a distributed system. This enables centralized management of configuration properties across all microservices, making updates easier and ensuring configuration consistency.
+
+- **Eureka Server:**
+  Acts as a service registry, allowing microservices to discover each other. This simplifies the management of service instances and endpoints, enabling dynamic scaling and fault tolerance by ensuring that service instances are registered and available for seamless communication.
+
+  ![Eureka](resources/eureka.png)
+
+### Monitoring and Logging
 
 - <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/prometheus/prometheus-original.svg" alt="Prometheus" width="30" height="30"/><img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/grafana/grafana-original.svg" alt="Grafana" width="30" height="30"/> **Prometheus & Grafana:**
 
@@ -143,7 +143,7 @@ The platform leverages microservices to ensure scalability, resilience, and main
   
   ![Loki](resources/loki.png)
 
-### 8. Distributed Tracing
+### Distributed Tracing
 
 - <img src="https://i.imgur.com/dEAIPRs.png" width="30" height="30" /> **Zipkin:**
 
@@ -151,7 +151,7 @@ The platform leverages microservices to ensure scalability, resilience, and main
 
   ![Zipkin](resources/zipkin.png)
 
-### 9. Containerization
+### Containerization
 
 - <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/docker/docker-original.svg" alt="Docker" width="30" height="30"/> **Docker:**
 
@@ -162,7 +162,7 @@ The platform leverages microservices to ensure scalability, resilience, and main
 
   ![Docker](resources/docker.png)
   
-### 10. Resilience
+### Resilience
 
 - <img src="https://i.imgur.com/OlDIdd2.png" width="30" height="30" /> **Resilience4j:**
 
