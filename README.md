@@ -106,16 +106,6 @@ The platform uses microservices for scalability, resilience, and independent ser
   ![Stripe](resources/stripecard.png)
   ![Stripe](resources/stripeqrcode.png)
   ![Stripe](resources/stripe.png)
-
-### Service Communication
-
-- <img src="https://i.imgur.com/eTXiKPb.png" width="30" height="30" /> **Kafka:**
-
-  Kafka facilitates asynchronous communication between services, ensuring safe storage and distribution of messages. It allows services to communicate efficiently in an event-driven architecture, decoupling services and improving scalability.
-  
-- **OpenFeign:**
-
-  OpenFeign simplifies inter-microservice communication by automatically creating REST client proxies, reducing boilerplate code and enhancing developer productivity.
  
 ### Config Server & Service Discovery
 
@@ -161,6 +151,16 @@ The platform uses microservices for scalability, resilience, and independent ser
   Docker Compose is utilized to orchestrate multi-container setups, allowing services such as MySQL, MongoDB, Redis, Grafana, Kafka, and Prometheus to be managed together efficiently. This simplifies starting, stopping, and scaling services in local and cloud environments.
 
   ![Docker](resources/docker.png)
+
+### Service Communication
+
+- <img src="https://i.imgur.com/eTXiKPb.png" width="30" height="30" /> **Kafka:**
+
+  Kafka facilitates asynchronous communication between services, ensuring safe storage and distribution of messages. It allows services to communicate efficiently in an event-driven architecture, decoupling services and improving scalability.
+  
+- **OpenFeign:**
+
+  OpenFeign simplifies inter-microservice communication by automatically creating REST client proxies, reducing boilerplate code and enhancing developer productivity.
   
 ### Resilience
 
