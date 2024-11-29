@@ -4,6 +4,8 @@
 
 ❗️ The system is designed to handle and process nearly all business scenarios, adhering to best practices for data integrity and security, ensuring that the platform remains reliable and protected against potential issues.
 
+❗️ Below is a general overview of the project. For more detailed information regarding flows, data constraints, and business logic, please refer to the code.
+
 ## 🏗 Architecture Overview
 
 ### Microservices Architecture
