@@ -1,8 +1,7 @@
 package com.tien.order.dto.request;
 
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -13,14 +12,14 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class OrderItemCreationRequest {
 
-      @NotBlank(message = "PRODUCT_ID_IS_REQUIRED")
+      @NotNull(message = "PRODUCT_ID_IS_REQUIRED")
       String productId;
 
       @NotNull(message = "VARIANT_ID_IS_REQUIRED")
       String variantId;
 
       @NotNull(message = "QUANTITY_IS_REQUIRED")
-      @Positive(message = "QUANTITY_MUST_BE_POSITIVE")
+      @Min(value = 1, message = "QUANTITY_MUST_BE_AT_LEAST_1")
       Integer quantity;
 
 }

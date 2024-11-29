@@ -12,7 +12,10 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
-@Table(name = "order_items")
+@Table(name = "order_items",
+        indexes = {
+                @Index(name = "idx_order_items_product_variant", columnList = "productId, variantId")
+        })
 public class OrderItem {
 
       @Id

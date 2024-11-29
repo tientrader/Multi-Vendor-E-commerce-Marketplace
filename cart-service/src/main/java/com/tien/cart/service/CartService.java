@@ -2,7 +2,7 @@ package com.tien.cart.service;
 
 import com.tien.cart.dto.request.CartCreationRequest;
 import com.tien.cart.dto.response.CartResponse;
-import com.tien.cart.dto.response.OrderResponse;
+import com.tien.cart.httpclient.response.OrderResponse;
 
 public interface CartService {
 

@@ -1,4 +1,4 @@
-package com.tien.cart.dto.response;
+package com.tien.order.httpclient.response;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -8,8 +8,9 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ExistsResponse {
+public class StripeChargeResponse {
 
-      boolean exists;
+      Boolean success;
+      String chargeId;
 
 }

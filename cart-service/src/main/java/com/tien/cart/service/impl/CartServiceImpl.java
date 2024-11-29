@@ -2,9 +2,9 @@ package com.tien.cart.service.impl;
 
 import com.tien.cart.dto.ApiResponse;
 import com.tien.cart.dto.request.CartItemCreationRequest;
-import com.tien.cart.dto.request.OrderCreationRequest;
+import com.tien.cart.httpclient.request.OrderCreationRequest;
 import com.tien.cart.dto.response.CartItemResponse;
-import com.tien.cart.dto.response.OrderResponse;
+import com.tien.cart.httpclient.response.OrderResponse;
 import com.tien.cart.entity.Cart;
 import com.tien.cart.entity.CartItem;
 import com.tien.cart.exception.AppException;
@@ -14,7 +14,7 @@ import com.tien.cart.httpclient.PromotionClient;
 import com.tien.cart.httpclient.ShopClient;
 import com.tien.cart.mapper.CartMapper;
 import com.tien.cart.dto.request.CartCreationRequest;
-import com.tien.cart.dto.response.ExistsResponse;
+import com.tien.cart.httpclient.response.ExistsResponse;
 import com.tien.cart.dto.response.CartResponse;
 import com.tien.cart.httpclient.ProductClient;
 import com.tien.cart.service.CartService;
@@ -53,7 +53,6 @@ public class CartServiceImpl implements CartService {
       @Override
       public CartResponse upsertProductInCart(CartCreationRequest request) {
             String username = getCurrentUsername();
-            validateUsername(username);
             String cartKey = CART_KEY_PREFIX + username;
 
             validateShopOwnership(request);
@@ -96,14 +95,11 @@ public class CartServiceImpl implements CartService {
       @Override
       public void applyPromotionCodeToCart(String promoCode) {
             String username = getCurrentUsername();
-            validateUsername(username);
-
             String cartKey = CART_KEY_PREFIX + username;
             Cart cart = (Cart) redisTemplate.opsForValue().get(cartKey);
             validateCart(cart);
 
             if (Objects.requireNonNull(cart).getItems() == null || cart.getItems().isEmpty()) {
-                  log.error("Cart is empty, cannot apply promotion code");
                   throw new AppException(ErrorCode.CART_NOT_FOUND);
             }
 
@@ -124,8 +120,6 @@ public class CartServiceImpl implements CartService {
       @Override
       public OrderResponse createOrderFromCart(String paymentMethod, String paymentToken) {
             String username = getCurrentUsername();
-            validateUsername(username);
-
             String cartKey = CART_KEY_PREFIX + username;
             Cart cart = (Cart) redisTemplate.opsForValue().get(cartKey);
             validateCart(cart);
@@ -180,8 +174,6 @@ public class CartServiceImpl implements CartService {
       @Override
       public void deleteMyCart() {
             String username = getCurrentUsername();
-            validateUsername(username);
-
             String cartKey = CART_KEY_PREFIX + username;
             Cart cart = (Cart) redisTemplate.opsForValue().get(cartKey);
             validateCart(cart);
@@ -192,8 +184,6 @@ public class CartServiceImpl implements CartService {
       @Override
       public CartResponse getMyCart() {
             String username = getCurrentUsername();
-            validateUsername(username);
-
             String cartKey = CART_KEY_PREFIX + username;
             Cart cart = (Cart) redisTemplate.opsForValue().get(cartKey);
             validateCart(cart);
@@ -255,16 +245,8 @@ public class CartServiceImpl implements CartService {
             existingCart.setTotal(calculateTotalPriceForExistingCart(updatedItems));
       }
 
-      private void validateUsername(String username) {
-            if (username == null) {
-                  log.error("Unauthorized access attempt: username is null");
-                  throw new AppException(ErrorCode.UNAUTHORIZED);
-            }
-      }
-
       private void validateCart(Cart cart) {
             if (cart == null) {
-                  log.error("Cart not found");
                   throw new AppException(ErrorCode.CART_NOT_FOUND);
             }
       }
@@ -332,7 +314,6 @@ public class CartServiceImpl implements CartService {
                   try {
                         ExistsResponse existsResponse = productClient.existsProduct(item.getProductId(), item.getVariantId()).getResult();
                         if (!existsResponse.isExists()) {
-                              log.error("Product not found: productId={}, variantId={}", item.getProductId(), item.getVariantId());
                               throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
                         }
                   } catch (FeignException e) {

@@ -4,9 +4,9 @@ import com.tien.event.dto.NotificationEvent;
 import com.tien.order.dto.ApiResponse;
 import com.tien.order.dto.request.OrderCreationRequest;
 import com.tien.order.dto.request.OrderItemCreationRequest;
-import com.tien.order.dto.request.StripeChargeRequest;
+import com.tien.order.httpclient.request.StripeChargeRequest;
 import com.tien.order.dto.response.OrderResponse;
-import com.tien.order.dto.response.StripeChargeResponse;
+import com.tien.order.httpclient.response.StripeChargeResponse;
 import com.tien.order.entity.Order;
 import com.tien.order.exception.AppException;
 import com.tien.order.exception.ErrorCode;
@@ -28,7 +28,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -51,35 +50,36 @@ public class OrderServiceImpl implements OrderService {
 
             Order order = orderMapper.toOrder(request);
             order.setUsername(username);
-            order.setTotal(calculateOrderTotal(request.getItems()));
+            order.setTotal(request.getTotal());
             order.setStatus("PENDING");
 
-            if ("CARD".equalsIgnoreCase(request.getPaymentMethod())) {
-                  StripeChargeRequest stripeChargeRequest = new StripeChargeRequest();
-                  stripeChargeRequest.setUsername(username);
-                  stripeChargeRequest.setAmount(order.getTotal());
-                  stripeChargeRequest.setStripeToken(request.getPaymentToken());
-                  stripeChargeRequest.setEmail(request.getEmail());
+            switch (request.getPaymentMethod().toUpperCase()) {
+                  case "CARD":
+                        StripeChargeRequest stripeChargeRequest = new StripeChargeRequest();
+                        stripeChargeRequest.setUsername(username);
+                        stripeChargeRequest.setAmount(order.getTotal());
+                        stripeChargeRequest.setStripeToken(request.getPaymentToken());
+                        stripeChargeRequest.setEmail(request.getEmail());
 
-                  ApiResponse<StripeChargeResponse> paymentResponse;
-                  try {
-                        paymentResponse = paymentClient.charge(stripeChargeRequest);
-                  } catch (FeignException e) {
-                        log.error("Error charging payment for user {}: {}", username, e.getMessage(), e);
-                        throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
-                  }
+                        ApiResponse<StripeChargeResponse> paymentResponse;
+                        try {
+                              paymentResponse = paymentClient.charge(stripeChargeRequest);
+                        } catch (FeignException e) {
+                              log.error("Error charging payment for user {}: {}", username, e.getMessage(), e);
+                              throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
+                        }
 
-                  if (paymentResponse.getResult() != null && paymentResponse.getResult().getSuccess()) {
-                        order.setStatus("PAID");
-                  } else {
-                        log.error("(createOrder) Payment failed for user {}: {}", username, paymentResponse.getMessage());
-                        throw new AppException(ErrorCode.PAYMENT_FAIL);
-                  }
-            } else if ("COD".equalsIgnoreCase(request.getPaymentMethod())) {
-                  order.setStatus("PENDING");
-            } else {
-                  log.error("(createOrder) Invalid payment method: {}", request.getPaymentMethod());
-                  throw new IllegalArgumentException("Invalid payment method: " + request.getPaymentMethod());
+                        if (paymentResponse.getResult() != null && paymentResponse.getResult().getSuccess()) {
+                              order.setStatus("PAID");
+                        } else {
+                              log.error("(createOrder) Payment failed for user {}: {}", username, paymentResponse.getMessage());
+                              throw new AppException(ErrorCode.PAYMENT_FAIL);
+                        }
+                        break;
+
+                  case "COD":
+                        order.setStatus("PENDING");
+                        break;
             }
 
             updateStockAndSoldQuantity(request.getItems());
@@ -112,32 +112,33 @@ public class OrderServiceImpl implements OrderService {
             order.setTotal(calculateOrderTotal(request.getItems()));
             order.setStatus("PENDING");
 
-            if ("CARD".equalsIgnoreCase(request.getPaymentMethod())) {
-                  StripeChargeRequest stripeChargeRequest = new StripeChargeRequest();
-                  stripeChargeRequest.setUsername(username);
-                  stripeChargeRequest.setAmount(order.getTotal());
-                  stripeChargeRequest.setStripeToken(request.getPaymentToken());
-                  stripeChargeRequest.setEmail(request.getEmail());
+            switch (request.getPaymentMethod().toUpperCase()) {
+                  case "CARD":
+                        StripeChargeRequest stripeChargeRequest = new StripeChargeRequest();
+                        stripeChargeRequest.setUsername(username);
+                        stripeChargeRequest.setAmount(order.getTotal());
+                        stripeChargeRequest.setStripeToken(request.getPaymentToken());
+                        stripeChargeRequest.setEmail(request.getEmail());
 
-                  ApiResponse<StripeChargeResponse> paymentResponse;
-                  try {
-                        paymentResponse = paymentClient.charge(stripeChargeRequest);
-                  } catch (FeignException e) {
-                        log.error("Error charging payment for user {}: {}", username, e.getMessage(), e);
-                        throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
-                  }
+                        ApiResponse<StripeChargeResponse> paymentResponse;
+                        try {
+                              paymentResponse = paymentClient.charge(stripeChargeRequest);
+                        } catch (FeignException e) {
+                              log.error("Error charging payment for user {}: {}", username, e.getMessage(), e);
+                              throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
+                        }
 
-                  if (paymentResponse.getResult() != null && paymentResponse.getResult().getSuccess()) {
-                        order.setStatus("PAID");
-                  } else {
-                        log.error("Payment failed for user {}: {}", username, paymentResponse.getMessage());
-                        throw new AppException(ErrorCode.PAYMENT_FAIL);
-                  }
-            } else if ("COD".equalsIgnoreCase(request.getPaymentMethod())) {
-                  order.setStatus("PENDING");
-            } else {
-                  log.error("Invalid payment method: {}", request.getPaymentMethod());
-                  throw new IllegalArgumentException("Invalid payment method: " + request.getPaymentMethod());
+                        if (paymentResponse.getResult() != null && paymentResponse.getResult().getSuccess()) {
+                              order.setStatus("PAID");
+                        } else {
+                              log.error("Payment failed for user {}: {}", username, paymentResponse.getMessage());
+                              throw new AppException(ErrorCode.PAYMENT_FAIL);
+                        }
+                        break;
+
+                  case "COD":
+                        order.setStatus("PENDING");
+                        break;
             }
 
             updateStockAndSoldQuantity(request.getItems());
@@ -166,7 +167,7 @@ public class OrderServiceImpl implements OrderService {
             return orderRepository.findAll()
                     .stream()
                     .map(orderMapper::toOrderResponse)
-                    .collect(Collectors.toList());
+                    .toList();
       }
 
       @Override
@@ -174,7 +175,7 @@ public class OrderServiceImpl implements OrderService {
             return findOrdersByUsername(getCurrentUsername())
                     .stream()
                     .map(orderMapper::toOrderResponse)
-                    .collect(Collectors.toList());
+                    .toList();
       }
 
       @Override
@@ -183,7 +184,7 @@ public class OrderServiceImpl implements OrderService {
             return findOrdersByUsername(username)
                     .stream()
                     .map(orderMapper::toOrderResponse)
-                    .collect(Collectors.toList());
+                    .toList();
       }
 
       @Override
@@ -205,16 +206,18 @@ public class OrderServiceImpl implements OrderService {
       }
 
       private double calculateOrderTotal(List<OrderItemCreationRequest> items) {
-            return items.stream()
-                    .mapToDouble(item -> {
-                          try {
-                                return productClient.getProductPriceById(item.getProductId(), item.getVariantId()).getResult() * item.getQuantity();
-                          } catch (FeignException e) {
-                                log.error("Error fetching price for productId={}, variantId={}: {}", item.getProductId(), item.getVariantId(), e.getMessage());
-                                throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
-                          }
-                    })
-                    .sum();
+            return items.stream().mapToDouble(item -> {
+                  try {
+                        return productClient.getProductPriceById(item.getProductId(), item.getVariantId()).getResult() * item.getQuantity();
+                  } catch (FeignException e) {
+                        if (e.status() == 404) {
+                              throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
+                        }
+                        log.error("Error fetching price for productId={}, variantId={}: {}",
+                                item.getProductId(), item.getVariantId(), e.getMessage());
+                        throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
+                  }
+            }).sum();
       }
 
       private void validateStockAvailability(List<OrderItemCreationRequest> items) {
@@ -227,7 +230,11 @@ public class OrderServiceImpl implements OrderService {
                               throw new AppException(ErrorCode.OUT_OF_STOCK);
                         }
                   } catch (FeignException e) {
-                        log.error("Error fetching stock for productId={}, variantId={}: {}", item.getProductId(), item.getVariantId(), e.getMessage());
+                        if (e.status() == 404) {
+                              throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
+                        }
+                        log.error("Error fetching stock for productId={}, variantId={}: {}",
+                                item.getProductId(), item.getVariantId(), e.getMessage());
                         throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
                   }
             });
@@ -238,7 +245,8 @@ public class OrderServiceImpl implements OrderService {
                   try {
                         productClient.updateStockAndSoldQuantity(item.getProductId(), item.getVariantId(), item.getQuantity());
                   } catch (FeignException e) {
-                        log.error("Error updating stock for productId={}, variantId={}: {}", item.getProductId(), item.getVariantId(), e.getMessage());
+                        log.error("Error updating stock for productId={}, variantId={}: {}",
+                                item.getProductId(), item.getVariantId(), e.getMessage());
                         throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
                   }
             });
@@ -246,16 +254,12 @@ public class OrderServiceImpl implements OrderService {
 
       private Order findOrderById(Long orderId) {
             return orderRepository.findById(orderId)
-                    .orElseThrow(() -> {
-                          log.error("Order not found: orderId={}", orderId);
-                          return new AppException(ErrorCode.ORDER_NOT_FOUND);
-                    });
+                    .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
       }
 
       private List<Order> findOrdersByUsername(String username) {
             List<Order> orders = orderRepository.findByUsername(username);
             if (orders.isEmpty()) {
-                  log.error("No orders found for username={}", username);
                   throw new AppException(ErrorCode.ORDER_NOT_FOUND);
             }
             return orders;

@@ -2,8 +2,8 @@ package com.tien.order.httpclient;
 
 import com.tien.order.configuration.AuthenticationRequestInterceptor;
 import com.tien.order.dto.ApiResponse;
-import com.tien.order.dto.request.StripeChargeRequest;
-import com.tien.order.dto.response.StripeChargeResponse;
+import com.tien.order.httpclient.request.StripeChargeRequest;
+import com.tien.order.httpclient.response.StripeChargeResponse;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
 import org.springframework.cloud.openfeign.FeignClient;

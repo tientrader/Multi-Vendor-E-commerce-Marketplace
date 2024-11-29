@@ -1,4 +1,4 @@
-package com.tien.cart.dto.response;
+package com.tien.cart.httpclient.request;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -8,10 +8,10 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class OrderItemResponse {
+public class OrderItemCreationRequest {
 
       String productId;
       String variantId;
-      int quantity;
+      Integer quantity;
 
 }

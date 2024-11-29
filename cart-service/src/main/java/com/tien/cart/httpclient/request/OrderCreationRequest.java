@@ -1,4 +1,4 @@
-package com.tien.cart.dto.response;
+package com.tien.cart.httpclient.request;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -10,14 +10,12 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class OrderResponse {
+public class OrderCreationRequest {
 
-      Long orderId;
-      String username;
       String email;
-      List<OrderItemResponse> items;
+      List<OrderItemCreationRequest> items;
       double total;
-      String status;
       String paymentMethod;
+      String paymentToken;
 
 }

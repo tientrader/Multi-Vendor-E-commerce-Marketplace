@@ -1,4 +1,4 @@
-package com.tien.order.dto.request;
+package com.tien.cart.httpclient.response;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -8,11 +8,10 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class StripeChargeRequest {
+public class OrderItemResponse {
 
-      String stripeToken;
-      String username;
-      String email;
-      Double amount;
+      String productId;
+      String variantId;
+      int quantity;
 
 }

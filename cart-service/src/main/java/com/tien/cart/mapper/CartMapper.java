@@ -1,8 +1,8 @@
 package com.tien.cart.mapper;
 
 import com.tien.cart.dto.request.CartCreationRequest;
-import com.tien.cart.dto.request.OrderCreationRequest;
-import com.tien.cart.dto.request.OrderItemCreationRequest;
+import com.tien.cart.httpclient.request.OrderCreationRequest;
+import com.tien.cart.httpclient.request.OrderItemCreationRequest;
 import com.tien.cart.dto.response.CartItemResponse;
 import com.tien.cart.dto.response.CartResponse;
 import com.tien.cart.entity.Cart;

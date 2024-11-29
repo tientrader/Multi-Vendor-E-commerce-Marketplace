@@ -2,7 +2,7 @@ package com.tien.cart.httpclient;
 
 import com.tien.cart.configuration.AuthenticationRequestInterceptor;
 import com.tien.cart.dto.ApiResponse;
-import com.tien.cart.dto.response.ExistsResponse;
+import com.tien.cart.httpclient.response.ExistsResponse;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
 import org.springframework.cloud.openfeign.FeignClient;
