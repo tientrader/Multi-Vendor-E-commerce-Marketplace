@@ -57,7 +57,26 @@ public class PostServiceImpl implements PostService {
                   throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
             }
 
-            List<String> imageUrls = handleImageUpload(postImages);
+            List<String> imageUrls = List.of();
+            if (postImages != null && !postImages.isEmpty()) {
+                  ApiResponse<List<FileResponse>> fileResponseApi;
+                  try {
+                        fileResponseApi = fileClient.uploadMultipleFiles(postImages);
+
+                        if (fileResponseApi == null || fileResponseApi.getResult() == null) {
+                              log.error("(createPost) File upload returned no results");
+                              throw new AppException(ErrorCode.FILE_UPLOAD_FAILED);
+                        }
+                  } catch (FeignException e) {
+                        log.error("Error uploading files: {}", e.getMessage(), e);
+                        throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
+                  }
+
+                  List<FileResponse> fileResponses = fileResponseApi.getResult();
+                  imageUrls = fileResponses.stream()
+                          .map(FileResponse::getUrl)
+                          .toList();
+            }
 
             Post post = postMapper.toPost(request);
             post.setUsername(username);
@@ -79,7 +98,27 @@ public class PostServiceImpl implements PostService {
             postMapper.updatePost(post, request);
             post.setModifiedDate(Instant.now());
 
-            List<String> imageUrls = handleImageUpload(postImages);
+            List<String> imageUrls = List.of();
+            if (postImages != null && !postImages.isEmpty()) {
+                  ApiResponse<List<FileResponse>> fileResponseApi;
+                  try {
+                        fileResponseApi = fileClient.uploadMultipleFiles(postImages);
+
+                        if (fileResponseApi == null || fileResponseApi.getResult() == null) {
+                              log.error("File upload returned no results");
+                              throw new AppException(ErrorCode.FILE_UPLOAD_FAILED);
+                        }
+                  } catch (FeignException e) {
+                        log.error("Error uploading files: {}", e.getMessage(), e);
+                        throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
+                  }
+
+                  List<FileResponse> fileResponses = fileResponseApi.getResult();
+                  imageUrls = fileResponses.stream()
+                          .map(FileResponse::getUrl)
+                          .collect(Collectors.toList());
+            }
+
             if (!imageUrls.isEmpty()) {
                   post.setImageUrls(imageUrls);
             }
@@ -126,44 +165,16 @@ public class PostServiceImpl implements PostService {
             return postMapper.toPostResponse(findPostById(postId));
       }
 
-      private List<String> handleImageUpload(List<MultipartFile> postImages) {
-            if (postImages == null || postImages.isEmpty()) {
-                  return List.of();
-            }
-
-            ApiResponse<List<FileResponse>> fileResponseApi;
-            try {
-                  fileResponseApi = fileClient.uploadMultipleFiles(postImages);
-
-                  if (fileResponseApi == null || fileResponseApi.getResult() == null) {
-                        log.error("File upload returned no results");
-                        throw new AppException(ErrorCode.FILE_UPLOAD_FAILED);
-                  }
-            } catch (FeignException e) {
-                  log.error("Error uploading files: {}", e.getMessage(), e);
-                  throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
-            }
-
-            List<FileResponse> fileResponses = fileResponseApi.getResult();
-
-            return fileResponses.stream()
-                    .map(FileResponse::getUrl)
-                    .collect(Collectors.toList());
-      }
-
-      private Post findPostById(String postId) {
-            return postRepository.findById(postId)
-                    .orElseThrow(() -> {
-                          log.error("Post with ID {} not found.", postId);
-                          return new AppException(ErrorCode.POST_NOT_FOUND);
-                    });
-      }
-
       private void validateUserOwnership(Post post, String username) {
             if (!post.getUsername().equals(username)) {
                   log.error("User {} is not authorized to access the post owned by {}.", username, post.getUsername());
                   throw new AppException(ErrorCode.UNAUTHENTICATED);
             }
+      }
+
+      private Post findPostById(String postId) {
+            return postRepository.findById(postId)
+                    .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));
       }
 
 }

@@ -38,7 +38,6 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -300,7 +299,7 @@ public class StripeServiceImpl implements StripeService {
             List<StripeSubscription> subscriptions = stripeSubscriptionRepository.findAll();
             return subscriptions.stream()
                     .map(stripeMapper::toStripeSubscriptionResponse)
-                    .collect(Collectors.toList());
+                    .toList();
       }
 
       private Customer findOrCreateCustomer(String email, String fullName) throws StripeException {

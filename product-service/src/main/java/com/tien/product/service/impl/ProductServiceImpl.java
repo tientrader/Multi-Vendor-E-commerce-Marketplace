@@ -42,7 +42,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -63,7 +62,6 @@ public class ProductServiceImpl implements ProductService {
       @Transactional
       public ProductResponse createProduct(ProductCreationRequest request, List<MultipartFile> productImages) {
             if (productImages == null || productImages.isEmpty()) {
-                  log.error("Product images are required but none were provided.");
                   throw new AppException(ErrorCode.IMAGE_REQUIRED);
             }
 
@@ -259,7 +257,7 @@ public class ProductServiceImpl implements ProductService {
 
             return fileResponses.stream()
                     .map(FileResponse::getUrl)
-                    .collect(Collectors.toList());
+                    .toList();
       }
 
       private Product findProductById(String productId) {
@@ -276,18 +274,12 @@ public class ProductServiceImpl implements ProductService {
             return product.getVariants().stream()
                     .filter(v -> v.getVariantId().equals(variantId))
                     .findFirst()
-                    .orElseThrow(() -> {
-                          log.error("Variant not found with ID: {} for product ID: {}", variantId, product.getId());
-                          return new AppException(ErrorCode.VARIANT_NOT_FOUND);
-                    });
+                    .orElseThrow(() -> new AppException(ErrorCode.VARIANT_NOT_FOUND));
       }
 
       private Category findCategoryById(String categoryId) {
             return categoryRepository.findById(categoryId)
-                    .orElseThrow(() -> {
-                          log.error("Category not found with ID: {}", categoryId);
-                          return new AppException(ErrorCode.CATEGORY_NOT_FOUND);
-                    });
+                    .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
       }
 
       private void checkCategoryOwnership(Category category, String shopId) {
@@ -302,10 +294,7 @@ public class ProductServiceImpl implements ProductService {
                   ApiResponse<ShopResponse> response = shopClient.getShopByOwnerUsername(username);
 
                   return Optional.ofNullable(response.getResult())
-                          .orElseThrow(() -> {
-                                log.error("Shop not found for username: {}", username);
-                                return new AppException(ErrorCode.SHOP_NOT_FOUND);
-                          });
+                          .orElseThrow(() -> new AppException(ErrorCode.SHOP_NOT_FOUND));
             } catch (FeignException e) {
                   log.error("Error calling shop service for username {}: {}", username, e.getMessage(), e);
                   throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);

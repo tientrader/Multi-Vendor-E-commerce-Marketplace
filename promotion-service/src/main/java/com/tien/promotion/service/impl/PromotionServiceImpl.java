@@ -219,10 +219,7 @@ public class PromotionServiceImpl implements PromotionService {
 
       private Promotion findPromotionById(String id) {
             return promotionRepository.findById(id)
-                    .orElseThrow(() -> {
-                          log.error("Promotion with id {} not found", id);
-                          return new AppException(ErrorCode.PROMOTION_NOT_FOUND);
-                    });
+                    .orElseThrow(() -> new AppException(ErrorCode.PROMOTION_NOT_FOUND));
       }
 
 }

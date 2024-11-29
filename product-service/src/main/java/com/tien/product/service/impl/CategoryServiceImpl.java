@@ -98,10 +98,7 @@ public class CategoryServiceImpl implements CategoryService {
                   ApiResponse<ShopResponse> response = shopClient.getShopByOwnerUsername(username);
 
                   return Optional.ofNullable(response.getResult())
-                          .orElseThrow(() -> {
-                                log.error("Shop not found for username: {}", username);
-                                return new AppException(ErrorCode.SHOP_NOT_FOUND);
-                          });
+                          .orElseThrow(() -> new AppException(ErrorCode.SHOP_NOT_FOUND));
             } catch (FeignException e) {
                   log.error("Error calling shop service for username {}: {}", username, e.getMessage(), e);
                   throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
@@ -110,10 +107,7 @@ public class CategoryServiceImpl implements CategoryService {
 
       private Category findCategoryById(String categoryId) {
             return categoryRepository.findById(categoryId)
-                    .orElseThrow(() -> {
-                          log.error("(findCategoryById) Category with ID {} not found", categoryId);
-                          return new AppException(ErrorCode.CATEGORY_NOT_FOUND);
-                    });
+                    .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
       }
 
       private void validateCategoryOwnership(Category category, String shopId) {

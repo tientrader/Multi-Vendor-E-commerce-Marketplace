@@ -375,34 +375,22 @@ public class UserServiceImpl implements UserService {
 
       private User findUserById(String userId) {
             return userRepository.findByUserId(userId)
-                    .orElseThrow(() -> {
-                          log.error("User with ID {} not found", userId);
-                          return new AppException(ErrorCode.USER_NOT_EXISTED);
-                    });
+                    .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
       }
 
       private User findUserByProfileId(String profileId) {
             return userRepository.findById(profileId)
-                    .orElseThrow(() -> {
-                          log.error("User with profileID {} not found", profileId);
-                          return new AppException(ErrorCode.PROFILE_NOT_FOUND);
-                    });
+                    .orElseThrow(() -> new AppException(ErrorCode.PROFILE_NOT_FOUND));
       }
 
       private User findUserByEmail(String email) {
             return userRepository.findByEmail(email)
-                    .orElseThrow(() -> {
-                          log.error("User with email {} not found", email);
-                          return new AppException(ErrorCode.PROFILE_NOT_FOUND);
-                    });
+                    .orElseThrow(() -> new AppException(ErrorCode.PROFILE_NOT_FOUND));
       }
 
       private User findUserByUsername(String username) {
             return userRepository.findByUsername(username)
-                    .orElseThrow(() -> {
-                          log.error("User with username {} not found", username);
-                          return new AppException(ErrorCode.PROFILE_NOT_FOUND);
-                    });
+                    .orElseThrow(() -> new AppException(ErrorCode.PROFILE_NOT_FOUND));
       }
 
 }

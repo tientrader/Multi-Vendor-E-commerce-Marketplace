@@ -19,7 +19,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
@@ -78,7 +77,7 @@ public class ShopServiceImpl implements ShopService {
       }
 
       @Override
-      @PreAuthorize("hasRole('ADMIN')")
+      @Transactional
       public SalesReportResponse generateSalesReport(String shopId, String startDate, String endDate) {
             List<ProductResponse> products;
             try {
@@ -88,7 +87,67 @@ public class ShopServiceImpl implements ShopService {
                   throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
             }
 
-            return generateSalesData(products, startDate, endDate);
+            if (products == null || products.isEmpty()) {
+                  return new SalesReportResponse(
+                          0.0,
+                          0,
+                          Collections.emptyList(),
+                          "No Product",
+                          0.0,
+                          "No Product",
+                          startDate, endDate
+                  );
+            }
+
+            double totalRevenue = 0.0;
+            int totalItemsSold = 0;
+            Map<String, Integer> productSalesCount = new HashMap<>();
+            String topSellingProduct = "";
+            int highestSoldQuantity = 0;
+            double highestRevenueProductRevenue = 0.0;
+            String highestRevenueProduct = "";
+
+            for (ProductResponse product : products) {
+                  double productRevenue = 0.0;
+                  int productTotalSold = 0;
+
+                  for (ProductVariantResponse variant : product.getVariants()) {
+                        int soldQuantity = variant.getSoldQuantity();
+                        double price = variant.getPrice();
+                        productRevenue += price * soldQuantity;
+                        productTotalSold += soldQuantity;
+                  }
+
+                  totalRevenue += productRevenue;
+                  totalItemsSold += productTotalSold;
+                  productSalesCount.put(product.getName(), productTotalSold);
+
+                  if (productTotalSold > highestSoldQuantity) {
+                        highestSoldQuantity = productTotalSold;
+                        topSellingProduct = product.getName();
+                  }
+
+                  if (productRevenue > highestRevenueProductRevenue) {
+                        highestRevenueProductRevenue = productRevenue;
+                        highestRevenueProduct = product.getName();
+                  }
+            }
+
+            List<Map.Entry<String, Integer>> sortedProductSales = productSalesCount.entrySet()
+                    .stream()
+                    .sorted((entry1, entry2) -> entry2.getValue().compareTo(entry1.getValue()))
+                    .toList();
+
+            return new SalesReportResponse(
+                    totalRevenue,
+                    totalItemsSold,
+                    sortedProductSales,
+                    topSellingProduct,
+                    highestRevenueProductRevenue,
+                    highestRevenueProduct,
+                    startDate,
+                    endDate
+            );
       }
 
       @Override
@@ -104,25 +163,6 @@ public class ShopServiceImpl implements ShopService {
                   throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
             }
 
-            return generateSalesData(products, startDate, endDate);
-      }
-
-      @Override
-      public ShopResponse getShopByOwnerUsername(String ownerUsername) {
-            return shopMapper.toShopResponse(findShopByOwnerUsername(ownerUsername));
-      }
-
-      @Override
-      public String getOwnerUsernameByShopId(String shopId) {
-            return findShopById(shopId).getOwnerUsername();
-      }
-
-      @Override
-      public boolean checkIfShopExists(String shopId) {
-            return shopRepository.existsById(shopId);
-      }
-
-      private SalesReportResponse generateSalesData(List<ProductResponse> products, String startDate, String endDate) {
             if (products == null || products.isEmpty()) {
                   return new SalesReportResponse(
                           0.0,
@@ -186,6 +226,21 @@ public class ShopServiceImpl implements ShopService {
             );
       }
 
+      @Override
+      public ShopResponse getShopByOwnerUsername(String ownerUsername) {
+            return shopMapper.toShopResponse(findShopByOwnerUsername(ownerUsername));
+      }
+
+      @Override
+      public String getOwnerUsernameByShopId(String shopId) {
+            return findShopById(shopId).getOwnerUsername();
+      }
+
+      @Override
+      public boolean checkIfShopExists(String shopId) {
+            return shopRepository.existsById(shopId);
+      }
+
       private String getCurrentUsername() {
             Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             return jwt.getClaim("preferred_username");
@@ -193,18 +248,12 @@ public class ShopServiceImpl implements ShopService {
 
       private Shop findShopByOwnerUsername(String username) {
             return shopRepository.findByOwnerUsername(username)
-                    .orElseThrow(() -> {
-                          log.error("Shop not found for user {}", username);
-                          return new AppException(ErrorCode.SHOP_NOT_FOUND);
-                    });
+                    .orElseThrow(() -> new AppException(ErrorCode.SHOP_NOT_FOUND));
       }
 
       private Shop findShopById(String shopId) {
             return shopRepository.findById(shopId)
-                    .orElseThrow(() -> {
-                          log.error("Shop not found for ID {}", shopId);
-                          return new AppException(ErrorCode.SHOP_NOT_FOUND);
-                    });
+                    .orElseThrow(() -> new AppException(ErrorCode.SHOP_NOT_FOUND));
       }
 
 }

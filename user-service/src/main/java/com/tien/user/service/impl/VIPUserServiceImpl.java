@@ -157,14 +157,6 @@ public class VIPUserServiceImpl implements VIPUserService {
             };
       }
 
-      private User findUserByUsername(String username) {
-            return userRepository.findByUsername(username)
-                    .orElseThrow(() -> {
-                          log.error("User with username {} not found", username);
-                          return new AppException(ErrorCode.USER_NOT_EXISTED);
-                    });
-      }
-
       private void findOrCreateUser(VIPUserRequest request, String username) {
             userRepository.findByUsername(username);
             vipUserMapper.vipUserRequestToUser(request);
@@ -173,6 +165,11 @@ public class VIPUserServiceImpl implements VIPUserService {
       private User findOrCreateUser(VIPUserRequestWithSession request, String username) {
             return userRepository.findByUsername(username)
                     .orElse(vipUserMapper.vipUserRequestWithSessionToUser(request));
+      }
+
+      private User findUserByUsername(String username) {
+            return userRepository.findByUsername(username)
+                    .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
       }
 
 }

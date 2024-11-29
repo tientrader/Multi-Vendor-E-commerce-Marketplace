@@ -101,7 +101,27 @@ public class ReviewServiceImpl implements ReviewService {
                   }
             }
 
-            List<String> imageUrls = handleImageUpload(images);
+            List<String> imageUrls = List.of();
+            if (images != null && !images.isEmpty()) {
+                  ApiResponse<List<FileResponse>> fileResponseApi;
+                  try {
+                        fileResponseApi = fileClient.uploadMultipleFiles(images);
+
+                        if (fileResponseApi == null || fileResponseApi.getResult() == null) {
+                              log.error("(createReview) File upload returned no results");
+                              throw new AppException(ErrorCode.FILE_UPLOAD_FAILED);
+                        }
+                  } catch (FeignException e) {
+                        log.error("Error uploading files: {}", e.getMessage(), e);
+                        throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
+                  }
+
+                  List<FileResponse> fileResponses = fileResponseApi.getResult();
+                  imageUrls = fileResponses.stream()
+                          .map(FileResponse::getUrl)
+                          .collect(Collectors.toList());
+            }
+
             Review review = reviewMapper.toReview(request);
             review.setUsername(username);
             review.setImageUrls(imageUrls);
@@ -151,7 +171,27 @@ public class ReviewServiceImpl implements ReviewService {
             Review review = findReviewById(reviewId);
             validateUserOwnership(review, username);
 
-            List<String> uploadedImages = handleImageUpload(newImages);
+            List<String> uploadedImages = List.of();
+            if (newImages != null && !newImages.isEmpty()) {
+                  ApiResponse<List<FileResponse>> fileResponseApi;
+                  try {
+                        fileResponseApi = fileClient.uploadMultipleFiles(newImages);
+
+                        if (fileResponseApi == null || fileResponseApi.getResult() == null) {
+                              log.error("File upload returned no results");
+                              throw new AppException(ErrorCode.FILE_UPLOAD_FAILED);
+                        }
+                  } catch (FeignException e) {
+                        log.error("Error uploading files: {}", e.getMessage(), e);
+                        throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
+                  }
+
+                  List<FileResponse> fileResponses = fileResponseApi.getResult();
+                  uploadedImages = fileResponses.stream()
+                          .map(FileResponse::getUrl)
+                          .toList();
+            }
+
             if (!uploadedImages.isEmpty()) {
                   List<String> allImages = review.getImageUrls();
                   allImages.addAll(uploadedImages);
@@ -233,14 +273,6 @@ public class ReviewServiceImpl implements ReviewService {
             return jwt.getClaim("preferred_username");
       }
 
-      private Review findReviewById(String id) {
-            return reviewRepository.findById(id)
-                    .orElseThrow(() -> {
-                          log.error("Review with ID {} not found", id);
-                          return new AppException(ErrorCode.REVIEW_NOT_FOUND);
-                    });
-      }
-
       private void validateUserOwnership(Review review, String username) {
             if (!review.getUsername().equals(username)) {
                   log.error("User {} is not authorized to access the post owned by {}.", username, review.getUsername());
@@ -248,29 +280,9 @@ public class ReviewServiceImpl implements ReviewService {
             }
       }
 
-      private List<String> handleImageUpload(List<MultipartFile> images) {
-            if (images == null || images.isEmpty()) {
-                  return List.of();
-            }
-
-            ApiResponse<List<FileResponse>> fileResponseApi;
-            try {
-                  fileResponseApi = fileClient.uploadMultipleFiles(images);
-
-                  if (fileResponseApi == null || fileResponseApi.getResult() == null) {
-                        log.error("File upload returned no results");
-                        throw new AppException(ErrorCode.FILE_UPLOAD_FAILED);
-                  }
-            } catch (FeignException e) {
-                  log.error("Error uploading files: {}", e.getMessage(), e);
-                  throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
-            }
-
-            List<FileResponse> fileResponses = fileResponseApi.getResult();
-
-            return fileResponses.stream()
-                    .map(FileResponse::getUrl)
-                    .collect(Collectors.toList());
+      private Review findReviewById(String id) {
+            return reviewRepository.findById(id)
+                    .orElseThrow(() -> new AppException(ErrorCode.REVIEW_NOT_FOUND));
       }
 
 }
