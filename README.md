@@ -78,6 +78,20 @@ The platform uses microservices for scalability, resilience, and independent ser
 ![keycloak](resources/login1.png)
 ![keycloak](resources/login2.png)
 
+#### Demo: Social Login
+- Google
+
+![keycloak](resources/google1.png)
+![keycloak](resources/google2.png)
+
+- Facebook
+
+![keycloak](resources/facebook1.png)
+
+- Provide more information
+
+![keycloak](resources/social-login.png)
+
 #### Demo: Forgot Password
 ![keycloak](resources/forgot1.png)
 ![keycloak](resources/forgot2.png)
