@@ -79,6 +79,9 @@ The platform uses microservices for scalability, resilience, and independent ser
 ![keycloak](resources/login2.png)
 
 #### Demo: Forgot Password
+![keycloak](resources/forgot1.png)
+![keycloak](resources/forgot2.png)
+![keycloak](resources/forgot3.png)
 
 ### Databases Management
 
