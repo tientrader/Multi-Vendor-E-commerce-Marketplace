@@ -61,15 +61,24 @@ The platform uses microservices for scalability, resilience, and independent ser
 - <img src="https://i.imgur.com/0ue3f00.png" width="30" height="30" /> **Keycloak:**
 
   - **Single Sign-On (SSO):** Users can log in once to access multiple services, with support for OAuth 2.0 and OpenID Connect, providing seamless authentication across the platform.
-  - **Social Login:** Allows users to log in via their social accounts (e.g., Google, Facebook, Github), simplifying the authentication process and improving user experience.
   - **User Management:** Streamlines the processes of user registration, login, logout, email verification, password recovery, and overall account management, ensuring a seamless user experience.
   - **Email Verification:** Verifies users' email addresses during registration to ensure account authenticity and prevent fraudulent sign-ups.
   - **Argon2 Password Hashing:** Utilizes the Argon2 hashing algorithm for password storage, providing robust security against brute-force attacks and improving the overall resilience of user account security.
   - **Role-Based Access Control (RBAC):** Ensures that only authorized users can access specific features and resources, enhancing security and protecting sensitive operations.
   - **JSON Web Tokens (JWT):** JWT secures API communications with authentication tokens, mitigating CSRF attacks and enhancing data security.
+  - **Social Login:** Allows users to log in via their social accounts (e.g., Google, Facebook, Github), simplifying the authentication process and improving user experience.
+ 
+#### Demo: Registration
+![keycloak](resources/register1.png)
+![keycloak](resources/register2.png)
+![keycloak](resources/register3.png)
+![keycloak](resources/register4.png)
 
-  ![Keycloak](resources/keycloak.png)
-  ![Login Flow](resources/login.png)
+#### Demo: Login (Username & Password)
+![keycloak](resources/login1.png)
+![keycloak](resources/login2.png)
+
+#### Demo: Forgot Password
 
 ### Databases Management
 
