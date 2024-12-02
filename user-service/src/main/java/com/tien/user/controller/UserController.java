@@ -96,6 +96,15 @@ public class UserController {
                     .build();
       }
 
+      @GetMapping("/search")
+      public ApiResponse<Page<UserResponse>> searchUsers(@RequestParam String keyword,
+                                                         @RequestParam(defaultValue = "0") int page,
+                                                         @RequestParam(defaultValue = "10") int size) {
+            return ApiResponse.<Page<UserResponse>>builder()
+                    .result(userService.searchUsers(keyword, page, size))
+                    .build();
+      }
+
       @GetMapping("/my-info")
       public ApiResponse<UserResponse> getMyInfo() {
             return ApiResponse.<UserResponse>builder()

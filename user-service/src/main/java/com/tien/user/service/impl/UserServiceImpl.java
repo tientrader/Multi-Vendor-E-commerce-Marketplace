@@ -310,6 +310,14 @@ public class UserServiceImpl implements UserService {
       }
 
       @Override
+      @Transactional
+      public Page<UserResponse> searchUsers(String keyword, int page, int size) {
+            PageRequest pageRequest = PageRequest.of(page, size);
+            Page<User> users = userRepository.searchUsers(keyword, pageRequest);
+            return users.map(userMapper::toUserResponse);
+      }
+
+      @Override
       public Page<UserResponse> getUsers(int page, int size) {
             Page<User> userPage = userRepository.findAll(PageRequest.of(page, size));
             return userPage.map(userMapper::toUserResponse);

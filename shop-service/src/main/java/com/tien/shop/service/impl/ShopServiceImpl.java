@@ -18,6 +18,8 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -224,6 +226,13 @@ public class ShopServiceImpl implements ShopService {
                     startDate,
                     endDate
             );
+      }
+
+      @Override
+      public Page<ShopResponse> searchShops(String keyword, int page, int size) {
+            PageRequest pageRequest = PageRequest.of(page, size);
+            Page<Shop> shops = shopRepository.searchShops(keyword, pageRequest);
+            return shops.map(shopMapper::toShopResponse);
       }
 
       @Override

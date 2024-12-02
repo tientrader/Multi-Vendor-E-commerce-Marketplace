@@ -10,6 +10,7 @@ import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -55,6 +56,15 @@ public class ShopController {
                                                                @RequestParam("endDate") String endDate) {
             return ApiResponse.<SalesReportResponse>builder()
                     .result(shopService.getMySalesReport(startDate, endDate))
+                    .build();
+      }
+
+      @GetMapping("/search")
+      public ApiResponse<Page<ShopResponse>> searchShops(@RequestParam("keyword") String keyword,
+                                                         @RequestParam(defaultValue = "0") int page,
+                                                         @RequestParam(defaultValue = "10") int size) {
+            return ApiResponse.<Page<ShopResponse>>builder()
+                    .result(shopService.searchShops(keyword, page, size))
                     .build();
       }
 

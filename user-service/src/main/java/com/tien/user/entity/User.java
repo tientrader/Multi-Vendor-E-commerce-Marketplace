@@ -21,7 +21,8 @@ import java.time.LocalDateTime;
 @EntityListeners(AuditingEntityListener.class)
 @Table(name = "user", indexes = {
         @Index(name = "idx_email", columnList = "email"),
-        @Index(name = "idx_username", columnList = "username")
+        @Index(name = "idx_username", columnList = "username"),
+        @Index(name = "idx_phone_number", columnList = "phone_number")
 })
 public class User {
 

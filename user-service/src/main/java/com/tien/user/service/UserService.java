@@ -29,6 +29,8 @@ public interface UserService {
 
       void deleteUser(String userId);
 
+      Page<UserResponse> searchUsers(String keyword, int page, int size);
+
       Page<UserResponse> getUsers(int page, int size);
 
       List<UserResponse> getAllUsers();

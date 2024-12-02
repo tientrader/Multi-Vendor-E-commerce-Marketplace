@@ -18,12 +18,12 @@ public class Shop {
       @Id
       String id;
 
-      @Indexed(unique = true)
+      @Indexed
       String name;
 
       @Indexed
-      String email;
-
       String ownerUsername;
+
+      String email;
 
 }
