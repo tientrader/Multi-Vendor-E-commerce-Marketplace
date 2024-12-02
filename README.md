@@ -4,38 +4,36 @@
 
 ❗️ The system is designed to handle and process nearly all business scenarios, adhering to best practices for data integrity and security, ensuring that the platform remains reliable and protected against potential issues.
 
+❗️ Below is a general overview of the project. For more detailed information regarding flows, data constraints, and business logic, please refer to the code.
+
 ## 🏗 Architecture Overview
 
 ### Microservices Architecture
 
-The platform uses microservices for scalability, resilience, and independent service updates.
-
-#### Highlights:
-
 - **Service Segmentation**:  
   Each feature is encapsulated within its own service, allowing teams to focus on specific domains. This modular approach improves scalability, productivity, and the ability to update or replace individual services without affecting the entire system.  
 
+- **Scalability**:  
+  Each service can be independently scaled based on demand. For example, if the Order Service experiences high traffic, only that service is scaled, optimizing resource usage and maintaining performance during peak loads.
+  
 - **Decoupled Communication**:  
   Services interact through REST APIs and messaging queues, ensuring loose coupling between components. This flexibility allows each service to operate independently, enabling seamless updates and reducing the risk of cascading failures.  
-
-- **Fault Tolerance**:  
-  Mechanisms like circuit breakers, retries, and fallback strategies ensure that service failures are isolated. Users experience minimal disruption, as the system remains operational even if one or more services encounter issues.  
-
-- **Scalability**:  
-  Each service can be independently scaled based on demand. For example, if the Order Service experiences high traffic, only that service is scaled, optimizing resource usage and maintaining performance during peak loads.  
 
 - **Cost Optimization**:  
   The independent scalability of services helps allocate resources efficiently. You can expand only the services under heavy demand without increasing the infrastructure costs for the entire system, making the architecture both efficient and cost-effective.  
 
-- **Easy Maintenance**:  
-  Continuous Integration and Continuous Deployment (CI/CD) pipelines enable rapid development, testing, and deployment of new features. This reduces downtime during updates and accelerates the release cycle.  
-
 - **Centralized Management**:  
-  Tools like **Spring Cloud Config** manage system-wide configuration, while **Eureka Server** provides automatic service registration and discovery. These tools ensure high availability and simplify system management.  
+  Tools like Spring Cloud Config centralize configuration management, ensuring consistent updates across all services. Eureka Server enables automatic service registration, discovery, and dynamic load balancing, distributing requests evenly across multiple instances to optimize performance and ensure high availability.
 
+- **Fault Tolerance**:  
+  Mechanisms like circuit breakers, retries, and fallback strategies ensure that service failures are isolated. Users experience minimal disruption, as the system remains operational even if one or more services encounter issues.
+  
 - **Observability**:  
-  Monitoring and logging tools like **Prometheus**, **Grafana**, and **Zipkin** provide deep insights into the system's health and performance. These real-time analytics help proactively detect and resolve issues, ensuring the system remains reliable.  
+  Tools like Prometheus, Grafana, Loki, and Zipkin provide deep insights into system health. Loki collects logs, which are visualized in Grafana, while Zipkin enables distributed tracing across microservices. This combination helps detect and resolve issues quickly, ensuring the system remains reliable and performant.
 
+- **Easy Maintenance**:  
+  Continuous Integration and Continuous Deployment (CI/CD) pipelines enable rapid development, testing, and deployment of new features. This reduces downtime during updates and accelerates the release cycle.
+  
   ![Microservices Architecture](resources/microservices.png)
 
 ---
@@ -44,29 +42,64 @@ The platform uses microservices for scalability, resilience, and independent ser
 
 ### Java & Spring Framework
 
-- <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/java/java-original.svg" alt="Java" width="30" height="30"/> **Java:**
+- <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/java/java-original.svg" alt="Java" width="30" height="30"/> **Java:**  
+  - The primary language for building scalable, high-performance microservices, ideal for handling high transaction volumes.
 
-  Java is the primary language for building microservices, leveraging its multithreading capabilities and high performance. It provides a robust environment for scalable and maintainable solutions, particularly for services handling high transaction volumes like payments and orders.
+- <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/spring/spring-original.svg" alt="Spring" width="30" height="30"/> **Spring Framework:**  
+  - **Spring Boot:**  
+    Simplifies microservice development with minimal configuration, enabling quick setup and reducing boilerplate code so developers can focus on features.
 
-- <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/spring/spring-original.svg" alt="Spring" width="30" height="30"/> **Spring Framework:**
+  - **Spring WebFlux:**  
+    Facilitates asynchronous, non-blocking API development using reactive programming. It ensures responsiveness under high traffic by efficiently managing system resources, making it suitable for modern, event-driven architectures.
 
-  - **Spring Boot:** Enables rapid microservice development with minimal configuration, significantly reducing boilerplate code.
-  - **Spring WebFlux:** Facilitates the creation of asynchronous APIs through reactive programming, ensuring system responsiveness under high loads.
-  - **Spring Security:** Manages security across microservices, offering authentication and authorization features. Key integrations include Single Sign-On (SSO) and JSON Web Token (JWT) authentication.
-  - **Spring Data JPA:** Streamlines database interactions through repositories, simplifying data retrieval and CRUD operations.
-  - **Spring Cloud:** Provides essential tools for managing and routing microservices, enhancing scalability and flexibility in API development.
+  - **Spring Security:**  
+    Provides robust authentication and authorization mechanisms across microservices. Supports Single Sign-On (SSO) and JSON Web Token (JWT) for secure and seamless communication between services and users.
+
+  - **Spring Data JPA:**  
+    Simplifies data persistence with repositories, streamlining database operations such as retrieval, updates, and CRUD functionality, while reducing the need for verbose SQL queries.
+
+  - **Spring Cloud:**  
+    Enhances system scalability and flexibility by offering tools for service discovery, configuration management, and load balancing, ensuring smooth operation in distributed environments.
 
 ### Identity and Access Management
 
 - <img src="https://i.imgur.com/0ue3f00.png" width="30" height="30" /> **Keycloak:**
 
-  - **Single Sign-On (SSO):** Users can log in once to access multiple services, with support for OAuth 2.0 and OpenID Connect, providing seamless authentication across the platform.
-  - **User Management:** Streamlines the processes of user registration, login, logout, email verification, password recovery, and overall account management, ensuring a seamless user experience.
-  - **Email Verification:** Verifies users' email addresses during registration to ensure account authenticity and prevent fraudulent sign-ups.
-  - **Argon2 Password Hashing:** Utilizes the Argon2 hashing algorithm for password storage, providing robust security against brute-force attacks and improving the overall resilience of user account security.
-  - **Role-Based Access Control (RBAC):** Ensures that only authorized users can access specific features and resources, enhancing security and protecting sensitive operations.
-  - **JSON Web Tokens (JWT):** JWT secures API communications with authentication tokens, mitigating CSRF attacks and enhancing data security.
-  - **Social Login:** Allows users to log in via their social accounts (e.g., Google, Facebook, Github), simplifying the authentication process and improving user experience.
+  - **Single Sign-On (SSO):**  
+    Allows users to log in once and access multiple services seamlessly. It uses industry standards like OAuth 2.0 and OpenID Connect to provide secure and reliable authentication.
+
+  - **OAuth 2.0 & OpenID Connect:**  
+    Implements secure and standardized authentication and authorization workflows. The Authorization Code Flow ensures safe token exchange between clients and the identity provider, improving system security.
+
+  - **User Management:**  
+    Provides a centralized system for managing user accounts, including registration, login, logout, profile updates, email verification, and password recovery/reset. This simplifies the user experience and ensures account security.
+
+  - **Email Verification:**  
+    Verifies users' email addresses during registration to ensure account authenticity and reduce fraudulent sign-ups.
+
+  - **Role-Based Access Control (RBAC):**  
+    Manages permissions effectively by assigning roles to users. This ensures that only authorized users can perform specific actions or access sensitive resources.
+
+  - **Multi-Factor Authentication (MFA):**  
+    Enhances account security by requiring multiple factors for authentication. The platform supports Time-based One-Time Passwords (TOTP) through apps like Google Authenticator, adding an extra layer of protection.
+
+  - **JSON Web Tokens (JWT):**  
+    Utilizes RS256-signed JWTs for secure authentication and authorization. JWTs enable scalable, stateless user sessions across microservices while protecting against vulnerabilities like Cross-Site Request Forgery (CSRF).
+
+  - **Social Login:**  
+    Simplifies the authentication process by enabling users to log in with existing social accounts (e.g., Google, Facebook, GitHub). This feature reduces user friction and improves the onboarding experience.
+
+  - **Argon2 Password Hashing:**  
+    Ensures robust password security using the Argon2 algorithm, which is resistant to brute-force and hardware-based attacks due to its memory-hard design.
+
+  - **SHA-256 for TOTP:**  
+    Uses the SHA-256 hashing algorithm to generate secure Time-based One-Time Passwords (TOTP), ensuring the integrity and reliability of MFA codes.
+
+  - **Password Recovery and Reset:**  
+    Provides a secure and user-friendly process for recovering or resetting forgotten passwords. Strong validations ensure only authorized users can reset credentials, reducing unauthorized access risks.
+
+  - **Customizable Flows:**  
+    Administrators can tailor authentication and authorization workflows, such as adding conditions during first login, linking accounts with identity providers, or enforcing specific security policies.
  
 #### Demo: Registration
 ![keycloak](resources/register1.png)
@@ -79,6 +112,7 @@ The platform uses microservices for scalability, resilience, and independent ser
 ![keycloak](resources/login2.png)
 
 #### Demo: Social Login
+
 - Google
 
 ![keycloak](resources/google1.png)
@@ -88,7 +122,7 @@ The platform uses microservices for scalability, resilience, and independent ser
 
 ![keycloak](resources/facebook1.png)
 
-- Provide more information
+- Provide more information when the user chooses social login.
 
 ![keycloak](resources/social-login.png)
 
@@ -101,25 +135,25 @@ The platform uses microservices for scalability, resilience, and independent ser
 
 - <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/mysql/mysql-original.svg" alt="MySQL" width="30" height="30"/> **MySQL:**
 
-  MySQL ensures data consistency through ACID properties, allowing critical transactions to be processed accurately.  
+  MySQL is used for structured data storage, providing reliable transactional integrity with ACID properties. It handles critical operations such as order processing and financial transactions, ensuring data consistency and reliability. MySQL ensures robust performance under high transaction volumes and guarantees data integrity in critical workflows.
 
   ![MySQL](resources/mysql.png)
 
 - <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/mongodb/mongodb-original.svg" alt="MongoDB" width="30" height="30"/> **MongoDB:**
 
-  MongoDB is employed for unstructured data storage, such as product information and user reviews, providing a flexible and scalable NoSQL solution.  
+  MongoDB is employed for storing unstructured or semi-structured data, such as product catalogs, user reviews, and other dynamic content. It offers a flexible and scalable NoSQL solution, enabling efficient querying and indexing of large volumes of diverse data. MongoDB's schema-less design allows for easy scaling and adaptability as business requirements evolve.
 
   ![MongoDB](resources/mongodb.png)
 
 - <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/redis/redis-original.svg" alt="Redis" width="30" height="30"/> **Redis:**
 
-  Redis acts as a caching solution to alleviate load on MySQL and MongoDB, accelerating data access and reducing the number of database queries.  
+  Redis is used as an in-memory caching layer to enhance system performance by reducing database load. It accelerates data retrieval by caching frequently accessed data, reducing the number of database queries and speeding up response times by 5–10x. Redis plays a key role in improving user experience and system efficiency by managing high-traffic operations with minimal delay.
 
   ![Redis](resources/redis.png)
 
 - <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/amazonwebservices/amazonwebservices-original-wordmark.svg" alt="AWS S3" width="30" height="30"/> **AWS S3:**
 
-  AWS S3 is utilized for storing large volumes of unstructured data (e.g., images and videos), providing a highly durable and scalable storage solution.  
+  AWS S3 is integrated for secure, scalable storage of large volumes of unstructured data, such as media files (images, videos, etc.). It ensures high availability, durability, and easy accessibility, allowing the platform to store and retrieve media content efficiently while minimizing costs. AWS S3's scalability ensures that as data volumes grow, the storage system can expand without impacting performance.
 
   ![AWS S3](resources/awss3.png)
   
@@ -127,19 +161,24 @@ The platform uses microservices for scalability, resilience, and independent ser
 
 - <img src="https://i.imgur.com/oJqyUK5.png" width="30" height="30" /> **Stripe:**
 
-  Stripe provides comprehensive payment processing APIs that support various payment methods and currencies. Its webhook integration enables real-time transaction tracking. This allows for instant **charges** upon purchase and facilitates **recurring subscriptions** for users, enhancing overall transaction efficiency and user experience.
+  Stripe offers a comprehensive set of payment processing APIs that support multiple payment methods and currencies. It integrates with webhooks for real-time transaction tracking, allowing for immediate charges upon purchase. Additionally, Stripe facilitates recurring subscriptions, providing a seamless and efficient experience for users.
 
-  ![Stripe](resources/stripecard.png)
-  ![Stripe](resources/stripeqrcode.png)
-  ![Stripe](resources/stripe.png)
+#### Demo: Card Payment
+![Stripe Card Payment](resources/stripecard.png)
+
+#### Demo: QR Code Payment
+![Stripe QR Code Payment](resources/stripeqrcode.png)
+
+#### Payment History (Testing)
+![Stripe Payment History](resources/stripe.png)
  
 ### Config Server & Service Discovery
 
-- **Spring Cloud Config:**
-  Provides server and client-side support for externalized configuration in a distributed system. This enables centralized management of configuration properties across all microservices, making updates easier and ensuring configuration consistency.
+- **Spring Cloud Config:**  
+  Centralizes configuration management for microservices, allowing externalized properties to be shared and updated across services. This ensures consistent configurations across environments and simplifies service updates without downtime.
 
-- **Eureka Server:**
-  Acts as a service registry, allowing microservices to discover each other. This simplifies the management of service instances and endpoints, enabling dynamic scaling and fault tolerance by ensuring that service instances are registered and available for seamless communication.
+- **Eureka Server:**  
+  Functions as a service registry for microservices, enabling them to dynamically discover each other. It simplifies the scaling process and enhances fault tolerance by ensuring services can automatically register and deregister themselves as they scale or fail, maintaining smooth inter-service communication. Eureka also integrates with client-side load balancing (e.g., using Ribbon), ensuring traffic is evenly distributed across available service instances, improving performance and resilience.
 
   ![Eureka](resources/eureka.png)
 
@@ -147,7 +186,7 @@ The platform uses microservices for scalability, resilience, and independent ser
 
 - <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/prometheus/prometheus-original.svg" alt="Prometheus" width="30" height="30"/><img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/grafana/grafana-original.svg" alt="Grafana" width="30" height="30"/> **Prometheus & Grafana:**
 
-  These tools collect performance metrics for analysis and visualization, enabling real-time monitoring of system health.
+  Prometheus collects and stores performance metrics, such as system resource usage, request latency, and error rates, from microservices. Grafana visualizes this data in real-time dashboards, allowing developers and operators to track the system’s health and identify performance bottlenecks or failures.
 
   ![Prometheus](resources/prometheus.png)
   
@@ -155,7 +194,7 @@ The platform uses microservices for scalability, resilience, and independent ser
 
 - <img src="https://i.imgur.com/RMo3imI.png" width="30" height="30" /> **Loki:**
 
-  Loki serves as a centralized logging system, aggregating logs from microservices for efficient diagnosis and resolution of issues.
+  Loki is a centralized log aggregation system that collects logs from all microservices, enabling efficient troubleshooting and issue resolution. By correlating logs with metrics from Prometheus, it provides deep insights into service behavior, making it easier to detect and fix problems.
   
   ![Loki](resources/loki.png)
 
@@ -163,7 +202,7 @@ The platform uses microservices for scalability, resilience, and independent ser
 
 - <img src="https://i.imgur.com/dEAIPRs.png" width="30" height="30" /> **Zipkin:**
 
-  Zipkin allows for tracking the flow of requests through the system, helping to identify bottlenecks and optimize performance.
+  Zipkin is used to trace requests across different microservices, providing detailed insights into the journey of requests and helping to identify performance bottlenecks, slow services, or any failures in the system. By visualizing traces, Zipkin aids in optimizing and troubleshooting the system.
 
   ![Zipkin](resources/zipkin.png)
 
@@ -171,10 +210,10 @@ The platform uses microservices for scalability, resilience, and independent ser
 
 - <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/docker/docker-original.svg" alt="Docker" width="30" height="30"/> **Docker:**
 
-  Docker is used to containerize each service in the microservices architecture, ensuring that each component can be deployed with its dependencies in isolated environments. This enables consistent behavior across different environments, including development, testing, and production.
+  Docker containerizes each service in the microservices architecture, ensuring that each component runs in a consistent environment. This isolation allows for seamless deployment across various environments—development, testing, and production—while maintaining dependency management.
 
 - **Docker Compose:**
-  Docker Compose is utilized to orchestrate multi-container setups, allowing services such as MySQL, MongoDB, Redis, Grafana, Kafka, and Prometheus to be managed together efficiently. This simplifies starting, stopping, and scaling services in local and cloud environments.
+  Docker Compose is used to define and manage multi-container Docker applications. It allows developers to configure and run services like MySQL, MongoDB, Redis, Keycloak, Grafana, Prometheus, Loki and Kafka in unified environments, simplifying setup and orchestration for local and cloud-based environments.
 
   ![Docker](resources/docker.png)
 
@@ -182,16 +221,18 @@ The platform uses microservices for scalability, resilience, and independent ser
 
 - <img src="https://i.imgur.com/eTXiKPb.png" width="30" height="30" /> **Kafka:**
 
-  Kafka facilitates asynchronous communication between services, ensuring safe storage and distribution of messages. It allows services to communicate efficiently in an event-driven architecture, decoupling services and improving scalability.
+  Kafka is a distributed messaging platform that enables asynchronous communication between microservices. It ensures reliable message storage and distribution, making it ideal for event-driven architectures. Kafka decouples services and improves scalability by allowing them to communicate without direct dependency on each other.
   
 - **OpenFeign:**
 
-  OpenFeign simplifies inter-microservice communication by automatically creating REST client proxies, reducing boilerplate code and enhancing developer productivity.
+  OpenFeign simplifies inter-service communication by automatically generating REST client proxies, which eliminates the need for manually writing HTTP requests and handling responses. This reduces boilerplate code and increases developer efficiency.
   
 ### Resilience
 
 - <img src="https://i.imgur.com/OlDIdd2.png" width="30" height="30" /> **Resilience4j:**
 
-  - **Circuit Breaker:** Prevents requests to unavailable services, maintaining system stability.
-  - **Retry Mechanism:** Automatically retries failed requests, enhancing reliability.
-  - **Time Limiter:** Sets a maximum allowable time for requests, ensuring quick failure responses if a service is slow or unresponsive, thereby enhancing overall system responsiveness.
+  Resilience4j provides several mechanisms to improve the reliability and stability of microservices:
+
+  - **Circuit Breaker:** Detects failures and prevents requests from reaching unavailable services, maintaining overall system stability.
+  - **Retry Mechanism:** Automatically retries failed requests, improving service availability.
+  - **Time Limiter:** Ensures requests have a time limit, providing quick failure responses if a service is slow or unresponsive, thus enhancing system performance and responsiveness.
