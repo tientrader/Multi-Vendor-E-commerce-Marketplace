@@ -3,7 +3,11 @@ package com.tien.order.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -14,6 +18,7 @@ import java.util.List;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
+@EntityListeners(AuditingEntityListener.class)
 @Table(name = "orders",
         indexes = {
                 @Index(name = "idx_orders_username", columnList = "username"),
@@ -43,5 +48,11 @@ public class Order {
 
       @Column(nullable = false)
       String paymentMethod;
+
+      @CreatedDate
+      LocalDateTime createdAt;
+
+      @LastModifiedDate
+      LocalDateTime updatedAt;
 
 }
