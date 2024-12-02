@@ -2,6 +2,7 @@ package com.tien.post.entity;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.MongoId;
 
@@ -20,8 +21,12 @@ public class Post {
       @MongoId
       String id;
 
+      @Indexed
       String username;
+
+      @Indexed
       String content;
+
       List<String> imageUrls;
       long likesCount;
       long commentsCount;

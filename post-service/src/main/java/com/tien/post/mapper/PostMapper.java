@@ -7,12 +7,16 @@ import com.tien.post.dto.response.PostResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
 
+import java.util.List;
+
 @Mapper(componentModel = "spring")
 public interface PostMapper {
 
       Post toPost(PostCreationRequest request);
 
       PostResponse toPostResponse(Post post);
+
+      List<PostResponse> toPostResponseList(List<Post> posts);
 
       void updatePost(@MappingTarget Post post, PostUpdateRequest postUpdateRequest);
 

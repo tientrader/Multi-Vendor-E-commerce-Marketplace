@@ -18,6 +18,8 @@ public interface ProductService {
 
       void deleteProduct(String productId);
 
+      Page<ProductResponse> searchProducts(String keyword, String shopId, String categoryId, int page, int size, String sortBy, String sortDirection, Double minPrice, Double maxPrice);
+
       Page<ProductResponse> getProducts(String shopId, String categoryId, int page, int size, String sortBy, String sortDirection, Double minPrice, Double maxPrice, ProductSort productSort);
 
       ProductResponse getProductById(String productId);

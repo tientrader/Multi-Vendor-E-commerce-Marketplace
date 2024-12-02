@@ -50,6 +50,25 @@ public class PostController {
                     .build();
       }
 
+      @GetMapping("/search")
+      public ApiResponse<PageResponse<PostResponse>> searchPosts(
+              @RequestParam("keyword") String keyword,
+              @RequestParam(value = "page", required = false, defaultValue = "1") int page,
+              @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
+            return ApiResponse.<PageResponse<PostResponse>>builder()
+                    .result(postService.searchPosts(keyword, page, size))
+                    .build();
+      }
+
+      @GetMapping("/home")
+      public ApiResponse<PageResponse<PostResponse>> getHomePagePosts(
+              @RequestParam(value = "page", required = false, defaultValue = "1") int page,
+              @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
+            return ApiResponse.<PageResponse<PostResponse>>builder()
+                    .result(postService.getHomePagePosts(page, size))
+                    .build();
+      }
+
       @GetMapping("/my-posts")
       public ApiResponse<PageResponse<PostResponse>> myPosts(
               @RequestParam(value = "page", required = false, defaultValue = "1") int page,

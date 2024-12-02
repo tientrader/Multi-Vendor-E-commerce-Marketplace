@@ -49,6 +49,23 @@ public class ProductController {
                     .build();
       }
 
+      @GetMapping("/search")
+      public ApiResponse<Page<ProductResponse>> searchProducts(
+              @RequestParam(required = false) String keyword,
+              @RequestParam(required = false) String shopId,
+              @RequestParam(required = false) String categoryId,
+              @RequestParam(defaultValue = "0") int page,
+              @RequestParam(defaultValue = "10") int size,
+              @RequestParam(defaultValue = "name") String sortBy,
+              @RequestParam(defaultValue = "asc") String sortDirection,
+              @RequestParam(required = false) Double minPrice,
+              @RequestParam(required = false) Double maxPrice) {
+            return ApiResponse.<Page<ProductResponse>>builder()
+                    .result(productService.searchProducts(
+                            keyword, shopId, categoryId, page, size, sortBy, sortDirection, minPrice, maxPrice))
+                    .build();
+      }
+
       @GetMapping
       public ApiResponse<Page<ProductResponse>> getProducts(
               @RequestParam(required = false) String shopId,

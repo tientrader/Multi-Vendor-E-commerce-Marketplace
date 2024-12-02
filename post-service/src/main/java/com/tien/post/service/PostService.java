@@ -16,6 +16,10 @@ public interface PostService {
 
       void deletePost(String postId);
 
+      PageResponse<PostResponse> searchPosts(String keyword, int page, int size);
+
+      PageResponse<PostResponse> getHomePagePosts(int page, int size);
+
       PageResponse<PostResponse> getMyPosts(int page, int size);
 
       PostResponse getPostById(String postId);

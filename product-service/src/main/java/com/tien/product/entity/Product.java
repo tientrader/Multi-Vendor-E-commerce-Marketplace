@@ -6,6 +6,7 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
@@ -24,7 +25,10 @@ public class Product {
       @Id
       String id;
       String shopId;
+
+      @Indexed
       String name;
+
       String description;
       List<ProductVariant> variants;
       String categoryId;

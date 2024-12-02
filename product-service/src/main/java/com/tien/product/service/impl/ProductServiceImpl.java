@@ -142,10 +142,52 @@ public class ProductServiceImpl implements ProductService {
       }
 
       @Override
+      public Page<ProductResponse> searchProducts(
+              String keyword,
+              String shopId, String categoryId,
+              int page, int size,
+              String sortBy, String sortDirection,
+              Double minPrice, Double maxPrice) {
+
+            Criteria criteria = new Criteria();
+
+            if (keyword != null && !keyword.isEmpty()) {
+                  criteria.and("name").regex(keyword, "i");
+            }
+
+            if (shopId != null) {
+                  criteria.and("shopId").is(shopId);
+            }
+
+            if (categoryId != null) {
+                  criteria.and("categoryId").is(categoryId);
+            }
+
+            if (minPrice != null && maxPrice != null) {
+                  criteria.and("price").gte(minPrice).lte(maxPrice);
+            } else if (minPrice != null) {
+                  criteria.and("price").gte(minPrice);
+            } else if (maxPrice != null) {
+                  criteria.and("price").lte(maxPrice);
+            }
+
+            Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortBy);
+            Query query = Query.query(criteria).with(PageRequest.of(page, size, sort));
+
+            List<Product> products = mongoTemplate.find(query, Product.class);
+            long total = mongoTemplate.count(query.skip(-1).limit(-1), Product.class);
+            List<ProductResponse> responses = productMapper.toProductResponses(products);
+
+            return new PageImpl<>(responses, PageRequest.of(page, size), total);
+      }
+
+      @Override
       public Page<ProductResponse> getProducts(
               String shopId, String categoryId,
-              int page, int size, String sortBy, String sortDirection,
-              Double minPrice, Double maxPrice, ProductSort productSort) {
+              int page, int size,
+              String sortBy, String sortDirection,
+              Double minPrice, Double maxPrice,
+              ProductSort productSort) {
 
             productSort = Optional.ofNullable(productSort).orElse(ProductSort.DEFAULT);
             Criteria criteria = new Criteria();
