@@ -16,11 +16,16 @@ import org.springframework.stereotype.Component;
 public class KafkaConsumer {
 
       StripeService stripeService;
+      KafkaProducer kafkaProducer;
 
       @KafkaListener(topics = "payment-request")
       public void listenPaymentRequest(StripeChargeRequest request) {
-            log.info("Received payment request: {}", request);
-            stripeService.processCharge(request);
+            try {
+                  stripeService.processCharge(request);
+            } catch (Exception e) {
+                  log.error("Failed to process payment request: {}", request, e);
+                  kafkaProducer.send("payment-request-dlq", request);
+            }
       }
 
 }

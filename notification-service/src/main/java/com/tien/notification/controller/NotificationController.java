@@ -65,4 +65,15 @@ public class NotificationController {
                     .build());
       }
 
+      @KafkaListener(topics = "dlq-notification")
+      public void listenDLQ(NotificationEvent message) {
+            emailService.sendEmail(SendEmailRequest.builder()
+                    .to(Recipient.builder()
+                            .email(message.getRecipient())
+                            .build())
+                    .subject(message.getSubject())
+                    .htmlContent(message.getBody())
+                    .build());
+      }
+
 }

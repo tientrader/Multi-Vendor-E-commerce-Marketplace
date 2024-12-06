@@ -16,12 +16,17 @@ import org.springframework.stereotype.Component;
 public class KafkaConsumer {
 
       OrderService orderService;
+      KafkaProducer kafkaProducer;
 
-      @KafkaListener(topics = "payment-response", groupId = "order-service")
+      @KafkaListener(topics = "payment-response")
       public void listenPaymentResponse(PaymentResponse paymentResponse) {
-            log.info("Received payment response: {}", paymentResponse);
-            String newStatus = paymentResponse.isSuccess() ? "PAID" : "FAILED";
-            orderService.updateOrderStatus(paymentResponse.getOrderId(), newStatus);
+            try {
+                  String newStatus = paymentResponse.isSuccess() ? "PAID" : "FAILED";
+                  orderService.updateOrderStatus(paymentResponse.getOrderId(), newStatus);
+            } catch (Exception e) {
+                  log.error("Failed to process payment response: {}", paymentResponse, e);
+                  kafkaProducer.send("payment-response-dlq", paymentResponse);
+            }
       }
 
 }

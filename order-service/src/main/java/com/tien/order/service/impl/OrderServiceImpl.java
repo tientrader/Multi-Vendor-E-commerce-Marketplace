@@ -66,7 +66,6 @@ public class OrderServiceImpl implements OrderService {
             }
 
             updateStockAndSoldQuantity(request.getItems());
-            orderRepository.save(order);
 
             kafkaProducer.send("order-created-successful", NotificationEvent.builder()
                     .channel("EMAIL")
