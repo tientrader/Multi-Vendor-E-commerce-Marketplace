@@ -7,6 +7,7 @@ import com.stripe.param.CustomerCreateParams;
 import com.stripe.param.CustomerSearchParams;
 import com.stripe.param.checkout.SessionCreateParams;
 import com.tien.event.dto.NotificationEvent;
+import com.tien.event.dto.PaymentResponse;
 import com.tien.payment.dto.request.PaymentSessionRequest;
 import com.tien.event.dto.StripeChargeRequest;
 import com.tien.payment.dto.request.StripeSubscriptionRequest;
@@ -18,6 +19,7 @@ import com.tien.payment.entity.StripeCharge;
 import com.tien.payment.entity.StripeSubscription;
 import com.tien.payment.exception.AppException;
 import com.tien.payment.exception.ErrorCode;
+import com.tien.payment.kafka.KafkaProducer;
 import com.tien.payment.mapper.StripeMapper;
 import com.tien.payment.repository.SessionRepository;
 import com.tien.payment.repository.StripeChargeRepository;
@@ -30,7 +32,6 @@ import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -49,7 +50,7 @@ public class StripeServiceImpl implements StripeService {
       StripeSubscriptionRepository stripeSubscriptionRepository;
       SessionRepository sessionRepository;
       StripeMapper stripeMapper;
-      KafkaTemplate<String, Object> kafkaTemplate;
+      KafkaProducer kafkaProducer;
 
       @Value("${stripe.api.key}")
       @NonFinal
@@ -104,7 +105,12 @@ public class StripeServiceImpl implements StripeService {
                         stripeCharge.setChargeId(charge.getId());
                         stripeCharge.setSuccess(true);
 
-                        kafkaTemplate.send("payment_successful", NotificationEvent.builder()
+                        kafkaProducer.send("payment-response", PaymentResponse.builder()
+                                .orderId(request.getOrderId())
+                                .success(true)
+                                .build());
+
+                        kafkaProducer.send("payment_successful", NotificationEvent.builder()
                                 .channel("email")
                                 .recipient(request.getEmail())
                                 .subject("Payment Successful")
@@ -112,6 +118,11 @@ public class StripeServiceImpl implements StripeService {
                                 .build());
                   } else {
                         stripeCharge.setSuccess(false);
+
+                        kafkaProducer.send("payment-response", PaymentResponse.builder()
+                                .orderId(request.getOrderId())
+                                .success(false)
+                                .build());
                   }
 
                   stripeCharge.setUsername(username);

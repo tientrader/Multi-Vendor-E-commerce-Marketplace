@@ -9,6 +9,7 @@ import com.tien.order.entity.Order;
 import com.tien.order.exception.AppException;
 import com.tien.order.exception.ErrorCode;
 import com.tien.order.httpclient.ProductClient;
+import com.tien.order.kafka.KafkaProducer;
 import com.tien.order.mapper.OrderMapper;
 import com.tien.order.repository.OrderRepository;
 import com.tien.order.service.OrderService;
@@ -17,7 +18,6 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -35,7 +35,7 @@ public class OrderServiceImpl implements OrderService {
       ProductClient productClient;
       OrderRepository orderRepository;
       OrderMapper orderMapper;
-      KafkaTemplate<String, Object> kafkaTemplate;
+      KafkaProducer kafkaProducer;
 
       @Override
       @Transactional
@@ -48,28 +48,27 @@ public class OrderServiceImpl implements OrderService {
             order.setUsername(username);
             order.setTotal(request.getTotal());
             order.setStatus("PENDING");
+            orderRepository.save(order);
 
             switch (request.getPaymentMethod().toUpperCase()) {
                   case "CARD":
-                        kafkaTemplate.send("payment-request", StripeChargeRequest.builder()
+                        kafkaProducer.send("payment-request", StripeChargeRequest.builder()
+                                .orderId(order.getOrderId())
                                 .username(username)
                                 .amount(order.getTotal())
                                 .stripeToken(request.getPaymentToken())
                                 .email(request.getEmail())
                                 .build());
-
-                        order.setStatus("PAID");
                         break;
 
                   case "COD":
-                        order.setStatus("PENDING");
                         break;
             }
 
             updateStockAndSoldQuantity(request.getItems());
             orderRepository.save(order);
 
-            kafkaTemplate.send("order-created-successful", NotificationEvent.builder()
+            kafkaProducer.send("order-created-successful", NotificationEvent.builder()
                     .channel("EMAIL")
                     .recipient(request.getEmail())
                     .subject("Order created successfully")
@@ -98,25 +97,22 @@ public class OrderServiceImpl implements OrderService {
 
             switch (request.getPaymentMethod().toUpperCase()) {
                   case "CARD":
-                        kafkaTemplate.send("payment-request", StripeChargeRequest.builder()
+                        kafkaProducer.send("payment-request", StripeChargeRequest.builder()
                                 .username(username)
                                 .amount(order.getTotal())
                                 .stripeToken(request.getPaymentToken())
                                 .email(request.getEmail())
                                 .build());
-
-                        order.setStatus("PAID");
                         break;
 
                   case "COD":
-                        order.setStatus("PENDING");
                         break;
             }
 
             updateStockAndSoldQuantity(request.getItems());
             orderRepository.save(order);
 
-            kafkaTemplate.send("order-created-successful", NotificationEvent.builder()
+            kafkaProducer.send("order-created-successful", NotificationEvent.builder()
                     .channel("EMAIL")
                     .recipient(request.getEmail())
                     .subject("Order created successfully")
@@ -124,6 +120,14 @@ public class OrderServiceImpl implements OrderService {
                     .build());
 
             return orderMapper.toOrderResponse(order);
+      }
+
+      @Override
+      @Transactional
+      public void updateOrderStatus(Long orderId, String newStatus) {
+            Order order = findOrderById(orderId);
+            order.setStatus(newStatus);
+            orderRepository.save(order);
       }
 
       @Override

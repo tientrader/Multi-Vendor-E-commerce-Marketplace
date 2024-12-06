@@ -13,8 +13,8 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class StripeChargeRequest {
 
+      Long orderId;
       String stripeToken;
-
       String username;
 
       @NotNull(message = "EMAIL_IS_REQUIRED")

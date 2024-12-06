@@ -11,6 +11,8 @@ public interface OrderService {
 
       OrderResponse buyNow(OrderCreationRequest request);
 
+      void updateOrderStatus(Long orderId, String newStatus);
+
       void deleteOrder(Long orderId);
 
       List<OrderResponse> getAllOrders();
