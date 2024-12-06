@@ -1,4 +1,4 @@
-package com.tien.payment.dto.request;
+package com.tien.event.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
@@ -14,6 +14,8 @@ import lombok.experimental.FieldDefaults;
 public class StripeChargeRequest {
 
       String stripeToken;
+
+      String username;
 
       @NotNull(message = "EMAIL_IS_REQUIRED")
       @Email(message = "INVALID_EMAIL")

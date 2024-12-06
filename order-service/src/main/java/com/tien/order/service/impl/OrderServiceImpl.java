@@ -1,16 +1,13 @@
 package com.tien.order.service.impl;
 
 import com.tien.event.dto.NotificationEvent;
-import com.tien.order.dto.ApiResponse;
 import com.tien.order.dto.request.OrderCreationRequest;
 import com.tien.order.dto.request.OrderItemCreationRequest;
-import com.tien.order.httpclient.request.StripeChargeRequest;
+import com.tien.event.dto.StripeChargeRequest;
 import com.tien.order.dto.response.OrderResponse;
-import com.tien.order.httpclient.response.StripeChargeResponse;
 import com.tien.order.entity.Order;
 import com.tien.order.exception.AppException;
 import com.tien.order.exception.ErrorCode;
-import com.tien.order.httpclient.PaymentClient;
 import com.tien.order.httpclient.ProductClient;
 import com.tien.order.mapper.OrderMapper;
 import com.tien.order.repository.OrderRepository;
@@ -36,7 +33,6 @@ import java.util.List;
 public class OrderServiceImpl implements OrderService {
 
       ProductClient productClient;
-      PaymentClient paymentClient;
       OrderRepository orderRepository;
       OrderMapper orderMapper;
       KafkaTemplate<String, Object> kafkaTemplate;
@@ -55,26 +51,14 @@ public class OrderServiceImpl implements OrderService {
 
             switch (request.getPaymentMethod().toUpperCase()) {
                   case "CARD":
-                        StripeChargeRequest stripeChargeRequest = new StripeChargeRequest();
-                        stripeChargeRequest.setUsername(username);
-                        stripeChargeRequest.setAmount(order.getTotal());
-                        stripeChargeRequest.setStripeToken(request.getPaymentToken());
-                        stripeChargeRequest.setEmail(request.getEmail());
+                        kafkaTemplate.send("payment-request", StripeChargeRequest.builder()
+                                .username(username)
+                                .amount(order.getTotal())
+                                .stripeToken(request.getPaymentToken())
+                                .email(request.getEmail())
+                                .build());
 
-                        ApiResponse<StripeChargeResponse> paymentResponse;
-                        try {
-                              paymentResponse = paymentClient.charge(stripeChargeRequest);
-                        } catch (FeignException e) {
-                              log.error("Error charging payment for user {}: {}", username, e.getMessage(), e);
-                              throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
-                        }
-
-                        if (paymentResponse.getResult() != null && paymentResponse.getResult().getSuccess()) {
-                              order.setStatus("PAID");
-                        } else {
-                              log.error("(createOrder) Payment failed for user {}: {}", username, paymentResponse.getMessage());
-                              throw new AppException(ErrorCode.PAYMENT_FAIL);
-                        }
+                        order.setStatus("PAID");
                         break;
 
                   case "COD":
@@ -114,26 +98,14 @@ public class OrderServiceImpl implements OrderService {
 
             switch (request.getPaymentMethod().toUpperCase()) {
                   case "CARD":
-                        StripeChargeRequest stripeChargeRequest = new StripeChargeRequest();
-                        stripeChargeRequest.setUsername(username);
-                        stripeChargeRequest.setAmount(order.getTotal());
-                        stripeChargeRequest.setStripeToken(request.getPaymentToken());
-                        stripeChargeRequest.setEmail(request.getEmail());
+                        kafkaTemplate.send("payment-request", StripeChargeRequest.builder()
+                                .username(username)
+                                .amount(order.getTotal())
+                                .stripeToken(request.getPaymentToken())
+                                .email(request.getEmail())
+                                .build());
 
-                        ApiResponse<StripeChargeResponse> paymentResponse;
-                        try {
-                              paymentResponse = paymentClient.charge(stripeChargeRequest);
-                        } catch (FeignException e) {
-                              log.error("Error charging payment for user {}: {}", username, e.getMessage(), e);
-                              throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
-                        }
-
-                        if (paymentResponse.getResult() != null && paymentResponse.getResult().getSuccess()) {
-                              order.setStatus("PAID");
-                        } else {
-                              log.error("Payment failed for user {}: {}", username, paymentResponse.getMessage());
-                              throw new AppException(ErrorCode.PAYMENT_FAIL);
-                        }
+                        order.setStatus("PAID");
                         break;
 
                   case "COD":

@@ -8,7 +8,7 @@ import com.stripe.param.CustomerSearchParams;
 import com.stripe.param.checkout.SessionCreateParams;
 import com.tien.event.dto.NotificationEvent;
 import com.tien.payment.dto.request.PaymentSessionRequest;
-import com.tien.payment.dto.request.StripeChargeRequest;
+import com.tien.event.dto.StripeChargeRequest;
 import com.tien.payment.dto.request.StripeSubscriptionRequest;
 import com.tien.payment.dto.request.SubscriptionSessionRequest;
 import com.tien.payment.dto.response.SessionResponse;
@@ -74,8 +74,16 @@ public class StripeServiceImpl implements StripeService {
 
       @Override
       public StripeChargeResponse charge(StripeChargeRequest request) {
-            StripeCharge stripeCharge = stripeMapper.toStripeCharge(request);
             String currentUsername = getCurrentUsername();
+            request.setUsername(currentUsername);
+
+            return processCharge(request);
+      }
+
+      @Override
+      public StripeChargeResponse processCharge(StripeChargeRequest request) {
+            StripeCharge stripeCharge = stripeMapper.toStripeCharge(request);
+            String username = request.getUsername();
 
             String stripeToken = request.getStripeToken() != null ? request.getStripeToken() : "tok_visa";
 
@@ -83,11 +91,11 @@ public class StripeServiceImpl implements StripeService {
                   Map<String, Object> chargeParams = new HashMap<>();
                   chargeParams.put("amount", (int) (request.getAmount() * 100));
                   chargeParams.put("currency", "USD");
-                  chargeParams.put("description", "Payment for order by " + currentUsername);
+                  chargeParams.put("description", "Payment for order by " + username);
                   chargeParams.put("source", stripeToken);
 
                   HashMap<String, Object> metadata = new HashMap<>();
-                  metadata.put("username", currentUsername);
+                  metadata.put("username", username);
                   chargeParams.put("metadata", metadata);
 
                   Charge charge = Charge.create(chargeParams);
@@ -106,11 +114,11 @@ public class StripeServiceImpl implements StripeService {
                         stripeCharge.setSuccess(false);
                   }
 
-                  stripeCharge.setUsername(currentUsername);
+                  stripeCharge.setUsername(username);
                   stripeChargeRepository.save(stripeCharge);
                   return stripeMapper.toStripeChargeResponse(stripeCharge);
             } catch (StripeException e) {
-                  log.error("Payment failed for user {}: {}", currentUsername, e.getMessage());
+                  log.error("Payment failed for user {}: {}", username, e.getMessage());
                   throw new AppException(ErrorCode.PAYMENT_FAILED);
             }
       }
