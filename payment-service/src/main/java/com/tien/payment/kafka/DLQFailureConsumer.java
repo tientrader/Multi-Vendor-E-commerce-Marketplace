@@ -1,7 +1,7 @@
-package com.tien.order.kafka;
+package com.tien.payment.kafka;
 
 import com.tien.event.dto.NotificationEvent;
-import com.tien.event.dto.PaymentResponse;
+import com.tien.event.dto.StripeChargeRequest;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -13,18 +13,19 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class DeadLetterQueueConsumer {
+public class DLQFailureConsumer {
 
       KafkaProducer kafkaProducer;
 
-      @KafkaListener(topics = "payment-response-dlq")
-      public void listenDlq(PaymentResponse paymentResponse) {
-            log.error("Message in DLQ: {}", paymentResponse);
+      @KafkaListener(topics = "payment-request-dlq-failure")
+      public void listenDlqFailure(StripeChargeRequest stripeChargeRequest) {
+            log.error("Message in DLQ-Failure: {}", stripeChargeRequest);
+
             kafkaProducer.send("dlq-notification", NotificationEvent.builder()
                     .channel("email")
                     .recipient("facebooktnt123@gmail.com")
-                    .subject("DLQ Alert - Order Service Issue")
-                    .body("There was an issue processing payment-response. Please check the order-service logs for details.")
+                    .subject("Critical Alert: DLQ-Failure")
+                    .body("Message failed during DLQ retry process. Details: " + stripeChargeRequest)
                     .build());
       }
 
