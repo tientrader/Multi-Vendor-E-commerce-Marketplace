@@ -17,6 +17,17 @@ services:
     networks:
       - tien-network
 
+  kafka-exporter:
+    image: 'danielqsj/kafka-exporter:latest'
+    container_name: kafka-exporter
+    ports:
+      - '9308:9308'
+    environment:
+      - KAFKA_SERVER=kafka:9094
+      - KAFKA_VERSION=3.7.0
+    networks:
+      - tien-network
+
   mongodb:
     image: mongodb/mongodb-community-server:7.0.5-ubi8
     container_name: mongodb
