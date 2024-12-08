@@ -7,16 +7,19 @@ WORKDIR /app
 COPY pom.xml .
 COPY src ./src
 
-# Build source code with maven
+# Build source code with Maven
 RUN mvn package -DskipTests
 
-#Stage 2: create image
-# Start with Amazon Correto JDK 21
+# Stage 2: create image
+# Start with Amazon Corretto JDK 21
 FROM amazoncorretto:21.0.4
 
-# Set working folder to App and copy complied file from above step
+# Set working folder to /app and copy the compiled file from above step
 WORKDIR /app
-COPY --from=build /app/target/*.jar app.jar
+COPY --from=build /app/target/*.jar review-service-0.0.1-SNAPSHOT.jar
+
+# Expose the port the application will run on (assuming your app runs on 8080)
+EXPOSE 8089
 
 # Command to run the application
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-jar", "review-service-0.0.1-SNAPSHOT.jar"]

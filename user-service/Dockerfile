@@ -16,10 +16,10 @@ FROM amazoncorretto:21.0.4
 
 # Set working folder to /app and copy the compiled file from above step
 WORKDIR /app
-COPY --from=build /app/target/*.jar api-gateway-0.0.1-SNAPSHOT.jar
+COPY --from=build /app/target/*.jar user-service-0.0.1-SNAPSHOT.jar
 
 # Expose the port the application will run on (assuming your app runs on 8080)
-EXPOSE 8888
+EXPOSE 8080
 
 # Command to run the application
 ENTRYPOINT ["java", "-jar", "user-service-0.0.1-SNAPSHOT.jar"]
