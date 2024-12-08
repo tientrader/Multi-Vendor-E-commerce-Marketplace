@@ -32,7 +32,7 @@ public class NotificationController {
                     .build());
       }
 
-      @KafkaListener(topics = "payment_successful")
+      @KafkaListener(topics = "payment-successful")
       public void listenPaymentService(NotificationEvent message) {
             emailService.sendEmail(SendEmailRequest.builder()
                     .to(Recipient.builder()

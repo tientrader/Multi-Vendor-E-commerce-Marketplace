@@ -34,7 +34,6 @@ public class DLQRetryService {
                   for (PaymentResponse message : dlqMessages) {
                         try {
                               kafkaTemplate.send("payment-response", message);
-                              log.info("Retried and sent to payment-response: {}", message);
                         } catch (Exception e) {
                               log.error("Retry failed for message: {}", message, e);
                               try {

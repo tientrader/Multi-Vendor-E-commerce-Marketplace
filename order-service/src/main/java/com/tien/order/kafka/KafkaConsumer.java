@@ -18,7 +18,7 @@ public class KafkaConsumer {
       OrderService orderService;
       KafkaProducer kafkaProducer;
 
-      @KafkaListener(topics = "payment-response")
+      @KafkaListener(topics = "payment-response", groupId = "payment-service-group")
       public void listenPaymentResponse(PaymentResponse paymentResponse) {
             try {
                   String newStatus = paymentResponse.isSuccess() ? "PAID" : "FAILED";

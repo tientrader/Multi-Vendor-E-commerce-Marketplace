@@ -21,7 +21,7 @@ spring:
       retries: 3
       acks: all
     consumer:
-      group-id: payment-service-group
+      group-id: order-service-group
       auto-offset-reset: earliest
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer

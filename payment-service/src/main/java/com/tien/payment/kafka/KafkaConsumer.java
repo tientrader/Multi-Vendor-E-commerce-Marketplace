@@ -18,7 +18,7 @@ public class KafkaConsumer {
       StripeService stripeService;
       KafkaProducer kafkaProducer;
 
-      @KafkaListener(topics = "payment-request")
+      @KafkaListener(topics = "payment-request", groupId = "order-service-group")
       public void listenPaymentRequest(StripeChargeRequest request) {
             try {
                   stripeService.processCharge(request);

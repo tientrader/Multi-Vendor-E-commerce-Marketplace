@@ -110,7 +110,7 @@ public class StripeServiceImpl implements StripeService {
                                 .success(true)
                                 .build());
 
-                        kafkaProducer.send("payment_successful", NotificationEvent.builder()
+                        kafkaProducer.send("payment-successful", NotificationEvent.builder()
                                 .channel("email")
                                 .recipient(request.getEmail())
                                 .subject("Payment Successful")
