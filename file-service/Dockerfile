@@ -18,7 +18,7 @@ FROM amazoncorretto:21.0.4
 WORKDIR /app
 COPY --from=build /app/target/*.jar file-service-0.0.1-SNAPSHOT.jar
 
-# Expose the port the application will run on (assuming your app runs on 8080)
+# Expose the port the application will run on
 EXPOSE 8088
 
 # Command to run the application
