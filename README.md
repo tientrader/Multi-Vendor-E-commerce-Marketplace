@@ -1,10 +1,15 @@
 # 📌 Multi-Vendor E-commerce Marketplace
 
-**Multi-Vendor E-commerce Marketplace** is a robust platform connecting buyers and sellers in a seamless, user-centric ecosystem. It offers features for easy product discovery, order management, secure payment processing, and multi-channel transaction support. Designed for exceptional user experience and scalability, it ensures secure and reliable interactions for all participants.
+### ❓ **The Million-Dollar Question:**
+**"How to handle millions of requests per second?"**
 
-❗️ The system is designed to handle and process nearly all business scenarios, adhering to best practices for data integrity and security, ensuring that the platform remains reliable and protected against potential issues.
+- To tackle this challenge, you need a scalable, responsive, and reliable system. This is exactly what I’ve built with the Multi-Vendor E-commerce Marketplace — a robust platform designed to connect buyers and sellers in a seamless, user-friendly ecosystem. The platform offers features like easy product discovery, efficient order management, secure payment processing, and multi-channel transaction support.
 
-❗️ Below is a general overview of the project. For more detailed information regarding flows, data constraints, and business logic, please refer to the code.
+### 🔑 **Key Highlights:**
+- Scalable and high-performance system designed to handle and process nearly all business scenarios.
+- Implements best practices for data integrity and security, ensuring that the platform remains reliable and protected against potential issues.
+
+❗ Below is a high-level overview of the project. For more in-depth details about workflows, data constraints, and business logic, please refer to the code.
 
 ## 🏗 Architecture Overview
 
@@ -61,6 +66,22 @@
   - **Spring Cloud:**  
     Enhances system scalability and flexibility by offering tools for service discovery, configuration management, and load balancing, ensuring smooth operation in distributed environments.
 
+  - **Spring Kafka:**  
+    Simplifies integration of Kafka messaging in Spring applications, supporting Kafka Producers/Consumers, Kafka Streams, and Kafka Connect for real-time data processing and system integration. It handles serialization, deserialization, and error management, enabling reliable event-driven architectures.
+
+### Service Communication
+
+- <img src="https://i.imgur.com/eTXiKPb.png" width="30" height="30" /> **Kafka:**
+
+  Kafka is a distributed messaging platform that enables asynchronous communication between microservices. It ensures reliable message storage and distribution, making it ideal for event-driven architectures. Kafka decouples services and improves scalability by allowing them to communicate without direct dependency on each other.
+
+  ![Kafka](resources/kafka.png)
+  ![Kafka](resources/kafka-grafana.png)
+  
+- **OpenFeign:**
+
+  OpenFeign simplifies inter-service communication by automatically generating REST client proxies, which eliminates the need for manually writing HTTP requests and handling responses. This reduces boilerplate code and increases developer efficiency.
+  
 ### Identity and Access Management
 
 - <img src="https://i.imgur.com/0ue3f00.png" width="30" height="30" /> **Keycloak:**
@@ -212,20 +233,20 @@
 
   Docker containerizes each service in the microservices architecture, ensuring that each component runs in a consistent environment. This isolation allows for seamless deployment across various environments—development, testing, and production—while maintaining dependency management.
 
-- **Docker Compose:**
-  Docker Compose is used to define and manage multi-container Docker applications. It allows developers to configure and run services like MySQL, MongoDB, Redis, Keycloak, Grafana, Prometheus, Loki and Kafka in unified environments, simplifying setup and orchestration for local and cloud-based environments.
-
   ![Docker](resources/docker.png)
+  ![Docker](resources/docker-hub.png)
 
-### Service Communication
+### CI/CD Pipeline Automation
 
-- <img src="https://i.imgur.com/eTXiKPb.png" width="30" height="30" /> **Kafka:**
+- <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/git/git-original.svg" width="30" height="30" /> **Git:**
 
-  Kafka is a distributed messaging platform that enables asynchronous communication between microservices. It ensures reliable message storage and distribution, making it ideal for event-driven architectures. Kafka decouples services and improves scalability by allowing them to communicate without direct dependency on each other.
+  Git is used for version control, enabling collaboration and maintaining code history across multiple developers. It ensures efficient branching, merging, and conflict resolution during development.
   
-- **OpenFeign:**
+- <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/jenkins/jenkins-original.svg" width="30" height="30" /> **Jenkins:**
 
-  OpenFeign simplifies inter-service communication by automatically generating REST client proxies, which eliminates the need for manually writing HTTP requests and handling responses. This reduces boilerplate code and increases developer efficiency.
+  Jenkins automates the CI/CD pipeline, streamlining the processes of building, testing, and deploying services. It integrates seamlessly with Git repositories to trigger builds on code changes.
+
+![Jenkins](resources/jenkins.png)
   
 ### Resilience
 
