@@ -310,7 +310,6 @@ public class UserServiceImpl implements UserService {
       }
 
       @Override
-      @Transactional
       public Page<UserResponse> searchUsers(String keyword, int page, int size) {
             PageRequest pageRequest = PageRequest.of(page, size);
             Page<User> users = userRepository.searchUsers(keyword, pageRequest);

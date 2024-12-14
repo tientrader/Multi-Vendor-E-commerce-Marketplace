@@ -76,8 +76,17 @@ services:
     ports:
       - "6379:6379"
     environment:
-      - REDIS_PASSWORD=
-    command: [ "redis-server", "--requirepass", "redis-password" ]
+      - REDIS_PASSWORD=redis-password
+    command:
+      [
+        "redis-server",
+        "--requirepass", "redis-password",
+        "--appendonly", "yes",
+        "--appendfsync", "always",
+        "--save", "900", "1",
+        "--save", "300", "10",
+        "--save", "60", "10000"
+      ]
     volumes:
       - redis-data:/data
     networks:
