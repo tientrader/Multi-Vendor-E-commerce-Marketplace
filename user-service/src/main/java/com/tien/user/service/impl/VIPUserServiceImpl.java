@@ -60,7 +60,8 @@ public class VIPUserServiceImpl implements VIPUserService {
                   throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
             }
 
-            findOrCreateUser(request, username);
+            userRepository.findByUsername(username)
+                    .orElseGet(() -> userRepository.save(vipUserMapper.vipUserRequestToUser(request)));
       }
 
       @Override
@@ -82,7 +83,9 @@ public class VIPUserServiceImpl implements VIPUserService {
                   throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
             }
 
-            User user = findOrCreateUser(request, username);
+            User user = userRepository.findByUsername(username)
+                    .orElse(vipUserMapper.vipUserRequestWithSessionToUser(request));
+
             String sessionUrl = sessionResponse.getResult().getSessionUrl();
 
             VIPUserResponseWithSession vipUserResponseWithSession = vipUserMapper.userToVipUserResponseWithSession(user);
@@ -94,7 +97,9 @@ public class VIPUserServiceImpl implements VIPUserService {
       @Override
       @Transactional
       public void updateVipEndDate(String username, String packageType, String subscriptionId) {
-            User user = findUserByUsername(username);
+            User user = userRepository.findByUsername(username)
+                    .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
             LocalDate vipStartDate = LocalDate.now();
             LocalDate vipEndDate = getVipEndDateBasedOnPackageType(packageType, vipStartDate);
 
@@ -110,7 +115,9 @@ public class VIPUserServiceImpl implements VIPUserService {
       @Transactional
       public void cancelVIPUserSubscription() {
             String currentUsername = getCurrentUsername();
-            User user = findUserByUsername(currentUsername);
+
+            User user = userRepository.findByUsername(currentUsername)
+                    .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
             if (user.getStripeSubscriptionId() == null) {
                   log.warn("User {} does not have a subscription to cancel.", currentUsername);
@@ -130,7 +137,8 @@ public class VIPUserServiceImpl implements VIPUserService {
 
       @Override
       public VIPUserResponse checkIfUserIsVIP(String username) {
-            User user = findUserByUsername(username);
+            User user = userRepository.findByUsername(username)
+                    .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
             if (!user.isVipStatus() || (user.getVipEndDate() != null && user.getVipEndDate().isBefore(LocalDate.now()))) {
                   log.error("User {} is not a VIP user or has canceled their subscription.", username);
@@ -155,21 +163,6 @@ public class VIPUserServiceImpl implements VIPUserService {
                         throw new AppException(ErrorCode.INVALID_PACKAGE_TYPE);
                   }
             };
-      }
-
-      private void findOrCreateUser(VIPUserRequest request, String username) {
-            userRepository.findByUsername(username);
-            vipUserMapper.vipUserRequestToUser(request);
-      }
-
-      private User findOrCreateUser(VIPUserRequestWithSession request, String username) {
-            return userRepository.findByUsername(username)
-                    .orElse(vipUserMapper.vipUserRequestWithSessionToUser(request));
-      }
-
-      private User findUserByUsername(String username) {
-            return userRepository.findByUsername(username)
-                    .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
       }
 
 }

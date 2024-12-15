@@ -228,7 +228,8 @@ public class UserServiceImpl implements UserService {
       @Override
       @Transactional
       public void forgotPassword(ForgotPasswordRequest request) {
-            User user = findUserByEmail(request.getEmail());
+            User user = userRepository.findByEmail(request.getEmail())
+                    .orElseThrow(() -> new AppException(ErrorCode.PROFILE_NOT_FOUND));
             String userId = user.getUserId();
 
             CompletableFuture.runAsync(() -> {
@@ -245,7 +246,8 @@ public class UserServiceImpl implements UserService {
       @Transactional
       @PreAuthorize("hasRole('ADMIN')")
       public UserResponse updateUser(String userId, UserUpdateRequest updateRequest) {
-            User user = findUserById(userId);
+            User user = userRepository.findByUserId(userId)
+                    .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
             try {
                   identityClient.updateUser("Bearer " + getAccessToken(), userId, updateRequest);
@@ -262,7 +264,8 @@ public class UserServiceImpl implements UserService {
       @Transactional
       public UserResponse updateMyInfo(UserUpdateRequest updateRequest) {
             String userId = getCurrentUserId();
-            User user = findUserById(userId);
+            User user = userRepository.findByUserId(userId)
+                    .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
             try {
                   identityClient.updateUser("Bearer " + getAccessToken(), userId, updateRequest);
@@ -297,7 +300,8 @@ public class UserServiceImpl implements UserService {
       @Transactional
       @PreAuthorize("hasRole('ADMIN')")
       public void deleteUser(String userId) {
-            findUserById(userId);
+            userRepository.findByUserId(userId)
+                    .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
             try {
                   identityClient.deleteUser("Bearer " + getAccessToken(), userId);
@@ -307,6 +311,23 @@ public class UserServiceImpl implements UserService {
             }
 
             userRepository.deleteByUserId(userId);
+      }
+
+      @Override
+      @PreAuthorize("hasRole('ADMIN')")
+      public List<UserResponse> getAllUsers() {
+            return userRepository.findAll()
+                    .stream()
+                    .map(userMapper::toUserResponse)
+                    .toList();
+      }
+
+      @Override
+      @PreAuthorize("hasRole('ADMIN')")
+      public UserResponse getUserByUserId(String userId) {
+            User user = userRepository.findByUserId(userId)
+                    .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+            return userMapper.toUserResponse(user);
       }
 
       @Override
@@ -323,33 +344,25 @@ public class UserServiceImpl implements UserService {
       }
 
       @Override
-      @PreAuthorize("hasRole('ADMIN')")
-      public List<UserResponse> getAllUsers() {
-            return userRepository.findAll()
-                    .stream()
-                    .map(userMapper::toUserResponse)
-                    .toList();
-      }
-
-      @Override
       public UserResponse getMyInfo() {
-            return userMapper.toUserResponse(findUserById(getCurrentUserId()));
-      }
-
-      @Override
-      @PreAuthorize("hasRole('ADMIN')")
-      public UserResponse getUserByUserId(String userId) {
-            return userMapper.toUserResponse(findUserById(userId));
-      }
-
-      @Override
-      public UserResponse getUserByProfileId(String profileId) {
-            return userMapper.toUserResponse(findUserByProfileId(profileId));
+            String userId = getCurrentUserId();
+            User user = userRepository.findByUserId(userId)
+                    .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+            return userMapper.toUserResponse(user);
       }
 
       @Override
       public UserResponse getUserByUsername(String username) {
-            return userMapper.toUserResponse(findUserByUsername(username));
+            User user = userRepository.findByUsername(username)
+                    .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+            return userMapper.toUserResponse(user);
+      }
+
+      @Override
+      public UserResponse getUserByProfileId(String profileId) {
+            User user = userRepository.findById(profileId)
+                    .orElseThrow(() -> new AppException(ErrorCode.PROFILE_NOT_FOUND));
+            return userMapper.toUserResponse(user);
       }
 
       private String getCurrentUserId() {
@@ -378,26 +391,6 @@ public class UserServiceImpl implements UserService {
                     .client_secret(clientSecret)
                     .scope("openid")
                     .build()).getAccessToken();
-      }
-
-      private User findUserById(String userId) {
-            return userRepository.findByUserId(userId)
-                    .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
-      }
-
-      private User findUserByProfileId(String profileId) {
-            return userRepository.findById(profileId)
-                    .orElseThrow(() -> new AppException(ErrorCode.PROFILE_NOT_FOUND));
-      }
-
-      private User findUserByEmail(String email) {
-            return userRepository.findByEmail(email)
-                    .orElseThrow(() -> new AppException(ErrorCode.PROFILE_NOT_FOUND));
-      }
-
-      private User findUserByUsername(String username) {
-            return userRepository.findByUsername(username)
-                    .orElseThrow(() -> new AppException(ErrorCode.PROFILE_NOT_FOUND));
       }
 
 }
