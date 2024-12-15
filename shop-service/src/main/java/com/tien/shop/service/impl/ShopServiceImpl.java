@@ -67,15 +67,21 @@ public class ShopServiceImpl implements ShopService {
       @Override
       @Transactional
       public ShopResponse updateShop(ShopUpdateRequest request) {
-            Shop shop = findShopByOwnerUsername(getCurrentUsername());
+            String currentUsername = getCurrentUsername();
+            Shop shop = shopRepository.findByOwnerUsername(currentUsername)
+                    .orElseThrow(() -> new AppException(ErrorCode.SHOP_NOT_FOUND));
             shopMapper.updateShop(shop, request);
+
             return shopMapper.toShopResponse(shopRepository.save(shop));
       }
 
       @Override
       @Transactional
       public void deleteShop() {
-            shopRepository.delete(findShopByOwnerUsername(getCurrentUsername()));
+            String currentUsername = getCurrentUsername();
+            Shop shop = shopRepository.findByOwnerUsername(currentUsername)
+                    .orElseThrow(() -> new AppException(ErrorCode.SHOP_NOT_FOUND));
+            shopRepository.delete(shop);
       }
 
       @Override
@@ -155,7 +161,8 @@ public class ShopServiceImpl implements ShopService {
       @Override
       public SalesReportResponse getMySalesReport(String startDate, String endDate) {
             String username = getCurrentUsername();
-            Shop shop = findShopByOwnerUsername(username);
+            Shop shop = shopRepository.findByOwnerUsername(username)
+                    .orElseThrow(() -> new AppException(ErrorCode.SHOP_NOT_FOUND));
 
             List<ProductResponse> products;
             try {
@@ -237,12 +244,16 @@ public class ShopServiceImpl implements ShopService {
 
       @Override
       public ShopResponse getShopByOwnerUsername(String ownerUsername) {
-            return shopMapper.toShopResponse(findShopByOwnerUsername(ownerUsername));
+            Shop shop = shopRepository.findByOwnerUsername(ownerUsername)
+                    .orElseThrow(() -> new AppException(ErrorCode.SHOP_NOT_FOUND));
+            return shopMapper.toShopResponse(shop);
       }
 
       @Override
       public String getOwnerUsernameByShopId(String shopId) {
-            return findShopById(shopId).getOwnerUsername();
+            return shopRepository.findById(shopId)
+                    .orElseThrow(() -> new AppException(ErrorCode.SHOP_NOT_FOUND))
+                    .getOwnerUsername();
       }
 
       @Override
@@ -253,16 +264,6 @@ public class ShopServiceImpl implements ShopService {
       private String getCurrentUsername() {
             Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             return jwt.getClaim("preferred_username");
-      }
-
-      private Shop findShopByOwnerUsername(String username) {
-            return shopRepository.findByOwnerUsername(username)
-                    .orElseThrow(() -> new AppException(ErrorCode.SHOP_NOT_FOUND));
-      }
-
-      private Shop findShopById(String shopId) {
-            return shopRepository.findById(shopId)
-                    .orElseThrow(() -> new AppException(ErrorCode.SHOP_NOT_FOUND));
       }
 
 }

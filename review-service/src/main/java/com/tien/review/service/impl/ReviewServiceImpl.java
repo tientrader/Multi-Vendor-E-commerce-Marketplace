@@ -32,10 +32,10 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -51,6 +51,7 @@ public class ReviewServiceImpl implements ReviewService {
       ShopClient shopClient;
 
       @Override
+      @Transactional
       public ReviewResponse createReview(ReviewCreationRequest request, List<MultipartFile> images) {
             String username = getCurrentUsername();
 
@@ -62,8 +63,7 @@ public class ReviewServiceImpl implements ReviewService {
             try {
                   var existsResponse = productClient.existsProduct(request.getProductId(), request.getVariantId());
                   if (!existsResponse.getResult().isExists()) {
-                        log.error("Product with ID {} and variant {} does not exist.",
-                                request.getProductId(), request.getVariantId());
+                        log.error("Product with ID {} and variant {} does not exist.", request.getProductId(), request.getVariantId());
                         throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
                   }
             } catch (FeignException e) {
@@ -87,8 +87,7 @@ public class ReviewServiceImpl implements ReviewService {
                                   item.getVariantId().equals(request.getVariantId()));
 
                   if (!hasPurchased) {
-                        log.error("User {} has not purchased the product {} with variant {}",
-                                username, request.getProductId(), request.getVariantId());
+                        log.error("User {} has not purchased the product {} with variant {}", username, request.getProductId(), request.getVariantId());
                         throw new AppException(ErrorCode.UNAUTHORIZED);
                   }
             } catch (FeignException e) {
@@ -119,7 +118,7 @@ public class ReviewServiceImpl implements ReviewService {
                   List<FileResponse> fileResponses = fileResponseApi.getResult();
                   imageUrls = fileResponses.stream()
                           .map(FileResponse::getUrl)
-                          .collect(Collectors.toList());
+                          .toList();
             }
 
             Review review = reviewMapper.toReview(request);
@@ -130,6 +129,7 @@ public class ReviewServiceImpl implements ReviewService {
       }
 
       @Override
+      @Transactional
       public void respondToReview(String reviewId, String response) {
             String currentUsername = getCurrentUsername();
 
@@ -139,7 +139,8 @@ public class ReviewServiceImpl implements ReviewService {
                   throw new AppException(ErrorCode.UNAUTHORIZED);
             }
 
-            Review review = findReviewById(reviewId);
+            Review review = reviewRepository.findById(reviewId)
+                    .orElseThrow(() -> new AppException(ErrorCode.REVIEW_NOT_FOUND));
             String productId = review.getProductId();
 
             try {
@@ -166,10 +167,17 @@ public class ReviewServiceImpl implements ReviewService {
       }
 
       @Override
+      @Transactional
       public ReviewResponse updateReview(String reviewId, ReviewUpdateRequest request, List<MultipartFile> newImages) {
             String username = getCurrentUsername();
-            Review review = findReviewById(reviewId);
-            validateUserOwnership(review, username);
+
+            Review review = reviewRepository.findById(reviewId)
+                    .orElseThrow(() -> new AppException(ErrorCode.REVIEW_NOT_FOUND));
+
+            if (!review.getUsername().equals(username)) {
+                  log.error("User {} is not authorized to update the review owned by {}.", username, review.getUsername());
+                  throw new AppException(ErrorCode.UNAUTHENTICATED);
+            }
 
             List<String> uploadedImages = List.of();
             if (newImages != null && !newImages.isEmpty()) {
@@ -203,17 +211,29 @@ public class ReviewServiceImpl implements ReviewService {
       }
 
       @Override
+      @Transactional
       public void deleteReview(String reviewId) {
-            validateUserOwnership(findReviewById(reviewId), getCurrentUsername());
+            String username = getCurrentUsername();
+
+            Review review = reviewRepository.findById(reviewId)
+                    .orElseThrow(() -> new AppException(ErrorCode.REVIEW_NOT_FOUND));
+
+            if (!review.getUsername().equals(username)) {
+                  log.error("User {} is not authorized to delete the review owned by {}.", username, review.getUsername());
+                  throw new AppException(ErrorCode.UNAUTHENTICATED);
+            }
+
             reviewRepository.deleteById(reviewId);
       }
 
       @Override
+      @Transactional
       public void deleteAllReviewsOfUser(String username) {
             reviewRepository.deleteAll(reviewRepository.findByUsername(username));
       }
 
       @Override
+      @Transactional
       public void deleteAllReviewsOfProduct(String productId) {
             reviewRepository.deleteAll(reviewRepository.findByProductId(productId));
       }
@@ -230,16 +250,17 @@ public class ReviewServiceImpl implements ReviewService {
       }
 
       @Override
-      public ReviewResponse getReviewById(String reviewId) {
-            return reviewMapper.toReviewResponse(findReviewById(reviewId));
-      }
-
-      @Override
       public Page<ReviewResponse> getReviewsByProductAndRating(String productId, int rating, int page, int size) {
             Pageable pageable = PageRequest.of(page, size);
             Page<Review> reviewPage = reviewRepository.findByProductIdAndRating(productId, rating, pageable);
-
             return reviewPage.map(reviewMapper::toReviewResponse);
+      }
+
+      @Override
+      public ReviewResponse getReviewById(String reviewId) {
+            Review review = reviewRepository.findById(reviewId)
+                    .orElseThrow(() -> new AppException(ErrorCode.REVIEW_NOT_FOUND));
+            return reviewMapper.toReviewResponse(review);
       }
 
       @Override
@@ -271,18 +292,6 @@ public class ReviewServiceImpl implements ReviewService {
       private String getCurrentUsername() {
             Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             return jwt.getClaim("preferred_username");
-      }
-
-      private void validateUserOwnership(Review review, String username) {
-            if (!review.getUsername().equals(username)) {
-                  log.error("User {} is not authorized to access the post owned by {}.", username, review.getUsername());
-                  throw new AppException(ErrorCode.UNAUTHENTICATED);
-            }
-      }
-
-      private Review findReviewById(String id) {
-            return reviewRepository.findById(id)
-                    .orElseThrow(() -> new AppException(ErrorCode.REVIEW_NOT_FOUND));
       }
 
 }

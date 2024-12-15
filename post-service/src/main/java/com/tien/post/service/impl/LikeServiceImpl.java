@@ -11,6 +11,8 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -21,11 +23,10 @@ public class LikeServiceImpl implements LikeService {
 
       LikeRepository likeRepository;
       PostRepository postRepository;
-      AuthenticationServiceImpl authenticationService;
 
       @Override
       public boolean toggleLike(String postId) {
-            String username = authenticationService.getAuthenticatedUsername();
+            String username = getCurrentUsername();
 
             Post post = postRepository.findById(postId)
                     .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));
@@ -50,6 +51,11 @@ public class LikeServiceImpl implements LikeService {
       @Override
       public long getLikesCount(String postId) {
             return likeRepository.countByPostId(postId);
+      }
+
+      private String getCurrentUsername() {
+            Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            return jwt.getClaim("preferred_username");
       }
 
 }

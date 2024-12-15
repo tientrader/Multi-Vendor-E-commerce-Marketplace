@@ -124,7 +124,8 @@ public class OrderServiceImpl implements OrderService {
       @Override
       @Transactional
       public void updateOrderStatus(Long orderId, String newStatus) {
-            Order order = findOrderById(orderId);
+            Order order = orderRepository.findById(orderId)
+                    .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
             order.setStatus(newStatus);
             orderRepository.save(order);
       }
@@ -133,7 +134,8 @@ public class OrderServiceImpl implements OrderService {
       @PreAuthorize("hasRole('ADMIN')")
       @Transactional
       public void deleteOrder(Long orderId) {
-            orderRepository.delete(findOrderById(orderId));
+            orderRepository.delete(orderRepository.findById(orderId)
+                    .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND)));
       }
 
       @Override
@@ -147,8 +149,14 @@ public class OrderServiceImpl implements OrderService {
 
       @Override
       public List<OrderResponse> getMyOrders() {
-            return findOrdersByUsername(getCurrentUsername())
-                    .stream()
+            String username = getCurrentUsername();
+            List<Order> orders = orderRepository.findByUsername(username);
+
+            if (orders.isEmpty()) {
+                  throw new AppException(ErrorCode.ORDER_NOT_FOUND);
+            }
+
+            return orders.stream()
                     .map(orderMapper::toOrderResponse)
                     .toList();
       }
@@ -156,8 +164,13 @@ public class OrderServiceImpl implements OrderService {
       @Override
       @PreAuthorize("hasRole('ADMIN')")
       public List<OrderResponse> getOrdersByUsername(String username) {
-            return findOrdersByUsername(username)
-                    .stream()
+            List<Order> orders = orderRepository.findByUsername(username);
+
+            if (orders.isEmpty()) {
+                  throw new AppException(ErrorCode.ORDER_NOT_FOUND);
+            }
+
+            return orders.stream()
                     .map(orderMapper::toOrderResponse)
                     .toList();
       }
@@ -165,7 +178,8 @@ public class OrderServiceImpl implements OrderService {
       @Override
       public OrderResponse getMyOrderByOrderId(Long orderId) {
             String username = getCurrentUsername();
-            Order order = findOrderById(orderId);
+            Order order = orderRepository.findById(orderId)
+                    .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
 
             if (!order.getUsername().equals(username)) {
                   log.error("User {} attempted to access another user's order: orderId={}", username, orderId);
@@ -188,8 +202,7 @@ public class OrderServiceImpl implements OrderService {
                         if (e.status() == 404) {
                               throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
                         }
-                        log.error("Error fetching price for productId={}, variantId={}: {}",
-                                item.getProductId(), item.getVariantId(), e.getMessage());
+                        log.error("Error fetching price for productId={}, variantId={}: {}", item.getProductId(), item.getVariantId(), e.getMessage());
                         throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
                   }
             }).sum();
@@ -200,16 +213,14 @@ public class OrderServiceImpl implements OrderService {
                   try {
                         int stockQuantity = productClient.getProductStockById(item.getProductId(), item.getVariantId()).getResult();
                         if (stockQuantity < item.getQuantity()) {
-                              log.error("Out of stock for productId={}, variantId={}, requestedQuantity={}, availableQuantity={}",
-                                      item.getProductId(), item.getVariantId(), item.getQuantity(), stockQuantity);
+                              log.error("Out of stock for productId={}, variantId={}, requestedQuantity={}, availableQuantity={}", item.getProductId(), item.getVariantId(), item.getQuantity(), stockQuantity);
                               throw new AppException(ErrorCode.OUT_OF_STOCK);
                         }
                   } catch (FeignException e) {
                         if (e.status() == 404) {
                               throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
                         }
-                        log.error("Error fetching stock for productId={}, variantId={}: {}",
-                                item.getProductId(), item.getVariantId(), e.getMessage());
+                        log.error("Error fetching stock for productId={}, variantId={}: {}", item.getProductId(), item.getVariantId(), e.getMessage());
                         throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
                   }
             });
@@ -220,24 +231,10 @@ public class OrderServiceImpl implements OrderService {
                   try {
                         productClient.updateStockAndSoldQuantity(item.getProductId(), item.getVariantId(), item.getQuantity());
                   } catch (FeignException e) {
-                        log.error("Error updating stock for productId={}, variantId={}: {}",
-                                item.getProductId(), item.getVariantId(), e.getMessage());
+                        log.error("Error updating stock for productId={}, variantId={}: {}", item.getProductId(), item.getVariantId(), e.getMessage());
                         throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
                   }
             });
-      }
-
-      private Order findOrderById(Long orderId) {
-            return orderRepository.findById(orderId)
-                    .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
-      }
-
-      private List<Order> findOrdersByUsername(String username) {
-            List<Order> orders = orderRepository.findByUsername(username);
-            if (orders.isEmpty()) {
-                  throw new AppException(ErrorCode.ORDER_NOT_FOUND);
-            }
-            return orders;
       }
 
 }

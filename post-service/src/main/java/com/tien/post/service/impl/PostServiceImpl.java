@@ -14,6 +14,7 @@ import com.tien.post.dto.request.PostUpdateRequest;
 import com.tien.post.dto.response.PostResponse;
 import com.tien.post.repository.PostRepository;
 import com.tien.post.service.PostService;
+import com.tien.post.util.DateTimeFormatter;
 import feign.FeignException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -37,14 +40,13 @@ public class PostServiceImpl implements PostService {
 
       UserClient userClient;
       FileClient fileClient;
-      DateTimeFormatterImpl dateTimeFormatter;
+      DateTimeFormatter dateTimeFormatter;
       PostRepository postRepository;
       PostMapper postMapper;
-      AuthenticationServiceImpl authenticationService;
 
       @Override
       public PostResponse createPost(PostCreationRequest request, List<MultipartFile> postImages) {
-            String username = authenticationService.getAuthenticatedUsername();
+            String username = getCurrentUsername();
 
             try {
                   userClient.checkIfUserIsVIP(username);
@@ -90,10 +92,15 @@ public class PostServiceImpl implements PostService {
 
       @Override
       public PostResponse updatePost(String postId, PostUpdateRequest request, List<MultipartFile> postImages) {
-            String username = authenticationService.getAuthenticatedUsername();
+            String username = getCurrentUsername();
 
-            Post post = findPostById(postId);
-            validateUserOwnership(post, username);
+            Post post = postRepository.findById(postId)
+                    .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));
+
+            if (!post.getUsername().equals(username)) {
+                  log.error("User {} is not authorized to access the post owned by {}.", username, post.getUsername());
+                  throw new AppException(ErrorCode.UNAUTHENTICATED);
+            }
 
             postMapper.updatePost(post, request);
             post.setModifiedDate(Instant.now());
@@ -129,9 +136,14 @@ public class PostServiceImpl implements PostService {
 
       @Override
       public void deletePost(String postId) {
-            String username = authenticationService.getAuthenticatedUsername();
-            Post post = findPostById(postId);
-            validateUserOwnership(post, username);
+            String username = getCurrentUsername();
+            Post post = postRepository.findById(postId)
+                    .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));
+
+            if (!post.getUsername().equals(username)) {
+                  log.error("User {} is not authorized to delete the post owned by {}.", username, post.getUsername());
+                  throw new AppException(ErrorCode.UNAUTHENTICATED);
+            }
 
             postRepository.delete(post);
       }
@@ -176,7 +188,7 @@ public class PostServiceImpl implements PostService {
 
       @Override
       public PageResponse<PostResponse> getMyPosts(int page, int size) {
-            String username = authenticationService.getAuthenticatedUsername();
+            String username = getCurrentUsername();
 
             Sort sort = Sort.by("createdDate").descending();
             Pageable pageable = PageRequest.of(page - 1, size, sort);
@@ -200,19 +212,14 @@ public class PostServiceImpl implements PostService {
 
       @Override
       public PostResponse getPostById(String postId) {
-            return postMapper.toPostResponse(findPostById(postId));
-      }
-
-      private void validateUserOwnership(Post post, String username) {
-            if (!post.getUsername().equals(username)) {
-                  log.error("User {} is not authorized to access the post owned by {}.", username, post.getUsername());
-                  throw new AppException(ErrorCode.UNAUTHENTICATED);
-            }
-      }
-
-      private Post findPostById(String postId) {
-            return postRepository.findById(postId)
+            Post post = postRepository.findById(postId)
                     .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));
+            return postMapper.toPostResponse(post);
+      }
+
+      private String getCurrentUsername() {
+            Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            return jwt.getClaim("preferred_username");
       }
 
 }

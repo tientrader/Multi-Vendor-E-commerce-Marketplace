@@ -31,6 +31,7 @@ public class ProductVariantServiceImpl implements ProductVariantService {
       @Transactional
       public void addProductVariant(String productId, ProductVariantRequest request) {
             Product product = findProductById(productId);
+
             ProductVariant newVariant = productVariantMapper.toProductVariant(request);
             product.getVariants().add(newVariant);
 
@@ -43,6 +44,7 @@ public class ProductVariantServiceImpl implements ProductVariantService {
       public void updateProductVariant(String productId, String variantId, ProductVariantUpdateRequest request) {
             Product product = findProductById(productId);
             ProductVariant variant = findProductVariant(product, variantId);
+
             productVariantMapper.updateProductVariant(variant, request);
 
             redisTemplate.opsForValue().set("product:" + productId, product);
@@ -61,6 +63,7 @@ public class ProductVariantServiceImpl implements ProductVariantService {
                           variantId, productId, quantity, variant.getStock());
                   throw new AppException(ErrorCode.OUT_OF_STOCK);
             }
+
             variant.setStock(newStock);
             variant.setSoldQuantity(variant.getSoldQuantity() + quantity);
 
@@ -73,6 +76,7 @@ public class ProductVariantServiceImpl implements ProductVariantService {
       public void deleteProductVariant(String productId, String variantId) {
             Product product = findProductById(productId);
             ProductVariant variant = findProductVariant(product, variantId);
+
             product.getVariants().remove(variant);
 
             redisTemplate.opsForValue().set("product:" + productId, product);

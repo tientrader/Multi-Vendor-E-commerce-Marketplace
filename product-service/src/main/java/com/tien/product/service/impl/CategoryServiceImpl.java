@@ -43,8 +43,8 @@ public class CategoryServiceImpl implements CategoryService {
 
             Category category = categoryMapper.toCategory(request);
             category.setShopId(shopResponse.getId());
-            Category savedCategory = categoryRepository.save(category);
 
+            Category savedCategory = categoryRepository.save(category);
             return categoryMapper.toCategoryResponse(savedCategory);
       }
 
@@ -57,8 +57,8 @@ public class CategoryServiceImpl implements CategoryService {
             Category category = findCategoryById(categoryId);
             validateCategoryOwnership(category, shopResponse.getId());
             categoryMapper.updateCategory(category, request);
-            Category updatedCategory = categoryRepository.save(category);
 
+            Category updatedCategory = categoryRepository.save(category);
             return categoryMapper.toCategoryResponse(updatedCategory);
       }
 
@@ -70,6 +70,7 @@ public class CategoryServiceImpl implements CategoryService {
 
             Category category = findCategoryById(categoryId);
             validateCategoryOwnership(category, shopResponse.getId());
+
             categoryRepository.deleteById(categoryId);
       }
 
@@ -96,7 +97,6 @@ public class CategoryServiceImpl implements CategoryService {
       private ShopResponse getShopByOwnerUsername(String username) {
             try {
                   ApiResponse<ShopResponse> response = shopClient.getShopByOwnerUsername(username);
-
                   return Optional.ofNullable(response.getResult())
                           .orElseThrow(() -> new AppException(ErrorCode.SHOP_NOT_FOUND));
             } catch (FeignException e) {

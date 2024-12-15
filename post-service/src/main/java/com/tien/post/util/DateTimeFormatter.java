@@ -1,6 +1,5 @@
-package com.tien.post.service.impl;
+package com.tien.post.util;
 
-import com.tien.post.service.DateTimeFormatterService;
 import org.springframework.stereotype.Component;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -10,7 +9,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 @Component
-public class DateTimeFormatterImpl implements DateTimeFormatterService {
+public class DateTimeFormatter {
 
       private static final java.time.format.DateTimeFormatter DATE_FORMATTER = java.time.format.DateTimeFormatter.ISO_DATE;
 
@@ -23,7 +22,6 @@ public class DateTimeFormatterImpl implements DateTimeFormatterService {
             STRATEGY_MAP.put(Long.MAX_VALUE, elapsed -> LocalDateTime.now().minusSeconds(elapsed).format(DATE_FORMATTER));
       }
 
-      @Override
       public String format(Instant instant) {
             long elapsedSeconds = ChronoUnit.SECONDS.between(instant, Instant.now());
 

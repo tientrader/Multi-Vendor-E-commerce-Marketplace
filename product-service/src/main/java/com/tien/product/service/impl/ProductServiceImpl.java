@@ -260,8 +260,7 @@ public class ProductServiceImpl implements ProductService {
 
       @Override
       public String getShopIdByProductId(String productId) {
-            Product product = findProductById(productId);
-            return product.getShopId();
+            return findProductById(productId).getShopId();
       }
 
       private String getCurrentUsername() {

@@ -191,7 +191,8 @@ public class PromotionServiceImpl implements PromotionService {
       @Override
       @PreAuthorize("hasRole('ADMIN')")
       public PromotionResponse updatePromotion(String id, PromotionUpdateRequest request) {
-            Promotion existingPromotion = findPromotionById(id);
+            Promotion existingPromotion = promotionRepository.findById(id)
+                    .orElseThrow(() -> new AppException(ErrorCode.PROMOTION_NOT_FOUND));
             promotionMapper.updatePromotion(existingPromotion, request);
 
             Promotion savedPromotion = promotionRepository.save(existingPromotion);
@@ -201,12 +202,16 @@ public class PromotionServiceImpl implements PromotionService {
       @Override
       @PreAuthorize("hasRole('ADMIN')")
       public void deletePromotion(String id) {
-            promotionRepository.delete(findPromotionById(id));
+            Promotion promotion = promotionRepository.findById(id)
+                    .orElseThrow(() -> new AppException(ErrorCode.PROMOTION_NOT_FOUND));
+            promotionRepository.delete(promotion);
       }
 
       @Override
       public PromotionResponse getPromotionById(String id) {
-            return promotionMapper.toPromotionResponse(findPromotionById(id));
+            Promotion promotion = promotionRepository.findById(id)
+                    .orElseThrow(() -> new AppException(ErrorCode.PROMOTION_NOT_FOUND));
+            return promotionMapper.toPromotionResponse(promotion);
       }
 
       @Override
@@ -215,11 +220,6 @@ public class PromotionServiceImpl implements PromotionService {
                     .stream()
                     .map(promotionMapper::toPromotionResponse)
                     .toList();
-      }
-
-      private Promotion findPromotionById(String id) {
-            return promotionRepository.findById(id)
-                    .orElseThrow(() -> new AppException(ErrorCode.PROMOTION_NOT_FOUND));
       }
 
 }

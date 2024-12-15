@@ -181,13 +181,13 @@ public class StripeServiceImpl implements StripeService {
                   stripeSubscription.setUsername(currentUsername);
                   stripeSubscription.setPriceId(priceId);
                   stripeSubscription.setNumberOfLicense(numberOfLicense);
+
                   stripeSubscriptionRepository.save(stripeSubscription);
 
                   return StripeSubscriptionResponse.builder()
                           .username(currentUsername)
                           .stripeCustomerId(customer.getId())
                           .build();
-
             } catch (StripeException e) {
                   log.error("Subscription creation failed for user {}: {}", currentUsername, e.getMessage());
                   throw new AppException(ErrorCode.SUBSCRIPTION_CREATION_FAILED);
@@ -204,14 +204,27 @@ public class StripeServiceImpl implements StripeService {
                   String productName = request.getProductName();
                   String currency = "USD";
 
-                  Customer customer = findOrCreateCustomer(request.getEmail(), username);
-                  String clientUrl = "https://localhost:3000";
+                  CustomerSearchParams params = CustomerSearchParams.builder()
+                          .setQuery("email:'" + request.getEmail() + "'")
+                          .build();
+
+                  CustomerSearchResult search = Customer.search(params);
+                  Customer customer;
+                  if (search.getData().isEmpty()) {
+                        CustomerCreateParams customerCreateParams = CustomerCreateParams.builder()
+                                .setName(username)
+                                .setEmail(request.getEmail())
+                                .build();
+                        customer = Customer.create(customerCreateParams);
+                  } else {
+                        customer = search.getData().getFirst();
+                  }
 
                   SessionCreateParams.Builder sessionCreateParamsBuilder = SessionCreateParams.builder()
                           .setMode(SessionCreateParams.Mode.PAYMENT)
                           .setCustomer(customer.getId())
-                          .setSuccessUrl(clientUrl + "/success")
-                          .setCancelUrl(clientUrl + "/failure");
+                          .setSuccessUrl("https://localhost:3000/success")
+                          .setCancelUrl("https://localhost:3000/failure");
 
                   sessionCreateParamsBuilder.addLineItem(
                           SessionCreateParams.LineItem.builder()
@@ -255,8 +268,21 @@ public class StripeServiceImpl implements StripeService {
             SessionResponse sessionResponse = new SessionResponse();
 
             try {
-                  Customer customer = findOrCreateCustomer(request.getEmail(), username);
-                  String clientUrl = "https://localhost:3000";
+                  CustomerSearchParams params = CustomerSearchParams.builder()
+                          .setQuery("email:'" + request.getEmail() + "'")
+                          .build();
+
+                  CustomerSearchResult search = Customer.search(params);
+                  Customer customer;
+                  if (search.getData().isEmpty()) {
+                        CustomerCreateParams customerCreateParams = CustomerCreateParams.builder()
+                                .setName(username)
+                                .setEmail(request.getEmail())
+                                .build();
+                        customer = Customer.create(customerCreateParams);
+                  } else {
+                        customer = search.getData().getFirst();
+                  }
 
                   String priceId = switch (request.getPackageType()) {
                         case "MONTHLY" -> monthlyPriceId;
@@ -268,8 +294,8 @@ public class StripeServiceImpl implements StripeService {
                   SessionCreateParams sessionCreateParams = SessionCreateParams.builder()
                           .setMode(SessionCreateParams.Mode.SUBSCRIPTION)
                           .setCustomer(customer.getId())
-                          .setSuccessUrl(clientUrl + "/success")
-                          .setCancelUrl(clientUrl + "/failure")
+                          .setSuccessUrl("https://localhost:3000/success")
+                          .setCancelUrl("https://localhost:3000/failure")
                           .putMetadata("username", username)
                           .putMetadata("packageType", request.getPackageType())
                           .addLineItem(SessionCreateParams.LineItem.builder()
@@ -304,8 +330,7 @@ public class StripeServiceImpl implements StripeService {
       @Override
       public void cancelSubscription(String subscriptionId) {
             try {
-                  Subscription subscription = Subscription.retrieve(subscriptionId);
-                  subscription.cancel();
+                  Subscription.retrieve(subscriptionId).cancel();
             } catch (StripeException e) {
                   log.error("Failed to cancel subscription with ID {}: {}", subscriptionId, e.getMessage());
                   throw new AppException(ErrorCode.SUBSCRIPTION_CANCEL_FAILED);
@@ -315,31 +340,10 @@ public class StripeServiceImpl implements StripeService {
       @Override
       @PreAuthorize("hasRole('ADMIN')")
       public List<StripeSubscriptionResponse> retrieveAllSubscriptions() {
-            List<StripeSubscription> subscriptions = stripeSubscriptionRepository.findAll();
-            return subscriptions.stream()
+            return stripeSubscriptionRepository.findAll()
+                    .stream()
                     .map(stripeMapper::toStripeSubscriptionResponse)
                     .toList();
-      }
-
-      private Customer findOrCreateCustomer(String email, String fullName) throws StripeException {
-            CustomerSearchParams params =
-                    CustomerSearchParams.builder()
-                            .setQuery("email:'" + email + "'")
-                            .build();
-
-            CustomerSearchResult search = Customer.search(params);
-            Customer customer;
-            if (search.getData().isEmpty()) {
-                  CustomerCreateParams customerCreateParams =
-                          CustomerCreateParams.builder()
-                                  .setName(fullName)
-                                  .setEmail(email)
-                                  .build();
-                  customer = Customer.create(customerCreateParams);
-            } else {
-                  customer = search.getData().getFirst();
-            }
-            return customer;
       }
 
       private String getCurrentUsername() {

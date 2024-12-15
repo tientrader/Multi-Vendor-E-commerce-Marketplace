@@ -15,6 +15,8 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -29,11 +31,10 @@ public class CommentServiceImpl implements CommentService {
       CommentRepository commentRepository;
       CommentMapper commentMapper;
       PostRepository postRepository;
-      AuthenticationServiceImpl authenticationService;
 
       @Override
       public CommentResponse createComment(String postId, CommentCreationRequest request) {
-            String username = authenticationService.getAuthenticatedUsername();
+            String username = getCurrentUsername();
 
             Comment comment = commentMapper.toComment(request);
             comment.setUsername(username);
@@ -43,67 +44,71 @@ public class CommentServiceImpl implements CommentService {
 
             Comment savedComment = commentRepository.save(comment);
 
-            Post post = findPostById(postId);
+            Post post = postRepository.findById(postId)
+                    .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));
             post.setCommentsCount(post.getCommentsCount() + 1);
-            postRepository.save(post);
 
+            postRepository.save(post);
             return commentMapper.toCommentResponse(savedComment);
       }
 
       @Override
       public void updateComment(String commentId, CommentUpdateRequest request) {
-            String username = authenticationService.getAuthenticatedUsername();
+            String username = getCurrentUsername();
 
-            Comment comment = findCommentById(commentId);
-            validateUserOwnership(comment, username);
+            Comment comment = commentRepository.findById(commentId)
+                    .orElseThrow(() -> new AppException(ErrorCode.COMMENT_NOT_FOUND));
+
+            if (!comment.getUsername().equals(username)) {
+                  log.error("User {} is not authorized to update the comment owned by {}.", username, comment.getUsername());
+                  throw new AppException(ErrorCode.UNAUTHENTICATED);
+            }
 
             commentMapper.updateCommentFromRequest(request, comment);
             comment.setModifiedDate(Instant.now());
+
             commentRepository.save(comment);
       }
 
       @Override
       public void deleteComment(String commentId) {
-            String username = authenticationService.getAuthenticatedUsername();
+            String username = getCurrentUsername();
 
-            Comment comment = findCommentById(commentId);
-            validateUserOwnership(comment, username);
+            Comment comment = commentRepository.findById(commentId)
+                    .orElseThrow(() -> new AppException(ErrorCode.COMMENT_NOT_FOUND));
+
+            if (!comment.getUsername().equals(username)) {
+                  log.error("User {} is not authorized to delete the comment owned by {}.", username, comment.getUsername());
+                  throw new AppException(ErrorCode.UNAUTHENTICATED);
+            }
 
             String postId = comment.getPostId();
             commentRepository.delete(comment);
 
-            Post post = findPostById(postId);
+            Post post = postRepository.findById(postId)
+                    .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));
             post.setCommentsCount(post.getCommentsCount() - 1);
+
             postRepository.save(post);
       }
 
       @Override
       public List<CommentResponse> getCommentsByPostId(String postId) {
-            return commentRepository.findAllByPostId(postId).stream()
+            return commentRepository.findAllByPostId(postId)
+                    .stream()
                     .map(commentMapper::toCommentResponse)
                     .toList();
       }
 
       @Override
       public CommentResponse getCommentById(String commentId) {
-            return commentMapper.toCommentResponse(findCommentById(commentId));
+            return commentMapper.toCommentResponse(commentRepository.findById(commentId)
+                    .orElseThrow(() -> new AppException(ErrorCode.COMMENT_NOT_FOUND)));
       }
 
-      private void validateUserOwnership(Comment comment, String username) {
-            if (!comment.getUsername().equals(username)) {
-                  log.error("User {} is not authorized to update or delete the comment owned by {}.", username, comment.getUsername());
-                  throw new AppException(ErrorCode.UNAUTHENTICATED);
-            }
-      }
-
-      private Post findPostById(String postId) {
-            return postRepository.findById(postId)
-                    .orElseThrow(() -> new AppException(ErrorCode.POST_NOT_FOUND));
-      }
-
-      private Comment findCommentById(String commentId) {
-            return commentRepository.findById(commentId)
-                    .orElseThrow(() -> new AppException(ErrorCode.COMMENT_NOT_FOUND));
+      private String getCurrentUsername() {
+            Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            return jwt.getClaim("preferred_username");
       }
 
 }
