@@ -2,6 +2,7 @@ package com.tien.cart.service;
 
 import com.tien.cart.dto.request.CartCreationRequest;
 import com.tien.cart.dto.response.CartResponse;
+import com.tien.cart.enums.PaymentMethod;
 import com.tien.cart.httpclient.response.OrderResponse;
 
 public interface CartService {
@@ -10,7 +11,7 @@ public interface CartService {
 
       void applyPromotionCodeToCart(String promoCode);
 
-      OrderResponse createOrderFromCart(String paymentMethod, String paymentToken);
+      OrderResponse createOrderFromCart(PaymentMethod paymentMethod, String paymentToken);
 
       void updateCartTotal(String username, double total);
 

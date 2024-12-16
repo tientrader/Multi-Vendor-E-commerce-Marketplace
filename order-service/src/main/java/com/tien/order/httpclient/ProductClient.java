@@ -30,7 +30,7 @@ public interface ProductClient {
       @Retry(name = "updateStockAndSoldQuantity")
       @PutMapping("/variants/{productId}/update-stock-sold")
       void updateStockAndSoldQuantity(@PathVariable String productId,
-                                                   @RequestParam String variantId,
-                                                   @RequestParam int quantity);
+                                      @RequestParam String variantId,
+                                      @RequestParam int quantity);
 
 }

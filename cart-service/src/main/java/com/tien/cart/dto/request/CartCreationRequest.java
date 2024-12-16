@@ -14,10 +14,6 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CartCreationRequest {
 
-      @Email(message = "INVALID_EMAIL")
-      @NotNull(message = "EMAIL_IS_REQUIRED")
-      String email;
-
       @NotEmpty(message = "PRODUCTS_LIST_CANNOT_BE_EMPTY")
       @Valid
       List<CartItemCreationRequest> items;

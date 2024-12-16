@@ -55,6 +55,7 @@ public class DLQRetryService {
             try (KafkaConsumer<String, PaymentResponse> consumer = new KafkaConsumer<>(props)) {
                   consumer.subscribe(Collections.singletonList("payment-response-dlq"));
                   ConsumerRecords<String, PaymentResponse> records = consumer.poll(Duration.ofSeconds(5));
+
                   for (ConsumerRecord<String, PaymentResponse> record : records) {
                         messages.add(record.value());
                   }
@@ -67,6 +68,7 @@ public class DLQRetryService {
 
       private static Properties getProperties() {
             Properties props = new Properties();
+
             props.put("bootstrap.servers", "localhost:9094");
             props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
             props.put("value.deserializer", "org.springframework.kafka.support.serializer.JsonDeserializer");
@@ -74,6 +76,7 @@ public class DLQRetryService {
             props.put("spring.json.value.default.type", PaymentResponse.class.getName());
             props.put("auto.offset.reset", "earliest");
             props.put("group.id", "dlq-retry-group");
+
             return props;
       }
 

@@ -6,6 +6,7 @@ import com.tien.order.dto.request.OrderItemCreationRequest;
 import com.tien.event.dto.StripeChargeRequest;
 import com.tien.order.dto.response.OrderResponse;
 import com.tien.order.entity.Order;
+import com.tien.order.enums.PaymentMethod;
 import com.tien.order.exception.AppException;
 import com.tien.order.exception.ErrorCode;
 import com.tien.order.httpclient.ProductClient;
@@ -41,27 +42,30 @@ public class OrderServiceImpl implements OrderService {
       @Transactional
       public OrderResponse createOrder(OrderCreationRequest request) {
             String username = getCurrentUsername();
+            String email = getCurrentEmail();
 
             validateStockAvailability(request.getItems());
 
             Order order = orderMapper.toOrder(request);
             order.setUsername(username);
             order.setTotal(request.getTotal());
+            order.setEmail(email);
             order.setStatus("PENDING");
             orderRepository.save(order);
 
-            switch (request.getPaymentMethod().toUpperCase()) {
-                  case "CARD":
+            PaymentMethod paymentMethod = PaymentMethod.fromString(request.getPaymentMethod());
+            switch (paymentMethod) {
+                  case CARD:
                         kafkaProducer.send("payment-request", StripeChargeRequest.builder()
                                 .orderId(order.getOrderId())
                                 .username(username)
                                 .amount(order.getTotal())
                                 .stripeToken(request.getPaymentToken())
-                                .email(request.getEmail())
+                                .email(email)
                                 .build());
                         break;
 
-                  case "COD":
+                  case COD:
                         break;
             }
 
@@ -69,7 +73,7 @@ public class OrderServiceImpl implements OrderService {
 
             kafkaProducer.send("order-created-successful", NotificationEvent.builder()
                     .channel("EMAIL")
-                    .recipient(request.getEmail())
+                    .recipient(email)
                     .subject("Order created successfully")
                     .body("Thank you for your purchase, " + username)
                     .build());
@@ -81,6 +85,7 @@ public class OrderServiceImpl implements OrderService {
       @Transactional
       public OrderResponse buyNow(OrderCreationRequest request) {
             String username = getCurrentUsername();
+            String email = getCurrentEmail();
 
             if (request.getItems().size() > 1) {
                   log.error("Buy Now can only handle a single product: request={}", request);
@@ -92,28 +97,31 @@ public class OrderServiceImpl implements OrderService {
             Order order = orderMapper.toOrder(request);
             order.setUsername(username);
             order.setTotal(calculateOrderTotal(request.getItems()));
+            order.setEmail(email);
             order.setStatus("PENDING");
+            orderRepository.save(order);
 
-            switch (request.getPaymentMethod().toUpperCase()) {
-                  case "CARD":
+            PaymentMethod paymentMethod = PaymentMethod.fromString(request.getPaymentMethod());
+            switch (paymentMethod) {
+                  case CARD:
                         kafkaProducer.send("payment-request", StripeChargeRequest.builder()
+                                .orderId(order.getOrderId())
                                 .username(username)
                                 .amount(order.getTotal())
                                 .stripeToken(request.getPaymentToken())
-                                .email(request.getEmail())
+                                .email(email)
                                 .build());
                         break;
 
-                  case "COD":
+                  case COD:
                         break;
             }
 
             updateStockAndSoldQuantity(request.getItems());
-            orderRepository.save(order);
 
             kafkaProducer.send("order-created-successful", NotificationEvent.builder()
                     .channel("EMAIL")
-                    .recipient(request.getEmail())
+                    .recipient(email)
                     .subject("Order created successfully")
                     .body("Thank you for your purchase, " + username)
                     .build());
@@ -192,6 +200,11 @@ public class OrderServiceImpl implements OrderService {
       private String getCurrentUsername() {
             Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             return jwt.getClaim("preferred_username");
+      }
+
+      private String getCurrentEmail() {
+            Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            return jwt.getClaim("email");
       }
 
       private double calculateOrderTotal(List<OrderItemCreationRequest> items) {

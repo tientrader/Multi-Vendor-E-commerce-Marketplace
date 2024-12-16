@@ -2,6 +2,7 @@ package com.tien.cart.service.impl;
 
 import com.tien.cart.dto.ApiResponse;
 import com.tien.cart.dto.request.CartItemCreationRequest;
+import com.tien.cart.enums.PaymentMethod;
 import com.tien.cart.httpclient.request.OrderCreationRequest;
 import com.tien.cart.dto.response.CartItemResponse;
 import com.tien.cart.httpclient.response.OrderResponse;
@@ -96,8 +97,12 @@ public class CartServiceImpl implements CartService {
       public void applyPromotionCodeToCart(String promoCode) {
             String username = getCurrentUsername();
             String cartKey = CART_KEY_PREFIX + username;
+
             Cart cart = (Cart) redisTemplate.opsForValue().get(cartKey);
-            validateCart(cart);
+
+            if (cart == null) {
+                  throw new AppException(ErrorCode.CART_NOT_FOUND);
+            }
 
             if (Objects.requireNonNull(cart).getItems() == null || cart.getItems().isEmpty()) {
                   throw new AppException(ErrorCode.CART_NOT_FOUND);
@@ -108,7 +113,7 @@ public class CartServiceImpl implements CartService {
             try {
                   promotionClient.applyPromotionCode(promoCode);
             } catch (FeignException e) {
-                  if (e.status() == 400 && e.contentUTF8().contains(ErrorCode.ORDER_VALUE_TOO_LOW.name())) {
+                  if (e.status() == 400 || e.contentUTF8().contains(ErrorCode.ORDER_VALUE_TOO_LOW.name())) {
                         log.error("PromotionService: Order value too low for promoCode {}", promoCode);
                         throw new AppException(ErrorCode.ORDER_VALUE_TOO_LOW);
                   }
@@ -118,25 +123,28 @@ public class CartServiceImpl implements CartService {
       }
 
       @Override
-      public OrderResponse createOrderFromCart(String paymentMethod, String paymentToken) {
+      public OrderResponse createOrderFromCart(PaymentMethod paymentMethod, String paymentToken) {
             String username = getCurrentUsername();
             String cartKey = CART_KEY_PREFIX + username;
+
             Cart cart = (Cart) redisTemplate.opsForValue().get(cartKey);
-            validateCart(cart);
+
+            if (cart == null) {
+                  throw new AppException(ErrorCode.CART_NOT_FOUND);
+            }
 
             validateStockAvailability(Objects.requireNonNull(cart).getItems());
 
             OrderCreationRequest orderRequest = cartMapper.toOrderCreationRequest(cart);
             orderRequest.setEmail(Objects.requireNonNull(cart).getEmail());
-            orderRequest.setPaymentMethod(paymentMethod);
+            orderRequest.setPaymentMethod(paymentMethod.name());
             orderRequest.setPaymentToken(paymentToken);
 
             ApiResponse<OrderResponse> orderResponse;
             try {
                   orderResponse = orderClient.createOrder(orderRequest);
             } catch (FeignException e) {
-                  log.error("FeignException occurred while creating order for user {}: {}",
-                          username, e.getMessage(), e);
+                  log.error("FeignException occurred while creating order for user {}: {}", username, e.getMessage(), e);
                   throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
             }
 
@@ -175,8 +183,12 @@ public class CartServiceImpl implements CartService {
       public void deleteMyCart() {
             String username = getCurrentUsername();
             String cartKey = CART_KEY_PREFIX + username;
+
             Cart cart = (Cart) redisTemplate.opsForValue().get(cartKey);
-            validateCart(cart);
+
+            if (cart == null) {
+                  throw new AppException(ErrorCode.CART_NOT_FOUND);
+            }
 
             redisTemplate.delete(cartKey);
       }
@@ -185,8 +197,12 @@ public class CartServiceImpl implements CartService {
       public CartResponse getMyCart() {
             String username = getCurrentUsername();
             String cartKey = CART_KEY_PREFIX + username;
+
             Cart cart = (Cart) redisTemplate.opsForValue().get(cartKey);
-            validateCart(cart);
+
+            if (cart == null) {
+                  throw new AppException(ErrorCode.CART_NOT_FOUND);
+            }
 
             return cartMapper.toCartResponse(cart);
       }
@@ -196,7 +212,13 @@ public class CartServiceImpl implements CartService {
             return jwt.getClaim("preferred_username");
       }
 
+      private String getCurrentEmail() {
+            Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            return jwt.getClaim("email");
+      }
+
       private Cart createNewCart(CartCreationRequest request, String username) {
+            String email = getCurrentEmail();
             validateProducts(request.getItems());
             double total = calculateTotalPriceForCartItems(request.getItems());
 
@@ -204,7 +226,7 @@ public class CartServiceImpl implements CartService {
             cart.setId(UUID.randomUUID().toString());
             cart.setTotal(total);
             cart.setUsername(username);
-            cart.setEmail(request.getEmail());
+            cart.setEmail(email);
 
             return cart;
       }
@@ -225,8 +247,7 @@ public class CartServiceImpl implements CartService {
 
                               if (newQuantity > 0) {
                                     cartItem.setQuantity(newQuantity);
-                              }
-                              else {
+                              } else {
                                     updatedItems.remove(cartItem);
                               }
                               break;
@@ -245,19 +266,12 @@ public class CartServiceImpl implements CartService {
             existingCart.setTotal(calculateTotalPriceForExistingCart(updatedItems));
       }
 
-      private void validateCart(Cart cart) {
-            if (cart == null) {
-                  throw new AppException(ErrorCode.CART_NOT_FOUND);
-            }
-      }
-
       private double calculateItemTotalPrice(CartItem cartItem) {
             try {
                   Double price = productClient.getProductPriceById(cartItem.getProductId(), cartItem.getVariantId()).getResult();
                   return (price != null ? price : 0.0) * cartItem.getQuantity();
             } catch (FeignException e) {
-                  log.error("(TotalPrice) FeignException occurred while fetching price for productId={}, variantId={}: {}",
-                          cartItem.getProductId(), cartItem.getVariantId(), e.getMessage());
+                  log.error("(TotalPrice) FeignException occurred while fetching price for productId={}, variantId={}: {}", cartItem.getProductId(), cartItem.getVariantId(), e.getMessage());
                   throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
             }
       }
@@ -271,8 +285,7 @@ public class CartServiceImpl implements CartService {
                                 Double price = productClient.getProductPriceById(cartItem.getProductId(), cartItem.getVariantId()).getResult();
                                 return (price != null ? price : 0.0) * cartItem.getQuantity();
                           } catch (FeignException e) {
-                                log.error("FeignException occurred while fetching price for productId={}, variantId={}: {}",
-                                        cartItem.getProductId(), cartItem.getVariantId(), e.getMessage());
+                                log.error("FeignException occurred while fetching price for productId={}, variantId={}: {}", cartItem.getProductId(), cartItem.getVariantId(), e.getMessage());
                                 throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
                           }
                     }).sum();
@@ -285,8 +298,7 @@ public class CartServiceImpl implements CartService {
                                 Double price = productClient.getProductPriceById(cartItem.getProductId(), cartItem.getVariantId()).getResult();
                                 return (price != null ? price : 0.0) * cartItem.getQuantity();
                           } catch (FeignException e) {
-                                log.error("(ExistingCart) FeignException occurred while fetching price for productId={}, variantId={}: {}",
-                                        cartItem.getProductId(), cartItem.getVariantId(), e.getMessage());
+                                log.error("(ExistingCart) FeignException occurred while fetching price for productId={}, variantId={}: {}", cartItem.getProductId(), cartItem.getVariantId(), e.getMessage());
                                 throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
                           }
                     }).sum();
@@ -333,8 +345,7 @@ public class CartServiceImpl implements CartService {
                               throw new AppException(ErrorCode.OUT_OF_STOCK);
                         }
                   } catch (FeignException e) {
-                        log.error("FeignException occurred while checking stock for productId={}, variantId={}: {}",
-                                item.getProductId(), item.getVariantId(), e.getMessage());
+                        log.error("FeignException occurred while checking stock for productId={}, variantId={}: {}", item.getProductId(), item.getVariantId(), e.getMessage());
                         throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
                   }
             });

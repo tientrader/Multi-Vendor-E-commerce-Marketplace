@@ -41,6 +41,7 @@ public enum ErrorCode {
       PAYMENT_METHOD_MUST_BE_ONE_OF_CARD_CODE(2014, "The payment method must be either CARD or COD.", HttpStatus.BAD_REQUEST),
       QUANTITY_MUST_BE_AT_LEAST_1(2015, "Quantity must be at least 1. Please specify a valid quantity.", HttpStatus.BAD_REQUEST),
       PAYMENT_TOKEN_IS_REQUIRED(2015, "Payment token is required. Please specify a valid payment token.", HttpStatus.BAD_REQUEST),
+      INVALID_PAYMENT_METHOD(2016, "The provided payment method is invalid. Please provide a valid method.", HttpStatus.BAD_REQUEST),
       ;
 
       int code;

@@ -8,7 +8,8 @@ import org.springframework.data.redis.core.RedisHash;
 import java.util.ArrayList;
 import java.util.List;
 
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor

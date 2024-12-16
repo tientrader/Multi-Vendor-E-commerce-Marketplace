@@ -18,7 +18,6 @@ public class KafkaProducer {
       public void send(String topic, Object message) {
             try {
                   kafkaTemplate.send(topic, message);
-                  log.info("Message sent to topic {}: {}", topic, message);
             } catch (Exception e) {
                   log.error("Failed to send message to topic {}: {}", topic, e.getMessage());
             }
