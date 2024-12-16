@@ -1,6 +1,5 @@
 package com.tien.shop.dto.request;
 
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -14,9 +13,5 @@ public class ShopUpdateRequest {
 
       @NotNull(message = "NAME_IS_REQUIRED")
       String name;
-
-      @Email(message = "INVALID_EMAIL")
-      @NotNull(message = "EMAIL_IS_REQUIRED")
-      String email;
 
 }

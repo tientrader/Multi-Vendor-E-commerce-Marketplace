@@ -77,9 +77,8 @@ public class ShopController {
 
       @GetMapping("/{shopId}/owner")
       public ApiResponse<String> getOwnerUsernameByShopId(@PathVariable("shopId") String shopId) {
-            String ownerUsername = shopService.getOwnerUsernameByShopId(shopId);
             return ApiResponse.<String>builder()
-                    .result(ownerUsername)
+                    .result(shopService.getOwnerUsernameByShopId(shopId))
                     .build();
       }
 

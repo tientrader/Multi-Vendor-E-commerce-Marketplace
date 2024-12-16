@@ -44,6 +44,7 @@ public class ShopServiceImpl implements ShopService {
       @Transactional
       public ShopResponse createShop(ShopCreationRequest request) {
             String username = getCurrentUsername();
+            String email = getCurrentEmail();
 
             if (shopRepository.existsByOwnerUsername(username)) {
                   log.error("User {} already has a shop", username);
@@ -52,11 +53,12 @@ public class ShopServiceImpl implements ShopService {
 
             Shop shop = shopMapper.toShop(request);
             shop.setOwnerUsername(username);
+            shop.setEmail(email);
             shop = shopRepository.save(shop);
 
             kafkaTemplate.send("shop-created-successful", NotificationEvent.builder()
                     .channel("EMAIL")
-                    .recipient(request.getEmail())
+                    .recipient(email)
                     .subject("Shop Created Successfully")
                     .body("Thanks for choosing us. Wish you all the best!")
                     .build());
@@ -70,8 +72,8 @@ public class ShopServiceImpl implements ShopService {
             String currentUsername = getCurrentUsername();
             Shop shop = shopRepository.findByOwnerUsername(currentUsername)
                     .orElseThrow(() -> new AppException(ErrorCode.SHOP_NOT_FOUND));
-            shopMapper.updateShop(shop, request);
 
+            shopMapper.updateShop(shop, request);
             return shopMapper.toShopResponse(shopRepository.save(shop));
       }
 
@@ -81,6 +83,7 @@ public class ShopServiceImpl implements ShopService {
             String currentUsername = getCurrentUsername();
             Shop shop = shopRepository.findByOwnerUsername(currentUsername)
                     .orElseThrow(() -> new AppException(ErrorCode.SHOP_NOT_FOUND));
+
             shopRepository.delete(shop);
       }
 
@@ -264,6 +267,11 @@ public class ShopServiceImpl implements ShopService {
       private String getCurrentUsername() {
             Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             return jwt.getClaim("preferred_username");
+      }
+
+      private String getCurrentEmail() {
+            Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            return jwt.getClaim("email");
       }
 
 }
