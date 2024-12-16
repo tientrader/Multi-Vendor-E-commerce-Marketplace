@@ -51,8 +51,7 @@ public class PromotionServiceImpl implements PromotionService {
                                     throw new AppException(ErrorCode.SHOP_NOT_FOUND);
                               }
                         } catch (FeignException e) {
-                              log.error("FeignException occurred while checking if shop exists for shopId={} : {}",
-                                      shopId, e.getMessage());
+                              log.error("FeignException occurred while checking if shop exists for shopId={} : {}", shopId, e.getMessage());
                               throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
                         }
                   }
@@ -68,8 +67,7 @@ public class PromotionServiceImpl implements PromotionService {
                                     throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
                               }
                         } catch (FeignException e) {
-                              log.error("FeignException occurred while checking if product exists for productId={} : {}",
-                                      productId, e.getMessage());
+                              log.error("FeignException occurred while checking if product exists for productId={} : {}", productId, e.getMessage());
                               throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
                         }
                   }
@@ -85,10 +83,7 @@ public class PromotionServiceImpl implements PromotionService {
       @Override
       public void applyPromotionCode(String promoCode) {
             Promotion promotion = promotionRepository.findByPromoCode(promoCode)
-                    .orElseThrow(() -> {
-                          log.error("Promotion with promoCode {} not found", promoCode);
-                          return new AppException(ErrorCode.PROMOTION_NOT_FOUND);
-                    });
+                    .orElseThrow(() -> new AppException(ErrorCode.PROMOTION_NOT_FOUND));
 
             if (promotion.getEndDate().isBefore(LocalDate.now().atStartOfDay())) {
                   log.error("Promotion with promoCode {} has expired", promoCode);
@@ -153,15 +148,14 @@ public class PromotionServiceImpl implements PromotionService {
                   boolean isApplicableForProduct = promotion.getConditions().getApplicableProducts().contains(productId);
 
                   if (!isApplicableForShop || !isApplicableForProduct) {
-                        log.warn("Product {} is not eligible for promoCode {} (ShopId: {}, ProductId: {})",
-                                productId, promoCode, shopId, productId);
+                        log.warn("Product {} is not eligible for promoCode {} (ShopId: {}, ProductId: {})", productId, promoCode, shopId, productId);
                         continue;
                   }
 
-                  if ("fixed".equalsIgnoreCase(promotion.getType())) {
-                        totalDiscount += promotion.getDiscount().getAmount();
-                  } else if ("percentage".equalsIgnoreCase(promotion.getType())) {
-                        totalDiscount += cartResponse.getTotal() * (promotion.getDiscount().getPercentage() / 100);
+                  switch (promotion.getType()) {
+                        case FIXED -> totalDiscount += promotion.getDiscount().getAmount();
+                        case PERCENTAGE -> totalDiscount += cartResponse.getTotal() * (promotion.getDiscount().getPercentage() / 100);
+                        default -> log.error("Unsupported promotion type: {}", promotion.getType());
                   }
             }
 
@@ -175,8 +169,7 @@ public class PromotionServiceImpl implements PromotionService {
                   try {
                         cartClient.updateCartTotal(cartResponse.getUsername(), cartResponse.getTotal());
                   } catch (FeignException e) {
-                        log.error("Failed to update cart total for username {}: {}",
-                                cartResponse.getUsername(), e.getMessage());
+                        log.error("Failed to update cart total for username {}: {}", cartResponse.getUsername(), e.getMessage());
                         throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
                   }
 

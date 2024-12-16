@@ -263,17 +263,17 @@ public class ProductServiceImpl implements ProductService {
             return findProductById(productId).getShopId();
       }
 
-      private String getCurrentUsername() {
-            Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            return jwt.getClaim("preferred_username");
-      }
-
       @Override
       public boolean isProductExist(String productId) {
             Product product = (Product) redisTemplate.opsForValue().get("product:" + productId);
             if (product != null) return true;
 
             return productRepository.existsById(productId);
+      }
+
+      private String getCurrentUsername() {
+            Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            return jwt.getClaim("preferred_username");
       }
 
       private List<String> handleImageUpload(List<MultipartFile> productImages) {
@@ -333,7 +333,6 @@ public class ProductServiceImpl implements ProductService {
       private ShopResponse getShopByOwnerUsername(String username) {
             try {
                   ApiResponse<ShopResponse> response = shopClient.getShopByOwnerUsername(username);
-
                   return Optional.ofNullable(response.getResult())
                           .orElseThrow(() -> new AppException(ErrorCode.SHOP_NOT_FOUND));
             } catch (FeignException e) {

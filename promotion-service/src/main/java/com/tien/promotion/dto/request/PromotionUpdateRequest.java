@@ -1,5 +1,6 @@
 package com.tien.promotion.dto.request;
 
+import com.tien.promotion.enums.PromotionType;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
@@ -19,7 +20,7 @@ public class PromotionUpdateRequest {
       String name;
 
       @NotNull(message = "TYPE_IS_REQUIRED")
-      String type;
+      PromotionType type;
 
       String description;
 

@@ -1,5 +1,6 @@
 package com.tien.promotion.dto.response;
 
+import com.tien.promotion.enums.PromotionType;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -15,7 +16,7 @@ public class PromotionResponse {
       String id;
       String name;
       String promoCode;
-      String type;
+      PromotionType type;
       String description;
 
       ConditionsResponse conditions;

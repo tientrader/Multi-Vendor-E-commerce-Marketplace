@@ -1,5 +1,6 @@
 package com.tien.promotion.entity;
 
+import com.tien.promotion.enums.PromotionType;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.annotation.CreatedDate;
@@ -23,7 +24,7 @@ public class Promotion {
 
       String name;
       String promoCode;
-      String type;
+      PromotionType type;
       String description;
       Conditions conditions;
       Discount discount;

@@ -10,7 +10,6 @@ import java.util.List;
 
 public interface ReviewService {
 
-
       ReviewResponse createReview(ReviewCreationRequest request, List<MultipartFile> images);
 
       void respondToReview(String reviewId, String response);

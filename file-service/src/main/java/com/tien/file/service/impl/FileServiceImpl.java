@@ -63,7 +63,6 @@ public class FileServiceImpl implements FileService {
             fileEntity.setType(file.getContentType());
 
             fileRepository.save(fileEntity);
-
             return fileMapper.toFileUploadResponse(fileEntity);
       }
 
@@ -91,7 +90,6 @@ public class FileServiceImpl implements FileService {
                   fileEntity.setType(file.getContentType());
 
                   fileRepository.save(fileEntity);
-
                   responses.add(fileMapper.toFileUploadResponse(fileEntity));
             }
 
@@ -108,11 +106,7 @@ public class FileServiceImpl implements FileService {
       @Override
       public FileResponse getFile(String fileName) {
             File fileEntity = fileRepository.findByName(fileName)
-                    .orElseThrow(() -> {
-                          log.error("Failed to retrieve file with name: {}", fileName);
-                          return new AppException(ErrorCode.FILE_NOT_FOUND);
-                    });
-
+                    .orElseThrow(() -> new AppException(ErrorCode.FILE_NOT_FOUND));
             return fileMapper.toFileUploadResponse(fileEntity);
       }
 

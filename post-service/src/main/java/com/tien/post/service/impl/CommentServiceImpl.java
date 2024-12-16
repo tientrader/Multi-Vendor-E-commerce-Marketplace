@@ -41,7 +41,6 @@ public class CommentServiceImpl implements CommentService {
             comment.setPostId(postId);
             comment.setCreatedDate(Instant.now());
             comment.setModifiedDate(Instant.now());
-
             Comment savedComment = commentRepository.save(comment);
 
             Post post = postRepository.findById(postId)
