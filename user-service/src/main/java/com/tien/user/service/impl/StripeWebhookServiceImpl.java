@@ -5,6 +5,7 @@ import com.stripe.model.Event;
 import com.stripe.model.Subscription;
 import com.stripe.model.checkout.Session;
 import com.stripe.net.Webhook;
+import com.tien.user.enums.PackageType;
 import com.tien.user.exception.AppException;
 import com.tien.user.exception.ErrorCode;
 import com.tien.user.service.StripeWebhookService;
@@ -38,16 +39,30 @@ public class StripeWebhookServiceImpl implements StripeWebhookService {
                         case "checkout.session.completed" -> {
                               Session session = (Session) event.getData().getObject();
                               String username = session.getMetadata().get("username");
-                              String packageType = session.getMetadata().get("packageType");
+                              String packageTypeStr = session.getMetadata().get("packageType");
                               String subscriptionId = session.getSubscription();
-                              vipUserService.updateVipEndDate(username, packageType, subscriptionId);
+
+                              try {
+                                    PackageType packageType = PackageType.valueOf(packageTypeStr.toUpperCase());
+                                    vipUserService.updateVipEndDate(username, packageType, subscriptionId);
+                              } catch (IllegalArgumentException e) {
+                                    log.error("Invalid packageType received in event: {}", packageTypeStr);
+                                    throw new AppException(ErrorCode.INVALID_PACKAGE_TYPE);
+                              }
                         }
                         case "customer.subscription.created" -> {
                               Subscription subscription = (Subscription) event.getData().getObject();
                               String subscriptionId = subscription.getId();
                               String username = subscription.getMetadata().get("username");
-                              String packageType = subscription.getMetadata().get("packageType");
-                              vipUserService.updateVipEndDate(username, packageType, subscriptionId);
+                              String packageTypeStr = subscription.getMetadata().get("packageType");
+
+                              try {
+                                    PackageType packageType = PackageType.valueOf(packageTypeStr.toUpperCase());
+                                    vipUserService.updateVipEndDate(username, packageType, subscriptionId);
+                              } catch (IllegalArgumentException e) {
+                                    log.error("Invalid packageType received in subscription: {}", packageTypeStr);
+                                    throw new AppException(ErrorCode.INVALID_PACKAGE_TYPE);
+                              }
                         }
                   }
             } catch (SignatureVerificationException e) {

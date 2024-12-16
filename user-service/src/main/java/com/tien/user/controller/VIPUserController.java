@@ -5,6 +5,7 @@ import com.tien.user.dto.request.VIPUserRequest;
 import com.tien.user.dto.request.VIPUserRequestWithSession;
 import com.tien.user.dto.response.VIPUserResponse;
 import com.tien.user.dto.response.VIPUserResponseWithSession;
+import com.tien.user.enums.PackageType;
 import com.tien.user.service.VIPUserService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -30,15 +31,14 @@ public class VIPUserController {
 
       @PostMapping("/createWithSession")
       public ApiResponse<VIPUserResponseWithSession> createVIPUserWithSession(@RequestBody @Valid VIPUserRequestWithSession request) {
-            VIPUserResponseWithSession response = vipUserService.createVIPUserWithSession(request);
             return ApiResponse.<VIPUserResponseWithSession>builder()
-                    .result(response)
+                    .result(vipUserService.createVIPUserWithSession(request))
                     .build();
       }
 
       @PutMapping("/update-end-date/{username}")
       public ApiResponse<Void> updateVipEndDate(@PathVariable String username,
-                                                @RequestParam String packageType,
+                                                @RequestParam PackageType packageType,
                                                 @RequestParam String subscriptionId) {
             vipUserService.updateVipEndDate(username, packageType, subscriptionId);
             return ApiResponse.<Void>builder()

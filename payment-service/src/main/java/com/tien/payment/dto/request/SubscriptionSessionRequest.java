@@ -1,5 +1,6 @@
 package com.tien.payment.dto.request;
 
+import com.tien.payment.enums.PackageType;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -17,6 +18,6 @@ public class SubscriptionSessionRequest {
       String email;
 
       @NotNull(message = "PACKAGE_TYPE_IS_REQUIRED")
-      String packageType;
+      PackageType packageType;
 
 }

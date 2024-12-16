@@ -77,7 +77,6 @@ public class StripeServiceImpl implements StripeService {
       public StripeChargeResponse charge(StripeChargeRequest request) {
             String currentUsername = getCurrentUsername();
             request.setUsername(currentUsername);
-
             return processCharge(request);
       }
 
@@ -155,10 +154,9 @@ public class StripeServiceImpl implements StripeService {
                   Customer customer = Customer.create(customerMap);
 
                   String priceId = switch (request.getPackageType()) {
-                        case "MONTHLY" -> monthlyPriceId;
-                        case "SEMIANNUAL" -> semiannualPriceId;
-                        case "ANNUAL" -> annualPriceId;
-                        default -> throw new IllegalArgumentException("Invalid package type: " + request.getPackageType());
+                        case MONTHLY -> monthlyPriceId;
+                        case SEMIANNUAL -> semiannualPriceId;
+                        case ANNUAL -> annualPriceId;
                   };
 
                   List<Object> items = new ArrayList<>();
@@ -183,7 +181,6 @@ public class StripeServiceImpl implements StripeService {
                   stripeSubscription.setNumberOfLicense(numberOfLicense);
 
                   stripeSubscriptionRepository.save(stripeSubscription);
-
                   return StripeSubscriptionResponse.builder()
                           .username(currentUsername)
                           .stripeCustomerId(customer.getId())
@@ -209,6 +206,7 @@ public class StripeServiceImpl implements StripeService {
                           .build();
 
                   CustomerSearchResult search = Customer.search(params);
+
                   Customer customer;
                   if (search.getData().isEmpty()) {
                         CustomerCreateParams customerCreateParams = CustomerCreateParams.builder()
@@ -250,8 +248,8 @@ public class StripeServiceImpl implements StripeService {
                   paymentSession.setSessionUrl(stripeSession.getUrl());
                   paymentSession.setSessionId(stripeSession.getId());
                   paymentSession.setUsername(username);
-                  sessionRepository.save(paymentSession);
 
+                  sessionRepository.save(paymentSession);
                   return stripeMapper.toSessionResponse(paymentSession);
             } catch (StripeException e) {
                   log.error("Payment session creation failed for user {}: {}", username, e.getMessage());
@@ -273,6 +271,7 @@ public class StripeServiceImpl implements StripeService {
                           .build();
 
                   CustomerSearchResult search = Customer.search(params);
+
                   Customer customer;
                   if (search.getData().isEmpty()) {
                         CustomerCreateParams customerCreateParams = CustomerCreateParams.builder()
@@ -285,10 +284,9 @@ public class StripeServiceImpl implements StripeService {
                   }
 
                   String priceId = switch (request.getPackageType()) {
-                        case "MONTHLY" -> monthlyPriceId;
-                        case "SEMIANNUAL" -> semiannualPriceId;
-                        case "ANNUAL" -> annualPriceId;
-                        default -> throw new IllegalArgumentException("Invalid package type: " + request.getPackageType());
+                        case MONTHLY -> monthlyPriceId;
+                        case SEMIANNUAL -> semiannualPriceId;
+                        case ANNUAL -> annualPriceId;
                   };
 
                   SessionCreateParams sessionCreateParams = SessionCreateParams.builder()
@@ -297,7 +295,7 @@ public class StripeServiceImpl implements StripeService {
                           .setSuccessUrl("https://localhost:3000/success")
                           .setCancelUrl("https://localhost:3000/failure")
                           .putMetadata("username", username)
-                          .putMetadata("packageType", request.getPackageType())
+                          .putMetadata("packageType", request.getPackageType().name())
                           .addLineItem(SessionCreateParams.LineItem.builder()
                                   .setQuantity(1L)
                                   .setPrice(priceId)

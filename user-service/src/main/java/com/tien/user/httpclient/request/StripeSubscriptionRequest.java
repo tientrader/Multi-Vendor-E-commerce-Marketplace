@@ -1,5 +1,6 @@
 package com.tien.user.httpclient.request;
 
+import com.tien.user.enums.PackageType;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -12,7 +13,7 @@ public class StripeSubscriptionRequest {
 
       String stripeToken;
       String email;
-      String packageType;
+      PackageType packageType;
       String username;
       long numberOfLicense;
 

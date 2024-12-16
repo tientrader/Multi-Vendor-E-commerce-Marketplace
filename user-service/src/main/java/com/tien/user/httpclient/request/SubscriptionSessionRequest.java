@@ -1,5 +1,6 @@
 package com.tien.user.httpclient.request;
 
+import com.tien.user.enums.PackageType;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -12,6 +13,6 @@ public class SubscriptionSessionRequest {
 
       String email;
       String username;
-      String packageType;
+      PackageType packageType;
 
 }

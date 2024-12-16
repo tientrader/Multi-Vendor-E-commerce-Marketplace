@@ -1,6 +1,7 @@
 package com.tien.user.service.impl;
 
 import com.tien.user.dto.ApiResponse;
+import com.tien.user.enums.PackageType;
 import com.tien.user.httpclient.request.StripeSubscriptionRequest;
 import com.tien.user.httpclient.request.SubscriptionSessionRequest;
 import com.tien.user.dto.request.VIPUserRequest;
@@ -96,7 +97,7 @@ public class VIPUserServiceImpl implements VIPUserService {
 
       @Override
       @Transactional
-      public void updateVipEndDate(String username, String packageType, String subscriptionId) {
+      public void updateVipEndDate(String username, PackageType packageType, String subscriptionId) {
             User user = userRepository.findByUsername(username)
                     .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
@@ -153,15 +154,11 @@ public class VIPUserServiceImpl implements VIPUserService {
             return jwt.getClaim("preferred_username");
       }
 
-      private LocalDate getVipEndDateBasedOnPackageType(String packageType, LocalDate vipStartDate) {
+      private LocalDate getVipEndDateBasedOnPackageType(PackageType packageType, LocalDate vipStartDate) {
             return switch (packageType) {
-                  case "MONTHLY" -> vipStartDate.plusMonths(1);
-                  case "SEMIANNUAL" -> vipStartDate.plusMonths(6);
-                  case "ANNUAL" -> vipStartDate.plusYears(1);
-                  default -> {
-                        log.error("Invalid package type provided: {}", packageType);
-                        throw new AppException(ErrorCode.INVALID_PACKAGE_TYPE);
-                  }
+                  case MONTHLY -> vipStartDate.plusMonths(1);
+                  case SEMIANNUAL -> vipStartDate.plusMonths(6);
+                  case ANNUAL -> vipStartDate.plusYears(1);
             };
       }
 
