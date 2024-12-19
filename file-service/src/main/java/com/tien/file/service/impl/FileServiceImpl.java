@@ -104,6 +104,7 @@ public class FileServiceImpl implements FileService {
       }
 
       @Override
+      @PreAuthorize("hasRole('ADMIN')")
       public FileResponse getFile(String fileName) {
             File fileEntity = fileRepository.findByName(fileName)
                     .orElseThrow(() -> new AppException(ErrorCode.FILE_NOT_FOUND));

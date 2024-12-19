@@ -36,7 +36,7 @@ public class Order {
       @Column(nullable = false)
       String email;
 
-      @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+      @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
       @JoinColumn(name = "order_id")
       List<OrderItem> items;
 
