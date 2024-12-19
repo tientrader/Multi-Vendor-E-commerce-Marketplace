@@ -202,21 +202,23 @@
   Functions as a service registry for microservices, enabling them to dynamically discover each other. It simplifies the scaling process and enhances fault tolerance by ensuring services can automatically register and deregister themselves as they scale or fail, maintaining smooth inter-service communication. Eureka also integrates with client-side load balancing, ensuring traffic is evenly distributed across available service instances, improving performance and resilience.
 
   ![Eureka](resources/eureka.png)
-
+  
 ### Monitoring and Logging
 
 - <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/prometheus/prometheus-original.svg" alt="Prometheus" width="30" height="30"/><img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/grafana/grafana-original.svg" alt="Grafana" width="30" height="30"/> **Prometheus & Grafana:**
 
-  Prometheus collects and stores performance metrics, such as system resource usage, request latency, and error rates, from microservices. Grafana visualizes this data in real-time dashboards, allowing developers and operators to track the system’s health and identify performance bottlenecks or failures.
+  Prometheus is a monitoring system that collects and stores performance metrics from various microservices. These metrics include CPU and memory usage, request latency, error rates, and other system-level metrics. Prometheus uses a time-series database, which allows it to efficiently collect and query large amounts of data.
+  
+![Prometheus](resources/prometheus.png)
 
-  ![Prometheus](resources/prometheus.png)
+  Grafana is a data visualization tool that integrates with Prometheus to create real-time dashboards. It enables developers and operators to track the health of their systems, monitor performance trends, and quickly identify bottlenecks, failures, or anomalies in the system’s behavior. The combination of Prometheus and Grafana is crucial for observability in microservice architectures.
   
   ![Grafana](resources/grafana.png)
 
 - <img src="https://i.imgur.com/RMo3imI.png" width="30" height="30" /> **Loki:**
 
-  Loki is a centralized log aggregation system that collects logs from all microservices, enabling efficient troubleshooting and issue resolution. By correlating logs with metrics from Prometheus, it provides deep insights into service behavior, making it easier to detect and fix problems.
-  
+  Loki is a log aggregation system designed to collect and store logs from all microservices in a centralized manner. It is optimized for high-volume, low-latency log collection. By integrating Loki with Prometheus, developers can correlate logs with metrics, providing deeper insights into service behavior and system performance. This makes it easier to troubleshoot issues and quickly identify the root cause of problems, especially when the logs are linked to specific performance metrics or error spikes.
+
   ![Loki](resources/loki.png)
 
 ### Distributed Tracing
