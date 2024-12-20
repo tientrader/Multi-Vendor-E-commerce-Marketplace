@@ -242,126 +242,129 @@ pipeline {
                 }
             }
         }
-        stage('Login and Push Docker Images to Docker Hub') {
+        stage('Login and Push Docker Images to AWS ECR') {
             steps {
                 script {
-                    withCredentials([string(credentialsId: 'tienpro', variable: 'tienpro')]) {
-                        sh 'echo ${tienpro} | docker login -u ntiense03 --password-stdin'
+                    withCredentials([string(credentialsId: 'tienpro-id', variable: 'AWS_ACCESS_KEY_ID'),
+                                     string(credentialsId: 'tienpro-secret', variable: 'AWS_SECRET_ACCESS_KEY')]) {
+                        sh '''
+                        aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/k5o6t2c9
+                        '''
                     }
                 }
             }
         }
-        stage('Push Docker Images to Docker Hub') {
+        stage('Push Docker Images to AWS ECR') {
             parallel {
-		        stage('Push Config Server Image') {
+                stage('Push Config Server Image') {
                     steps {
                         script {
-                            sh 'docker tag config-server:latest ntiense03/config-server:latest'
-                            sh 'docker push ntiense03/config-server:latest'
+                            sh 'docker tag config-server:latest public.ecr.aws/k5o6t2c9/e-com:config-server-v1.0'
+                            sh 'docker push public.ecr.aws/k5o6t2c9/e-com:config-server-v1.0'
                         }
                     }
                 }
                 stage('Push Service Discovery Image') {
                     steps {
                         script {
-                            sh 'docker tag service-discovery:latest ntiense03/service-discovery:latest'
-                            sh 'docker push ntiense03/service-discovery:latest'
+                            sh 'docker tag service-discovery:latest public.ecr.aws/k5o6t2c9/e-com:service-discovery-v1.0'
+                            sh 'docker push public.ecr.aws/k5o6t2c9/e-com:service-discovery-v1.0'
                         }
                     }
                 }
                 stage('Push API Gateway Image') {
                     steps {
                         script {
-                            sh 'docker tag api-gateway:latest ntiense03/api-gateway:latest'
-                            sh 'docker push ntiense03/api-gateway:latest'
+                            sh 'docker tag api-gateway:latest public.ecr.aws/k5o6t2c9/e-com:api-gateway-v1.0'
+                            sh 'docker push public.ecr.aws/k5o6t2c9/e-com:api-gateway-v1.0'
                         }
                     }
                 }
                 stage('Push User Service Image') {
                     steps {
                         script {
-                            sh 'docker tag user-service:latest ntiense03/user-service:latest'
-                            sh 'docker push ntiense03/user-service:latest'
+                            sh 'docker tag user-service:latest public.ecr.aws/k5o6t2c9/e-com:user-service-v1.0'
+                            sh 'docker push public.ecr.aws/k5o6t2c9/e-com:user-service-v1.0'
                         }
                     }
                 }
                 stage('Push Shop Service Image') {
                     steps {
                         script {
-                            sh 'docker tag shop-service:latest ntiense03/shop-service:latest'
-                            sh 'docker push ntiense03/shop-service:latest'
+                            sh 'docker tag shop-service:latest public.ecr.aws/k5o6t2c9/e-com:shop-service-v1.0'
+                            sh 'docker push public.ecr.aws/k5o6t2c9/e-com:shop-service-v1.0'
                         }
                     }
                 }
                 stage('Push Product Service Image') {
                     steps {
                         script {
-                            sh 'docker tag product-service:latest ntiense03/product-service:latest'
-                            sh 'docker push ntiense03/product-service:latest'
+                            sh 'docker tag product-service:latest public.ecr.aws/k5o6t2c9/e-com:product-service-v1.0'
+                            sh 'docker push public.ecr.aws/k5o6t2c9/e-com:product-service-v1.0'
                         }
                     }
                 }
                 stage('Push Cart Service Image') {
                     steps {
                         script {
-                            sh 'docker tag cart-service:latest ntiense03/cart-service:latest'
-                            sh 'docker push ntiense03/cart-service:latest'
+                            sh 'docker tag cart-service:latest public.ecr.aws/k5o6t2c9/e-com:cart-service-v1.0'
+                            sh 'docker push public.ecr.aws/k5o6t2c9/e-com:cart-service-v1.0'
                         }
                     }
                 }
                 stage('Push Order Service Image') {
                     steps {
                         script {
-                            sh 'docker tag order-service:latest ntiense03/order-service:latest'
-                            sh 'docker push ntiense03/order-service:latest'
+                            sh 'docker tag order-service:latest public.ecr.aws/k5o6t2c9/e-com:order-service-v1.0'
+                            sh 'docker push public.ecr.aws/k5o6t2c9/e-com:order-service-v1.0'
                         }
                     }
                 }
                 stage('Push Post Service Image') {
                     steps {
                         script {
-                            sh 'docker tag post-service:latest ntiense03/post-service:latest'
-                            sh 'docker push ntiense03/post-service:latest'
+                            sh 'docker tag post-service:latest public.ecr.aws/k5o6t2c9/e-com:post-service-v1.0'
+                            sh 'docker push public.ecr.aws/k5o6t2c9/e-com:post-service-v1.0'
                         }
                     }
                 }
                 stage('Push Notification Service Image') {
                     steps {
                         script {
-                            sh 'docker tag notification-service:latest ntiense03/notification-service:latest'
-                            sh 'docker push ntiense03/notification-service:latest'
+                            sh 'docker tag notification-service:latest public.ecr.aws/k5o6t2c9/e-com:notification-service-v1.0'
+                            sh 'docker push public.ecr.aws/k5o6t2c9/e-com:notification-service-v1.0'
                         }
                     }
                 }
                 stage('Push Payment Service Image') {
                     steps {
                         script {
-                            sh 'docker tag payment-service:latest ntiense03/payment-service:latest'
-                            sh 'docker push ntiense03/payment-service:latest'
+                            sh 'docker tag payment-service:latest public.ecr.aws/k5o6t2c9/e-com:payment-service-v1.0'
+                            sh 'docker push public.ecr.aws/k5o6t2c9/e-com:payment-service-v1.0'
                         }
                     }
                 }
                 stage('Push File Service Image') {
                     steps {
                         script {
-                            sh 'docker tag file-service:latest ntiense03/file-service:latest'
-                            sh 'docker push ntiense03/file-service:latest'
+                            sh 'docker tag file-service:latest public.ecr.aws/k5o6t2c9/e-com:file-service-v1.0'
+                            sh 'docker push public.ecr.aws/k5o6t2c9/e-com:file-service-v1.0'
                         }
                     }
                 }
                 stage('Push Review Service Image') {
                     steps {
                         script {
-                            sh 'docker tag review-service:latest ntiense03/review-service:latest'
-                            sh 'docker push ntiense03/review-service:latest'
+                            sh 'docker tag review-service:latest public.ecr.aws/k5o6t2c9/e-com:review-service-v1.0'
+                            sh 'docker push public.ecr.aws/k5o6t2c9/e-com:review-service-v1.0'
                         }
                     }
                 }
                 stage('Push Promotion Service Image') {
                     steps {
                         script {
-                            sh 'docker tag promotion-service:latest ntiense03/promotion-service:latest'
-                            sh 'docker push ntiense03/promotion-service:latest'
+                            sh 'docker tag promotion-service:latest public.ecr.aws/k5o6t2c9/e-com:promotion-service-v1.0'
+                            sh 'docker push public.ecr.aws/k5o6t2c9/e-com:promotion-service-v1.0'
                         }
                     }
                 }
