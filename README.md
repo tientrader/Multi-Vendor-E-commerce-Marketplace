@@ -238,6 +238,12 @@
   ![Docker](resources/docker.png)
   ![Docker](resources/docker-hub.png)
 
+- <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/amazonwebservices/amazonwebservices-original-wordmark.svg" alt="AWS S3" width="30" height="30"/> **AWS ECR (Elastic Container Registry):**
+
+  AWS ECR securely stores and manages Docker images, providing easy integration with Amazon ECS (Elastic Container Service) and other AWS services to enable efficient container deployment at scale.
+
+  ![AWS ECR](resources/aws-ecr.png)
+
 ### CI/CD Pipeline Automation
 
 - <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/git/git-original.svg" width="30" height="30" /> **Git:**
@@ -248,7 +254,13 @@
 
   Jenkins automates the CI/CD pipeline, streamlining the processes of building, testing, and deploying services. It integrates seamlessly with Git repositories to trigger builds on code changes.
 
+- **Docker**
+  
 ![Jenkins](resources/jenkins.png)
+
+- **AWS ECR**
+  
+![Jenkins](resources/jenkins-aws-ecr.png)
   
 ### Resilience
 
