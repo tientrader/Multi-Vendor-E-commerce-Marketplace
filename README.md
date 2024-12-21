@@ -254,7 +254,7 @@
 
   Jenkins automates the CI/CD pipeline, streamlining the processes of building, testing, and deploying services. It integrates seamlessly with Git repositories to trigger builds on code changes.
 
-- **Docker**
+- **Docker Hub**
   
 ![Jenkins](resources/jenkins.png)
 
