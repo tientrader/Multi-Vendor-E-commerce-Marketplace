@@ -16,7 +16,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.lambda.LambdaClient;
+import software.amazon.awssdk.services.lambda.model.InvokeRequest;
+import software.amazon.awssdk.services.lambda.model.InvokeResponse;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
@@ -33,6 +37,11 @@ public class FileServiceImpl implements FileService {
       S3Client s3Client;
       FileMapper fileMapper;
       FileRepository fileRepository;
+      LambdaClient lambdaClient;
+
+      @Value("${cloud.aws.lambda.function}")
+      @NonFinal
+      String lambdaFunctionName;
 
       @Value("${cloud.aws.s3.bucket}")
       @NonFinal
@@ -46,54 +55,64 @@ public class FileServiceImpl implements FileService {
       public FileResponse uploadFile(MultipartFile file) throws IOException {
             String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
 
-            PutObjectRequest putObjectRequest = PutObjectRequest.builder()
-                    .bucket(bucketName)
-                    .key(fileName)
-                    .contentType(file.getContentType())
-                    .build();
+            uploadToS3(file, fileName);
 
-            s3Client.putObject(putObjectRequest, RequestBody.fromBytes(file.getBytes()));
+            String fileUrl = generateFileUrl(fileName);
+            File fileEntity = saveFileMetadata(file, fileName, fileUrl);
 
-            String fileUrl = "https://" + bucketName + ".s3." + region + ".amazonaws.com/" + fileName;
+            String resizedFileUrl = invokeLambdaFunction(fileName, fileUrl);
 
-            File fileEntity = new File();
-            fileEntity.setName(fileName);
-            fileEntity.setUrl(fileUrl);
-            fileEntity.setSize(file.getSize());
-            fileEntity.setType(file.getContentType());
-
+            fileEntity.setUrl(resizedFileUrl);
             fileRepository.save(fileEntity);
+
             return fileMapper.toFileUploadResponse(fileEntity);
       }
 
       @Override
-      public List<FileResponse> uploadMultipleFiles(List<MultipartFile> files) throws IOException {
+      public List<FileResponse> uploadMultipleFiles(List<MultipartFile> files) {
             List<FileResponse> responses = new ArrayList<>();
 
-            for (MultipartFile file : files) {
-                  String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+            files.parallelStream().forEach(file -> {
+                  try {
+                        String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
 
-                  PutObjectRequest putObjectRequest = PutObjectRequest.builder()
-                          .bucket(bucketName)
-                          .key(fileName)
-                          .contentType(file.getContentType())
-                          .build();
+                        uploadToS3(file, fileName);
 
-                  s3Client.putObject(putObjectRequest, RequestBody.fromBytes(file.getBytes()));
+                        String fileUrl = generateFileUrl(fileName);
+                        File fileEntity = saveFileMetadata(file, fileName, fileUrl);
 
-                  String fileUrl = "https://" + bucketName + ".s3." + region + ".amazonaws.com/" + fileName;
+                        String resizedFileUrl = invokeLambdaFunction(fileName, fileUrl);
 
-                  File fileEntity = new File();
-                  fileEntity.setName(fileName);
-                  fileEntity.setUrl(fileUrl);
-                  fileEntity.setSize(file.getSize());
-                  fileEntity.setType(file.getContentType());
+                        fileEntity.setUrl(resizedFileUrl);
+                        fileRepository.save(fileEntity);
 
-                  fileRepository.save(fileEntity);
-                  responses.add(fileMapper.toFileUploadResponse(fileEntity));
-            }
+                        synchronized (responses) {
+                              responses.add(fileMapper.toFileUploadResponse(fileEntity));
+                        }
+                  } catch (IOException e) {
+                        log.error("Failed to upload file: {}", file.getOriginalFilename(), e);
+                  }
+            });
 
             return responses;
+      }
+
+      private String invokeLambdaFunction(String fileName, String fileUrl) {
+            try {
+                  InvokeRequest invokeRequest = InvokeRequest.builder()
+                          .functionName(lambdaFunctionName)
+                          .payload(SdkBytes.fromUtf8String("{\"fileName\": \"" + fileName + "\", \"fileUrl\": \"" + fileUrl + "\"}"))
+                          .build();
+
+                  InvokeResponse invokeResponse = lambdaClient.invoke(invokeRequest);
+                  String resizedFileUrl = invokeResponse.payload().asUtf8String();
+                  resizedFileUrl = resizedFileUrl.replace("\"", "");
+
+                  return resizedFileUrl;
+            } catch (Exception e) {
+                  log.error("Failed to invoke Lambda function: {}", lambdaFunctionName, e);
+                  return fileUrl;
+            }
       }
 
       @Override
@@ -109,6 +128,31 @@ public class FileServiceImpl implements FileService {
             File fileEntity = fileRepository.findByName(fileName)
                     .orElseThrow(() -> new AppException(ErrorCode.FILE_NOT_FOUND));
             return fileMapper.toFileUploadResponse(fileEntity);
+      }
+
+      private void uploadToS3(MultipartFile file, String fileName) throws IOException {
+            PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(fileName)
+                    .contentType(file.getContentType())
+                    .build();
+
+            s3Client.putObject(putObjectRequest, RequestBody.fromBytes(file.getBytes()));
+      }
+
+      private String generateFileUrl(String fileName) {
+            return "https://" + bucketName + ".s3." + region + ".amazonaws.com/" + fileName;
+      }
+
+      private File saveFileMetadata(MultipartFile file, String fileName, String fileUrl) {
+            File fileEntity = new File();
+            fileEntity.setName(fileName);
+            fileEntity.setUrl(fileUrl);
+            fileEntity.setSize(file.getSize());
+            fileEntity.setType(file.getContentType());
+
+            fileRepository.save(fileEntity);
+            return fileEntity;
       }
 
 }
