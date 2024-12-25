@@ -172,11 +172,26 @@
 
   ![Redis](resources/redis.png)
 
-- <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/amazonwebservices/amazonwebservices-original-wordmark.svg" alt="AWS S3" width="30" height="30"/> **AWS S3:**
+- <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/amazonwebservices/amazonwebservices-original-wordmark.svg" alt="AWS S3" width="30" height="30"/> **AWS S3 & AWS Lambda:**
 
-  AWS S3 is integrated for secure, scalable storage of large volumes of unstructured data, such as media files (images, videos, etc.). It ensures high availability, durability, and easy accessibility, allowing the platform to store and retrieve media content efficiently while minimizing costs. AWS S3's scalability ensures that as data volumes grow, the storage system can expand without impacting performance.
+  AWS S3 is used for secure, scalable storage of large volumes of unstructured data (e.g., images, videos), ensuring high availability, durability, and easy accessibility. It supports the platform’s need to store and retrieve media efficiently while minimizing costs.
 
-  ![AWS S3](resources/awss3.png)
+  To optimize storage and enhance performance, AWS Lambda is integrated to automate image resizing and quality reduction. This process reduces file sizes, optimizes storage, and improves platform efficiency by processing images in real time before they are stored in S3. The seamless integration between AWS S3 and Lambda allows for efficient media processing.
+
+#### Pre-Lambda:
+Before Lambda integration, images are uploaded to S3 in their original formats and sizes, without any optimization.
+
+![AWS S3](resources/awss3.png)
+
+#### Lambda Processing:
+Once an image is uploaded, Lambda triggers a resizing and quality reduction process, optimizing the image by reducing its size and maintaining an efficient balance between storage and visual quality.
+
+![AWS S3](resources/aws-lambda.png)
+
+#### Post-Lambda:
+The optimized image is stored back in S3, minimizing storage usage while maintaining a balance between performance and quality.
+
+![AWS S3](resources/aws-s3-resized.png)
   
 ### Payment Management
 
