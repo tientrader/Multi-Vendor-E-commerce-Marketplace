@@ -130,6 +130,9 @@ public class StripeServiceImpl implements StripeService {
             } catch (StripeException e) {
                   log.error("Payment failed for user {}: {}", username, e.getMessage());
                   throw new AppException(ErrorCode.PAYMENT_FAILED);
+            } catch (Exception e) {
+                  log.error("An unexpected error occurred while processing charge for user {}: {}", username, e.getMessage(), e);
+                  throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
             }
       }
 
@@ -188,6 +191,9 @@ public class StripeServiceImpl implements StripeService {
             } catch (StripeException e) {
                   log.error("Subscription creation failed for user {}: {}", currentUsername, e.getMessage());
                   throw new AppException(ErrorCode.SUBSCRIPTION_CREATION_FAILED);
+            } catch (Exception e) {
+                  log.error("An unexpected error occurred while creating subscription for user {}: {}", currentUsername, e.getMessage(), e);
+                  throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
             }
       }
 
@@ -332,6 +338,9 @@ public class StripeServiceImpl implements StripeService {
             } catch (StripeException e) {
                   log.error("Failed to cancel subscription with ID {}: {}", subscriptionId, e.getMessage());
                   throw new AppException(ErrorCode.SUBSCRIPTION_CANCEL_FAILED);
+            } catch (Exception e) {
+                  log.error("An unexpected error occurred while canceling subscription with ID {}: {}", subscriptionId, e.getMessage());
+                  throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
             }
       }
 

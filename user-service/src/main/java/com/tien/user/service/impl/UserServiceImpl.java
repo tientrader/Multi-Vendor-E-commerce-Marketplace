@@ -13,6 +13,7 @@ import com.tien.user.exception.AppException;
 import com.tien.user.exception.ErrorCode;
 import com.tien.user.exception.ErrorNormalizer;
 import com.tien.user.httpclient.IdentityClient;
+import com.tien.user.kafka.KafkaProducer;
 import com.tien.user.mapper.UserMapper;
 import com.tien.user.repository.UserRepository;
 import com.tien.user.service.UserService;
@@ -27,7 +28,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -50,7 +50,7 @@ public class UserServiceImpl implements UserService {
       UserMapper userMapper;
       IdentityClient identityClient;
       ErrorNormalizer errorNormalizer;
-      KafkaTemplate<String, Object> kafkaTemplate;
+      KafkaProducer kafkaProducer;
 
       @Value("${idp.client-id}")
       @NonFinal
@@ -67,13 +67,12 @@ public class UserServiceImpl implements UserService {
       @Override
       @Transactional
       public UserResponse register(RegistrationRequest request) {
-            String token = getAccessToken();
-            ResponseEntity<?> creationResponse;
-
             if (userRepository.existsByPhoneNumber(request.getPhoneNumber())) {
                   throw new AppException(ErrorCode.PHONE_NUMBER_EXISTED);
             }
 
+            String token = getAccessToken();
+            ResponseEntity<?> creationResponse;
             try {
                   creationResponse = identityClient.createUser(
                           "Bearer " + token,
@@ -91,8 +90,7 @@ public class UserServiceImpl implements UserService {
                                           .build()))
                                   .attributes(Map.of(
                                           "phoneNumber", List.of(request.getPhoneNumber()),
-                                          "birthdate", List.of(request.getDob().toString())
-                                  ))
+                                          "birthdate", List.of(request.getDob().toString())))
                                   .build());
             } catch (FeignException e) {
                   log.error("Error occurred during user registration: {}", e.getMessage());
@@ -100,7 +98,6 @@ public class UserServiceImpl implements UserService {
             }
 
             String userId = extractUserId(creationResponse);
-
             User user = userMapper.toUser(request);
             user.setUserId(userId);
             user = userRepository.save(user);
@@ -114,7 +111,7 @@ public class UserServiceImpl implements UserService {
                   }
             });
 
-            kafkaTemplate.send("register-successful", NotificationEvent.builder()
+            kafkaProducer.send("register-successful", NotificationEvent.builder()
                     .channel("EMAIL")
                     .recipient(request.getEmail())
                     .subject("Welcome to TienProApp")
@@ -159,7 +156,7 @@ public class UserServiceImpl implements UserService {
 
                           userRepository.save(newUser);
 
-                          kafkaTemplate.send("register-successful", NotificationEvent.builder()
+                          kafkaProducer.send("register-successful", NotificationEvent.builder()
                                   .channel("EMAIL")
                                   .recipient(newUser.getEmail())
                                   .subject("Welcome to TienProApp")
@@ -390,7 +387,8 @@ public class UserServiceImpl implements UserService {
                     .client_id(clientId)
                     .client_secret(clientSecret)
                     .scope("openid")
-                    .build()).getAccessToken();
+                    .build())
+                    .getAccessToken();
       }
 
 }

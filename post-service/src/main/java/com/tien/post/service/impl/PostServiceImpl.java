@@ -30,7 +30,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -48,37 +47,8 @@ public class PostServiceImpl implements PostService {
       public PostResponse createPost(PostCreationRequest request, List<MultipartFile> postImages) {
             String username = getCurrentUsername();
 
-            try {
-                  userClient.checkIfUserIsVIP(username);
-            } catch (FeignException e) {
-                  if (e.status() == 400 && e.getMessage().contains("USER_NOT_VIP")) {
-                        log.error("User {} is not VIP.", username);
-                        throw new AppException(ErrorCode.USER_NOT_VIP);
-                  }
-                  log.error("External service error while checking VIP status for user {}: {}", username, e.getMessage());
-                  throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
-            }
-
-            List<String> imageUrls = List.of();
-            if (postImages != null && !postImages.isEmpty()) {
-                  ApiResponse<List<FileResponse>> fileResponseApi;
-                  try {
-                        fileResponseApi = fileClient.uploadMultipleFiles(postImages);
-
-                        if (fileResponseApi == null || fileResponseApi.getResult() == null) {
-                              log.error("(createPost) File upload returned no results");
-                              throw new AppException(ErrorCode.FILE_UPLOAD_FAILED);
-                        }
-                  } catch (FeignException e) {
-                        log.error("Error uploading files: {}", e.getMessage(), e);
-                        throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
-                  }
-
-                  List<FileResponse> fileResponses = fileResponseApi.getResult();
-                  imageUrls = fileResponses.stream()
-                          .map(FileResponse::getUrl)
-                          .toList();
-            }
+            checkIfUserIsVIP(username);
+            List<String> imageUrls = uploadImages(postImages);
 
             Post post = postMapper.toPost(request);
             post.setUsername(username);
@@ -105,27 +75,7 @@ public class PostServiceImpl implements PostService {
             postMapper.updatePost(post, request);
             post.setModifiedDate(Instant.now());
 
-            List<String> imageUrls = List.of();
-            if (postImages != null && !postImages.isEmpty()) {
-                  ApiResponse<List<FileResponse>> fileResponseApi;
-                  try {
-                        fileResponseApi = fileClient.uploadMultipleFiles(postImages);
-
-                        if (fileResponseApi == null || fileResponseApi.getResult() == null) {
-                              log.error("File upload returned no results");
-                              throw new AppException(ErrorCode.FILE_UPLOAD_FAILED);
-                        }
-                  } catch (FeignException e) {
-                        log.error("Error uploading files: {}", e.getMessage(), e);
-                        throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
-                  }
-
-                  List<FileResponse> fileResponses = fileResponseApi.getResult();
-                  imageUrls = fileResponses.stream()
-                          .map(FileResponse::getUrl)
-                          .collect(Collectors.toList());
-            }
-
+            List<String> imageUrls = uploadImages(postImages);
             if (!imageUrls.isEmpty()) {
                   post.setImageUrls(imageUrls);
             }
@@ -151,8 +101,8 @@ public class PostServiceImpl implements PostService {
       @Override
       public PageResponse<PostResponse> searchPosts(String keyword, int page, int size) {
             Pageable pageable = PageRequest.of(page - 1, size);
-            var pageData = postRepository.searchPosts(keyword, pageable);
 
+            var pageData = postRepository.searchPosts(keyword, pageable);
             var postList = postMapper.toPostResponseList(pageData.getContent());
 
             return PageResponse.<PostResponse>builder()
@@ -170,7 +120,6 @@ public class PostServiceImpl implements PostService {
             Pageable pageable = PageRequest.of(page - 1, size, sort);
 
             var pageData = postRepository.findAll(pageable);
-
             var postList = pageData.getContent().stream().map(post -> {
                   var postResponse = postMapper.toPostResponse(post);
                   postResponse.setCreated(dateTimeFormatter.format(post.getCreatedDate()));
@@ -192,8 +141,8 @@ public class PostServiceImpl implements PostService {
 
             Sort sort = Sort.by("createdDate").descending();
             Pageable pageable = PageRequest.of(page - 1, size, sort);
-            var pageData = postRepository.findAllByUsername(username, pageable);
 
+            var pageData = postRepository.findAllByUsername(username, pageable);
             var postList = pageData.getContent().stream().map(post -> {
                   var postResponse = postMapper.toPostResponse(post);
                   postResponse.setUsername(username);
@@ -220,6 +169,42 @@ public class PostServiceImpl implements PostService {
       private String getCurrentUsername() {
             Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             return jwt.getClaim("preferred_username");
+      }
+
+      private void checkIfUserIsVIP(String username) {
+            try {
+                  userClient.checkIfUserIsVIP(username);
+            } catch (FeignException e) {
+                  if (e.status() == 400 && e.getMessage().contains("USER_NOT_VIP")) {
+                        log.error("User {} is not VIP.", username);
+                        throw new AppException(ErrorCode.USER_NOT_VIP);
+                  }
+                  log.error("External service error while checking VIP status for user {}: {}", username, e.getMessage());
+                  throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
+            }
+      }
+
+      private List<String> uploadImages(List<MultipartFile> postImages) {
+            if (postImages == null || postImages.isEmpty()) {
+                  return List.of();
+            }
+
+            try {
+                  ApiResponse<List<FileResponse>> fileResponseApi = fileClient.uploadMultipleFiles(postImages);
+
+                  if (fileResponseApi == null || fileResponseApi.getResult() == null) {
+                        log.error("File upload returned no results");
+                        throw new AppException(ErrorCode.FILE_UPLOAD_FAILED);
+                  }
+
+                  return fileResponseApi.getResult()
+                          .stream()
+                          .map(FileResponse::getUrl)
+                          .toList();
+            } catch (FeignException e) {
+                  log.error("Error uploading files: {}", e.getMessage(), e);
+                  throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
+            }
       }
 
 }

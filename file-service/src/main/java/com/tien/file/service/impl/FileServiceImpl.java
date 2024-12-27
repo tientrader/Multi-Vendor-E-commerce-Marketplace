@@ -97,6 +97,35 @@ public class FileServiceImpl implements FileService {
             return responses;
       }
 
+      @Override
+      @PreAuthorize("hasRole('ADMIN')")
+      public void deleteFile(String fileName) {
+            s3Client.deleteObject(deleteRequest -> deleteRequest.bucket(bucketName).key(fileName));
+            fileRepository.deleteByName(fileName);
+      }
+
+      @Override
+      @PreAuthorize("hasRole('ADMIN')")
+      public FileResponse getFile(String fileName) {
+            File fileEntity = fileRepository.findByName(fileName)
+                    .orElseThrow(() -> new AppException(ErrorCode.FILE_NOT_FOUND));
+            return fileMapper.toFileUploadResponse(fileEntity);
+      }
+
+      private String generateFileUrl(String fileName) {
+            return "https://" + bucketName + ".s3." + region + ".amazonaws.com/" + fileName;
+      }
+
+      private void uploadToS3(MultipartFile file, String fileName) throws IOException {
+            PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(fileName)
+                    .contentType(file.getContentType())
+                    .build();
+
+            s3Client.putObject(putObjectRequest, RequestBody.fromBytes(file.getBytes()));
+      }
+
       private String invokeLambdaFunction(String fileName, String fileUrl) {
             try {
                   InvokeRequest invokeRequest = InvokeRequest.builder()
@@ -113,35 +142,6 @@ public class FileServiceImpl implements FileService {
                   log.error("Failed to invoke Lambda function: {}", lambdaFunctionName, e);
                   return fileUrl;
             }
-      }
-
-      @Override
-      @PreAuthorize("hasRole('ADMIN')")
-      public void deleteFile(String fileName) {
-            s3Client.deleteObject(deleteRequest -> deleteRequest.bucket(bucketName).key(fileName));
-            fileRepository.deleteByName(fileName);
-      }
-
-      @Override
-      @PreAuthorize("hasRole('ADMIN')")
-      public FileResponse getFile(String fileName) {
-            File fileEntity = fileRepository.findByName(fileName)
-                    .orElseThrow(() -> new AppException(ErrorCode.FILE_NOT_FOUND));
-            return fileMapper.toFileUploadResponse(fileEntity);
-      }
-
-      private void uploadToS3(MultipartFile file, String fileName) throws IOException {
-            PutObjectRequest putObjectRequest = PutObjectRequest.builder()
-                    .bucket(bucketName)
-                    .key(fileName)
-                    .contentType(file.getContentType())
-                    .build();
-
-            s3Client.putObject(putObjectRequest, RequestBody.fromBytes(file.getBytes()));
-      }
-
-      private String generateFileUrl(String fileName) {
-            return "https://" + bucketName + ".s3." + region + ".amazonaws.com/" + fileName;
       }
 
       private File saveFileMetadata(MultipartFile file, String fileName, String fileUrl) {
