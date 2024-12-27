@@ -99,27 +99,14 @@ public class CartServiceImpl implements CartService {
             String cartKey = CART_KEY_PREFIX + username;
 
             Cart cart = (Cart) redisTemplate.opsForValue().get(cartKey);
-
-            if (cart == null) {
-                  throw new AppException(ErrorCode.CART_NOT_FOUND);
-            }
+            if (cart == null) throw new AppException(ErrorCode.CART_NOT_FOUND);
 
             if (Objects.requireNonNull(cart).getItems() == null || cart.getItems().isEmpty()) {
                   throw new AppException(ErrorCode.CART_NOT_FOUND);
             }
 
             redisTemplate.opsForValue().set(PROMO_APPLIED_KEY_PREFIX + username, true);
-
-            try {
-                  promotionClient.applyPromotionCode(promoCode);
-            } catch (FeignException e) {
-                  if (e.status() == 400 || e.contentUTF8().contains(ErrorCode.ORDER_VALUE_TOO_LOW.name())) {
-                        log.error("PromotionService: Order value too low for promoCode {}", promoCode);
-                        throw new AppException(ErrorCode.ORDER_VALUE_TOO_LOW);
-                  }
-                  log.error("Failed to apply promotion code: {}. Status: {}", promoCode, e.status());
-                  throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
-            }
+            applyPromotionCodeWithClient(promoCode);
       }
 
       @Override
@@ -128,10 +115,7 @@ public class CartServiceImpl implements CartService {
             String cartKey = CART_KEY_PREFIX + username;
 
             Cart cart = (Cart) redisTemplate.opsForValue().get(cartKey);
-
-            if (cart == null) {
-                  throw new AppException(ErrorCode.CART_NOT_FOUND);
-            }
+            if (cart == null) throw new AppException(ErrorCode.CART_NOT_FOUND);
 
             validateStockAvailability(Objects.requireNonNull(cart).getItems());
 
@@ -140,13 +124,7 @@ public class CartServiceImpl implements CartService {
             orderRequest.setPaymentMethod(paymentMethod.name());
             orderRequest.setPaymentToken(paymentToken);
 
-            ApiResponse<OrderResponse> orderResponse;
-            try {
-                  orderResponse = orderClient.createOrder(orderRequest);
-            } catch (FeignException e) {
-                  log.error("FeignException occurred while creating order for user {}: {}", username, e.getMessage(), e);
-                  throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
-            }
+            ApiResponse<OrderResponse> orderResponse = sendOrderRequest(orderRequest, username);
 
             redisTemplate.delete(cartKey);
             return orderResponse.getResult();
@@ -162,11 +140,9 @@ public class CartServiceImpl implements CartService {
             }
 
             String cartKey = CART_KEY_PREFIX + username;
-            Cart cart = (Cart) redisTemplate.opsForValue().get(cartKey);
 
-            if (cart == null) {
-                  throw new AppException(ErrorCode.CART_NOT_FOUND);
-            }
+            Cart cart = (Cart) redisTemplate.opsForValue().get(cartKey);
+            if (cart == null) throw new AppException(ErrorCode.CART_NOT_FOUND);
 
             if (cart.isDiscountApplied()) {
                   log.error("Discount already applied for cart of user {}", username);
@@ -185,10 +161,7 @@ public class CartServiceImpl implements CartService {
             String cartKey = CART_KEY_PREFIX + username;
 
             Cart cart = (Cart) redisTemplate.opsForValue().get(cartKey);
-
-            if (cart == null) {
-                  throw new AppException(ErrorCode.CART_NOT_FOUND);
-            }
+            if (cart == null) throw new AppException(ErrorCode.CART_NOT_FOUND);
 
             redisTemplate.delete(cartKey);
       }
@@ -199,10 +172,7 @@ public class CartServiceImpl implements CartService {
             String cartKey = CART_KEY_PREFIX + username;
 
             Cart cart = (Cart) redisTemplate.opsForValue().get(cartKey);
-
-            if (cart == null) {
-                  throw new AppException(ErrorCode.CART_NOT_FOUND);
-            }
+            if (cart == null) throw new AppException(ErrorCode.CART_NOT_FOUND);
 
             return cartMapper.toCartResponse(cart);
       }
@@ -349,6 +319,28 @@ public class CartServiceImpl implements CartService {
                         throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
                   }
             });
+      }
+
+      private void applyPromotionCodeWithClient(String promoCode) {
+            try {
+                  promotionClient.applyPromotionCode(promoCode);
+            } catch (FeignException e) {
+                  if (e.status() == 400 || e.contentUTF8().contains(ErrorCode.ORDER_VALUE_TOO_LOW.name())) {
+                        log.error("PromotionService: Order value too low for promoCode {}", promoCode);
+                        throw new AppException(ErrorCode.ORDER_VALUE_TOO_LOW);
+                  }
+                  log.error("Failed to apply promotion code: {}. Status: {}", promoCode, e.status());
+                  throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
+            }
+      }
+
+      private ApiResponse<OrderResponse> sendOrderRequest(OrderCreationRequest orderRequest, String username) {
+            try {
+                  return orderClient.createOrder(orderRequest);
+            } catch (FeignException e) {
+                  log.error("FeignException occurred while creating order for user {}: {}", username, e.getMessage(), e);
+                  throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
+            }
       }
 
 }

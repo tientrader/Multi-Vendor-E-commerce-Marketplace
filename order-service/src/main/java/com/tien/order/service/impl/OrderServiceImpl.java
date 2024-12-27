@@ -134,6 +134,7 @@ public class OrderServiceImpl implements OrderService {
       public void updateOrderStatus(Long orderId, String newStatus) {
             Order order = orderRepository.findById(orderId)
                     .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+
             order.setStatus(newStatus);
             orderRepository.save(order);
       }

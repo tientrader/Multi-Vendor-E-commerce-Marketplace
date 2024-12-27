@@ -59,8 +59,7 @@ public class ProductVariantServiceImpl implements ProductVariantService {
 
             int newStock = variant.getStock() - quantity;
             if (newStock < 0) {
-                  log.error("Stock for variant {} of product {} is insufficient. Requested: {}, Available: {}",
-                          variantId, productId, quantity, variant.getStock());
+                  log.error("Stock for variant {} of product {} is insufficient. Requested: {}, Available: {}", variantId, productId, quantity, variant.getStock());
                   throw new AppException(ErrorCode.OUT_OF_STOCK);
             }
 

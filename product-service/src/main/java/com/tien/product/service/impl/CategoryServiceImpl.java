@@ -94,17 +94,6 @@ public class CategoryServiceImpl implements CategoryService {
             return jwt.getClaim("preferred_username");
       }
 
-      private ShopResponse getShopByOwnerUsername(String username) {
-            try {
-                  ApiResponse<ShopResponse> response = shopClient.getShopByOwnerUsername(username);
-                  return Optional.ofNullable(response.getResult())
-                          .orElseThrow(() -> new AppException(ErrorCode.SHOP_NOT_FOUND));
-            } catch (FeignException e) {
-                  log.error("Error calling shop service for username {}: {}", username, e.getMessage(), e);
-                  throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
-            }
-      }
-
       private Category findCategoryById(String categoryId) {
             return categoryRepository.findById(categoryId)
                     .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
@@ -114,6 +103,17 @@ public class CategoryServiceImpl implements CategoryService {
             if (!category.getShopId().equals(shopId)) {
                   log.error("User is unauthorized to access category with ID {} for shop ID {}", category.getId(), shopId);
                   throw new AppException(ErrorCode.UNAUTHORIZED);
+            }
+      }
+
+      private ShopResponse getShopByOwnerUsername(String username) {
+            try {
+                  ApiResponse<ShopResponse> response = shopClient.getShopByOwnerUsername(username);
+                  return Optional.ofNullable(response.getResult())
+                          .orElseThrow(() -> new AppException(ErrorCode.SHOP_NOT_FOUND));
+            } catch (FeignException e) {
+                  log.error("Error calling shop service for username {}: {}", username, e.getMessage(), e);
+                  throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
             }
       }
 

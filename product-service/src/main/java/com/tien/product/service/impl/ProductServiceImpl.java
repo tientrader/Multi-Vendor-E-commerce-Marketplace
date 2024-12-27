@@ -68,7 +68,7 @@ public class ProductServiceImpl implements ProductService {
             String username = getCurrentUsername();
             ShopResponse shopResponse = getShopByOwnerUsername(username);
             Category category = findCategoryById(request.getCategoryId());
-            checkCategoryOwnership(category, shopResponse.getId());
+            validateCategoryOwnership(category, shopResponse.getId());
 
             Product product = productMapper.toProduct(request);
             product.setCategoryId(category.getId());
@@ -100,7 +100,7 @@ public class ProductServiceImpl implements ProductService {
 
             Product product = findProductById(productId);
             Category newCategory = findCategoryById(request.getCategoryId());
-            checkCategoryOwnership(newCategory, shopResponse.getId());
+            validateCategoryOwnership(newCategory, shopResponse.getId());
 
             Category oldCategory = findCategoryById(product.getCategoryId());
             oldCategory.getProductIds().remove(product.getId());
@@ -131,7 +131,7 @@ public class ProductServiceImpl implements ProductService {
             ShopResponse shopResponse = getShopByOwnerUsername(username);
 
             Product product = findProductById(productId);
-            checkCategoryOwnership(findCategoryById(product.getCategoryId()), shopResponse.getId());
+            validateCategoryOwnership(findCategoryById(product.getCategoryId()), shopResponse.getId());
 
             Category category = findCategoryById(product.getCategoryId());
             category.getProductIds().remove(product.getId());
@@ -281,24 +281,22 @@ public class ProductServiceImpl implements ProductService {
                   return List.of();
             }
 
-            ApiResponse<List<FileResponse>> fileResponseApi;
             try {
-                  fileResponseApi = fileClient.uploadMultipleFiles(productImages);
+                  ApiResponse<List<FileResponse>> fileResponseApi = fileClient.uploadMultipleFiles(productImages);
 
                   if (fileResponseApi == null || fileResponseApi.getResult() == null) {
                         log.error("File upload returned no results");
                         throw new AppException(ErrorCode.FILE_UPLOAD_FAILED);
                   }
+
+                  return fileResponseApi.getResult()
+                          .stream()
+                          .map(FileResponse::getUrl)
+                          .toList();
             } catch (FeignException e) {
                   log.error("Error uploading files: {}", e.getMessage(), e);
                   throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
             }
-
-            List<FileResponse> fileResponses = fileResponseApi.getResult();
-
-            return fileResponses.stream()
-                    .map(FileResponse::getUrl)
-                    .toList();
       }
 
       private Product findProductById(String productId) {
@@ -323,9 +321,9 @@ public class ProductServiceImpl implements ProductService {
                     .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
       }
 
-      private void checkCategoryOwnership(Category category, String shopId) {
+      private void validateCategoryOwnership(Category category, String shopId) {
             if (!category.getShopId().equals(shopId)) {
-                  log.error("Unauthorized access to category ID: {} by shop ID: {}", category.getId(), shopId);
+                  log.error("User is unauthorized to access category with ID {} for shop ID {}", category.getId(), shopId);
                   throw new AppException(ErrorCode.UNAUTHORIZED);
             }
       }

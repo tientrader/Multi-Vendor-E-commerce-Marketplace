@@ -60,72 +60,16 @@ public class ReviewServiceImpl implements ReviewService {
                   throw new AppException(ErrorCode.ALREADY_REVIEWED);
             }
 
-            try {
-                  var existsResponse = productClient.existsProduct(request.getProductId(), request.getVariantId());
-                  if (!existsResponse.getResult().isExists()) {
-                        log.error("Product with ID {} and variant {} does not exist.", request.getProductId(), request.getVariantId());
-                        throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
-                  }
-            } catch (FeignException e) {
-                  if (e.status() == 404) {
-                        log.error("Product not found (404): {}", e.getMessage());
-                        throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
-                  } else {
-                        log.error("Error checking product existence: {}", e.getMessage());
-                        throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
-                  }
-            }
-
-            try {
-                  var ordersResponse = orderClient.getMyOrders();
-                  ObjectMapper objectMapper = new ObjectMapper();
-                  List<OrderResponse> orders = objectMapper.convertValue(ordersResponse.getResult(), new TypeReference<>() {});
-
-                  boolean hasPurchased = orders.stream()
-                          .flatMap(order -> order.getItems().stream())
-                          .anyMatch(item -> item.getProductId().equals(request.getProductId()) &&
-                                  item.getVariantId().equals(request.getVariantId()));
-
-                  if (!hasPurchased) {
-                        log.error("User {} has not purchased the product {} with variant {}", username, request.getProductId(), request.getVariantId());
-                        throw new AppException(ErrorCode.UNAUTHORIZED);
-                  }
-            } catch (FeignException e) {
-                  if (e.status() == 404) {
-                        log.error("Orders not found for user (404): {}", e.getMessage());
-                        throw new AppException(ErrorCode.USER_NOT_PURCHASED_PRODUCT);
-                  } else {
-                        log.error("Error fetching user orders: {}", e.getMessage());
-                        throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
-                  }
-            }
-
-            List<String> imageUrls = List.of();
-            if (images != null && !images.isEmpty()) {
-                  ApiResponse<List<FileResponse>> fileResponseApi;
-                  try {
-                        fileResponseApi = fileClient.uploadMultipleFiles(images);
-
-                        if (fileResponseApi == null || fileResponseApi.getResult() == null) {
-                              log.error("(createReview) File upload returned no results");
-                              throw new AppException(ErrorCode.FILE_UPLOAD_FAILED);
-                        }
-                  } catch (FeignException e) {
-                        log.error("Error uploading files: {}", e.getMessage(), e);
-                        throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
-                  }
-
-                  List<FileResponse> fileResponses = fileResponseApi.getResult();
-                  imageUrls = fileResponses.stream()
-                          .map(FileResponse::getUrl)
-                          .toList();
-            }
+            validateProductExists(request.getProductId(), request.getVariantId());
+            validateUserPurchasedProduct(username, request.getProductId(), request.getVariantId());
+            List<String> imageUrls = uploadReviewImages(images);
 
             Review review = reviewMapper.toReview(request);
             review.setUsername(username);
             review.setImageUrls(imageUrls);
 
-            return reviewMapper.toReviewResponse(reviewRepository.save(review));
+            reviewRepository.save(review);
+            return reviewMapper.toReviewResponse(review);
       }
 
       @Override
@@ -133,34 +77,11 @@ public class ReviewServiceImpl implements ReviewService {
       public void respondToReview(String reviewId, String response) {
             String currentUsername = getCurrentUsername();
 
-            ApiResponse<ShopResponse> shopResponse = shopClient.getShopByOwnerUsername(currentUsername);
-            if (shopResponse == null || shopResponse.getResult() == null) {
-                  log.error("Shop for user {} not found", currentUsername);
-                  throw new AppException(ErrorCode.UNAUTHORIZED);
-            }
-
+            ShopResponse shop = getShopByOwner(currentUsername);
             Review review = reviewRepository.findById(reviewId)
                     .orElseThrow(() -> new AppException(ErrorCode.REVIEW_NOT_FOUND));
-            String productId = review.getProductId();
 
-            try {
-                  ApiResponse<ProductResponse> productResponse = productClient.getProductById(productId);
-                  if (productResponse == null || productResponse.getResult() == null) {
-                        log.error("Product with ID {} not found", productId);
-                        throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
-                  }
-
-                  String shopId = shopResponse.getResult().getId();
-                  String productShopId = productResponse.getResult().getShopId();
-
-                  if (!shopId.equals(productShopId)) {
-                        log.error("Product with ID {} does not belong to the shop of user {}", productId, currentUsername);
-                        throw new AppException(ErrorCode.UNAUTHORIZED);
-                  }
-            } catch (FeignException e) {
-                  log.error("Error fetching product information for product ID {}: {}", productId, e.getMessage());
-                  throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
-            }
+            validateProductBelongsToShop(review.getProductId(), shop.getId(), currentUsername);
 
             review.setShopResponse(response);
             reviewRepository.save(review);
@@ -171,34 +92,8 @@ public class ReviewServiceImpl implements ReviewService {
       public ReviewResponse updateReview(String reviewId, ReviewUpdateRequest request, List<MultipartFile> newImages) {
             String username = getCurrentUsername();
 
-            Review review = reviewRepository.findById(reviewId)
-                    .orElseThrow(() -> new AppException(ErrorCode.REVIEW_NOT_FOUND));
-
-            if (!review.getUsername().equals(username)) {
-                  log.error("User {} is not authorized to update the review owned by {}.", username, review.getUsername());
-                  throw new AppException(ErrorCode.UNAUTHENTICATED);
-            }
-
-            List<String> uploadedImages = List.of();
-            if (newImages != null && !newImages.isEmpty()) {
-                  ApiResponse<List<FileResponse>> fileResponseApi;
-                  try {
-                        fileResponseApi = fileClient.uploadMultipleFiles(newImages);
-
-                        if (fileResponseApi == null || fileResponseApi.getResult() == null) {
-                              log.error("File upload returned no results");
-                              throw new AppException(ErrorCode.FILE_UPLOAD_FAILED);
-                        }
-                  } catch (FeignException e) {
-                        log.error("Error uploading files: {}", e.getMessage(), e);
-                        throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
-                  }
-
-                  List<FileResponse> fileResponses = fileResponseApi.getResult();
-                  uploadedImages = fileResponses.stream()
-                          .map(FileResponse::getUrl)
-                          .toList();
-            }
+            Review review = getReviewOwnedByUser(reviewId, username);
+            List<String> uploadedImages = uploadReviewImages(newImages);
 
             if (!uploadedImages.isEmpty()) {
                   List<String> allImages = review.getImageUrls();
@@ -214,7 +109,6 @@ public class ReviewServiceImpl implements ReviewService {
       @Transactional
       public void deleteReview(String reviewId) {
             String username = getCurrentUsername();
-
             Review review = reviewRepository.findById(reviewId)
                     .orElseThrow(() -> new AppException(ErrorCode.REVIEW_NOT_FOUND));
 
@@ -245,7 +139,10 @@ public class ReviewServiceImpl implements ReviewService {
                   return 0;
             }
 
-            double sum = reviews.stream().mapToInt(Review::getRating).sum();
+            double sum = reviews.stream()
+                    .mapToInt(Review::getRating)
+                    .sum();
+
             return sum / reviews.size();
       }
 
@@ -292,6 +189,112 @@ public class ReviewServiceImpl implements ReviewService {
       private String getCurrentUsername() {
             Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             return jwt.getClaim("preferred_username");
+      }
+
+      private void validateProductExists(String productId, String variantId) {
+            try {
+                  var existsResponse = productClient.existsProduct(productId, variantId);
+                  if (!existsResponse.getResult().isExists()) {
+                        log.error("Product with ID {} and variant {} does not exist.", productId, variantId);
+                        throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
+                  }
+            } catch (FeignException e) {
+                  if (e.status() == 404) {
+                        log.error("Product not found (404): {}", e.getMessage());
+                        throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
+                  } else {
+                        log.error("Error checking product existence: {}", e.getMessage());
+                        throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
+                  }
+            }
+      }
+
+      private void validateUserPurchasedProduct(String username, String productId, String variantId) {
+            try {
+                  var ordersResponse = orderClient.getMyOrders();
+                  ObjectMapper objectMapper = new ObjectMapper();
+                  List<OrderResponse> orders = objectMapper.convertValue(ordersResponse.getResult(), new TypeReference<>() {});
+
+                  boolean hasPurchased = orders.stream()
+                          .flatMap(order -> order.getItems().stream())
+                          .anyMatch(item -> item.getProductId().equals(productId) &&
+                                            item.getVariantId().equals(variantId));
+
+                  if (!hasPurchased) {
+                        log.error("User {} has not purchased the product {} with variant {}", username, productId, variantId);
+                        throw new AppException(ErrorCode.UNAUTHORIZED);
+                  }
+            } catch (FeignException e) {
+                  if (e.status() == 404) {
+                        log.error("Orders not found for user (404): {}", e.getMessage());
+                        throw new AppException(ErrorCode.USER_NOT_PURCHASED_PRODUCT);
+                  } else {
+                        log.error("Error fetching user orders: {}", e.getMessage());
+                        throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
+                  }
+            }
+      }
+
+      private List<String> uploadReviewImages(List<MultipartFile> images) {
+            if (images == null || images.isEmpty()) {
+                  return List.of();
+            }
+
+            try {
+                  var fileResponseApi = fileClient.uploadMultipleFiles(images);
+                  if (fileResponseApi == null || fileResponseApi.getResult() == null) {
+                        log.error("(createReview) File upload returned no results");
+                        throw new AppException(ErrorCode.FILE_UPLOAD_FAILED);
+                  }
+
+                  return fileResponseApi.getResult()
+                          .stream()
+                          .map(FileResponse::getUrl)
+                          .toList();
+            } catch (FeignException e) {
+                  log.error("Error uploading files: {}", e.getMessage(), e);
+                  throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
+            }
+      }
+
+      private ShopResponse getShopByOwner(String username) {
+            ApiResponse<ShopResponse> shopResponse = shopClient.getShopByOwnerUsername(username);
+            if (shopResponse == null || shopResponse.getResult() == null) {
+                  log.error("Shop for user {} not found", username);
+                  throw new AppException(ErrorCode.UNAUTHORIZED);
+            }
+            return shopResponse.getResult();
+      }
+
+      private void validateProductBelongsToShop(String productId, String shopId, String username) {
+            try {
+                  ApiResponse<ProductResponse> productResponse = productClient.getProductById(productId);
+                  if (productResponse == null || productResponse.getResult() == null) {
+                        log.error("Product with ID {} not found", productId);
+                        throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
+                  }
+
+                  String productShopId = productResponse.getResult().getShopId();
+                  if (!shopId.equals(productShopId)) {
+                        log.error("Product with ID {} does not belong to the shop of user {}", productId, username);
+                        throw new AppException(ErrorCode.UNAUTHORIZED);
+                  }
+            } catch (FeignException e) {
+                  log.error("Error fetching product information for product ID {}: {}", productId, e.getMessage());
+                  throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
+            }
+      }
+
+      private Review getReviewOwnedByUser(String reviewId, String username) {
+            Review review = reviewRepository.findById(reviewId)
+                    .orElseThrow(() -> new AppException(ErrorCode.REVIEW_NOT_FOUND));
+
+            if (!review.getUsername().equals(username)) {
+                  log.error("User {} is not authorized to update the review owned by {}.", username, review.getUsername());
+                  throw new AppException(ErrorCode.UNAUTHENTICATED);
+            }
+
+            return review;
       }
 
 }

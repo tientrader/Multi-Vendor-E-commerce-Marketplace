@@ -44,32 +44,14 @@ public class PromotionServiceImpl implements PromotionService {
             List<String> applicableShops = request.getConditions().getApplicableShops();
             if (applicableShops != null && !applicableShops.isEmpty()) {
                   for (String shopId : applicableShops) {
-                        try {
-                              ApiResponse<Boolean> shopExistsResponse = shopClient.checkIfShopExists(shopId);
-                              if (shopExistsResponse == null || !shopExistsResponse.getResult()) {
-                                    log.error("Shop with id {} does not exist", shopId);
-                                    throw new AppException(ErrorCode.SHOP_NOT_FOUND);
-                              }
-                        } catch (FeignException e) {
-                              log.error("FeignException occurred while checking if shop exists for shopId={} : {}", shopId, e.getMessage());
-                              throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
-                        }
+                        checkIfShopExists(shopId);
                   }
             }
 
             List<String> applicableProducts = request.getConditions().getApplicableProducts();
             if (applicableProducts != null && !applicableProducts.isEmpty()) {
                   for (String productId : applicableProducts) {
-                        try {
-                              ApiResponse<Boolean> productExistsResponse = productClient.isProductExist(productId);
-                              if (productExistsResponse == null || !productExistsResponse.getResult()) {
-                                    log.error("Product with id {} does not exist", productId);
-                                    throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
-                              }
-                        } catch (FeignException e) {
-                              log.error("FeignException occurred while checking if product exists for productId={} : {}", productId, e.getMessage());
-                              throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
-                        }
+                        checkIfProductExists(productId);
                   }
             }
 
@@ -95,69 +77,21 @@ public class PromotionServiceImpl implements PromotionService {
                   throw new AppException(ErrorCode.PROMOTION_USAGE_LIMIT_REACHED);
             }
 
-            CartResponse cartResponse;
-            try {
-                  cartResponse = cartClient.getMyCart().getResult();
-            } catch (FeignException e) {
-                  log.error("Failed to fetch cart for promoCode {}: {}", promoCode, e.getMessage());
-                  throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
-            }
+            CartResponse cartResponse = getCartForPromotion(promoCode);
 
             if (cartResponse == null || cartResponse.getItems() == null || cartResponse.getItems().isEmpty()) {
                   log.error("Cart is empty or not found");
                   throw new AppException(ErrorCode.CART_NOT_FOUND);
             }
 
-            double eligibleCartTotal = 0;
-            for (CartItemResponse item : cartResponse.getItems()) {
-                  String productId = item.getProductId();
-                  String shopId;
-                  try {
-                        shopId = productClient.getShopIdByProductId(productId).getResult();
-                  } catch (FeignException e) {
-                        log.error("(eligibleCartTotal) Failed to fetch shop ID for productId {}: {}", productId, e.getMessage());
-                        throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
-                  }
-
-                  boolean isApplicableForShop = promotion.getConditions().getApplicableShops().contains(shopId);
-                  boolean isApplicableForProduct = promotion.getConditions().getApplicableProducts().contains(productId);
-
-                  if (isApplicableForShop && isApplicableForProduct) {
-                        eligibleCartTotal += item.getTotalPrice() * item.getQuantity();
-                  }
-            }
+            double eligibleCartTotal = calculateEligibleCartTotal(cartResponse, promotion);
 
             if (eligibleCartTotal < promotion.getConditions().getMinOrderValue()) {
                   log.error("Eligible order value is less than the minimum required for promoCode {}", promoCode);
                   throw new AppException(ErrorCode.ORDER_VALUE_TOO_LOW);
             }
 
-            double totalDiscount = 0;
-
-            for (CartItemResponse item : cartResponse.getItems()) {
-                  String productId = item.getProductId();
-                  String shopId;
-                  try {
-                        shopId = productClient.getShopIdByProductId(productId).getResult();
-                  } catch (FeignException e) {
-                        log.error("(totalDiscount) Failed to fetch shop ID for productId {}: {}", productId, e.getMessage());
-                        throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
-                  }
-
-                  boolean isApplicableForShop = promotion.getConditions().getApplicableShops().contains(shopId);
-                  boolean isApplicableForProduct = promotion.getConditions().getApplicableProducts().contains(productId);
-
-                  if (!isApplicableForShop || !isApplicableForProduct) {
-                        log.warn("Product {} is not eligible for promoCode {} (ShopId: {}, ProductId: {})", productId, promoCode, shopId, productId);
-                        continue;
-                  }
-
-                  switch (promotion.getType()) {
-                        case FIXED -> totalDiscount += promotion.getDiscount().getAmount();
-                        case PERCENTAGE -> totalDiscount += cartResponse.getTotal() * (promotion.getDiscount().getPercentage() / 100);
-                        default -> log.error("Unsupported promotion type: {}", promotion.getType());
-                  }
-            }
+            double totalDiscount = calculateTotalDiscount(cartResponse, promotion);
 
             double maxDiscountAllowed = promotion.getDiscount().getMaxDiscountValue() != null ?
                     promotion.getDiscount().getMaxDiscountValue() : Double.MAX_VALUE;
@@ -166,12 +100,7 @@ public class PromotionServiceImpl implements PromotionService {
 
             if (totalDiscount > 0) {
                   cartResponse.setTotal(cartResponse.getTotal() - totalDiscount);
-                  try {
-                        cartClient.updateCartTotal(cartResponse.getUsername(), cartResponse.getTotal());
-                  } catch (FeignException e) {
-                        log.error("Failed to update cart total for username {}: {}", cartResponse.getUsername(), e.getMessage());
-                        throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
-                  }
+                  updateCartTotal(cartResponse.getUsername(), cartResponse.getTotal());
 
                   promotion.setUsageCount(promotion.getUsageCount() + 1);
                   promotionRepository.save(promotion);
@@ -213,6 +142,98 @@ public class PromotionServiceImpl implements PromotionService {
                     .stream()
                     .map(promotionMapper::toPromotionResponse)
                     .toList();
+      }
+
+      private void checkIfShopExists(String shopId) {
+            try {
+                  ApiResponse<Boolean> shopExistsResponse = shopClient.checkIfShopExists(shopId);
+                  if (shopExistsResponse == null || !shopExistsResponse.getResult()) {
+                        log.error("Shop with id {} does not exist", shopId);
+                        throw new AppException(ErrorCode.SHOP_NOT_FOUND);
+                  }
+            } catch (FeignException e) {
+                  log.error("FeignException occurred while checking if shop exists for shopId={} : {}", shopId, e.getMessage());
+                  throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
+            }
+      }
+
+      private void checkIfProductExists(String productId) {
+            try {
+                  ApiResponse<Boolean> productExistsResponse = productClient.isProductExist(productId);
+                  if (productExistsResponse == null || !productExistsResponse.getResult()) {
+                        log.error("Product with id {} does not exist", productId);
+                        throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
+                  }
+            } catch (FeignException e) {
+                  log.error("FeignException occurred while checking if product exists for productId={} : {}", productId, e.getMessage());
+                  throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
+            }
+      }
+
+      private CartResponse getCartForPromotion(String promoCode) {
+            try {
+                  return cartClient.getMyCart().getResult();
+            } catch (FeignException e) {
+                  log.error("Failed to fetch cart for promoCode {}: {}", promoCode, e.getMessage());
+                  throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
+            }
+      }
+
+      private double calculateEligibleCartTotal(CartResponse cartResponse, Promotion promotion) {
+            double eligibleCartTotal = 0;
+            for (CartItemResponse item : cartResponse.getItems()) {
+                  String productId = item.getProductId();
+                  String shopId = getShopIdByProductId(productId);
+
+                  boolean isApplicableForShop = promotion.getConditions().getApplicableShops().contains(shopId);
+                  boolean isApplicableForProduct = promotion.getConditions().getApplicableProducts().contains(productId);
+
+                  if (isApplicableForShop && isApplicableForProduct) {
+                        eligibleCartTotal += item.getTotalPrice() * item.getQuantity();
+                  }
+            }
+            return eligibleCartTotal;
+      }
+
+      private String getShopIdByProductId(String productId) {
+            try {
+                  return productClient.getShopIdByProductId(productId).getResult();
+            } catch (FeignException e) {
+                  log.error("Failed to fetch shop ID for productId {}: {}", productId, e.getMessage());
+                  throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
+            }
+      }
+
+      private double calculateTotalDiscount(CartResponse cartResponse, Promotion promotion) {
+            double totalDiscount = 0;
+            for (CartItemResponse item : cartResponse.getItems()) {
+                  String productId = item.getProductId();
+                  String shopId = getShopIdByProductId(productId);
+
+                  boolean isApplicableForShop = promotion.getConditions().getApplicableShops().contains(shopId);
+                  boolean isApplicableForProduct = promotion.getConditions().getApplicableProducts().contains(productId);
+
+                  if (!isApplicableForShop || !isApplicableForProduct) {
+                        log.warn("Product {} is not eligible for promoCode", productId);
+                        continue;
+                  }
+
+                  switch (promotion.getType()) {
+                        case FIXED -> totalDiscount += promotion.getDiscount().getAmount();
+                        case PERCENTAGE -> totalDiscount += cartResponse.getTotal() * (promotion.getDiscount().getPercentage() / 100);
+                        default -> log.error("Unsupported promotion type: {}", promotion.getType());
+                  }
+            }
+            return totalDiscount;
+      }
+
+      private void updateCartTotal(String username, double total) {
+            try {
+                  cartClient.updateCartTotal(username, total);
+            } catch (FeignException e) {
+                  log.error("Failed to update cart total for username {}: {}", username, e.getMessage());
+                  throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
+            }
       }
 
 }
