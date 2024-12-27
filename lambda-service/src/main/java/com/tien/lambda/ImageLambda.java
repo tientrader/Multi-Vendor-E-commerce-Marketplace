@@ -18,13 +18,14 @@ import java.util.Map;
 public class ImageLambda implements RequestHandler<Map<String, String>, String> {
 
       private final AmazonS3 s3Client = AmazonS3ClientBuilder.defaultClient();
+      private static final String BUCKET_NAME = "tienpro";
 
       @Override
       public String handleRequest(Map<String, String> event, Context context) {
             try {
                   String fileName = event.get("fileName");
 
-                  InputStream s3Object = s3Client.getObject(new GetObjectRequest(getBucketName(), fileName)).getObjectContent();
+                  InputStream s3Object = s3Client.getObject(new GetObjectRequest(BUCKET_NAME, fileName)).getObjectContent();
                   if (s3Object == null) {
                         System.out.println("Failed to get object: " + fileName);
                         return "Error: File not found in S3";
@@ -41,10 +42,10 @@ public class ImageLambda implements RequestHandler<Map<String, String>, String> 
 
                   String outputKey = "resized/resized_" + fileName;
 
-                  s3Client.putObject(new PutObjectRequest(getBucketName(), outputKey, outputFile.toFile()));
+                  s3Client.putObject(new PutObjectRequest(BUCKET_NAME, outputKey, outputFile.toFile()));
 
                   if (!fileName.startsWith("resized/")) {
-                        s3Client.deleteObject(new DeleteObjectRequest(getBucketName(), fileName));
+                        s3Client.deleteObject(new DeleteObjectRequest(BUCKET_NAME, fileName));
                   }
 
                   Files.delete(tempFile);
@@ -58,13 +59,8 @@ public class ImageLambda implements RequestHandler<Map<String, String>, String> 
             }
       }
 
-      private String getBucketName() {
-            return "tienpro";
-      }
-
       private String generateResizedFileUrl(String outputKey) {
-            String bucketName = getBucketName();
-            return "https://" + bucketName + ".s3.amazonaws.com/" + outputKey;
+            return "https://" + BUCKET_NAME + ".s3.amazonaws.com/" + outputKey;
       }
 
 }
