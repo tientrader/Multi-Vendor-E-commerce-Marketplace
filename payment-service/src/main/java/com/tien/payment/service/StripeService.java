@@ -1,6 +1,6 @@
 package com.tien.payment.service;
 
-import com.tien.payment.dto.request.PaymentSessionRequest;
+import com.tien.payment.dto.request.ChargeSessionRequest;
 import com.tien.event.dto.StripeChargeRequest;
 import com.tien.payment.dto.request.StripeSubscriptionRequest;
 import com.tien.payment.dto.request.SubscriptionSessionRequest;
@@ -18,7 +18,7 @@ public interface StripeService {
 
       StripeSubscriptionResponse createSubscription(StripeSubscriptionRequest request);
 
-      SessionResponse createPaymentSession(PaymentSessionRequest request);
+      SessionResponse createChargeSession(ChargeSessionRequest request);
 
       SessionResponse createSubscriptionSession(SubscriptionSessionRequest request);
 

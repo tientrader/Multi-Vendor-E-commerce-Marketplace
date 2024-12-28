@@ -37,10 +37,10 @@ public class StripeController {
                     .build();
       }
 
-      @PostMapping("/session/payment")
-      public ApiResponse<SessionResponse> sessionPayment(@RequestBody @Valid PaymentSessionRequest request) {
+      @PostMapping("/session/charge")
+      public ApiResponse<SessionResponse> createChargeSession(@RequestBody @Valid ChargeSessionRequest request) {
             return ApiResponse.<SessionResponse>builder()
-                    .result(stripeService.createPaymentSession(request))
+                    .result(stripeService.createChargeSession(request))
                     .build();
       }
 

@@ -9,7 +9,7 @@ import com.stripe.param.checkout.SessionCreateParams;
 import com.tien.event.dto.NotificationEvent;
 import com.tien.event.dto.PaymentResponse;
 import com.tien.event.dto.StripeChargeRequest;
-import com.tien.payment.dto.request.PaymentSessionRequest;
+import com.tien.payment.dto.request.ChargeSessionRequest;
 import com.tien.payment.dto.request.StripeSubscriptionRequest;
 import com.tien.payment.dto.request.SubscriptionSessionRequest;
 import com.tien.payment.dto.response.SessionResponse;
@@ -207,8 +207,8 @@ public class StripeServiceImpl implements StripeService {
       }
 
       @Override
-      public SessionResponse createPaymentSession(PaymentSessionRequest request) {
-            com.tien.payment.entity.Session paymentSession = stripeMapper.toSession(request);
+      public SessionResponse createChargeSession(ChargeSessionRequest request) {
+            com.tien.payment.entity.Session chargeSession = stripeMapper.toSession(request);
             String username = getCurrentUsername();
             String email = getCurrentEmail();
 
@@ -261,11 +261,11 @@ public class StripeServiceImpl implements StripeService {
 
                   com.stripe.model.checkout.Session stripeSession = com.stripe.model.checkout.Session.create(sessionCreateParamsBuilder.build());
 
-                  paymentSession.setSessionUrl(stripeSession.getUrl());
-                  paymentSession.setUsername(username);
+                  chargeSession.setSessionUrl(stripeSession.getUrl());
+                  chargeSession.setUsername(username);
 
-                  sessionRepository.save(paymentSession);
-                  return stripeMapper.toSessionResponse(paymentSession);
+                  sessionRepository.save(chargeSession);
+                  return stripeMapper.toSessionResponse(chargeSession);
             } catch (StripeException e) {
                   log.error("Payment session creation failed for user {}: {}", username, e.getMessage());
                   throw new AppException(ErrorCode.PAYMENT_SESSION_CREATION_FAILED);

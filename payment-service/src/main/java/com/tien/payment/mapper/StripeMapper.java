@@ -17,7 +17,7 @@ public interface StripeMapper {
 
       StripeSubscriptionResponse toStripeSubscriptionResponse(StripeSubscription stripeSubscription);
 
-      Session toSession(PaymentSessionRequest request);
+      Session toSession(ChargeSessionRequest request);
 
       SessionResponse toSessionResponse(Session session);
 

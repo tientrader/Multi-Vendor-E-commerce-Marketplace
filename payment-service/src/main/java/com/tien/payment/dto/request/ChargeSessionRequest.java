@@ -12,7 +12,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class PaymentSessionRequest {
+public class ChargeSessionRequest {
 
       @NotNull(message = "AMOUNT_IS_REQUIRED")
       @Positive(message = "AMOUNT_MUST_BE_POSITIVE")
