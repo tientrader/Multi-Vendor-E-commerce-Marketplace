@@ -10,8 +10,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class SessionResponse {
 
+      String id;
       String sessionUrl;
-      String sessionId;
-      String username;
 
 }

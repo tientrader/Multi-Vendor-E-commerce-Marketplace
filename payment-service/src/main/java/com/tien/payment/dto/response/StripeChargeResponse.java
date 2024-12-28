@@ -10,7 +10,8 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class StripeChargeResponse {
 
-      Boolean success;
+      String id;
       String chargeId;
+      Boolean success;
 
 }

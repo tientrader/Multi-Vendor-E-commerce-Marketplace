@@ -15,7 +15,7 @@ public class Session {
 
       @Id
       @GeneratedValue(strategy = GenerationType.UUID)
-      String sessionId;
+      String id;
 
       @Column(nullable = false, length = 400)
       String sessionUrl;

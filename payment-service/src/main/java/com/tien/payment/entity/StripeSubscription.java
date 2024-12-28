@@ -30,6 +30,9 @@ public class StripeSubscription {
       String username;
 
       @Column(nullable = false)
+      Boolean success;
+
+      @Column(nullable = false)
       String priceId;
 
       @Column(nullable = false)
