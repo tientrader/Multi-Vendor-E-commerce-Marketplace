@@ -10,8 +10,9 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class VIPUserResponseWithSession {
 
+      String id;
+      String sessionUrl;
       String username;
       String email;
-      String sessionUrl;
 
 }

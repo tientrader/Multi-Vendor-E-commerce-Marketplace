@@ -1,7 +1,6 @@
 package com.tien.user.dto.request;
 
 import com.tien.user.enums.PackageType;
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -13,15 +12,10 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class VIPUserRequest {
 
-      @Email(message = "INVALID_EMAIL")
-      @NotNull(message = "EMAIL_IS_REQUIRED")
-      String email;
-
-      String stripeToken;
-
       @NotNull(message = "PACKAGE_TYPE_IS_REQUIRED")
       PackageType packageType;
 
+      String stripeToken;
       long numberOfLicense;
 
 }

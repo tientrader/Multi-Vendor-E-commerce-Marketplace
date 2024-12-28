@@ -42,13 +42,14 @@ public class VIPUserServiceImpl implements VIPUserService {
       @Transactional
       public void createVIPUser(VIPUserRequest request) {
             String username = getCurrentUsername();
+            String email = getCurrentEmail();
 
             String stripeToken = request.getStripeToken() != null ? request.getStripeToken() : "tok_visa";
             long numberOfLicense = request.getNumberOfLicense() > 0 ? request.getNumberOfLicense() : 1;
 
             StripeSubscriptionRequest subscriptionRequest = StripeSubscriptionRequest.builder()
                     .stripeToken(stripeToken)
-                    .email(request.getEmail())
+                    .email(email)
                     .packageType(request.getPackageType())
                     .username(username)
                     .numberOfLicense(numberOfLicense)
@@ -69,9 +70,10 @@ public class VIPUserServiceImpl implements VIPUserService {
       @Transactional
       public VIPUserResponseWithSession createVIPUserWithSession(VIPUserRequestWithSession request) {
             String username = getCurrentUsername();
+            String email = getCurrentEmail();
 
             SubscriptionSessionRequest sessionRequest = SubscriptionSessionRequest.builder()
-                    .email(request.getEmail())
+                    .email(email)
                     .username(username)
                     .packageType(request.getPackageType())
                     .build();
@@ -87,9 +89,11 @@ public class VIPUserServiceImpl implements VIPUserService {
             User user = userRepository.findByUsername(username)
                     .orElse(vipUserMapper.vipUserRequestWithSessionToUser(request));
 
+            String id = sessionResponse.getResult().getId();
             String sessionUrl = sessionResponse.getResult().getSessionUrl();
 
             VIPUserResponseWithSession vipUserResponseWithSession = vipUserMapper.userToVipUserResponseWithSession(user);
+            vipUserResponseWithSession.setId(id);
             vipUserResponseWithSession.setSessionUrl(sessionUrl);
 
             return vipUserResponseWithSession;
@@ -152,6 +156,11 @@ public class VIPUserServiceImpl implements VIPUserService {
       private String getCurrentUsername() {
             Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             return jwt.getClaim("preferred_username");
+      }
+
+      private String getCurrentEmail() {
+            Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            return jwt.getClaim("email");
       }
 
       private LocalDate getVipEndDateBasedOnPackageType(PackageType packageType, LocalDate vipStartDate) {
