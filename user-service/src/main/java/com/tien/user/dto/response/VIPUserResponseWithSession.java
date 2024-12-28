@@ -12,7 +12,6 @@ public class VIPUserResponseWithSession {
 
       String username;
       String email;
-      String id;
       String sessionUrl;
 
 }

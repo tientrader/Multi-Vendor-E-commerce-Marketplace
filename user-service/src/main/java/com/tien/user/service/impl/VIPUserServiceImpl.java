@@ -2,7 +2,9 @@ package com.tien.user.service.impl;
 
 import com.tien.user.dto.ApiResponse;
 import com.tien.user.enums.PackageType;
+import com.tien.user.httpclient.request.StripeSubscriptionRequest;
 import com.tien.user.httpclient.request.SubscriptionSessionRequest;
+import com.tien.user.dto.request.VIPUserRequest;
 import com.tien.user.dto.request.VIPUserRequestWithSession;
 import com.tien.user.httpclient.response.SessionResponse;
 import com.tien.user.dto.response.VIPUserResponse;
@@ -38,12 +40,38 @@ public class VIPUserServiceImpl implements VIPUserService {
 
       @Override
       @Transactional
+      public void createVIPUser(VIPUserRequest request) {
+            String username = getCurrentUsername();
+
+            String stripeToken = request.getStripeToken() != null ? request.getStripeToken() : "tok_visa";
+            long numberOfLicense = request.getNumberOfLicense() > 0 ? request.getNumberOfLicense() : 1;
+
+            StripeSubscriptionRequest subscriptionRequest = StripeSubscriptionRequest.builder()
+                    .stripeToken(stripeToken)
+                    .email(request.getEmail())
+                    .packageType(request.getPackageType())
+                    .username(username)
+                    .numberOfLicense(numberOfLicense)
+                    .build();
+
+            try {
+                  paymentClient.createSubscription(subscriptionRequest);
+            } catch (FeignException e) {
+                  log.error("Failed to create subscription for user {}: {}", username, e.getMessage());
+                  throw new AppException(ErrorCode.SERVICE_UNAVAILABLE);
+            }
+
+            userRepository.findByUsername(username)
+                    .orElseGet(() -> userRepository.save(vipUserMapper.vipUserRequestToUser(request)));
+      }
+
+      @Override
+      @Transactional
       public VIPUserResponseWithSession createVIPUserWithSession(VIPUserRequestWithSession request) {
             String username = getCurrentUsername();
-            String email = getCurrentEmail();
 
             SubscriptionSessionRequest sessionRequest = SubscriptionSessionRequest.builder()
-                    .email(email)
+                    .email(request.getEmail())
                     .username(username)
                     .packageType(request.getPackageType())
                     .build();
@@ -59,11 +87,9 @@ public class VIPUserServiceImpl implements VIPUserService {
             User user = userRepository.findByUsername(username)
                     .orElse(vipUserMapper.vipUserRequestWithSessionToUser(request));
 
-            String id = sessionResponse.getResult().getId();
             String sessionUrl = sessionResponse.getResult().getSessionUrl();
 
             VIPUserResponseWithSession vipUserResponseWithSession = vipUserMapper.userToVipUserResponseWithSession(user);
-            vipUserResponseWithSession.setId(id);
             vipUserResponseWithSession.setSessionUrl(sessionUrl);
 
             return vipUserResponseWithSession;
@@ -126,11 +152,6 @@ public class VIPUserServiceImpl implements VIPUserService {
       private String getCurrentUsername() {
             Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             return jwt.getClaim("preferred_username");
-      }
-
-      private String getCurrentEmail() {
-            Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-            return jwt.getClaim("email");
       }
 
       private LocalDate getVipEndDateBasedOnPackageType(PackageType packageType, LocalDate vipStartDate) {

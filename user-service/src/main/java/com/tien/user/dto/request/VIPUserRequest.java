@@ -11,13 +11,17 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class VIPUserRequestWithSession {
+public class VIPUserRequest {
 
       @Email(message = "INVALID_EMAIL")
       @NotNull(message = "EMAIL_IS_REQUIRED")
       String email;
 
+      String stripeToken;
+
       @NotNull(message = "PACKAGE_TYPE_IS_REQUIRED")
       PackageType packageType;
+
+      long numberOfLicense;
 
 }

@@ -1,6 +1,7 @@
 package com.tien.user.controller;
 
 import com.tien.user.dto.ApiResponse;
+import com.tien.user.dto.request.VIPUserRequest;
 import com.tien.user.dto.request.VIPUserRequestWithSession;
 import com.tien.user.dto.response.VIPUserResponse;
 import com.tien.user.dto.response.VIPUserResponseWithSession;
@@ -19,6 +20,14 @@ import org.springframework.web.bind.annotation.*;
 public class VIPUserController {
 
       VIPUserService vipUserService;
+
+      @PostMapping("/create")
+      public ApiResponse<Void> createVIPUser(@RequestBody @Valid VIPUserRequest request) {
+            vipUserService.createVIPUser(request);
+            return ApiResponse.<Void>builder()
+                    .message("VIP user created successfully.")
+                    .build();
+      }
 
       @PostMapping("/createWithSession")
       public ApiResponse<VIPUserResponseWithSession> createVIPUserWithSession(@RequestBody @Valid VIPUserRequestWithSession request) {
