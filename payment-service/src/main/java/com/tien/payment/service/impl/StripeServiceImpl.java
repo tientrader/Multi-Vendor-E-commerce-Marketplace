@@ -8,8 +8,8 @@ import com.stripe.param.CustomerSearchParams;
 import com.stripe.param.checkout.SessionCreateParams;
 import com.tien.event.dto.NotificationEvent;
 import com.tien.event.dto.PaymentResponse;
-import com.tien.payment.dto.request.PaymentSessionRequest;
 import com.tien.event.dto.StripeChargeRequest;
+import com.tien.payment.dto.request.PaymentSessionRequest;
 import com.tien.payment.dto.request.StripeSubscriptionRequest;
 import com.tien.payment.dto.request.SubscriptionSessionRequest;
 import com.tien.payment.dto.response.SessionResponse;
@@ -76,7 +76,9 @@ public class StripeServiceImpl implements StripeService {
       @Override
       public StripeChargeResponse charge(StripeChargeRequest request) {
             String currentUsername = getCurrentUsername();
+            String currentEmail = getCurrentEmail();
             request.setUsername(currentUsername);
+            request.setUsername(currentEmail);
             return processCharge(request);
       }
 
@@ -84,6 +86,7 @@ public class StripeServiceImpl implements StripeService {
       public StripeChargeResponse processCharge(StripeChargeRequest request) {
             StripeCharge stripeCharge = stripeMapper.toStripeCharge(request);
             String username = request.getUsername();
+            String email = request.getEmail();
 
             String stripeToken = request.getStripeToken() != null ? request.getStripeToken() : "tok_visa";
 
@@ -111,7 +114,7 @@ public class StripeServiceImpl implements StripeService {
 
                         kafkaProducer.send("payment-successful", NotificationEvent.builder()
                                 .channel("email")
-                                .recipient(request.getEmail())
+                                .recipient(email)
                                 .subject("Payment Successful")
                                 .body("Your payment of " + request.getAmount() + " USD was successful.")
                                 .build());
@@ -124,7 +127,6 @@ public class StripeServiceImpl implements StripeService {
                                 .build());
                   }
 
-                  stripeCharge.setUsername(username);
                   stripeChargeRepository.save(stripeCharge);
                   return stripeMapper.toStripeChargeResponse(stripeCharge);
             } catch (StripeException e) {
@@ -140,6 +142,7 @@ public class StripeServiceImpl implements StripeService {
       public StripeSubscriptionResponse createSubscription(StripeSubscriptionRequest request) {
             StripeSubscription stripeSubscription = stripeMapper.toStripeSubscription(request);
             String currentUsername = getCurrentUsername();
+            String currentEmail = getCurrentEmail();
 
             String stripeToken = request.getStripeToken() != null ? request.getStripeToken() : "tok_visa";
             long numberOfLicense = request.getNumberOfLicense() > 0 ? request.getNumberOfLicense() : 1;
@@ -152,7 +155,7 @@ public class StripeServiceImpl implements StripeService {
 
                   Map<String, Object> customerMap = new HashMap<>();
                   customerMap.put("name", currentUsername);
-                  customerMap.put("email", request.getEmail());
+                  customerMap.put("email", currentEmail);
                   customerMap.put("payment_method", paymentMethod.getId());
                   Customer customer = Customer.create(customerMap);
 
@@ -176,6 +179,7 @@ public class StripeServiceImpl implements StripeService {
 
                   Subscription subscription = Subscription.create(subscriptionParams);
 
+                  stripeSubscription.setSuccess(true);
                   stripeSubscription.setStripeCustomerId(customer.getId());
                   stripeSubscription.setStripeSubscriptionId(subscription.getId());
                   stripeSubscription.setStripePaymentMethodId(paymentMethod.getId());
@@ -185,10 +189,15 @@ public class StripeServiceImpl implements StripeService {
 
                   stripeSubscriptionRepository.save(stripeSubscription);
                   return StripeSubscriptionResponse.builder()
-                          .username(currentUsername)
+                          .id(stripeSubscription.getId())
                           .stripeCustomerId(customer.getId())
+                          .stripeSubscriptionId(subscription.getId())
+                          .success(true)
                           .build();
             } catch (StripeException e) {
+                  stripeSubscription.setSuccess(false);
+                  stripeSubscriptionRepository.save(stripeSubscription);
+
                   log.error("Subscription creation failed for user {}: {}", currentUsername, e.getMessage());
                   throw new AppException(ErrorCode.SUBSCRIPTION_CREATION_FAILED);
             } catch (Exception e) {
@@ -201,6 +210,7 @@ public class StripeServiceImpl implements StripeService {
       public SessionResponse createPaymentSession(PaymentSessionRequest request) {
             com.tien.payment.entity.Session paymentSession = stripeMapper.toSession(request);
             String username = getCurrentUsername();
+            String email = getCurrentEmail();
 
             try {
                   BigDecimal amount = request.getAmount();
@@ -208,7 +218,7 @@ public class StripeServiceImpl implements StripeService {
                   String currency = "USD";
 
                   CustomerSearchParams params = CustomerSearchParams.builder()
-                          .setQuery("email:'" + request.getEmail() + "'")
+                          .setQuery("email:'" + email + "'")
                           .build();
 
                   CustomerSearchResult search = Customer.search(params);
@@ -217,7 +227,7 @@ public class StripeServiceImpl implements StripeService {
                   if (search.getData().isEmpty()) {
                         CustomerCreateParams customerCreateParams = CustomerCreateParams.builder()
                                 .setName(username)
-                                .setEmail(request.getEmail())
+                                .setEmail(email)
                                 .build();
                         customer = Customer.create(customerCreateParams);
                   } else {
@@ -252,7 +262,6 @@ public class StripeServiceImpl implements StripeService {
                   com.stripe.model.checkout.Session stripeSession = com.stripe.model.checkout.Session.create(sessionCreateParamsBuilder.build());
 
                   paymentSession.setSessionUrl(stripeSession.getUrl());
-                  paymentSession.setSessionId(stripeSession.getId());
                   paymentSession.setUsername(username);
 
                   sessionRepository.save(paymentSession);
@@ -269,11 +278,11 @@ public class StripeServiceImpl implements StripeService {
       @Override
       public SessionResponse createSubscriptionSession(SubscriptionSessionRequest request) {
             String username = getCurrentUsername();
-            SessionResponse sessionResponse = new SessionResponse();
+            String email = getCurrentEmail();
 
             try {
                   CustomerSearchParams params = CustomerSearchParams.builder()
-                          .setQuery("email:'" + request.getEmail() + "'")
+                          .setQuery("email:'" + email + "'")
                           .build();
 
                   CustomerSearchResult search = Customer.search(params);
@@ -282,7 +291,7 @@ public class StripeServiceImpl implements StripeService {
                   if (search.getData().isEmpty()) {
                         CustomerCreateParams customerCreateParams = CustomerCreateParams.builder()
                                 .setName(username)
-                                .setEmail(request.getEmail())
+                                .setEmail(email)
                                 .build();
                         customer = Customer.create(customerCreateParams);
                   } else {
@@ -311,17 +320,12 @@ public class StripeServiceImpl implements StripeService {
                   com.stripe.model.checkout.Session stripeSession = com.stripe.model.checkout.Session.create(sessionCreateParams);
 
                   com.tien.payment.entity.Session session = com.tien.payment.entity.Session.builder()
-                          .sessionId(stripeSession.getId())
                           .sessionUrl(stripeSession.getUrl())
                           .username(username)
                           .build();
                   sessionRepository.save(session);
 
-                  sessionResponse.setSessionId(stripeSession.getId());
-                  sessionResponse.setSessionUrl(stripeSession.getUrl());
-                  sessionResponse.setUsername(username);
-
-                  return sessionResponse;
+                  return stripeMapper.toSessionResponse(session);
             } catch (StripeException e) {
                   log.error("Subscription session creation failed for user {}: {}", username, e.getMessage());
                   throw new AppException(ErrorCode.SUBSCRIPTION_SESSION_CREATION_FAILED);
@@ -356,6 +360,11 @@ public class StripeServiceImpl implements StripeService {
       private String getCurrentUsername() {
             Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             return jwt.getClaim("preferred_username");
+      }
+
+      private String getCurrentEmail() {
+            Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            return jwt.getClaim("email");
       }
 
 }
