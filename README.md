@@ -3,6 +3,8 @@
 ### ❓ **The Million-Dollar Question:**
 **"How to handle millions of requests per second?"**
 
+![Ted](resources/ted.png)
+
 - To tackle this challenge, you need a scalable, responsive, and reliable system. This is exactly what I’ve built with the Multi-Vendor E-commerce Marketplace — a robust platform designed to connect buyers and sellers in a seamless, user-friendly ecosystem. The platform offers features like easy product discovery, efficient order management, secure payment processing, and multi-channel transaction support.
 
 ### 🔑 **Key Highlights:**
