@@ -13,6 +13,8 @@
 
 ❗ Below is a high-level overview of the project. For more in-depth details about workflows, data constraints, and business logic, please refer to the code.
 
+![Diagram](resources/diagram.png)
+
 ## 🏗 Architecture Overview
 
 ### Microservices Architecture
