@@ -9,10 +9,10 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
 import net.coobird.thumbnailator.Thumbnails;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Map;
 
 public class ImageLambda implements RequestHandler<Map<String, String>, String> {
@@ -31,25 +31,20 @@ public class ImageLambda implements RequestHandler<Map<String, String>, String> 
                         return "Error: File not found in S3";
                   }
 
-                  Path tempFile = Files.createTempFile("input", ".jpg");
-                  Files.copy(s3Object, tempFile, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
-
-                  Path outputFile = Files.createTempFile("output", ".jpg");
-                  Thumbnails.of(tempFile.toFile())
+                  ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                  Thumbnails.of(s3Object)
                           .size(800, 600)
                           .outputQuality(0.5)
-                          .toFile(outputFile.toFile());
+                          .toOutputStream(outputStream);
 
                   String outputKey = "resized/resized_" + fileName;
 
-                  s3Client.putObject(new PutObjectRequest(BUCKET_NAME, outputKey, outputFile.toFile()));
+                  InputStream resizedImageInputStream = new ByteArrayInputStream(outputStream.toByteArray());
+                  s3Client.putObject(new PutObjectRequest(BUCKET_NAME, outputKey, resizedImageInputStream, null));
 
                   if (!fileName.startsWith("resized/")) {
                         s3Client.deleteObject(new DeleteObjectRequest(BUCKET_NAME, fileName));
                   }
-
-                  Files.delete(tempFile);
-                  Files.delete(outputFile);
 
                   return generateResizedFileUrl(outputKey);
 

@@ -18,7 +18,7 @@ app:
 spring:
   servlet:
     multipart:
-      max-file-size: 1MB
+      max-file-size: 3MB
       max-request-size: 5MB
   cloud:
     gateway:
@@ -255,25 +255,25 @@ resilience4j:
       userService:
         timeout-duration: 10s
       productService:
-        timeout-duration: 12s
+        timeout-duration: 15s
       cartService:
         timeout-duration: 10s
       orderService:
         timeout-duration: 10s
       shopService:
-        timeout-duration: 8s
+        timeout-duration: 10s
       postService:
-        timeout-duration: 12s
+        timeout-duration: 15s
       notificationService:
-        timeout-duration: 8s
+        timeout-duration: 10s
       paymentService:
         timeout-duration: 10s
       fileService:
-        timeout-duration: 12s
+        timeout-duration: 15s
       reviewService:
-        timeout-duration: 12s
+        timeout-duration: 15s
       promotionService:
-        timeout-duration: 12s
+        timeout-duration: 10s
 
 logging:
   level:
