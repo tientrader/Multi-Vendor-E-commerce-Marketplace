@@ -238,14 +238,6 @@ The optimized image is stored back in S3, minimizing storage usage while maintai
 
   ![Loki](resources/loki.png)
 
-### Distributed Tracing
-
-- <img src="https://i.imgur.com/dEAIPRs.png" width="30" height="30" /> **Zipkin:**
-
-  Zipkin is used to trace requests across different microservices, providing detailed insights into the journey of requests and helping to identify performance bottlenecks, slow services, or any failures in the system. By visualizing traces, Zipkin aids in optimizing and troubleshooting the system.
-
-  ![Zipkin](resources/zipkin.png)
-
 ### Containerization
 
 - <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/docker/docker-original.svg" alt="Docker" width="30" height="30"/> **Docker:**
@@ -271,11 +263,11 @@ The optimized image is stored back in S3, minimizing storage usage while maintai
 
   Jenkins automates the CI/CD pipeline, streamlining the processes of building, testing, and deploying services. It integrates seamlessly with Git repositories to trigger builds on code changes.
 
-- **Docker Hub**
+**Docker Hub**
   
 ![Jenkins](resources/jenkins.png)
 
-- **AWS ECR**
+**AWS ECR**
   
 ![Jenkins](resources/jenkins-aws-ecr.png)
   
