@@ -10,7 +10,7 @@ spring:
       max-request-size: 5MB
   data:
     mongodb:
-      uri: mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@localhost:27017/review-service?authSource=admin
+      uri: mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_HOST:localhost}:27017/review-service?authSource=admin
 
 springdoc:
   swagger-ui:

@@ -6,7 +6,7 @@ server:
 spring:
   data:
     mongodb:
-      uri: mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@localhost:27017/shop-service?authSource=admin
+      uri: mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_HOST:localhost}:27017/shop-service?authSource=admin
   kafka:
     bootstrap-servers: localhost:9094
     producer:
