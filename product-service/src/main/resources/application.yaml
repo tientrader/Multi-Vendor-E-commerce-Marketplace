@@ -1,5 +1,5 @@
 spring:
   config:
-    import: optional:configserver:http://config-server:9999
+    import: optional:configserver:${CONFIG_SERVER_URL:http://localhost:9999}
   application:
     name: product-service
