@@ -62,7 +62,7 @@ management:
       enabled: true
   tracing:
     exporter:
-      tempo:
-        url: http://localhost:3200
+      zipkin:
+        url: http://${ZIPKIN_HOST:localhost}:9411/api/v2/spans
     sampler:
       probability: 1.0

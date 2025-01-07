@@ -14,7 +14,7 @@ spring:
       ddl-auto: update
     show-sql: true
   kafka:
-    bootstrap-servers: localhost:9094
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost}:9094
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
@@ -78,6 +78,6 @@ management:
   tracing:
     exporter:
       zipkin:
-        url: http://localhost:9411/api/v2/spans
+        url: http://${ZIPKIN_HOST:localhost}:9411/api/v2/spans
     sampling:
       probability: 1.0

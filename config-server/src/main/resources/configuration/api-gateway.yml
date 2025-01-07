@@ -12,6 +12,9 @@ server:
       - application/javascript
       - application/json
 
+keycloak:
+  url: ${KEYCLOAK_URL:http://localhost:8180/realms/tienproapp/protocol/openid-connect/certs}
+
 app:
   api-prefix: /api/v1
 
@@ -308,6 +311,6 @@ management:
   tracing:
     exporter:
       zipkin:
-        url: http://localhost:9411/api/v2/spans
+        url: http://${ZIPKIN_HOST:localhost}:9411/api/v2/spans
     sampling:
       probability: 1.0
