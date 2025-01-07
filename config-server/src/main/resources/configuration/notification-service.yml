@@ -3,6 +3,9 @@ server:
   servlet:
     context-path: /notification
 
+keycloak:
+  url: ${KEYCLOAK_URL:http://localhost:8180/realms/tienproapp/protocol/openid-connect/certs}
+
 spring:
   data:
     mongodb:

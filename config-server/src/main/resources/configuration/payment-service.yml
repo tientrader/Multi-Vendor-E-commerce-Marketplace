@@ -3,6 +3,9 @@ server:
   servlet:
     context-path: /payment
 
+keycloak:
+  url: ${KEYCLOAK_URL:http://localhost:8180/realms/tienproapp/protocol/openid-connect/certs}
+
 spring:
   datasource:
     url: jdbc:mysql://${MYSQL_HOST:localhost}:3306/PaymentService

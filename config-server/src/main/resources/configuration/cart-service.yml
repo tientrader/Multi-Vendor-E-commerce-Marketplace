@@ -3,6 +3,9 @@ server:
   servlet:
     context-path: /cart
 
+keycloak:
+  url: ${KEYCLOAK_URL:http://localhost:8180/realms/tienproapp/protocol/openid-connect/certs}
+
 spring:
   redis:
     host: ${REDIS_HOST:localhost}
