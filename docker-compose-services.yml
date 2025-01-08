@@ -1,0 +1,258 @@
+version: "3.9"
+services:
+  config-server:
+    image: public.ecr.aws/k5o6t2c9/e-com:config-server-v1.0
+    container_name: config-server
+    ports:
+      - "9999:9999"
+    networks:
+      - tien-network
+
+  service-discovery:
+    image: public.ecr.aws/k5o6t2c9/e-com:service-discovery-v1.0
+    container_name: service-discovery
+    ports:
+      - "8761:8761"
+    environment:
+      - CONFIG_SERVER_URL=${CONFIG_SERVER_URL}
+      - EUREKA_HOSTNAME=service-discovery
+    networks:
+      - tien-network
+
+  api-gateway:
+    image: public.ecr.aws/k5o6t2c9/e-com:api-gateway-v1.0
+    container_name: api-gateway
+    ports:
+      - "8888:8888"
+    environment:
+      - CONFIG_SERVER_URL=${CONFIG_SERVER_URL}
+      - EUREKA_INSTANCE_HOSTNAME=api-gateway
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=${EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE}
+      - LOKI_HOST=${LOKI_HOST}
+      - ZIPKIN_HOST=${ZIPKIN_HOST}
+      - KEYCLOAK_URL=${KEYCLOAK_URL}
+    networks:
+      - tien-network
+
+  user-service:
+    image: public.ecr.aws/k5o6t2c9/e-com:user-service-v1.0
+    container_name: user-service
+    ports:
+      - "8091:8091"
+    environment:
+      - CONFIG_SERVER_URL=${CONFIG_SERVER_URL}
+      - EUREKA_INSTANCE_HOSTNAME=user-service
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=${EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE}
+      - LOKI_HOST=${LOKI_HOST}
+      - ZIPKIN_HOST=${ZIPKIN_HOST}
+      - KAFKA_BOOTSTRAP_SERVERS=${KAFKA_BOOTSTRAP_SERVERS}
+      - MYSQL_HOST=${MYSQL_HOST}
+      - MYSQL_USERNAME=${MYSQL_USERNAME}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - IDP_URL=${IDP_URL}
+      - ISSUER_URI=${ISSUER_URI}
+      - CLIENT_ID=${CLIENT_ID}
+      - CLIENT_SECRET=${CLIENT_SECRET}
+      - REDIRECT_URI=${REDIRECT_URI}
+      - STRIPE_ENDPOINT_SECRET=${STRIPE_ENDPOINT_SECRET}
+    networks:
+      - tien-network
+
+  shop-service:
+    image: public.ecr.aws/k5o6t2c9/e-com:shop-service-v1.0
+    container_name: shop-service
+    ports:
+      - "8081:8081"
+    environment:
+      - CONFIG_SERVER_URL=${CONFIG_SERVER_URL}
+      - EUREKA_INSTANCE_HOSTNAME=shop-service
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=${EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE}
+      - LOKI_HOST=${LOKI_HOST}
+      - ZIPKIN_HOST=${ZIPKIN_HOST}
+      - KEYCLOAK_URL=${KEYCLOAK_URL}
+      - KAFKA_BOOTSTRAP_SERVERS=${KAFKA_BOOTSTRAP_SERVERS}
+      - MONGO_HOST=${MONGO_HOST}
+      - MONGO_USERNAME=${MONGO_USERNAME}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
+    networks:
+      - tien-network
+
+  product-service:
+    image: public.ecr.aws/k5o6t2c9/e-com:product-service-v1.0
+    container_name: product-service
+    ports:
+      - "8082:8082"
+    environment:
+      - CONFIG_SERVER_URL=${CONFIG_SERVER_URL}
+      - EUREKA_INSTANCE_HOSTNAME=product-service
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=${EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE}
+      - LOKI_HOST=${LOKI_HOST}
+      - ZIPKIN_HOST=${ZIPKIN_HOST}
+      - KEYCLOAK_URL=${KEYCLOAK_URL}
+      - MONGO_HOST=${MONGO_HOST}
+      - MONGO_USERNAME=${MONGO_USERNAME}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    networks:
+      - tien-network
+
+  cart-service:
+    image: public.ecr.aws/k5o6t2c9/e-com:cart-service-v1.0
+    container_name: cart-service
+    ports:
+      - "8083:8083"
+    environment:
+      - CONFIG_SERVER_URL=${CONFIG_SERVER_URL}
+      - EUREKA_INSTANCE_HOSTNAME=cart-service
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=${EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE}
+      - LOKI_HOST=${LOKI_HOST}
+      - ZIPKIN_HOST=${ZIPKIN_HOST}
+      - KEYCLOAK_URL=${KEYCLOAK_URL}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    networks:
+      - tien-network
+
+  order-service:
+    image: public.ecr.aws/k5o6t2c9/e-com:order-service-v1.0
+    container_name: order-service
+    ports:
+      - "8084:8084"
+    environment:
+      - CONFIG_SERVER_URL=${CONFIG_SERVER_URL}
+      - EUREKA_INSTANCE_HOSTNAME=order-service
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=${EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE}
+      - LOKI_HOST=${LOKI_HOST}
+      - ZIPKIN_HOST=${ZIPKIN_HOST}
+      - KEYCLOAK_URL=${KEYCLOAK_URL}
+      - KAFKA_BOOTSTRAP_SERVERS=${KAFKA_BOOTSTRAP_SERVERS}
+      - MYSQL_HOST=${MYSQL_HOST}
+      - MYSQL_USERNAME=${MYSQL_USERNAME}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    networks:
+      - tien-network
+
+  post-service:
+    image: public.ecr.aws/k5o6t2c9/e-com:post-service-v1.0
+    container_name: post-service
+    ports:
+      - "8085:8085"
+    environment:
+      - CONFIG_SERVER_URL=${CONFIG_SERVER_URL}
+      - EUREKA_INSTANCE_HOSTNAME=post-service
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=${EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE}
+      - LOKI_HOST=${LOKI_HOST}
+      - ZIPKIN_HOST=${ZIPKIN_HOST}
+      - KEYCLOAK_URL=${KEYCLOAK_URL}
+      - MONGO_HOST=${MONGO_HOST}
+      - MONGO_USERNAME=${MONGO_USERNAME}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
+    networks:
+      - tien-network
+
+  notification-service:
+    image: public.ecr.aws/k5o6t2c9/e-com:notification-service-v1.0
+    container_name: notification-service
+    ports:
+      - "8086:8086"
+    environment:
+      - CONFIG_SERVER_URL=${CONFIG_SERVER_URL}
+      - EUREKA_INSTANCE_HOSTNAME=notification-service
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=${EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE}
+      - LOKI_HOST=${LOKI_HOST}
+      - ZIPKIN_HOST=${ZIPKIN_HOST}
+      - KEYCLOAK_URL=${KEYCLOAK_URL}
+      - KAFKA_BOOTSTRAP_SERVERS=${KAFKA_BOOTSTRAP_SERVERS}
+      - MONGO_HOST=${MONGO_HOST}
+      - MONGO_USERNAME=${MONGO_USERNAME}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
+      - BREVO_API_KEY=${BREVO_API_KEY}
+    networks:
+      - tien-network
+
+  payment-service:
+    image: public.ecr.aws/k5o6t2c9/e-com:payment-service-v1.0
+    container_name: payment-service
+    ports:
+      - "8087:8087"
+    environment:
+      - CONFIG_SERVER_URL=${CONFIG_SERVER_URL}
+      - EUREKA_INSTANCE_HOSTNAME=payment-service
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=${EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE}
+      - LOKI_HOST=${LOKI_HOST}
+      - ZIPKIN_HOST=${ZIPKIN_HOST}
+      - KEYCLOAK_URL=${KEYCLOAK_URL}
+      - KAFKA_BOOTSTRAP_SERVERS=${KAFKA_BOOTSTRAP_SERVERS}
+      - MYSQL_HOST=${MYSQL_HOST}
+      - MYSQL_USERNAME=${MYSQL_USERNAME}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - STRIPE_API_KEY=${STRIPE_API_KEY}
+      - VIP_1_MONTH=${VIP_1_MONTH}
+      - VIP_6_MONTHS=${VIP_6_MONTHS}
+      - VIP_1_YEAR=${VIP_1_YEAR}
+    networks:
+      - tien-network
+
+  file-service:
+    image: public.ecr.aws/k5o6t2c9/e-com:file-service-v1.0
+    container_name: file-service
+    ports:
+      - "8088:8088"
+    environment:
+      - CONFIG_SERVER_URL=${CONFIG_SERVER_URL}
+      - EUREKA_INSTANCE_HOSTNAME=file-service
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=${EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE}
+      - LOKI_HOST=${LOKI_HOST}
+      - ZIPKIN_HOST=${ZIPKIN_HOST}
+      - KEYCLOAK_URL=${KEYCLOAK_URL}
+      - MONGO_HOST=${MONGO_HOST}
+      - MONGO_USERNAME=${MONGO_USERNAME}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
+      - AWS_LAMBDA_FUNCTION=${AWS_LAMBDA_FUNCTION}
+      - AWS_S3_BUCKET=${AWS_S3_BUCKET}
+      - AWS_S3_REGION=${AWS_S3_REGION}
+      - AWS_S3_ACCESS_KEY=${AWS_S3_ACCESS_KEY}
+      - AWS_S3_SECRET_KEY=${AWS_S3_SECRET_KEY}
+    networks:
+      - tien-network
+
+  review-service:
+    image: public.ecr.aws/k5o6t2c9/e-com:review-service-v1.0
+    container_name: review-service
+    ports:
+      - "8089:8089"
+    environment:
+      - CONFIG_SERVER_URL=${CONFIG_SERVER_URL}
+      - EUREKA_INSTANCE_HOSTNAME=review-service
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=${EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE}
+      - LOKI_HOST=${LOKI_HOST}
+      - ZIPKIN_HOST=${ZIPKIN_HOST}
+      - KEYCLOAK_URL=${KEYCLOAK_URL}
+      - MONGO_HOST=${MONGO_HOST}
+      - MONGO_USERNAME=${MONGO_USERNAME}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
+    networks:
+      - tien-network
+
+  promotion-service:
+    image: public.ecr.aws/k5o6t2c9/e-com:promotion-service-v1.0
+    container_name: promotion-service
+    ports:
+      - "8090:8090"
+    environment:
+      - CONFIG_SERVER_URL=${CONFIG_SERVER_URL}
+      - EUREKA_INSTANCE_HOSTNAME=promotion-service
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=${EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE}
+      - LOKI_HOST=${LOKI_HOST}
+      - ZIPKIN_HOST=${ZIPKIN_HOST}
+      - KEYCLOAK_URL=${KEYCLOAK_URL}
+      - MONGO_HOST=${MONGO_HOST}
+      - MONGO_USERNAME=${MONGO_USERNAME}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
+    networks:
+      - tien-network
+
+networks:
+  tien-network:
+    driver: bridge
