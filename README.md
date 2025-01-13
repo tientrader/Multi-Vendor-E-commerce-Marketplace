@@ -7,11 +7,7 @@
 
 - To tackle this challenge, you need a scalable, responsive, and reliable system. This is exactly what I’ve built with the Multi-Vendor E-commerce Marketplace — a robust platform designed to connect buyers and sellers in a seamless, user-friendly ecosystem. The platform offers features like easy product discovery, efficient order management, secure payment processing, and multi-channel transaction support.
 
-### 🔑 **Key Highlights:**
-- Scalable and high-performance system designed to handle and process nearly all business scenarios.
-- Implements best practices for data integrity and security, ensuring that the platform remains reliable and protected against potential issues.
-
-❗ Below is a high-level overview of the project. For more in-depth details about workflows, data constraints, and business logic, please refer to the code.
+❗❗ Below is a high-level overview of the system architecture, focusing on the main components and their interactions. For more in-depth details about workflows, data constraints, and business logic, please refer to the code.
 
 ![Diagram](resources/diagram.png)
 
@@ -20,28 +16,22 @@
 ### Microservices Architecture
 
 - **Service Segmentation**:  
-  Each feature is encapsulated within its own service, allowing teams to focus on specific domains. This modular approach improves scalability, productivity, and the ability to update or replace individual services without affecting the entire system.  
+  Each feature is encapsulated within its own service, promoting focus on specific domains. This modular approach enables easier updates, better maintainability, and independent deployments without disrupting the whole system.
 
 - **Scalability**:  
-  Each service can be independently scaled based on demand. For example, if the Order Service experiences high traffic, only that service is scaled, optimizing resource usage and maintaining performance during peak loads.
-  
-- **Decoupled Communication**:  
-  Services interact through REST APIs and messaging queues, ensuring loose coupling between components. This flexibility allows each service to operate independently, enabling seamless updates and reducing the risk of cascading failures.  
+  Services can be scaled independently based on demand. For example, if a service experiences high traffic, it can be scaled without affecting other services, ensuring efficient resource utilization and consistent performance.
 
-- **Cost Optimization**:  
-  The independent scalability of services helps allocate resources efficiently. You can expand only the services under heavy demand without increasing the infrastructure costs for the entire system, making the architecture both efficient and cost-effective.  
+- **Loose Coupling**:  
+  Services communicate via APIs and messaging queues, ensuring minimal dependencies between components. This decoupling makes it easier to update, maintain, and scale individual services while reducing the risk of system-wide failures.
 
-- **Centralized Management**:  
-  Tools like Spring Cloud Config centralize configuration management, ensuring consistent updates across all services. Eureka Server enables automatic service registration, discovery, and dynamic load balancing, distributing requests evenly across multiple instances to optimize performance and ensure high availability.
+- **Resilience**:  
+  Fault tolerance mechanisms such as retries and circuit breakers isolate failures, maintaining system availability even if one or more services face issues.
 
-- **Fault Tolerance**:  
-  Mechanisms like circuit breakers, retries, and fallback strategies ensure that service failures are isolated. Users experience minimal disruption, as the system remains operational even if one or more services encounter issues.
-  
-- **Observability**:  
-  Tools like Prometheus, Grafana, Loki, and Zipkin provide deep insights into system health. Loki collects logs, which are visualized in Grafana, while Zipkin enables distributed tracing across microservices. This combination helps detect and resolve issues quickly, ensuring the system remains reliable and performant.
+- **Independent Deployability**:  
+  Since each service operates independently, new features and updates can be deployed without impacting other services, enabling faster development cycles and reducing downtime.
 
-- **Easy Maintenance**:  
-  Continuous Integration and Continuous Deployment (CI/CD) pipelines enable rapid development, testing, and deployment of new features. This reduces downtime during updates and accelerates the release cycle.
+- **Cost Efficiency**:  
+  The ability to scale services independently ensures that resources are allocated efficiently. Services under heavy load can be scaled up without requiring additional infrastructure for the entire system.
   
   ![Microservices Architecture](resources/microservices.png)
 
@@ -58,33 +48,48 @@
   - **Spring Boot:**  
     Simplifies microservice development with minimal configuration, enabling quick setup and reducing boilerplate code so developers can focus on features.
 
-  - **Spring WebFlux:**  
-    Facilitates asynchronous, non-blocking API development using reactive programming. It ensures responsiveness under high traffic by efficiently managing system resources, making it suitable for modern, event-driven architectures.
-
   - **Spring Security:**  
     Provides robust authentication and authorization mechanisms across microservices. Supports Single Sign-On (SSO) and JSON Web Token (JWT) for secure and seamless communication between services and users.
 
-  - **Spring Data JPA:**  
+  - **Spring Data:**  
     Simplifies data persistence with repositories, streamlining database operations such as retrieval, updates, and CRUD functionality, while reducing the need for verbose SQL queries.
 
   - **Spring Cloud:**  
     Enhances system scalability and flexibility by offering tools for service discovery, configuration management, and load balancing, ensuring smooth operation in distributed environments.
-
+    
+  - **Spring WebFlux:**  
+    Facilitates asynchronous, non-blocking API development using reactive programming. It ensures responsiveness under high traffic by efficiently managing system resources, making it suitable for modern, event-driven architectures.
+    
   - **Spring Kafka:**  
     Simplifies integration of Kafka messaging in Spring applications, supporting Kafka Producers/Consumers, Kafka Streams, and Kafka Connect for real-time data processing and system integration. It handles serialization, deserialization, and error management, enabling reliable event-driven architectures.
 
+### Config Server & Service Discovery
+
+- **Spring Cloud Config:**  
+  Centralizes configuration management for microservices, allowing externalized properties to be shared and updated across services. This ensures consistent configurations across environments and simplifies service updates without downtime.
+
+- **Eureka Server:**  
+  Functions as a service registry for microservices, enabling them to dynamically discover each other. It simplifies the scaling process and enhances fault tolerance by ensuring services can automatically register and deregister themselves as they scale or fail, maintaining smooth inter-service communication. Eureka also integrates with client-side load balancing, ensuring traffic is evenly distributed across available service instances, improving performance and resilience.
+
+  ![Eureka](resources/eureka.png)
+  
 ### Service Communication
+
+- **Feign Client**:
+  
+  Feign Client simplifies inter-service communication by automatically generating REST client proxies, eliminating the need for manually writing HTTP requests and handling responses. This reduces boilerplate code and increases developer efficiency.
 
 - <img src="https://i.imgur.com/eTXiKPb.png" width="30" height="30" /> **Kafka:**
 
   Kafka is a distributed messaging platform that enables asynchronous communication between microservices. It ensures reliable message storage and distribution, making it ideal for event-driven architectures. Kafka decouples services and improves scalability by allowing them to communicate without direct dependency on each other.
 
-  ![Kafka](resources/kafka.png)
-  ![Kafka](resources/kafka-grafana.png)
+#### Offset Explorer:
   
-- **OpenFeign:**
-
-  OpenFeign simplifies inter-service communication by automatically generating REST client proxies, which eliminates the need for manually writing HTTP requests and handling responses. This reduces boilerplate code and increases developer efficiency.
+  ![Kafka](resources/kafka.png)
+  
+#### Grafana Dashboard:
+  
+  ![Kafka](resources/kafka-grafana.png)
   
 ### Identity and Access Management
 
@@ -99,14 +104,11 @@
   - **User Management:**  
     Provides a centralized system for managing user accounts, including registration, login, logout, profile updates, email verification, and password recovery/reset. This simplifies the user experience and ensures account security.
 
-  - **Email Verification:**  
-    Verifies users' email addresses during registration to ensure account authenticity and reduce fraudulent sign-ups.
-
   - **Role-Based Access Control (RBAC):**  
     Manages permissions effectively by assigning roles to users. This ensures that only authorized users can perform specific actions or access sensitive resources.
 
   - **Multi-Factor Authentication (MFA):**  
-    Enhances account security by requiring multiple factors for authentication. The platform supports Time-based One-Time Passwords (TOTP) through apps like Google Authenticator, adding an extra layer of protection.
+    Enhances account security by requiring multiple factors for authentication. The platform verifies users' email addresses during registration to ensure account authenticity and supports Time-based One-Time Passwords (TOTP) through apps like Google Authenticator, adding an extra layer of protection.
 
   - **JSON Web Tokens (JWT):**  
     Utilizes RS256-signed JWTs for secure authentication and authorization. JWTs enable scalable, stateless user sessions across microservices while protecting against vulnerabilities like Cross-Site Request Forgery (CSRF).
@@ -176,6 +178,23 @@
 
   ![Redis](resources/redis.png)
 
+### Payment Management
+
+- <img src="https://i.imgur.com/oJqyUK5.png" width="30" height="30" /> **Stripe:**
+
+  Stripe offers a comprehensive set of payment processing APIs that support multiple payment methods and currencies. It integrates with webhooks for real-time transaction tracking, allowing for immediate charges upon purchase. Additionally, Stripe facilitates recurring subscriptions, providing a seamless and efficient experience for users.
+
+#### Demo: Card Payment
+![Stripe Card Payment](resources/stripecard.png)
+
+#### Demo: QR Code Payment
+![Stripe QR Code Payment](resources/stripeqrcode.png)
+
+#### Payment History (Testing)
+![Stripe Payment History](resources/stripe.png)
+
+### Cloud Services
+
 - <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/amazonwebservices/amazonwebservices-original-wordmark.svg" alt="AWS S3" width="30" height="30"/> **AWS S3 & AWS Lambda:**
 
   AWS S3 is used for secure, scalable storage of large volumes of unstructured data (e.g., images, videos), ensuring high availability, durability, and easy accessibility. It supports the platform’s need to store and retrieve media efficiently while minimizing costs.
@@ -196,49 +215,22 @@ Once an image is uploaded, Lambda triggers a resizing and quality reduction proc
 The optimized image is stored back in S3, minimizing storage usage while maintaining a balance between performance and quality.
 
 ![AWS S3](resources/aws-s3-resized.png)
-  
-### Payment Management
 
-- <img src="https://i.imgur.com/oJqyUK5.png" width="30" height="30" /> **Stripe:**
+### Resilience
 
-  Stripe offers a comprehensive set of payment processing APIs that support multiple payment methods and currencies. It integrates with webhooks for real-time transaction tracking, allowing for immediate charges upon purchase. Additionally, Stripe facilitates recurring subscriptions, providing a seamless and efficient experience for users.
+- <img src="https://i.imgur.com/OlDIdd2.png" width="30" height="30" /> **Resilience4j:**
 
-#### Demo: Card Payment
-![Stripe Card Payment](resources/stripecard.png)
+  Resilience4j provides several mechanisms to improve the reliability and stability of microservices:
 
-#### Demo: QR Code Payment
-![Stripe QR Code Payment](resources/stripeqrcode.png)
+  - **Circuit Breaker:** Detects failures and prevents requests from reaching unavailable services, maintaining overall system stability.
+  - **Retry Mechanism:** Automatically retries failed requests, improving service availability.
+  - **Time Limiter:** Ensures requests have a time limit, providing quick failure responses if a service is slow or unresponsive, thus enhancing system performance and responsiveness.
 
-#### Payment History (Testing)
-![Stripe Payment History](resources/stripe.png)
- 
-### Config Server & Service Discovery
+- <img src="https://i.imgur.com/eTXiKPb.png" width="30" height="30" /> **Kafka Dead Letter Queue (DLQ):**  
+  Utilizes Kafka's DLQ feature to handle messages that cannot be processed successfully, ensuring that failed messages are captured and can be examined or retried later without affecting the main processing flow.
 
-- **Spring Cloud Config:**  
-  Centralizes configuration management for microservices, allowing externalized properties to be shared and updated across services. This ensures consistent configurations across environments and simplifies service updates without downtime.
-
-- **Eureka Server:**  
-  Functions as a service registry for microservices, enabling them to dynamically discover each other. It simplifies the scaling process and enhances fault tolerance by ensuring services can automatically register and deregister themselves as they scale or fail, maintaining smooth inter-service communication. Eureka also integrates with client-side load balancing, ensuring traffic is evenly distributed across available service instances, improving performance and resilience.
-
-  ![Eureka](resources/eureka.png)
-  
-### Monitoring and Logging
-
-- <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/prometheus/prometheus-original.svg" alt="Prometheus" width="30" height="30"/><img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/grafana/grafana-original.svg" alt="Grafana" width="30" height="30"/> **Prometheus & Grafana:**
-
-  Prometheus is a monitoring system that collects and stores performance metrics from various microservices. These metrics include CPU and memory usage, request latency, error rates, and other system-level metrics. Prometheus uses a time-series database, which allows it to efficiently collect and query large amounts of data.
-  
-![Prometheus](resources/prometheus.png)
-
-  Grafana is a data visualization tool that integrates with Prometheus to create real-time dashboards. It enables developers and operators to track the health of their systems, monitor performance trends, and quickly identify bottlenecks, failures, or anomalies in the system’s behavior. The combination of Prometheus and Grafana is crucial for observability in microservice architectures.
-  
-  ![Grafana](resources/grafana.png)
-
-- <img src="https://i.imgur.com/RMo3imI.png" width="30" height="30" /> **Loki:**
-
-  Loki is a log aggregation system designed to collect and store logs from all microservices in a centralized manner. It is optimized for high-volume, low-latency log collection. By integrating Loki with Prometheus, developers can correlate logs with metrics, providing deeper insights into service behavior and system performance. This makes it easier to troubleshoot issues and quickly identify the root cause of problems, especially when the logs are linked to specific performance metrics or error spikes.
-
-  ![Loki](resources/loki.png)
+- <img src="https://i.imgur.com/eTXiKPb.png" width="30" height="30" /> **Kafka Partitioning:**  
+  Improves message throughput and scalability by distributing messages across multiple partitions, enabling parallel processing and optimized resource utilization, which enhances system performance and fault tolerance.
 
 ### Containerization
 
@@ -272,13 +264,25 @@ The optimized image is stored back in S3, minimizing storage usage while maintai
 **AWS ECR**
   
 ![Jenkins](resources/jenkins-aws-ecr.png)
+ 
+### Monitoring and Logging
+
+- <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/prometheus/prometheus-original.svg" alt="Prometheus" width="30" height="30"/><img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/grafana/grafana-original.svg" alt="Grafana" width="30" height="30"/> **Prometheus & Grafana:**
+
+  Prometheus is a monitoring system that collects and stores performance metrics from various microservices. These metrics include CPU and memory usage, request latency, error rates, and other system-level metrics. Prometheus uses a time-series database, which allows it to efficiently collect and query large amounts of data.
   
-### Resilience
+![Prometheus](resources/prometheus.png)
 
-- <img src="https://i.imgur.com/OlDIdd2.png" width="30" height="30" /> **Resilience4j:**
+  Grafana is a data visualization tool that integrates with Prometheus to create real-time dashboards. It enables developers and operators to track the health of their systems, monitor performance trends, and quickly identify bottlenecks, failures, or anomalies in the system’s behavior. The combination of Prometheus and Grafana is crucial for observability in microservice architectures.
+  
+  ![Grafana](resources/grafana.png)
 
-  Resilience4j provides several mechanisms to improve the reliability and stability of microservices:
+- <img src="https://i.imgur.com/RMo3imI.png" width="30" height="30" /> **Loki:**
 
-  - **Circuit Breaker:** Detects failures and prevents requests from reaching unavailable services, maintaining overall system stability.
-  - **Retry Mechanism:** Automatically retries failed requests, improving service availability.
-  - **Time Limiter:** Ensures requests have a time limit, providing quick failure responses if a service is slow or unresponsive, thus enhancing system performance and responsiveness.
+  Loki is a log aggregation system designed to collect and store logs from all microservices in a centralized manner. It is optimized for high-volume, low-latency log collection. By integrating Loki with Prometheus, developers can correlate logs with metrics, providing deeper insights into service behavior and system performance. This makes it easier to troubleshoot issues and quickly identify the root cause of problems, especially when the logs are linked to specific performance metrics or error spikes.
+
+  ![Loki](resources/loki.png)
+
+- <img src="https://i.imgur.com/WVVoihl.png" alt="Zipkin" width="30" height="30" /> **Zipkin:**
+
+  Zipkin is a distributed tracing system that allows tracking of requests as they flow through different microservices. It helps developers trace performance bottlenecks and latencies across service calls, providing visibility into the end-to-end flow of requests.
