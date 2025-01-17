@@ -12,7 +12,7 @@ pipeline {
         }
         stage('Build Services') {
             parallel {
-		stage('Build Config Server') {
+                stage('Build Config Server') {
                     steps {
                         dir('config-server') {
                             sh 'mvn clean install'
@@ -114,11 +114,11 @@ pipeline {
         }
         stage('Build Docker Images') {
             parallel {
-		        stage('Build Docker Image for Config Server') {
+                stage('Build Docker Image for Config Server') {
                     steps {
                         dir('config-server') {
                             script {
-                                sh 'docker build -t config-server:latest .'
+                                sh 'docker build --platform linux/amd64 -t config-server:latest .'
                             }
                         }
                     }
@@ -127,7 +127,7 @@ pipeline {
                     steps {
                         dir('service-discovery') {
                             script {
-                                sh 'docker build -t service-discovery:latest .'
+                                sh 'docker build --platform linux/amd64 -t service-discovery:latest .'
                             }
                         }
                     }
@@ -136,7 +136,7 @@ pipeline {
                     steps {
                         dir('api-gateway') {
                             script {
-                                sh 'docker build -t api-gateway:latest .'
+                                sh 'docker build --platform linux/amd64 -t api-gateway:latest .'
                             }
                         }
                     }
@@ -145,7 +145,7 @@ pipeline {
                     steps {
                         dir('user-service') {
                             script {
-                                sh 'docker build -t user-service:latest .'
+                                sh 'docker build --platform linux/amd64 -t user-service:latest .'
                             }
                         }
                     }
@@ -154,7 +154,7 @@ pipeline {
                     steps {
                         dir('shop-service') {
                             script {
-                                sh 'docker build -t shop-service:latest .'
+                                sh 'docker build --platform linux/amd64 -t shop-service:latest .'
                             }
                         }
                     }
@@ -163,7 +163,7 @@ pipeline {
                     steps {
                         dir('product-service') {
                             script {
-                                sh 'docker build -t product-service:latest .'
+                                sh 'docker build --platform linux/amd64 -t product-service:latest .'
                             }
                         }
                     }
@@ -172,7 +172,7 @@ pipeline {
                     steps {
                         dir('cart-service') {
                             script {
-                                sh 'docker build -t cart-service:latest .'
+                                sh 'docker build --platform linux/amd64 -t cart-service:latest .'
                             }
                         }
                     }
@@ -181,7 +181,7 @@ pipeline {
                     steps {
                         dir('order-service') {
                             script {
-                                sh 'docker build -t order-service:latest .'
+                                sh 'docker build --platform linux/amd64 -t order-service:latest .'
                             }
                         }
                     }
@@ -190,7 +190,7 @@ pipeline {
                     steps {
                         dir('post-service') {
                             script {
-                                sh 'docker build -t post-service:latest .'
+                                sh 'docker build --platform linux/amd64 -t post-service:latest .'
                             }
                         }
                     }
@@ -199,7 +199,7 @@ pipeline {
                     steps {
                         dir('notification-service') {
                             script {
-                                sh 'docker build -t notification-service:latest .'
+                                sh 'docker build --platform linux/amd64 -t notification-service:latest .'
                             }
                         }
                     }
@@ -208,7 +208,7 @@ pipeline {
                     steps {
                         dir('payment-service') {
                             script {
-                                sh 'docker build -t payment-service:latest .'
+                                sh 'docker build --platform linux/amd64 -t payment-service:latest .'
                             }
                         }
                     }
@@ -217,7 +217,7 @@ pipeline {
                     steps {
                         dir('file-service') {
                             script {
-                                sh 'docker build -t file-service:latest .'
+                                sh 'docker build --platform linux/amd64 -t file-service:latest .'
                             }
                         }
                     }
@@ -226,7 +226,7 @@ pipeline {
                     steps {
                         dir('review-service') {
                             script {
-                                sh 'docker build -t review-service:latest .'
+                                sh 'docker build --platform linux/amd64 -t review-service:latest .'
                             }
                         }
                     }
@@ -235,7 +235,7 @@ pipeline {
                     steps {
                         dir('promotion-service') {
                             script {
-                                sh 'docker build -t promotion-service:latest .'
+                                sh 'docker build --platform linux/amd64 -t promotion-service:latest .'
                             }
                         }
                     }
