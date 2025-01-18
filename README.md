@@ -187,6 +187,11 @@
 #### Demo: Card Payment
 ![Stripe Card Payment](resources/stripecard.png)
 
+#### Demo: Stripe Link Payment
+![Stripe_Link1](resources/link1.png)
+![Stripe_Link2](resources/link2.png)
+![Stripe_Link3](resources/link3.png)
+
 #### Demo: QR Code Payment
 ![Stripe QR Code Payment](resources/stripeqrcode.png)
 
@@ -286,3 +291,5 @@ The optimized image is stored back in S3, minimizing storage usage while maintai
 - <img src="https://i.imgur.com/WVVoihl.png" alt="Zipkin" width="30" height="30" /> **Zipkin:**
 
   Zipkin is a distributed tracing system that allows tracking of requests as they flow through different microservices. It helps developers trace performance bottlenecks and latencies across service calls, providing visibility into the end-to-end flow of requests.
+
+  ![Zipkin](resources/zipkin.png)
